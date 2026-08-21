@@ -6,8 +6,23 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		123BA7102FA6296900FFA528 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 123BA70F2FA6296900FFA528 /* Swinject */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		12E9B40D2FD44E9C00EDFB8C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 123BA6DE2FA61C8500FFA528 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 123BA6E52FA61C8500FFA528;
+			remoteInfo = PillFlow;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		123BA6E62FA61C8500FFA528 /* PillFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PillFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		12E9B4092FD44E9C00EDFB8C /* PillFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PillFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +31,23 @@
 			path = PillFlow;
 			sourceTree = "<group>";
 		};
+		12E9B40A2FD44E9C00EDFB8C /* PillFlowTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PillFlowTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		123BA6E32FA61C8500FFA528 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				123BA7102FA6296900FFA528 /* Swinject in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		12E9B4062FD44E9C00EDFB8C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +61,7 @@
 			isa = PBXGroup;
 			children = (
 				123BA6E82FA61C8500FFA528 /* PillFlow */,
+				12E9B40A2FD44E9C00EDFB8C /* PillFlowTests */,
 				123BA6E72FA61C8500FFA528 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +70,7 @@
 			isa = PBXGroup;
 			children = (
 				123BA6E62FA61C8500FFA528 /* PillFlow.app */,
+				12E9B4092FD44E9C00EDFB8C /* PillFlowTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -65,10 +95,34 @@
 			);
 			name = PillFlow;
 			packageProductDependencies = (
+				123BA70F2FA6296900FFA528 /* Swinject */,
 			);
 			productName = PillFlow;
 			productReference = 123BA6E62FA61C8500FFA528 /* PillFlow.app */;
 			productType = "com.apple.product-type.application";
+		};
+		12E9B4082FD44E9C00EDFB8C /* PillFlowTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 12E9B40F2FD44E9C00EDFB8C /* Build configuration list for PBXNativeTarget "PillFlowTests" */;
+			buildPhases = (
+				12E9B4052FD44E9C00EDFB8C /* Sources */,
+				12E9B4062FD44E9C00EDFB8C /* Frameworks */,
+				12E9B4072FD44E9C00EDFB8C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				12E9B40E2FD44E9C00EDFB8C /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				12E9B40A2FD44E9C00EDFB8C /* PillFlowTests */,
+			);
+			name = PillFlowTests;
+			packageProductDependencies = (
+			);
+			productName = PillFlowTests;
+			productReference = 12E9B4092FD44E9C00EDFB8C /* PillFlowTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -77,11 +131,15 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2640;
-				LastUpgradeCheck = 2640;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					123BA6E52FA61C8500FFA528 = {
 						CreatedOnToolsVersion = 26.4;
+					};
+					12E9B4082FD44E9C00EDFB8C = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 123BA6E52FA61C8500FFA528;
 					};
 				};
 			};
@@ -94,18 +152,29 @@
 			);
 			mainGroup = 123BA6DD2FA61C8500FFA528;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				123BA70E2FA6296900FFA528 /* XCRemoteSwiftPackageReference "Swinject" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 123BA6E72FA61C8500FFA528 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				123BA6E52FA61C8500FFA528 /* PillFlow */,
+				12E9B4082FD44E9C00EDFB8C /* PillFlowTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		123BA6E42FA61C8500FFA528 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		12E9B4072FD44E9C00EDFB8C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +191,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		12E9B4052FD44E9C00EDFB8C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		12E9B40E2FD44E9C00EDFB8C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 123BA6E52FA61C8500FFA528 /* PillFlow */;
+			targetProxy = 12E9B40D2FD44E9C00EDFB8C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		123BA6EF2FA61C8700FFA528 /* Debug */ = {
@@ -184,6 +268,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -241,6 +326,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -259,8 +345,8 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -291,8 +377,8 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -307,6 +393,50 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		12E9B4102FD44E9C00EDFB8C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CZ5Y366HYY;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.BonzikDjozzyCompany.PillFlowTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PillFlow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PillFlow";
+			};
+			name = Debug;
+		};
+		12E9B4112FD44E9C00EDFB8C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CZ5Y366HYY;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.BonzikDjozzyCompany.PillFlowTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PillFlow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PillFlow";
 			};
 			name = Release;
 		};
@@ -331,7 +461,35 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		12E9B40F2FD44E9C00EDFB8C /* Build configuration list for PBXNativeTarget "PillFlowTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12E9B4102FD44E9C00EDFB8C /* Debug */,
+				12E9B4112FD44E9C00EDFB8C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		123BA70E2FA6296900FFA528 /* XCRemoteSwiftPackageReference "Swinject" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Swinject/Swinject.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		123BA70F2FA6296900FFA528 /* Swinject */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 123BA70E2FA6296900FFA528 /* XCRemoteSwiftPackageReference "Swinject" */;
+			productName = Swinject;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 123BA6DE2FA61C8500FFA528 /* Project object */;
 }
