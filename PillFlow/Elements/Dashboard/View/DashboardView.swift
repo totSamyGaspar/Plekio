@@ -30,12 +30,15 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                     if isToday {
                         let allPills = viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills
 
-                        if let earliestUntakenTime = allPills.filter({ !$0.isTaken }).min(by: { $0.time < $1.time })?.time {
+                        // Missed doses (past the 1-hour grace window) are excluded here too —
+                        // otherwise a missed dose would still surface as "Up Next" with a
+                        // working Log button, bypassing the same lock MedicationCardView enforces.
+                        if let earliestUntakenTime = allPills.filter({ !$0.isTaken && !$0.isMissed }).min(by: { $0.time < $1.time })?.time {
 
                             let pillsAtThisTime = allPills.filter { Calendar.current.isDate($0.time, equalTo: earliestUntakenTime, toGranularity: .minute) }
 
                             UpNextHeroCard(pills: pillsAtThisTime) {
-                                for pill in pillsAtThisTime where !pill.isTaken {
+                                for pill in pillsAtThisTime where !pill.isTaken && !pill.isMissed {
                                     viewModel.togglePill(id: pill.id)
                                 }
                             }
