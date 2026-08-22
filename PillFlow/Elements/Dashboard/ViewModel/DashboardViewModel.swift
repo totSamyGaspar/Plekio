@@ -21,10 +21,14 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     
     
     private let dbService: DatabaseServiceProtocol
+    private let notificationService: NotificationServiceProtocol
     private var cancellables = Set<AnyCancellable>()
-    
-    init(dbService: DatabaseServiceProtocol) {
+
+    // MARK: - Init
+
+    init(dbService: DatabaseServiceProtocol, notificationService: NotificationServiceProtocol) {
         self.dbService = dbService
+        self.notificationService = notificationService
         fetchData()
         
         NotificationCenter.default.publisher(for: .databaseDidUpdate)
@@ -35,52 +39,63 @@ final class DashboardViewModel: DashboardViewModelProtocol {
             .store(in: &cancellables)
     }
     
+    // MARK: - Computed Properties
+
     var weekDates: [Date] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
     }
     
-    // Фильтруем данные для UI
     var morningPills: [PillDose] { allPills.filter { $0.period == .morning } }
     var noonPills: [PillDose] { allPills.filter { $0.period == .noon } }
     var eveningPills: [PillDose] { allPills.filter { $0.period == .evening } }
     
     var isEmpty: Bool { allPills.isEmpty }
     
+    // MARK: - Data Loading
+
     private func fetchData() {
-        // 1. Загружаем все курсы один раз из базы данных
+        // Load all courses once from the database...
         let allCourses = dbService.fetchAllCourses()
-        
-        // 2. Передаем этот список для получения таблеток на выбранную дату (без повторного обращения к БД)
+
+        // ...and reuse that list for both the selected date's pills...
         allPills = dbService.fetchPills(for: selectedDate, preFetchedCourses: allCourses)
-        
-        // 3. Передаем этот же список в метод расчета статистики
+
+        // ...and the weekly stats calculation, avoiding repeated DB queries.
         calculateWeeklyStats(with: allCourses)
     }
-    
-    // Логика нажатия на чекбокс
+
+    // MARK: - Actions
+
     func togglePill(id: UUID) {
-        // Находим таблетку по ID карточки
         guard let pill = allPills.first(where: { $0.id == id }) else { return }
-        
-        // Говорим БД переключить статус
+
         dbService.togglePill(medicationId: pill.medicationId, scheduledTime: pill.time)
-        
-        // Перерисовываем UI
+
+        // Marking a dose taken must also keep pending push notifications in
+        // sync (otherwise a reminder can still fire after the dose was
+        // logged). Full reset + reschedule, same approach used elsewhere
+        // (CourseDetailViewModel, NewTreatmentViewModel); scheduleNotifications
+        // itself skips slots already marked taken.
+        notificationService.removeAllPending()
+        let activeCourses = dbService.fetchAllCourses().filter { $0.endDate >= Date() }
+        notificationService.scheduleNotifications(activeCourses: activeCourses)
+
         fetchData()
     }
-    
+
     func handlePushTap(medicationId: UUID, time: Date, completion: @escaping (PillDose?) -> Void) {
-        // Переключаем календарь на день из пуша (это автоматически вызовет fetchData)
+        // Setting selectedDate triggers fetchData via its didSet.
         selectedDate = time
-        
-        // Даем UI миллисекунду на перерисовку и загрузку данных из БД
+
+        // Give the UI a moment to redraw and finish loading before reading allPills.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             let pill = self.allPills.first(where: { $0.medicationId == medicationId })
             completion(pill)
         }
     }
+
     private func calculateWeeklyStats(with allCourses: [TreatmentCourse]) {
         let calendar = Calendar.current
         var percentages: [Double] = []
@@ -90,12 +105,12 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         for i in (0..<7).reversed() {
             let date = calendar.date(byAdding: .day, value: -i, to: Date()) ?? Date()
             
-            // Форматируем день недели (Fri, Sat...)
+            // Format the weekday label (Fri, Sat...)
             let formatter = DateFormatter()
             formatter.dateFormat = "EEE"
             daysLabels.append(formatter.string(from: date))
-            
-            // Передаем кэшированный список курсов во вложенном цикле
+
+            // Reuse the cached course list here too, to avoid a query per day.
             let dailyPills = dbService.fetchPills(for: date, preFetchedCourses: allCourses)
             if dailyPills.isEmpty {
                 percentages.append(0.0)

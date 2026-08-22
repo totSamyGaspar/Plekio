@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 
-// MARK: - Реальная ViewModel
+// MARK: - Concrete ViewModel
 final class OnboardingViewModel: OnboardingViewModelProtocol {
     @Published var currentPage = 0
     

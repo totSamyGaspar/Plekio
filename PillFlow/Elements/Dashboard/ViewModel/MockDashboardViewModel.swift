@@ -22,7 +22,7 @@ final class MockDashboardViewModel: DashboardViewModelProtocol {
     
     var isEmpty: Bool = false
     
-    // НОВЫЕ СВОЙСТВА ИЗ ОБНОВЛЕННОГО ПРОТОКОЛА (Фейковые данные для графика)
+    // Fake data for the weekly adherence chart preview
     @Published var weeklyPercentages: [Double] = [1.0, 1.0, 1.0, 0.6, 1.0, 0.7, 1.0]
     @Published var weeklyDays: [String] = ["Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu"]
     @Published var recentAverage: Int = 93

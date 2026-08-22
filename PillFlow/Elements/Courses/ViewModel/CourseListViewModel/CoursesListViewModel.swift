@@ -32,21 +32,21 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
         let allCourses = dbService.fetchAllCourses()
         let startOfToday = Calendar.current.startOfDay(for: Date())
         
-        // Активные: окончание сегодня или в будущем
+        // Active: ending today or in the future
         self.activeCourses = allCourses.filter { Calendar.current.startOfDay(for: $0.endDate) >= startOfToday }
-        
-        // История: окончание было вчера или раньше (сортируем от самых недавних к старым)
+
+        // History: ended yesterday or earlier (sorted from most recent to oldest)
         self.historyCourses = allCourses.filter { Calendar.current.startOfDay(for: $0.endDate) < startOfToday }
             .sorted { $0.endDate > $1.endDate }
     }
-    
+
     func deleteCourse(_ course: TreatmentCourse) {
-        // Отменяем пуши для всех таблеток
+        // Cancel notifications for all medications in this course
         for med in course.medications {
             notificationService.cancelNotifications(for: med.id)
         }
-        
-        // Удаляем курс и обновляем списки
+
+        // Delete the course and refresh the lists
         dbService.deleteCourse(course)
         fetchCourses()
     }

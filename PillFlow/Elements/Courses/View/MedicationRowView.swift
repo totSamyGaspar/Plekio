@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct MedicationRowView: View {
     let med: MedicationItem
@@ -18,7 +19,7 @@ struct MedicationRowView: View {
             // MARK: - Medication Icon or Photo (UX Improvement)
             
             Group {
-                if let uiImage = ImageCache.shared.image(for: med.id, data: med.medicationImageData) {
+                if let uiImage {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
@@ -62,20 +63,24 @@ struct MedicationRowView: View {
         .onAppear {
             loadAsyncImage()
         }
+        // med.id stays the same after editing (same SwiftData object), so SwiftUI
+        // doesn't recreate this row and onAppear won't fire again. Listen for
+        // .databaseDidUpdate (posted by DatabaseService.updateMedication) to force
+        // a reload of the photo instead.
+        .onReceive(NotificationCenter.default.publisher(for: .databaseDidUpdate)) { _ in
+            loadAsyncImage(force: true)
+        }
     }
-    
-    private func loadAsyncImage() {
-        guard let imageData = med.medicationImageData, uiImage == nil else { return }
-        DispatchQueue.global(qos: .userInitiated).async {
-            if let decodedImage = UIImage(data: imageData) {
-                DispatchQueue.main.async {
-                    self.uiImage = decodedImage
-                }
-            }
+
+    private func loadAsyncImage(force: Bool = false) {
+        // force: true forces a reload (used after .databaseDidUpdate), ignoring
+        // any previously loaded image.
+        guard force || uiImage == nil else { return }
+        ImageCache.shared.loadAsync(for: med.id) { image in
+            self.uiImage = image
         }
     }
     
-    // Helper function for formatted text
     private func frequencyString(for days: Int) -> String {
         switch days {
         case 1: return "Every day"

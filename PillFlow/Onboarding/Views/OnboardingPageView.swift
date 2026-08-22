@@ -17,7 +17,7 @@ struct OnboardingPageView: View {
         VStack(spacing: 32) {
             Spacer()
             
-            // MARK: - Контейнер с магической иконкой
+            // MARK: - Magic Icon Container
             ZStack {
                 Circle()
                     .fill(
@@ -56,7 +56,7 @@ struct OnboardingPageView: View {
             }
             .padding(.vertical, 20)
             
-            // MARK: - Текст
+            // MARK: - Text
             VStack(spacing: 16) {
                 Text(page.title)
                     .font(.system(.title2, design: .serif).weight(.bold))
@@ -74,7 +74,7 @@ struct OnboardingPageView: View {
             Spacer()
         }
         .onAppear {
-            // Запуск пульсации ауры и тени
+            // Start the aura and shadow pulsing animation
             withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
                 isPulsing = true
             }

@@ -11,21 +11,20 @@ import Combine
 @MainActor
 final class AppRouter: ObservableObject {
     
-    // У каждого таба своя независимая стопка пушей
+    // Each tab has its own independent navigation stack.
     @Published var coursesPath = NavigationPath()
-    
-    // Активный шит (модалка)
+
+    // Currently presented sheet / full-screen cover.
     @Published var activeSheet: SheetRoute?
     @Published var activeFullScreen: SheetRoute?
-    
-    // Активный таб
+
     @Published var selectedTab: Int = 0
-    
+
     // MARK: - Push navigation
-    
+
     func push(_ route: Route) {
-        // Сейчас push только для courses-таба,
-        // при масштабировании добавишь параметр tab
+        // Only pushes onto the courses tab for now; add a `tab` parameter
+        // here if navigation needs to scale to other tabs.
         coursesPath.append(route)
     }
     
@@ -56,7 +55,7 @@ final class AppRouter: ObservableObject {
         self.pendingPushTime = time
     }
     
-    // Хранилище для "отложенного" перехода из пуш-уведомления
+    // Holds a pending navigation target from a push notification until it's consumed.
     @Published var pendingPushMedicationIds: [UUID]?
     @Published var pendingPushTime: Date?
     

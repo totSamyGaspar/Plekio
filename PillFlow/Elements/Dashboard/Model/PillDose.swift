@@ -7,7 +7,7 @@
 
 import Foundation
 
-// Периоды дня для секций на главном экране
+// Day periods for the sections on the main screen
 enum DayPeriod: String, CaseIterable, Identifiable {
     case morning = "Morning"
     case noon = "Afternoon"
@@ -15,7 +15,7 @@ enum DayPeriod: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
 }
 
-// Модель конкретного приема таблетки
+// Model of a single pill dose
 struct PillDose: Identifiable {
     let id = UUID()
     let medicationId: UUID
@@ -25,8 +25,10 @@ struct PillDose: Identifiable {
     let time: Date
     let period: DayPeriod
     var isTaken: Bool
-    var medicationImageData: Data?
-    
+    // No image data here by design: the view loads the photo lazily via
+    // ImageCache.shared.loadAsync(for:completion:), keyed on medicationId,
+    // instead of copying the photo blob into every PillDose instance.
+
     var stockCount: Int? = 9
     var lowStockThreshold: Int = 10
     

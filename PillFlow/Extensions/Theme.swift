@@ -8,13 +8,13 @@
 import SwiftUI
 
 extension Color {
-    /// Глубокий темный фон приложения
+    /// Deep dark background used throughout the app
     static let bgDark = Color(red: 0.06, green: 0.08, blue: 0.12)
-    
-    /// Цвет для карточек и плашек на темном фоне
+
+    /// Color for cards and panels on the dark background
     static let cardDark = Color(red: 0.11, green: 0.13, blue: 0.19)
-    
-    /// Неоновый акцентный цвет (можно использовать стандартный .mint,
-    /// но если захочешь сделать его ярче, меняй здесь)
+
+    /// Neon accent color (defaults to standard .mint; change here to adjust
+    /// the accent everywhere at once)
     static let neonMint = Color.mint
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct MedicationCardView: View {
     let pill: PillDose
@@ -13,7 +14,8 @@ struct MedicationCardView: View {
     let onToggle: () -> Void
     let onTapCard: () -> Void
     
-    let cardDark = Color(red: 0.11, green: 0.13, blue: 0.19)
+    // Reuse the shared color from Extensions/Theme.swift as the single source of truth.
+    let cardDark = Color.cardDark
     
     @State private var uiImage: UIImage? = nil
     
@@ -21,7 +23,7 @@ struct MedicationCardView: View {
         HStack(spacing: 16) {
             // MARK: - Icon / Image
             Group {
-                if let uiImage = ImageCache.shared.image(for: pill.medicationId, data: pill.medicationImageData) {
+                if let uiImage {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
@@ -88,12 +90,10 @@ struct MedicationCardView: View {
             HStack(spacing: 8) {
                 if isToday {
                     if pill.isTaken {
-                        // Таблетка выпита
                         Image(systemName: "checkmark.circle.fill")
                             .font(.title)
                             .foregroundColor(.mint)
                     } else if pill.isMissed {
-                        // Таблетка пропущена
                         Text("MISSED")
                             .font(.caption2.weight(.heavy))
                             .padding(.horizontal, 8)
@@ -102,7 +102,7 @@ struct MedicationCardView: View {
                             .foregroundColor(.red)
                             .cornerRadius(6)
                     } else {
-                        // Обычное состояние (время еще не пришло)
+                        // Not yet due
                         Button(action: onToggle) {
                             Image(systemName: "checkmark.circle")
                                 .font(.title)
@@ -110,7 +110,7 @@ struct MedicationCardView: View {
                         }
                     }
                 } else {
-                    // Прошлые или будущие дни
+                    // Past or future days
                     if pill.isTaken {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.title)
@@ -135,29 +135,28 @@ struct MedicationCardView: View {
         .background(cardDark)
         .cornerRadius(20)
         .onTapGesture {
-            if isToday && !pill.isTaken { onTapCard() }
+            // Missed doses (past the 1-hour grace window) are locked: no modal,
+            // no toggle. Within that window they're tappable like any other
+            // upcoming dose.
+            if isToday && !pill.isTaken && !pill.isMissed { onTapCard() }
+        }
+        // PillDose.id is regenerated on every fetch, which usually forces a
+        // fresh card, but we don't rely on that alone: if SwiftUI reuses the
+        // view, this reloads the photo from disk explicitly (same approach
+        // as MedicationRowView).
+        .onReceive(NotificationCenter.default.publisher(for: .databaseDidUpdate)) { _ in
+            loadAsyncImage(force: true)
         }
     }
-    
-    private func loadAsyncImage() {
-        // 1. Проверяем наличие в кеше
-        if let cachedImage = ImageCache.shared.get(forKey: pill.medicationId) {
-            self.uiImage = cachedImage
-            return
-        }
-        
-        guard let imageData = pill.medicationImageData else { return }
-        
-        // 2. Если в кеше нет, декодируем
-        DispatchQueue.global(qos: .userInitiated).async {
-            if let decodedImage = UIImage(data: imageData) {
-                // 3. Сохраняем в кеш
-                ImageCache.shared.set(decodedImage, forKey: pill.medicationId)
-                
-                DispatchQueue.main.async {
-                    self.uiImage = decodedImage
-                }
-            }
+
+    private func loadAsyncImage(force: Bool = false) {
+        // Cache lookup, disk read, and background decoding are centralized in
+        // ImageCache.loadAsync (same pattern as MedicationRowView); we only
+        // pass the medicationId since PillDose no longer carries the photo
+        // blob. `force` isn't used by ImageCache.loadAsync itself but is kept
+        // here to match MedicationRowView's signature.
+        ImageCache.shared.loadAsync(for: pill.medicationId) { image in
+            self.uiImage = image
         }
     }
 }
@@ -178,7 +177,6 @@ struct MedicationCardView: View {
                     time: Date(),
                     period: .morning,
                     isTaken: false,
-                    medicationImageData: nil,
                     stockCount: 9,
                     lowStockThreshold: 10
                 ),
@@ -196,7 +194,6 @@ struct MedicationCardView: View {
                     time: Date().addingTimeInterval(3600),
                     period: .morning,
                     isTaken: true,
-                    medicationImageData: nil,
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),

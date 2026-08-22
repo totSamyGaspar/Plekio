@@ -31,12 +31,11 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     func deleteMedication(at offsets: IndexSet) { medications.remove(atOffsets: offsets) }
     
     func saveCourse() {
-        // 1. Сохраняем в базу
+        // 1. Save to the database
         dbService.saveCourse(name: courseName, startDate: startDate, endDate: endDate, drafts: medications)
-        
-        // 2. ИЗМЕНЕНИЕ: Передаем даты курса в планировщик пушей!
-        // 2. Обновляем пуши
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+
+        // 2. Refresh notifications (via the protocol, not directly through UNUserNotificationCenter)
+        notificationService.removeAllPending()
         let activeCourses = dbService.fetchAllCourses().filter { $0.endDate >= Date() }
         notificationService.scheduleNotifications(activeCourses: activeCourses)
     }

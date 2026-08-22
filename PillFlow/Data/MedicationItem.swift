@@ -17,7 +17,10 @@ final class MedicationItem {
     var timesOfDay: [Date]
     var frequencyDays: Int
     var course: TreatmentCourse?
-    var medicationImageData: Data?
+    // Photos are stored on disk (see ImageCache), keyed by this medication's
+    // `id`, rather than as a blob field on the model — that way every fetch
+    // (schedule, statistics, notifications, etc.) doesn't have to load image
+    // data it isn't going to render.
     var stockCount: Int
     var lowStockThreshold: Int
 
@@ -31,7 +34,6 @@ final class MedicationItem {
         dosage: Int,
         timesOfDay: [Date],
         frequencyDays: Int,
-        medicationImageData: Data? = nil,
         stockCount: Int = 30,
         lowStockThreshold: Int = 10
     ) {
@@ -42,7 +44,6 @@ final class MedicationItem {
         self.timesOfDay = timesOfDay
         self.frequencyDays = frequencyDays
         self.logs = []
-        self.medicationImageData = medicationImageData
         self.stockCount = stockCount
         self.lowStockThreshold = lowStockThreshold
     }

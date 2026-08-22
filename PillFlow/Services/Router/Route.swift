@@ -9,8 +9,8 @@ import Foundation
 
 enum Route: Hashable {
     case courseDetail(TreatmentCourse)
-    
-    // По мере роста приложения добавляешь сюда:
+
+    // Add more cases here as the app grows, e.g.:
     // case medicationDetail(MedicationItem)
     // case statistics
 }
@@ -21,7 +21,7 @@ enum SheetRoute: Identifiable {
     case addMedication(onSave: (MedicationDraft) -> Void)
     case takePill(pills: [PillDose], onTake: () -> Void, onSkip: () -> Void)
     
-    // Identifiable нужен для .sheet(item:)
+    // Identifiable is required for .sheet(item:).
     var id: String {
         switch self {
         case .newTreatment:       return "newTreatment"

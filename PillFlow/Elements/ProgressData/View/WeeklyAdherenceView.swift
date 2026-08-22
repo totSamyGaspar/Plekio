@@ -8,16 +8,17 @@
 import SwiftUI
 
 struct WeeklyAdherenceView: View {
-    // Временно замокаем данные для визуала (потом привяжешь к реальной стате)
+    // Temporary mock data for the visuals (wire up to real stats later)
     let percentages: [Double]
     let days: [String]
     let recentAverage: Int
-    
-    let cardDark = Color(red: 0.11, green: 0.13, blue: 0.19)
-    
+
+    // Reuse the shared color from Theme instead of a hardcoded RGB value
+    let cardDark = Color.cardDark
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Заголовок
+            // Header
             VStack(alignment: .leading, spacing: 4) {
                 Text("WEEKLY ADHERENCE HISTORY")
                     .font(.caption.weight(.heavy))
@@ -29,26 +30,26 @@ struct WeeklyAdherenceView: View {
                     .foregroundColor(.white.opacity(0.7))
             }
             
-            // График-капсулы
+            // Capsule chart
             HStack(spacing: 12) {
                 ForEach(0..<7, id: \.self) { index in
                     VStack(spacing: 8) {
                         GeometryReader { geo in
                             ZStack(alignment: .bottom) {
-                                // Фон капсулы
+                                // Capsule background
                                 Capsule()
                                     .fill(Color.white.opacity(0.05))
-                                
-                                // Заполнение (процент выпитого)
+
+                                // Fill (percentage taken)
                                 Capsule()
                                     .fill(Color.mint)
                                     .frame(height: geo.size.height * percentages[index])
-                                // Добавляем легкое неоновое свечение верхушке
+                                // Subtle neon glow on the top edge
                                     .shadow(color: Color.mint.opacity(0.3), radius: 5, x: 0, y: -5)
                             }
                         }
-                        .frame(height: 80) // Высота графика
-                        
+                        .frame(height: 80)
+
                         Text(days[index])
                             .font(.caption2.weight(.bold))
                             .foregroundColor(.white.opacity(0.5))
@@ -58,7 +59,7 @@ struct WeeklyAdherenceView: View {
             
             Divider().background(Color.white.opacity(0.2))
             
-            // Итог
+            // Summary
             HStack(alignment: .bottom) {
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                     Text("\(recentAverage)")

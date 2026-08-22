@@ -30,11 +30,11 @@ struct SettingsView: View {
                             .foregroundColor(.white.opacity(0.5))
                     }
                 }
-                .listRowBackground(Color.cardDark) // Темные плашки настроек
-                
+                .listRowBackground(Color.cardDark) // Dark background for settings rows
+
                 Section {
                     Button(action: {
-                        // Пока ничего не делает
+                        // No action yet
                     }) {
                         Label("Поддержать проект", systemImage: "cup.and.saucer.fill")
                             .foregroundColor(.neonMint)
@@ -42,7 +42,7 @@ struct SettingsView: View {
                 }
                 .listRowBackground(Color.cardDark)
             }
-            .scrollContentBackground(.hidden) // Убираем серый фон списка
+            .scrollContentBackground(.hidden) // Remove the list's default gray background
         }
         .navigationTitle("Настройки")
         .navigationBarTitleDisplayMode(.large)

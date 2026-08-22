@@ -37,15 +37,15 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
     }
     
     func addNewMedication(_ draft: MedicationDraft) {
-        // 1. Сохраняем в БД
+        // 1. Persist to the database
         dbService.addMedication(draft: draft, to: course)
-        
-        // 2. Обновляем пуши
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+
+        // 2. Reschedule notifications (via the protocol, not directly through UNUserNotificationCenter)
+        notificationService.removeAllPending()
         let activeCourses = dbService.fetchAllCourses().filter { $0.endDate >= Date() }
         notificationService.scheduleNotifications(activeCourses: activeCourses)
-        
-        // 3. Обновляем локальный список для UI
+
+        // 3. Refresh the local list for the UI
         self.medications = course.medications.sorted(by: { $0.name < $1.name })
     }
     
@@ -59,15 +59,15 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
     }
     
     func updateMedication(medication: MedicationItem, with draft: MedicationDraft) {
-        // 1. Обновляем данные в базе (убедись, что у dbService есть такой метод, если нет — я помогу его написать)
+        // 1. Persist changes to the database
         dbService.updateMedication(medication, with: draft)
-        
-        // 2. Обновляем пуши
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+
+        // 2. Reschedule notifications (via the protocol, not directly through UNUserNotificationCenter)
+        notificationService.removeAllPending()
         let activeCourses = dbService.fetchAllCourses().filter { $0.endDate >= Date() }
         notificationService.scheduleNotifications(activeCourses: activeCourses)
-        
-        // 3. Обновляем локальный список для UI
+
+        // 3. Refresh the local list for the UI
         self.medications = course.medications.sorted(by: { $0.name < $1.name })
     }
 }

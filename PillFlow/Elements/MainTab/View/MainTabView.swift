@@ -96,7 +96,7 @@ struct MainTabView: View {
                 router.dismissSheet()
             }, onSnooze: {
                 let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-                // Снузим всю пачку
+                // Snooze the whole batch
                 let ids = pills.map { $0.medicationId.uuidString }
                 let names = pills.map { $0.name }.joined(separator: ", ")
                 notifService.scheduleSnooze(for: ids, combinedNames: names)
