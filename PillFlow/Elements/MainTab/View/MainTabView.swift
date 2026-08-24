@@ -49,7 +49,7 @@ struct MainTabView: View {
             NavigationStack {
                 StatisticsView()
             }
-            .tabItem { Label("Progress", systemImage: "chart.pie.fill") }
+            .tabItem { Label("Diary", systemImage: "text.book.closed.fill") }
             .tag(2)
             
             // TAB 3: Settings

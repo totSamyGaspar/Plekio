@@ -27,19 +27,15 @@ struct CircularProgressView: View {
             // Filled ring
             Circle()
                 .trim(from: 0.0, to: CGFloat(min(progress, 1.0)))
-                .stroke(ringGradient, style: StrokeStyle(lineWidth: 16, lineCap: .round))
+                .stroke(ringGradient, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.spring(response: 0.8, dampingFraction: 0.7), value: progress)
 
             // Text inside the ring
             VStack(spacing: 2) {
                 Text("\(Int(progress * 100))%")
-                    .font(.system(size: 48, weight: .bold, design: .serif))
+                    .font(.system(size: 15, weight: .semibold, design: .serif))
                     .foregroundColor(.white)
-                
-                Text("GOAL \(goal)%")
-                    .font(.caption.weight(.heavy))
-                    .foregroundColor(.white.opacity(0.8))
             }
         }
         .padding(20)

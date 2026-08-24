@@ -36,15 +36,11 @@ struct WeeklyAdherenceView: View {
                     VStack(spacing: 8) {
                         GeometryReader { geo in
                             ZStack(alignment: .bottom) {
-                                // Capsule background
-                                Capsule()
+                                TopRoundedBar()
                                     .fill(Color.white.opacity(0.05))
-
-                                // Fill (percentage taken)
-                                Capsule()
+                                TopRoundedBar()
                                     .fill(Color.mint)
                                     .frame(height: geo.size.height * percentages[index])
-                                // Subtle neon glow on the top edge
                                     .shadow(color: Color.mint.opacity(0.3), radius: 5, x: 0, y: -5)
                             }
                         }

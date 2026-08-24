@@ -87,6 +87,5 @@ struct UpNextHeroCard: View {
         .background(LinearGradient(colors: gradientColors, startPoint: .topLeading, endPoint: .bottomTrailing))
         .cornerRadius(32)
         .padding(.horizontal)
-        .shadow(color: gradientColors.first!.opacity(0.3), radius: 20, x: 0, y: 15)
     }
 }
