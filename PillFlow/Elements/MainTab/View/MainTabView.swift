@@ -15,23 +15,23 @@ struct MainTabView: View {
         appearance.configureWithDefaultBackground()
         appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
         appearance.backgroundColor = UIColor.black.withAlphaComponent(0.4)
-        
+
         let neonMint = UIColor(Color.mint)
         appearance.stackedLayoutAppearance.selected.iconColor = neonMint
         appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: neonMint]
         appearance.stackedLayoutAppearance.normal.iconColor = UIColor.systemGray
         appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.systemGray]
-        
+
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
-    
+
     var body: some View {
         TabView(selection: $router.selectedTab) {
             DashboardView()
                 .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
                 .tag(0)
-            
+
             // TAB 1: Courses — NavigationStack
             NavigationStack(path: $router.coursesPath) {
                 CoursesListView()
@@ -44,14 +44,14 @@ struct MainTabView: View {
             }
             .tabItem { Label("Courses", systemImage: "list.clipboard.fill") }
             .tag(1)
-            
-            // TAB 2: Statistics
+
+            // TAB 2: Diary — daily health & mood check-ins
             NavigationStack {
-                StatisticsView()
+                DiaryView()
             }
             .tabItem { Label("Diary", systemImage: "text.book.closed.fill") }
             .tag(2)
-            
+
             // TAB 3: Settings
             NavigationStack {
                 SettingsView()
@@ -71,22 +71,22 @@ struct MainTabView: View {
             UISelectionFeedbackGenerator().selectionChanged()
         }
     }
-    
+
     @ViewBuilder
     private func sheetContent(for sheet: SheetRoute) -> some View {
         switch sheet {
-            
+
         case .newTreatment:
             NewTreatmentView()
                 .preferredColorScheme(.dark)
-            
+
         case .addMedication(let onSave):
             AddMedicationView { draft in
                 onSave(draft)
                 router.dismissSheet()
             }
             .preferredColorScheme(.dark)
-            
+
         case .takePill(let pills, let onTake, let onSkip):
             TakePillModalView(pills: pills, onTake: {
                 onTake()

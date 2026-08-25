@@ -83,6 +83,17 @@ final class DIContainer {
             let mediaService = r.resolve(MediaPickerServiceProtocol.self)!
             return AddMedicationViewModel(mediaPickerService: mediaService)
         }.inObjectScope(.transient)
+
+        container.register((any DiaryViewModelProtocol).self) { r in
+            let dbService = r.resolve(DatabaseServiceProtocol.self)!
+            return DiaryViewModel(dbService: dbService)
+        }.inObjectScope(.transient)
+
+        container.register((any DiaryCheckInViewModelProtocol).self) { r in
+            let dbService = r.resolve(DatabaseServiceProtocol.self)!
+            let mediaService = r.resolve(MediaPickerServiceProtocol.self)!
+            return DiaryCheckInViewModel(dbService: dbService, mediaPickerService: mediaService)
+        }.inObjectScope(.transient)
     }
 
     // Generic resolve helpers that unwrap the optional Swinject returns.

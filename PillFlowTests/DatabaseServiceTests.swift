@@ -220,4 +220,133 @@ struct DatabaseServiceTests {
         #expect(ImageCache.shared.loadDataFromDisk(for: medA.id) == nil)
         #expect(ImageCache.shared.loadDataFromDisk(for: medB.id) == nil)
     }
+
+    // MARK: - Diary
+
+    @Test("saveDiaryEntry persists the draft's fields and writes its photos to disk")
+    func testSaveDiaryEntryPersistsFieldsAndPhotos() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+
+        var draft = DiaryEntryDraft()
+        draft.mood = .good
+        draft.physicalSummary = "Clear-headed and relaxed."
+        draft.energyLevel = 4
+        draft.discomfortLevel = 0
+        draft.sleepHours = 7.5
+        draft.sleepQuality = .good
+        draft.waterGlasses = 6
+        draft.symptoms = ["Mild Nausea"]
+        draft.reflectionNotes = "Felt good today."
+        draft.milestoneTags = ["Day 14 Milestone"]
+        draft.photos = [Data([0xFF, 0xD8, 0xFF])]
+
+        db.saveDiaryEntry(draft: draft)
+
+        let entries = db.fetchAllDiaryEntries()
+        #expect(entries.count == 1)
+
+        let saved = try #require(entries.first)
+        #expect(saved.moodLabel == "Good")
+        #expect(saved.moodScore == 4)
+        #expect(saved.physicalSummary == "Clear-headed and relaxed.")
+        #expect(saved.sleepQuality == "G")
+        #expect(saved.symptoms == ["Mild Nausea"])
+        #expect(saved.milestoneTags == ["Day 14 Milestone"])
+        #expect(saved.photoIds.count == 1)
+
+        // Clean up the photo file written to disk.
+        for photoId in saved.photoIds {
+            #expect(ImageCache.shared.loadDataFromDisk(for: photoId) == Data([0xFF, 0xD8, 0xFF]))
+            ImageCache.shared.deleteFromDisk(for: photoId)
+        }
+    }
+
+    @Test("updateDiaryEntry replaces photo files on disk when photosModified is set")
+    func testUpdateDiaryEntryOverwritesFieldsAndPhotos() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+
+        var original = DiaryEntryDraft()
+        original.mood = .good
+        original.photos = [Data([0x01])]
+        original.photosModified = true
+        db.saveDiaryEntry(draft: original)
+
+        let saved = try #require(db.fetchAllDiaryEntries().first)
+        let oldPhotoId = try #require(saved.photoIds.first)
+        #expect(ImageCache.shared.loadDataFromDisk(for: oldPhotoId) != nil)
+
+        var updatedDraft = DiaryEntryDraft()
+        updatedDraft.mood = .inPain
+        updatedDraft.physicalSummary = "Worse today."
+        updatedDraft.photos = [Data([0x02])]
+        // Mirrors DiaryCheckInViewModel.requestImageSelection/removePhoto
+        // actually setting this when the user touches photos.
+        updatedDraft.photosModified = true
+
+        db.updateDiaryEntry(saved, with: updatedDraft)
+
+        #expect(saved.moodLabel == "In Pain")
+        #expect(saved.moodScore == 1)
+        #expect(saved.physicalSummary == "Worse today.")
+        #expect(saved.photoIds.count == 1)
+
+        let newPhotoId = try #require(saved.photoIds.first)
+        #expect(newPhotoId != oldPhotoId)
+        #expect(ImageCache.shared.loadDataFromDisk(for: newPhotoId) == Data([0x02]))
+        // The old photo file must be cleaned up, not left orphaned.
+        #expect(ImageCache.shared.loadDataFromDisk(for: oldPhotoId) == nil)
+
+        ImageCache.shared.deleteFromDisk(for: newPhotoId)
+    }
+
+    @Test("updateDiaryEntry leaves photo files untouched when photosModified is false")
+    func testUpdateDiaryEntryLeavesPhotosUntouchedWhenNotModified() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+
+        var original = DiaryEntryDraft()
+        original.mood = .good
+        original.photos = [Data([0x01])]
+        original.photosModified = true
+        db.saveDiaryEntry(draft: original)
+
+        let saved = try #require(db.fetchAllDiaryEntries().first)
+        let originalPhotoId = try #require(saved.photoIds.first)
+
+        // Simulates DiaryCheckInView.init(editingEntry:) preloading the
+        // existing photo bytes into the draft (photosModified stays false
+        // since the user never called requestImageSelection/removePhoto),
+        // then saving after only changing an unrelated field.
+        var updatedDraft = DiaryEntryDraft()
+        updatedDraft.mood = .inPain
+        updatedDraft.photos = [Data([0x01])] // same bytes, preloaded, untouched
+
+        db.updateDiaryEntry(saved, with: updatedDraft)
+
+        #expect(saved.moodLabel == "In Pain")
+        // The photo id must be exactly the same file — not deleted and
+        // rewritten under a new UUID for no reason.
+        #expect(saved.photoIds == [originalPhotoId])
+        #expect(ImageCache.shared.loadDataFromDisk(for: originalPhotoId) == Data([0x01]))
+
+        ImageCache.shared.deleteFromDisk(for: originalPhotoId)
+    }
+
+    @Test("deleteDiaryEntry removes the entry's photo files from disk")
+    func testDeleteDiaryEntryRemovesPhotoFiles() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+
+        var draft = DiaryEntryDraft()
+        draft.photos = [Data([0x01]), Data([0x02])]
+        db.saveDiaryEntry(draft: draft)
+
+        let saved = try #require(db.fetchAllDiaryEntries().first)
+        let photoIds = saved.photoIds
+        #expect(photoIds.count == 2)
+        #expect(photoIds.allSatisfy { ImageCache.shared.loadDataFromDisk(for: $0) != nil })
+
+        db.deleteDiaryEntry(saved)
+
+        #expect(db.fetchAllDiaryEntries().isEmpty)
+        #expect(photoIds.allSatisfy { ImageCache.shared.loadDataFromDisk(for: $0) == nil })
+    }
 }
