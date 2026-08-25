@@ -24,6 +24,8 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
             Color.bgDark.ignoresSafeArea()
             
             VStack(spacing: 0) {
+                header
+                
                 Picker("Course Filter", selection: $selectedSegment) {
                     Text("Active").tag(0)
                     Text("History").tag(1)
@@ -70,18 +72,41 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                 }
             }
         }
-        .navigationTitle("My Courses")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: { router.present(.newTreatment) }) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title3)
-                        .foregroundColor(.neonMint)
-                }
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
     }
+    
+    // MARK: - Header
+    
+    private var header: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("My Courses")
+                    .font(.system(size: 30, weight: .heavy, design: .serif))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            Spacer(minLength: 0)
+            
+            Button(action: { router.present(.newTreatment) }) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title3)
+                    .foregroundColor(.neonMint)
+                    .frame(width: 44, height: 44)
+                    .background(Circle().fill(Color.white.opacity(0.04)))
+                    .overlay(Circle().stroke(Color.white.opacity(0.06), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 6)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+    
+    // MARK: - Empty state
     
     private var emptyStateView: some View {
         VStack(spacing: 16) {

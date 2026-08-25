@@ -24,7 +24,7 @@ final class DatabaseService: DatabaseServiceProtocol {
     private init() {
         do {
             let schema = Schema([
-                TreatmentCourse.self, MedicationItem.self, DoseLog.self,
+                TreatmentCourse.self, MedicationItem.self, DoseLog.self, DiaryEntry.self,
             ])
             let config = ModelConfiguration(
                 schema: schema,
@@ -49,7 +49,7 @@ final class DatabaseService: DatabaseServiceProtocol {
     init(inMemoryForTesting: Bool) {
         do {
             let schema = Schema([
-                TreatmentCourse.self, MedicationItem.self, DoseLog.self,
+                TreatmentCourse.self, MedicationItem.self, DoseLog.self, DiaryEntry.self,
             ])
             let config = ModelConfiguration(
                 schema: schema,
@@ -330,8 +330,108 @@ final class DatabaseService: DatabaseServiceProtocol {
         try? context.save()
         NotificationCenter.default.post(name: .databaseDidUpdate, object: nil)
     }
+
+    // MARK: - Diary
+
+    func saveDiaryEntry(draft: DiaryEntryDraft) {
+        let entry = DiaryEntry(
+            id: draft.id,
+            checkInDate: draft.checkInDate,
+            moodLabel: draft.mood.rawValue,
+            moodScore: draft.mood.score,
+            physicalSummary: draft.physicalSummary,
+            energyLevel: draft.energyLevel,
+            discomfortLevel: draft.discomfortLevel,
+            sleepHours: draft.sleepHours,
+            sleepQuality: draft.sleepQuality.rawValue,
+            waterGlasses: draft.waterGlasses,
+            symptoms: draft.symptoms,
+            reflectionNotes: draft.reflectionNotes,
+            milestoneTags: draft.milestoneTags,
+            isQuickLog: draft.isQuickLog
+        )
+
+        // Photos are written to disk (ImageCache) keyed by a fresh id per photo,
+        // same approach as MedicationItem's photo — see ImageCache.swift.
+        var photoIds: [UUID] = []
+        for data in draft.photos {
+            let photoId = UUID()
+            ImageCache.shared.saveToDisk(data, for: photoId)
+            photoIds.append(photoId)
+        }
+        entry.photoIds = photoIds
+
+        context.insert(entry)
+        try? context.save()
+        NotificationCenter.default.post(name: .databaseDidUpdate, object: nil)
+        NotificationCenter.default.post(name: .diaryDidUpdate, object: nil)
+    }
+
+    func updateDiaryEntry(_ entry: DiaryEntry, with draft: DiaryEntryDraft) {
+        entry.checkInDate = draft.checkInDate
+        entry.moodLabel = draft.mood.rawValue
+        entry.moodScore = draft.mood.score
+        entry.physicalSummary = draft.physicalSummary
+        entry.energyLevel = draft.energyLevel
+        entry.discomfortLevel = draft.discomfortLevel
+        entry.sleepHours = draft.sleepHours
+        entry.sleepQuality = draft.sleepQuality.rawValue
+        entry.waterGlasses = draft.waterGlasses
+        entry.symptoms = draft.symptoms
+        entry.reflectionNotes = draft.reflectionNotes
+        entry.milestoneTags = draft.milestoneTags
+        entry.isQuickLog = draft.isQuickLog
+
+        // Photos: replace wholesale — but only when the user actually
+        // touched photos this session (draft.photosModified). Without this
+        // guard, every edit-and-save — even one that only changes the mood —
+        // deleted every photo file on disk and rewrote byte-identical copies
+        // under fresh UUIDs, since DiaryCheckInView.init(editingEntry:)
+        // always preloads the existing photos into draft.photos regardless
+        // of whether the user meant to change them.
+        if draft.photosModified {
+            for oldPhotoId in entry.photoIds {
+                ImageCache.shared.deleteFromDisk(for: oldPhotoId)
+            }
+            var newPhotoIds: [UUID] = []
+            for data in draft.photos {
+                let photoId = UUID()
+                ImageCache.shared.saveToDisk(data, for: photoId)
+                newPhotoIds.append(photoId)
+            }
+            entry.photoIds = newPhotoIds
+        }
+
+        try? context.save()
+        NotificationCenter.default.post(name: .databaseDidUpdate, object: nil)
+        NotificationCenter.default.post(name: .diaryDidUpdate, object: nil)
+    }
+
+    func fetchAllDiaryEntries() -> [DiaryEntry] {
+        let descriptor = FetchDescriptor<DiaryEntry>(sortBy: [SortDescriptor(\.checkInDate, order: .reverse)])
+        return (try? context.fetch(descriptor)) ?? []
+    }
+
+    func deleteDiaryEntry(_ entry: DiaryEntry) {
+        // Clean up photo files on disk — they aren't removed automatically.
+        for photoId in entry.photoIds {
+            ImageCache.shared.deleteFromDisk(for: photoId)
+        }
+
+        context.delete(entry)
+        try? context.save()
+        NotificationCenter.default.post(name: .databaseDidUpdate, object: nil)
+        NotificationCenter.default.post(name: .diaryDidUpdate, object: nil)
+    }
 }
 
 extension Notification.Name {
     static let databaseDidUpdate = Notification.Name("databaseDidUpdate")
+    // Narrower companion to .databaseDidUpdate, posted only by the Diary
+    // mutation methods above. DiaryViewModel subscribes to this instead of
+    // the broad channel so taking a pill, refilling stock, or editing a
+    // course no longer triggers a full re-fetch of every diary entry —
+    // .databaseDidUpdate is still posted alongside it for any other
+    // subscriber that expects the broad signal.
+    static let diaryDidUpdate = Notification.Name("diaryDidUpdate")
 }

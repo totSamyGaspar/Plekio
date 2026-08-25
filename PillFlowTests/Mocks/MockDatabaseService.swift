@@ -7,6 +7,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     // MARK: - Stub properties (control what the mock returns)
     var pillsToReturn: [PillDose] = []
     var coursesToReturn: [TreatmentCourse] = []
+    var diaryEntriesToReturn: [DiaryEntry] = []
 
     // MARK: - Spy properties (record calls for assertions)
     var didCallSaveCourse = false
@@ -31,6 +32,11 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
     var refilledMedication: MedicationItem?
     var refilledAmount: Int?
+
+    var savedDiaryDraft: DiaryEntryDraft?
+    var updatedDiaryEntry: DiaryEntry?
+    var updatedDiaryDraft: DiaryEntryDraft?
+    var deletedDiaryEntry: DiaryEntry?
 
     // MARK: - Protocol Implementation
 
@@ -79,5 +85,22 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     func refillStock(for medication: MedicationItem, amount: Int) {
         refilledMedication = medication
         refilledAmount = amount
+    }
+
+    func saveDiaryEntry(draft: DiaryEntryDraft) {
+        savedDiaryDraft = draft
+    }
+
+    func updateDiaryEntry(_ entry: DiaryEntry, with draft: DiaryEntryDraft) {
+        updatedDiaryEntry = entry
+        updatedDiaryDraft = draft
+    }
+
+    func fetchAllDiaryEntries() -> [DiaryEntry] {
+        return diaryEntriesToReturn
+    }
+
+    func deleteDiaryEntry(_ entry: DiaryEntry) {
+        deletedDiaryEntry = entry
     }
 }

@@ -12,15 +12,21 @@ import SwiftData
 protocol DatabaseServiceProtocol {
     func saveCourse(name: String, startDate: Date, endDate: Date, drafts: [MedicationDraft])
     func togglePill(medicationId: UUID, scheduledTime: Date)
-    
+
     func fetchPills(for date: Date, preFetchedCourses: [TreatmentCourse]?) -> [PillDose]
     func fetchAllCourses() -> [TreatmentCourse]
     func deleteCourse(_ course: TreatmentCourse)
     func deleteMedication(_ medication: MedicationItem)
-    
+
     func updateCourseDetails(course: TreatmentCourse, name: String, startDate: Date, endDate: Date)
     func updateMedication(_ medication: MedicationItem, with draft: MedicationDraft)
     func addMedication(draft: MedicationDraft, to course: TreatmentCourse)
     func refillStock(for medication: MedicationItem, amount: Int)
-    
+
+    // MARK: - Diary
+
+    func saveDiaryEntry(draft: DiaryEntryDraft)
+    func updateDiaryEntry(_ entry: DiaryEntry, with draft: DiaryEntryDraft)
+    func fetchAllDiaryEntries() -> [DiaryEntry]
+    func deleteDiaryEntry(_ entry: DiaryEntry)
 }
