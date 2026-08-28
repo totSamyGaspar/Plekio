@@ -4,12 +4,10 @@
 //
 //  Tests for the add/edit medication draft — MedicationDraft.medicationImageData,
 //  which carries a photo before DatabaseService writes it to disk.
-//  requestImageSelection(source:) is intentionally NOT tested here: it calls
-//  MediaPickerServiceProtocol asynchronously via Task { ... }, and without
-//  structured awaiting of that task, testing it would mean either sleep()
-//  (flaky) or changing the production protocol's signature just for
-//  testability — not worth it for a single test. removeImage() and the
-//  initial state are synchronous and deterministic, so those are tested directly.
+//  requestImageSelection(source:) is deliberately not tested: it calls the
+//  picker inside Task { ... } with no structured way to await it, so a test
+//  would need sleep() (flaky) or a production signature change. removeImage()
+//  and the initial state are synchronous, so those are tested directly.
 //
 
 import Testing
@@ -35,9 +33,8 @@ struct AddMedicationViewModelTests {
         let mockMedia = MockMediaPickerService()
         let vm = AddMedicationViewModel(mediaPickerService: mockMedia)
 
-        // Simulate a photo already having been selected (as if the user just
-        // returned from the picker, or this is the edit screen where
-        // AddMedicationView.init(editingMedication:) loaded bytes from disk).
+        // A photo already selected: the user just came back from the picker, or this
+        // is the edit screen, where init(editingMedication:) preloaded the bytes.
         vm.selectedImage = UIImage(systemName: "pills.fill")
         vm.draft.medicationImageData = Data([0x01, 0x02])
 

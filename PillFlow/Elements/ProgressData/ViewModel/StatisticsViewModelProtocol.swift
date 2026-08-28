@@ -10,8 +10,9 @@ import Combine
 
 @MainActor
 protocol StatisticsViewModelProtocol: ObservableObject {
-    var takenCount: Int { get }
-    var totalCount: Int { get }
+    // takenCount/totalCount stay on StatisticsViewModel itself (the tests read
+    // them), but the screen only uses the derived progress. Putting them in the
+    // protocol would force every implementation to duplicate them.
     var progress: Double { get }
     var streakDays: Int { get }
     var lowStockItems: [MedicationItem] { get }

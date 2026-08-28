@@ -24,7 +24,7 @@ final class MediaPickerService: NSObject, MediaPickerServiceProtocol {
     private var continuation: CheckedContinuation<UIImage, Error>?
     
     func pickImage(source: MediaSource) async throws -> UIImage {
-        // Guard against a second concurrent call
+        // Guard against a second concurrent call: one stored continuation only.
         if continuation != nil {
             throw MediaPickerError.unknown
         }
@@ -110,7 +110,6 @@ extension MediaPickerService: PHPickerViewControllerDelegate {
     }
 }
 
-// Utility for finding the currently presented view controller
 extension UIApplication {
     static func topViewController(base: UIViewController? = UIApplication.shared.connectedScenes
         .compactMap { $0 as? UIWindowScene }

@@ -5,9 +5,21 @@
 //  Created by Edward Gasparian on 19.06.2026.
 //
 
+import OSLog
 import UIKit
 
-final class ImageCache {
+/// Photo storage: an in-memory NSCache in front of files on disk.
+///
+/// `nonisolated` is required here. The project builds with default main-actor
+/// isolation (`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`), so the whole module
+/// is implicitly `@MainActor`; `Sendable` alone is not enough, it is about
+/// passing values, not isolation. Without `nonisolated` the `Task.detached`
+/// disk read either warned or silently hopped back onto the main thread through
+/// an implicit `await`, defeating the point of reading files off it.
+///
+/// Thread safety is by construction: `NSCache` synchronizes itself and every
+/// other field is an immutable `let`, so there is no shared mutable state.
+nonisolated final class ImageCache: @unchecked Sendable {
     static let shared = ImageCache()
     private let cache = NSCache<NSString, UIImage>()
     private let fileManager = FileManager.default
@@ -34,17 +46,18 @@ final class ImageCache {
         directoryURL.appendingPathComponent("\(id.uuidString).jpg")
     }
 
-    func set(_ image: UIImage, forKey key: UUID) {
+    private func set(_ image: UIImage, forKey key: UUID) {
         cache.setObject(image, forKey: key.uuidString as NSString)
     }
 
-    func get(forKey key: UUID) -> UIImage? {
+    private func get(forKey key: UUID) -> UIImage? {
         return cache.object(forKey: key.uuidString as NSString)
     }
 
     // MARK: - Disk Storage
 
-    /// Saves already-compressed photo data (JPEG) to a file named by the medication's id.
+    /// Saves already-compressed photo data (JPEG) to a file named by the
+    /// medication's id.
     @discardableResult
     func saveToDisk(_ data: Data, for id: UUID) -> Bool {
         do {
@@ -53,7 +66,7 @@ final class ImageCache {
             cache.removeObject(forKey: id.uuidString as NSString)
             return true
         } catch {
-            print("🚨 Failed to save medication photo to disk: \(error)")
+            AppLog.media.error("Failed to save photo to disk: \(error.localizedDescription, privacy: .public)")
             return false
         }
     }
@@ -62,35 +75,27 @@ final class ImageCache {
         try? Data(contentsOf: fileURL(for: id))
     }
 
-    /// Deletes the photo file from disk (e.g. when a medication is deleted, or via an explicit "Delete" in the UI).
     func deleteFromDisk(for id: UUID) {
         try? fileManager.removeItem(at: fileURL(for: id))
         cache.removeObject(forKey: id.uuidString as NSString)
     }
 
     // MARK: - Shared Async Loading
-    //
-    // Single entry point for loading a medication photo: checks the in-memory
-    // cache first, then decodes the JPEG data off the main thread on a cache
-    // miss. Loading and rendering should both go through this method rather
-    // than duplicating the cache-check/decode logic per view.
-    func loadAsync(for id: UUID, completion: @escaping (UIImage?) -> Void) {
-        if let cached = get(forKey: id) {
-            completion(cached)
-            return
-        }
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self else {
-                DispatchQueue.main.async { completion(nil) }
-                return
-            }
-            let decoded = self.loadDataFromDisk(for: id).flatMap { UIImage(data: $0) }
-            if let decoded {
-                self.set(decoded, forKey: id)
-            }
-            DispatchQueue.main.async {
-                completion(decoded)
-            }
-        }
+
+    /// The single entry point for loading a photo: memory cache first, then a read
+    /// and decode off the main thread on a miss.
+    ///
+    /// This used to be a callback that fired synchronously on a cache hit, so a
+    /// @State assignment could land during view construction. The async version
+    /// behaves the same either way.
+    func image(for id: UUID) async -> UIImage? {
+        if let cached = get(forKey: id) { return cached }
+
+        let decoded = await Task.detached(priority: .userInitiated) { [self] in
+            loadDataFromDisk(for: id).flatMap { UIImage(data: $0) }
+        }.value
+
+        if let decoded { set(decoded, forKey: id) }
+        return decoded
     }
 }

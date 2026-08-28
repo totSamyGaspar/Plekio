@@ -38,10 +38,16 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                 
                 List {
                     if currentList.isEmpty {
-                        emptyStateView
+                        EmptyStateView(
+                            icon: selectedSegment == 0 ? "pills.fill" : "clock.arrow.circlepath",
+                            title: selectedSegment == 0 ? "No active courses" : "History is empty",
+                            verticalPadding: 80
+                        )
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     } else {
                         ForEach(currentList) { course in
-                            NavigationLink(value: Route.courseDetail(course)) {
+                            NavigationLink(value: Route.courseDetail(courseId: course.id)) {
                                 CourseRowView(course: course,
                                               isHistory: selectedSegment == 1)
                             }
@@ -106,27 +112,11 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
         .padding(.bottom, 8)
     }
     
-    // MARK: - Empty state
-    
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Spacer().frame(height: 100)
-            Image(systemName: selectedSegment == 0 ? "pills.fill" : "clock.arrow.circlepath")
-                .font(.system(size: 50))
-                .foregroundColor(.white.opacity(0.2))
-            Text(selectedSegment == 0 ? "No active courses" : "History is empty")
-                .font(.headline)
-                .foregroundColor(.white.opacity(0.6))
-        }
-        .frame(maxWidth: .infinity, alignment: .center)
-        .listRowBackground(Color.clear)
-        .listRowSeparator(.hidden)
-    }
 }
 
 extension CoursesListView where VM == CoursesListViewModel {
     init() {
-        self.init(viewModel: DIContainer.shared.resolve((any CoursesListViewModelProtocol).self) as! VM)
+        self.init(viewModel: DIContainer.shared.resolve(CoursesListViewModel.self))
     }
 }
 

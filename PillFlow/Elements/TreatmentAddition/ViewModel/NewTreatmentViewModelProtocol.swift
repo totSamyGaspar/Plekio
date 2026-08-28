@@ -18,5 +18,7 @@ protocol NewTreatmentViewModelProtocol: ObservableObject {
     
     func addMedication(_ draft: MedicationDraft)
     func deleteMedication(at offset: IndexSet)
-    func saveCourse()
+    /// Returns false if the save failed — the screen then stays open.
+    @discardableResult
+    func saveCourse() -> Bool
 }

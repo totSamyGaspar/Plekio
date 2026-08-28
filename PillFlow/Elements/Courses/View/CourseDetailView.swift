@@ -26,6 +26,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                 Section(header: Text("Course Settings").foregroundColor(.white.opacity(0.6))) {
                     TextField("Course Name", text: $viewModel.courseName)
                         .foregroundColor(.white)
+                        .onSubmit { viewModel.saveCourseChanges() }
                     DatePicker("Start", selection: $viewModel.startDate, displayedComponents: .date)
                         .foregroundColor(.white)
                     DatePicker("End", selection: $viewModel.endDate,
@@ -83,15 +84,36 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                 medicationToEdit = nil
             }
         }
-        .onChange(of: viewModel.courseName) { _, _ in viewModel.saveCourseChanges() }
-        .onChange(of: viewModel.startDate)  { _, _ in viewModel.saveCourseChanges() }
-        .onChange(of: viewModel.endDate)    { _, _ in viewModel.saveCourseChanges() }
+        .onChange(of: viewModel.startDate) { _, _ in viewModel.saveCourseChanges() }
+        .onChange(of: viewModel.endDate)   { _, _ in viewModel.saveCourseChanges() }
+        .onDisappear { viewModel.saveCourseChanges() }
     }
 }
 
 extension CourseDetailView where VM == CourseDetailViewModel {
     init(course: TreatmentCourse) {
-        self.init(viewModel: DIContainer.shared.resolve((any CourseDetailViewModelProtocol).self, argument: course) as! VM)
+        self.init(viewModel: DIContainer.shared.resolve(CourseDetailViewModel.self, argument: course))
+    }
+}
+
+struct CourseDetailDestination: View {
+    let courseId: UUID
+
+    var body: some View {
+        if let course = DIContainer.shared.resolve(DatabaseServiceProtocol.self).fetchCourse(id: courseId) {
+            CourseDetailView(course: course)
+        } else {
+            ZStack {
+                Color.bgDark.ignoresSafeArea()
+                ContentUnavailableView(
+                    "Course deleted",
+                    systemImage: "trash",
+                    description: Text("This course no longer exists.")
+                )
+            }
+            .navigationTitle("Course Details")
+            .navigationBarTitleDisplayMode(.inline)
+        }
     }
 }
 

@@ -74,7 +74,6 @@ struct OnboardingPageView: View {
             Spacer()
         }
         .onAppear {
-            // Start the aura and shadow pulsing animation
             withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
                 isPulsing = true
             }
@@ -92,8 +91,8 @@ struct OnboardingPageView: View {
         OnboardingPageView(page: OnboardingPage(
             imageSystemName: "bell.badge.fill",
             imageColor: .orange,
-            title: "Умные напоминания",
-            description: "Получай уведомления вовремя и отмечай прием лекарств прямо с экрана блокировки."
+            title: "Smart reminders",
+            description: "Get timely notifications and log your medication right from the lock screen."
         ))
     }
 }

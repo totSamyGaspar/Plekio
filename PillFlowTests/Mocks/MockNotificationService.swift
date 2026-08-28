@@ -8,6 +8,9 @@ final class MockNotificationService: NotificationServiceProtocol {
     var cancelledMedicationIds: [UUID] = []
     var snoozedMedicationIds: [String]?
     var didCallRemoveAllPending = false
+    var clearedDeliveredIds: [UUID]?
+    var clearedDeliveredSlot: Date?
+    var clearDeliveredCallCount = 0
 
     func requestPermission() {
         didCallRequestPermission = true
@@ -21,11 +24,17 @@ final class MockNotificationService: NotificationServiceProtocol {
         cancelledMedicationIds.append(medicationId)
     }
 
-    func scheduleSnooze(for medicationIds: [String], combinedNames: String) {
+    func scheduleSnooze(for medicationIds: [String], names: [String]) {
         snoozedMedicationIds = medicationIds
     }
 
     func removeAllPending() {
         didCallRemoveAllPending = true
+    }
+
+    func clearDelivered(takenMedicationIds: [UUID], scheduledTime: Date) {
+        clearDeliveredCallCount += 1
+        clearedDeliveredIds = takenMedicationIds
+        clearedDeliveredSlot = scheduledTime
     }
 }

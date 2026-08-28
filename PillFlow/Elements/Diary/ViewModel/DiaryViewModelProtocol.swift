@@ -11,6 +11,10 @@ import Foundation
 protocol DiaryViewModelProtocol: ObservableObject {
     var entries: [DiaryEntry] { get }
 
+    /// Every entry's photos flattened into checkpoints. Recomputed once per data
+    /// change rather than on every access from a view.
+    var photoCheckpoints: [DiaryPhotoCheckpoint] { get }
+
     // MARK: - Home screen stats (derived from `entries`)
 
     /// Average mood score (out of 5) over the last 7 days — falls back to all
@@ -20,7 +24,7 @@ protocol DiaryViewModelProtocol: ObservableObject {
     var avgEnergyLevel: Double { get }
     /// Total number of progress photos logged across all entries.
     var totalPhotosLogged: Int { get }
-    /// Average sleep hours across all entries.
+    /// Average sleep hours over the same 7-day window as avgMoodScore.
     var avgSleepHours: Double { get }
     /// Whether a check-in already exists for today.
     var hasCheckedInToday: Bool { get }

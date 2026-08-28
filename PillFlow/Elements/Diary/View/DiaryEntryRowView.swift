@@ -19,8 +19,11 @@ struct DiaryEntryRowView: View {
             HStack(alignment: .top) {
                 HStack(spacing: 8) {
                     Text(mood?.emoji ?? "📝")
-                    Text("\(entry.moodLabel.uppercased()) (\(entry.moodScore)/5)")
+                    // .textCase, not .uppercased(): case is a display concern, and
+                    // per-character uppercasing misbehaves in some languages.
+                    Text("\(entry.moodTitle) (\(entry.moodScore)/5)")
                         .font(.caption.weight(.heavy))
+                        .textCase(.uppercase)
                 }
                 .foregroundColor(.neonMint)
                 .padding(.horizontal, 10)
@@ -51,7 +54,12 @@ struct DiaryEntryRowView: View {
             } else {
                 HStack(spacing: 10) {
                     statChip(icon: "bolt.fill", iconColor: .yellow, text: "Energy: \(entry.energyLevel)/5")
-                    statChip(icon: "moon.fill", iconColor: .purple, text: "\(String(format: "%.0f", entry.sleepHours))h (\((SleepQuality(rawValue: entry.sleepQuality) ?? .good).label))")
+                    let sleepQuality = SleepQuality(rawValue: entry.sleepQuality) ?? .good
+                    statChip(
+                        icon: "moon.fill",
+                        iconColor: .purple,
+                        text: "\(entry.sleepHours, format: .number.precision(.fractionLength(0)))h · \(String(localized: sleepQuality.title))"
+                    )
                     statChip(icon: "drop.fill", iconColor: .blue, text: "\(entry.waterGlasses) glasses")
                     if entry.discomfortLevel > 0 {
                         statChip(icon: "heart.fill", iconColor: .pink, text: "Pain: \(entry.discomfortLevel)/10")
@@ -80,10 +88,10 @@ struct DiaryEntryRowView: View {
             if !entry.symptoms.isEmpty || !entry.milestoneTags.isEmpty {
                 FlowLayout(spacing: 6) {
                     ForEach(entry.symptoms, id: \.self) { symptom in
-                        smallTag(text: symptom, color: .neonMint)
+                        smallTag(text: DiarySymptomOptions.title(for: symptom), color: .neonMint)
                     }
                     ForEach(entry.milestoneTags, id: \.self) { tag in
-                        smallTag(text: "#\(tag)", color: Color(red: 0.7, green: 0.4, blue: 0.9))
+                        smallTag(text: "#\(DiaryMilestoneOptions.title(for: tag))", color: .milestonePurple)
                     }
                 }
             }
@@ -131,7 +139,7 @@ struct DiaryEntryRowView: View {
         .cornerRadius(24)
     }
 
-    private func statChip(icon: String, iconColor: Color, text: String) -> some View {
+    private func statChip(icon: String, iconColor: Color, text: LocalizedStringKey) -> some View {
         HStack(spacing: 4) {
             Image(systemName: icon).foregroundColor(iconColor)
             Text(text).foregroundColor(.white.opacity(0.8))

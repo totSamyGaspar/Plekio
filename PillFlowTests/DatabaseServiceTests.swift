@@ -46,7 +46,7 @@ struct DatabaseServiceTests {
 
         #expect(pills.count == 3)
         #expect(pills.map(\.period) == [.morning, .noon, .evening])
-        #expect(pills.allSatisfy { $0.name == "Ибупрофен" && $0.dosage == "2 pcs" })
+        #expect(pills.allSatisfy { $0.name == "Ибупрофен" && $0.dosage == 2 })
     }
 
     // MARK: - fetchPills: dosing interval (frequencyDays)
@@ -71,13 +71,11 @@ struct DatabaseServiceTests {
         db.context.insert(course)
         try? db.context.save()
 
-        // Day 0 (the course start itself) — should match.
+        // frequencyDays 3, counted from the course start: days 0 and 3 are multiples
+        // of the interval and match, days 1 and 2 are not.
         #expect(db.fetchPills(for: courseStart).count == 1)
-        // Day 1 — not a multiple of 3 → no match.
         #expect(db.fetchPills(for: addingDays(1, to: courseStart)).isEmpty)
-        // Day 2 — also not a multiple of 3 → no match.
         #expect(db.fetchPills(for: addingDays(2, to: courseStart)).isEmpty)
-        // Day 3 — a multiple of 3 → matches again.
         #expect(db.fetchPills(for: addingDays(3, to: courseStart)).count == 1)
     }
 
@@ -104,17 +102,37 @@ struct DatabaseServiceTests {
 
         let scheduledTime = testDate(2026, 6, 10, 9, 0)
 
-        // First "taken" toggle: creates a DoseLog and deducts stock.
-        db.togglePill(medicationId: med.id, scheduledTime: scheduledTime)
+        try db.togglePill(medicationId: med.id, scheduledTime: scheduledTime)
         #expect(med.logs.count == 1)
         #expect(med.logs.first?.isTaken == true)
         #expect(med.stockCount == 28)
 
-        // Toggling the same slot again reverts the mark and restores stock.
-        db.togglePill(medicationId: med.id, scheduledTime: scheduledTime)
+        try db.togglePill(medicationId: med.id, scheduledTime: scheduledTime)
         #expect(med.logs.count == 1) // the same DoseLog is reused, not duplicated
         #expect(med.logs.first?.isTaken == false)
         #expect(med.stockCount == 30)
+    }
+
+    @Test("сдвиг времени приёма переносит уже поставленные отметки")
+    func testChangingScheduleMovesExistingLogs() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = makeCourseWithMed(db)
+        let day = testDate(2026, 6, 10)
+
+        try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 10, 9, 0))
+        #expect(db.fetchPills(for: day).first?.isTaken == true)
+
+        // Move the dose to 11:00. The log used to stay pinned to 9:00 where the
+        // schedule no longer looked for it, so the day read as unlogged even though
+        // the stock had already been deducted.
+        var draft = MedicationDraft(from: med)
+        draft.timesOfDay = [testDate(2000, 1, 1, 11, 0)]
+        try db.updateMedication(med, with: draft)
+
+        let pills = db.fetchPills(for: day)
+        #expect(pills.count == 1)
+        #expect(pills.first?.isTaken == true)
+        #expect(Calendar.current.component(.hour, from: try #require(pills.first).time) == 11)
     }
 
     // MARK: - refillStock
@@ -134,7 +152,7 @@ struct DatabaseServiceTests {
             lowStockThreshold: 10
         )
 
-        db.refillStock(for: med, amount: 10)
+        try db.refillStock(for: med, amount: 10)
 
         #expect(med.stockCount == 15)
     }
@@ -160,7 +178,8 @@ struct DatabaseServiceTests {
         db.context.insert(course)
         try? db.context.save()
 
-        // Clean up regardless of whether the assertion below fails.
+        // ImageCache writes to the real on-disk cache, not a temp dir, so a leftover
+        // file would leak into the next test run.
         defer { ImageCache.shared.deleteFromDisk(for: med.id) }
 
         var draftWithPhoto = MedicationDraft()
@@ -168,14 +187,14 @@ struct DatabaseServiceTests {
         let fakeJPEGBytes = Data([0xFF, 0xD8, 0xFF, 0x00, 0x01, 0x02])
         draftWithPhoto.medicationImageData = fakeJPEGBytes
 
-        db.updateMedication(med, with: draftWithPhoto)
+        try db.updateMedication(med, with: draftWithPhoto)
         #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == fakeJPEGBytes)
 
-        // Saving without a photo (draft.medicationImageData == nil) must
-        // explicitly delete the file rather than leave a stale one on disk.
+        // Saving with medicationImageData == nil must delete the file, not leave a
+        // stale one on disk.
         var draftWithoutPhoto = MedicationDraft()
         draftWithoutPhoto.name = "Омега-3"
-        db.updateMedication(med, with: draftWithoutPhoto)
+        try db.updateMedication(med, with: draftWithoutPhoto)
         #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == nil)
     }
 
@@ -196,7 +215,7 @@ struct DatabaseServiceTests {
         ImageCache.shared.saveToDisk(Data([0x01]), for: med.id)
         #expect(ImageCache.shared.loadDataFromDisk(for: med.id) != nil)
 
-        db.deleteMedication(med)
+        try db.deleteMedication(med)
 
         #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == nil)
     }
@@ -215,7 +234,7 @@ struct DatabaseServiceTests {
         ImageCache.shared.saveToDisk(Data([0x01]), for: medA.id)
         ImageCache.shared.saveToDisk(Data([0x02]), for: medB.id)
 
-        db.deleteCourse(course)
+        try db.deleteCourse(course)
 
         #expect(ImageCache.shared.loadDataFromDisk(for: medA.id) == nil)
         #expect(ImageCache.shared.loadDataFromDisk(for: medB.id) == nil)
@@ -240,7 +259,7 @@ struct DatabaseServiceTests {
         draft.milestoneTags = ["Day 14 Milestone"]
         draft.photos = [Data([0xFF, 0xD8, 0xFF])]
 
-        db.saveDiaryEntry(draft: draft)
+        try db.saveDiaryEntry(draft: draft)
 
         let entries = db.fetchAllDiaryEntries()
         #expect(entries.count == 1)
@@ -254,7 +273,6 @@ struct DatabaseServiceTests {
         #expect(saved.milestoneTags == ["Day 14 Milestone"])
         #expect(saved.photoIds.count == 1)
 
-        // Clean up the photo file written to disk.
         for photoId in saved.photoIds {
             #expect(ImageCache.shared.loadDataFromDisk(for: photoId) == Data([0xFF, 0xD8, 0xFF]))
             ImageCache.shared.deleteFromDisk(for: photoId)
@@ -269,7 +287,7 @@ struct DatabaseServiceTests {
         original.mood = .good
         original.photos = [Data([0x01])]
         original.photosModified = true
-        db.saveDiaryEntry(draft: original)
+        try db.saveDiaryEntry(draft: original)
 
         let saved = try #require(db.fetchAllDiaryEntries().first)
         let oldPhotoId = try #require(saved.photoIds.first)
@@ -279,11 +297,11 @@ struct DatabaseServiceTests {
         updatedDraft.mood = .inPain
         updatedDraft.physicalSummary = "Worse today."
         updatedDraft.photos = [Data([0x02])]
-        // Mirrors DiaryCheckInViewModel.requestImageSelection/removePhoto
-        // actually setting this when the user touches photos.
+        // DiaryCheckInViewModel.requestImageSelection/removePhoto set this whenever
+        // the user actually touches photos.
         updatedDraft.photosModified = true
 
-        db.updateDiaryEntry(saved, with: updatedDraft)
+        try db.updateDiaryEntry(saved, with: updatedDraft)
 
         #expect(saved.moodLabel == "In Pain")
         #expect(saved.moodScore == 1)
@@ -293,7 +311,6 @@ struct DatabaseServiceTests {
         let newPhotoId = try #require(saved.photoIds.first)
         #expect(newPhotoId != oldPhotoId)
         #expect(ImageCache.shared.loadDataFromDisk(for: newPhotoId) == Data([0x02]))
-        // The old photo file must be cleaned up, not left orphaned.
         #expect(ImageCache.shared.loadDataFromDisk(for: oldPhotoId) == nil)
 
         ImageCache.shared.deleteFromDisk(for: newPhotoId)
@@ -307,24 +324,22 @@ struct DatabaseServiceTests {
         original.mood = .good
         original.photos = [Data([0x01])]
         original.photosModified = true
-        db.saveDiaryEntry(draft: original)
+        try db.saveDiaryEntry(draft: original)
 
         let saved = try #require(db.fetchAllDiaryEntries().first)
         let originalPhotoId = try #require(saved.photoIds.first)
 
-        // Simulates DiaryCheckInView.init(editingEntry:) preloading the
-        // existing photo bytes into the draft (photosModified stays false
-        // since the user never called requestImageSelection/removePhoto),
-        // then saving after only changing an unrelated field.
+        // DiaryCheckInView.init(editingEntry:) preloads the existing photo bytes into
+        // the draft; photosModified stays false because the user never touched the
+        // photos, and only an unrelated field is changed before saving.
         var updatedDraft = DiaryEntryDraft()
         updatedDraft.mood = .inPain
         updatedDraft.photos = [Data([0x01])] // same bytes, preloaded, untouched
 
-        db.updateDiaryEntry(saved, with: updatedDraft)
+        try db.updateDiaryEntry(saved, with: updatedDraft)
 
         #expect(saved.moodLabel == "In Pain")
-        // The photo id must be exactly the same file — not deleted and
-        // rewritten under a new UUID for no reason.
+        // The same file, not deleted and rewritten under a fresh UUID.
         #expect(saved.photoIds == [originalPhotoId])
         #expect(ImageCache.shared.loadDataFromDisk(for: originalPhotoId) == Data([0x01]))
 
@@ -337,16 +352,88 @@ struct DatabaseServiceTests {
 
         var draft = DiaryEntryDraft()
         draft.photos = [Data([0x01]), Data([0x02])]
-        db.saveDiaryEntry(draft: draft)
+        try db.saveDiaryEntry(draft: draft)
 
         let saved = try #require(db.fetchAllDiaryEntries().first)
         let photoIds = saved.photoIds
         #expect(photoIds.count == 2)
         #expect(photoIds.allSatisfy { ImageCache.shared.loadDataFromDisk(for: $0) != nil })
 
-        db.deleteDiaryEntry(saved)
+        try db.deleteDiaryEntry(saved)
 
         #expect(db.fetchAllDiaryEntries().isEmpty)
         #expect(photoIds.allSatisfy { ImageCache.shared.loadDataFromDisk(for: $0) == nil })
+    }
+
+    // MARK: - togglePill: back-dated logging
+
+    /// One course with a single medication, dosed at 9:00 every day.
+    private func makeCourseWithMed(
+        _ db: DatabaseService,
+        stockCount: Int = 30,
+        dosage: Int = 2
+    ) -> MedicationItem {
+        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let med = MedicationItem(
+            id: UUID(),
+            name: "Аспирин",
+            formSystemImage: "pills.fill",
+            dosage: dosage,
+            timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+            frequencyDays: 1,
+            stockCount: stockCount,
+            lowStockThreshold: 10
+        )
+        course.medications.append(med)
+        db.context.insert(course)
+        try? db.context.save()
+        return med
+    }
+
+    @Test("togglePill сбрасывает кэш целиком, а не только день слота")
+    func testTogglePillInvalidatesCacheForAllDays() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = makeCourseWithMed(db)
+
+        // Warm the cache for a different day: the cached entry copies stockCount as
+        // it stood at that fetch.
+        let otherDay = testDate(2026, 6, 10)
+        #expect(db.fetchPills(for: otherDay).first?.stockCount == 30)
+
+        // Log a dose on the NEIGHBOURING day. Stock is shared across days, so the
+        // cached day has to see the new value.
+        try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 11, 9, 0))
+
+        #expect(db.fetchPills(for: otherDay).first?.stockCount == 28)
+    }
+
+    @Test("остаток не уходит в минус")
+    func testStockNeverGoesNegative() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = makeCourseWithMed(db, stockCount: 1, dosage: 2)
+
+        try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 10, 9, 0))
+
+        #expect(med.stockCount == 0)
+        #expect(med.logs.first?.isTaken == true)
+    }
+
+    @Test("доза прошедшего дня отмечается, actualTakeTime позже запланированного")
+    func testLateLoggingRecordsActualTime() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = makeCourseWithMed(db)
+
+        let scheduled = testDate(2026, 6, 10, 9, 0)
+        try db.togglePill(medicationId: med.id, scheduledTime: scheduled)
+
+        let log = try #require(med.logs.first)
+        #expect(log.isTaken == true)
+        #expect(log.scheduledTime == scheduled)
+        // Logged now against a slot in the past, so the delay is visible in the log
+        // itself and needs no separate field.
+        let actualTakeTime = try #require(log.actualTakeTime)
+        #expect(actualTakeTime > scheduled)
+
+        #expect(db.fetchPills(for: testDate(2026, 6, 10)).first?.isTaken == true)
     }
 }

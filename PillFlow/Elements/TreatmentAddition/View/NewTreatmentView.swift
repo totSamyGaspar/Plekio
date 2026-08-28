@@ -5,7 +5,6 @@
 //  Created by Edward Gasparian on 02.05.2026.
 //
 
-// NewTreatmentView.swift
 import SwiftUI
 
 struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
@@ -34,7 +33,11 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                     Section(header: Text("Course Duration").foregroundColor(.white.opacity(0.6))) {
                         DatePicker("Start", selection: $viewModel.startDate, displayedComponents: .date)
                             .foregroundColor(.white)
-                        DatePicker("End", selection: $viewModel.endDate, displayedComponents: .date)
+                        // A course can't end before it starts: such a course saved
+                        // silently and then produced no doses at all. CourseDetailView
+                        // already had this constraint; here it was missing.
+                        DatePicker("End", selection: $viewModel.endDate,
+                                   in: viewModel.startDate..., displayedComponents: .date)
                             .foregroundColor(.white)
                     }
                     .listRowBackground(Color.cardDark)
@@ -47,7 +50,10 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                                     .frame(width: 30)
                                 Text(med.name).foregroundColor(.white)
                                 Spacer()
-                                Text("\(med.dosage) pcs, \(med.timesOfDay.count) times/day")
+                                // Two plurals in one string: Russian and Ukrainian
+                                // decline them independently, so each gets its own
+                                // translatable string.
+                                (Text("\(med.dosage) pcs") + Text(verbatim: ", ") + Text("\(med.timesOfDay.count) times/day"))
                                     .font(.caption)
                                     .foregroundColor(.white.opacity(0.5))
                             }
@@ -65,8 +71,9 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                     
                     Section {
                         Button(action: {
-                            viewModel.saveCourse()
-                            dismiss()
+                            // Dismiss only if the write actually succeeded —
+                            // otherwise what was typed would go with the screen.
+                            if viewModel.saveCourse() { dismiss() }
                         }) {
                             Text("Save Course")
                                 .font(.headline)
@@ -104,7 +111,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
 
 extension NewTreatmentView where VM == NewTreatmentViewModel {
     init() {
-        self.init(viewModel: DIContainer.shared.resolve((any NewTreatmentViewModelProtocol).self) as! VM)
+        self.init(viewModel: DIContainer.shared.resolve(NewTreatmentViewModel.self))
     }
 }
 

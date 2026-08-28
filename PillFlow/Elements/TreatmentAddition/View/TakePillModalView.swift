@@ -21,7 +21,6 @@ struct TakePillModalView: View {
 
     var body: some View {
         ZStack {
-            // Background blur
             Color.black.opacity(0.4)
                 .ignoresSafeArea()
                 .onTapGesture { dismiss() }
@@ -31,7 +30,6 @@ struct TakePillModalView: View {
                 .ignoresSafeArea()
                 .onTapGesture { dismiss() }
 
-            // Center card
             VStack(spacing: 0) {
                 // MARK: - Header
                 ZStack(alignment: .topTrailing) {
@@ -41,7 +39,7 @@ struct TakePillModalView: View {
                         endPoint: .bottomTrailing
                     )
 
-                    // Use the time from the first pill (it's the same for all of them)
+                    // All pills here share one time; the first one's will do.
                     if let firstPill = pills.first {
                         HStack(spacing: 4) {
                             Image(systemName: "clock")
@@ -72,7 +70,10 @@ struct TakePillModalView: View {
                                 .foregroundColor(.white.opacity(0.8))
                                 .tracking(1.0)
 
-                            Text(pills.count > 1 ? "Time for your Pills" : "Time for your Pill")
+                            // One string with the count, not a ternary: Russian and
+                            // Ukrainian have three plural forms that two branches
+                            // can't express. The "one" variant may drop the number.
+                            Text("Time for your \(pills.count) pills")
                                 .font(.title2.weight(.heavy))
                                 .foregroundColor(.white)
                         }
@@ -85,14 +86,13 @@ struct TakePillModalView: View {
                 // MARK: - Content Body
                 VStack(spacing: 16) {
 
-                    // List of medications for this time
                     ScrollView {
                         VStack(spacing: 12) {
                             ForEach(pills) { pill in
                                 HStack(spacing: 16) {
                                     ZStack {
                                         RoundedRectangle(cornerRadius: 16)
-                                            .fill(Color.mint.opacity(0.1))
+                                            .fill(Color.neonMint.opacity(0.1))
                                             .frame(width: 50, height: 50)
                                         Image(systemName: pill.formSystemImage)
                                             .font(.title2)
@@ -103,7 +103,10 @@ struct TakePillModalView: View {
                                         Text(pill.name)
                                             .font(.headline.weight(.bold))
                                             .foregroundColor(.white)
-                                        Text("\(pill.dosage) • \(pill.period.rawValue.capitalized)")
+                                        // Separate Text values: each piece is its
+                                        // own translatable string, not a
+                                        // concatenation with rawValue.
+                                        (Text("\(pill.dosage) pcs") + Text(verbatim: " • ") + Text(pill.period.title))
                                             .font(.subheadline.weight(.semibold))
                                             .foregroundColor(.neonMint)
                                     }
@@ -115,31 +118,27 @@ struct TakePillModalView: View {
                             }
                         }
                     }
-                    .frame(maxHeight: 220) // Limit scroll height when there are many pills
+                    .frame(maxHeight: 220)
 
                     Spacer(minLength: 10)
 
                     // MARK: - Action Buttons
+                    // Dismissal belongs to whoever presented the modal (MainTabView
+                    // calls router.dismissSheet from these same callbacks); dismiss()
+                    // used to be duplicated here.
                     HStack(spacing: 12) {
-                        ActionButton(icon: "xmark", title: pills.count > 1 ? "Skip All" : "Skip", color: .white, bgColor: cardDark) {
-                            onSkip()
-                            dismiss()
-                        }
+                        ActionButton(icon: "xmark", title: pills.count > 1 ? "Skip All" : "Skip", color: .white, bgColor: cardDark, action: onSkip)
 
-                        ActionButton(icon: "clock", title: "Snooze 15m", color: .yellow, bgColor: Color.yellow.opacity(0.15)) {
-                            onSnooze()
-                            dismiss()
-                        }
+                        ActionButton(icon: "clock", title: "Snooze 15m", color: .yellow, bgColor: Color.yellow.opacity(0.15), action: onSnooze)
 
-                        Button(action: {
-                            onTake()
-                            dismiss()
-                        }) {
+                        Button(action: onTake) {
                             VStack(spacing: 8) {
                                 Image(systemName: "checkmark")
                                     .font(.title3.weight(.bold))
                                 Text(pills.count > 1 ? "Take All" : "Take Now")
                                     .font(.caption.weight(.bold))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.75)
                             }
                             .foregroundColor(bgDark)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -162,7 +161,9 @@ struct TakePillModalView: View {
 
 struct ActionButton: View {
     let icon: String
-    let title: String
+    /// LocalizedStringKey, not String: with String the compiler does not extract
+    /// the call-site literal into the catalog, and the buttons stayed English.
+    let title: LocalizedStringKey
     let color: Color
     let bgColor: Color
     let action: () -> Void
@@ -173,9 +174,14 @@ struct ActionButton: View {
                 Image(systemName: icon)
                     .font(.title3.weight(.bold))
                     .foregroundColor(color)
+                // The three buttons split the modal's width evenly, about 95pt each.
+                // "Snooze 15m" in German ("15 Min. später") does not fit, so the label
+                // scales down instead of being truncated.
                 Text(title)
                     .font(.caption.weight(.bold))
                     .foregroundColor(color.opacity(0.8))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(bgColor)
@@ -187,8 +193,8 @@ struct ActionButton: View {
 #Preview {
     TakePillModalView(
         pills: [
-            PillDose(medicationId: UUID(), name: "Sertraline", dosage: "50mg", formSystemImage: "pills.fill", time: Date(), period: .morning, isTaken: false, stockCount: 10, lowStockThreshold: 5),
-            PillDose(medicationId: UUID(), name: "Vitamin D", dosage: "1 cap", formSystemImage: "capsule.fill", time: Date(), period: .morning, isTaken: false, stockCount: 10, lowStockThreshold: 5)
+            PillDose(medicationId: UUID(), name: "Sertraline", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .morning, isTaken: false, stockCount: 10, lowStockThreshold: 5),
+            PillDose(medicationId: UUID(), name: "Vitamin D", dosage: 1, formSystemImage: "capsule.fill", time: Date(), period: .morning, isTaken: false, stockCount: 10, lowStockThreshold: 5)
         ],
         onTake: {}, onSkip: {}, onSnooze: {}
     )

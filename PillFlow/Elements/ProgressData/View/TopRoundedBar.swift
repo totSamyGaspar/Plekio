@@ -4,7 +4,7 @@
 //
 //  Created by Edward Gasparian on 24.08.2026.
 //
-// This is element for WeeklyAdherenceView.swift
+//  Bar shape used by WeeklyAdherenceView.
 
 import SwiftUI
 

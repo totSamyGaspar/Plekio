@@ -13,6 +13,10 @@ protocol AddMedicationViewModelProtocol: ObservableObject {
     var selectedImage: UIImage? { get set }
     var showingPhotoSourceMenu: Bool { get set }
     
+    /// Switches the form into edit mode: fills the draft and loads the photo from
+    /// disk. Called from the view's `.task`, not its `init`.
+    func startEditing(_ medication: MedicationItem) async
+
     func requestImageSelection(source: MediaSource)
     func removeImage()
 }

@@ -30,9 +30,9 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                     if isToday {
                         let allPills = viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills
 
-                        // Missed doses (past the 1-hour grace window) are excluded here too —
-                        // otherwise a missed dose would still surface as "Up Next" with a
-                        // working Log button, bypassing the same lock MedicationCardView enforces.
+                        // Missed doses (past the 1-hour grace window) are excluded here too,
+                        // or one would still surface as "Up Next" with a working Log button,
+                        // bypassing the lock MedicationCardView enforces.
                         if let earliestUntakenTime = allPills.filter({ !$0.isTaken && !$0.isMissed }).min(by: { $0.time < $1.time })?.time {
 
                             let pillsAtThisTime = allPills.filter { Calendar.current.isDate($0.time, equalTo: earliestUntakenTime, toGranularity: .minute) }
@@ -57,7 +57,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                     calendarSection.padding(.top, 8)
 
                     if viewModel.isEmpty {
-                        emptyStateView
+                        EmptyStateView(icon: "pills", title: "Nothing for today", verticalPadding: 60)
                     } else {
                         timelineSection
                     }
@@ -68,33 +68,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
-        .onChange(of: router.pendingPushMedicationIds) { _, newValue in
-            guard newValue != nil else { return }
-            if let (medIds, _) = router.consumePendingPush() {
 
-                let allCurrentPills = viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills
-                let pillsToTake = allCurrentPills.filter { medIds.contains($0.medicationId) }
-
-                if !pillsToTake.isEmpty {
-                    router.presentFullScreen(
-                        .takePill(
-                            pills: pillsToTake,
-                            onTake: {
-                                for pill in pillsToTake {
-                                    viewModel.togglePill(id: pill.id)
-                                }
-                            },
-                            onSkip: {
-                                let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-                                for pill in pillsToTake {
-                                    notifService.cancelNotifications(for: pill.medicationId)
-                                }
-                            }
-                        )
-                    )
-                }
-            }
-        }
     }
 
     // MARK: - Sections
@@ -114,14 +88,18 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     private var dateSummaryCard: some View {
         HStack {
             VStack(alignment: .leading, spacing: 6) {
-                Text(Date().formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
+                // The date and the counters now describe the same day. This used to
+                // print today's date with the word "today" while the counter was
+                // computed for the selected date, so the two disagreed as soon as the
+                // user moved off today.
+                Text(viewModel.selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
                     .font(.title3.weight(.bold))
                     .foregroundColor(.white)
 
                 let total = viewModel.morningPills.count + viewModel.noonPills.count + viewModel.eveningPills.count
                 let taken = (viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills).filter { $0.isTaken }.count
 
-                Text("\(taken) of \(total) doses logged today")
+                Text("\(taken) of \(total) doses logged")
                     .font(.subheadline)
                     .foregroundColor(.neonMint)
             }
@@ -179,24 +157,18 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             .padding(.horizontal)
             .padding(.top, 16)
 
-            let isToday = Calendar.current.isDateInToday(viewModel.selectedDate)
-
-            // Shared helper for all three periods so morning/noon/evening
-            // sections stay behaviorally identical instead of drifting apart.
-            periodSection(pills: viewModel.morningPills, title: DayPeriod.morning.rawValue, timeString: "8:00 AM", isToday: isToday)
-            periodSection(pills: viewModel.noonPills, title: DayPeriod.noon.rawValue, timeString: "1:00 PM", isToday: isToday)
-            periodSection(pills: viewModel.eveningPills, title: DayPeriod.evening.rawValue, timeString: "7:00 PM", isToday: isToday)
+            periodSection(pills: viewModel.morningPills, title: DayPeriod.morning.title)
+            periodSection(pills: viewModel.noonPills, title: DayPeriod.noon.title)
+            periodSection(pills: viewModel.eveningPills, title: DayPeriod.evening.title)
         }
     }
 
     @ViewBuilder
-    private func periodSection(pills: [PillDose], title: String, timeString: String, isToday: Bool) -> some View {
+    private func periodSection(pills: [PillDose], title: LocalizedStringResource) -> some View {
         if !pills.isEmpty {
             PeriodSectionView(
                 title: title,
-                timeString: timeString,
                 pills: pills,
-                isToday: isToday,
                 onTogglePill: { id in viewModel.togglePill(id: id) },
                 onPillTap: { pill in
                     let sameTimePills = pills.filter { $0.time == pill.time }
@@ -217,22 +189,11 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         }
     }
 
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Spacer().frame(height: 60)
-            Image(systemName: "pills")
-                .font(.system(size: 60))
-                .foregroundColor(.secondary.opacity(0.5))
-            Text("Nothing for today")
-                .font(.headline)
-                .foregroundColor(.secondary)
-        }
-    }
 }
 
 extension DashboardView where VM == DashboardViewModel {
     init() {
-        self.init(viewModel: DIContainer.shared.resolve((any DashboardViewModelProtocol).self) as! VM)
+        self.init(viewModel: DIContainer.shared.resolve(DashboardViewModel.self))
     }
 }
 

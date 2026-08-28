@@ -9,31 +9,87 @@ import SwiftUI
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    /// A notification tap can arrive before SwiftUI has drawn the first screen and
+    /// assigned the router, so the payload is buffered and replayed the moment the
+    /// router appears. Without this a tap on a cold launch was silently lost.
+    weak var router: AppRouter? {
+        didSet { flushBufferedPush() }
+    }
 
-    weak var router: AppRouter?
-    
+    private var bufferedPush: (medicationIds: [UUID], time: Date)?
+
+    private func flushBufferedPush() {
+        guard let router, let push = bufferedPush else { return }
+        bufferedPush = nil
+        router.handlePushNotification(medicationIds: push.medicationIds, time: push.time)
+    }
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         return true
     }
-    
+
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        
+
         let userInfo = response.notification.request.content.userInfo
-        
-        if let medIdsStrings = userInfo["medicationIds"] as? [String],
-           let timeInterval = userInfo["time"] as? TimeInterval {
-            
-            let medIds = medIdsStrings.compactMap { UUID(uuidString: $0) }
-            let pushDate = Date(timeIntervalSince1970: timeInterval)
-            
-            DispatchQueue.main.async { [weak self] in
-                self?.router?.handlePushNotification(medicationIds: medIds, time: pushDate)
+
+        guard let medIdStrings = userInfo["medicationIds"] as? [String],
+              let timeInterval = userInfo["time"] as? TimeInterval else {
+            completionHandler()
+            return
+        }
+
+        let medIds = medIdStrings.compactMap { UUID(uuidString: $0) }
+        let names = userInfo["medicationNames"] as? [String] ?? []
+        let scheduledTime = Date(timeIntervalSince1970: timeInterval)
+        let action = response.actionIdentifier
+
+        DispatchQueue.main.async { [weak self] in
+            switch action {
+            // The button already answers the question, so it logs the dose instead of
+            // opening a modal asking it again — it only switches to today's tab.
+            case NotificationAction.take:
+                self?.logDoses(medicationIds: medIds, scheduledTime: scheduledTime)
+                self?.router?.selectedTab = 0
+
+            case NotificationAction.snooze:
+                let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
+                notifService.scheduleSnooze(for: medIdStrings, names: names)
+
+            // A skip is the absence of a log, not a state of its own. iOS removes the
+            // notification itself once any action is chosen.
+            case NotificationAction.skip:
+            break
+
+            // A plain tap on the notification body: open the app and show the modal.
+            default:
+            guard let self else { return }
+                if let router = self.router {
+                    router.handlePushNotification(medicationIds: medIds, time: scheduledTime)
+                } else {
+                    self.bufferedPush = (medIds, scheduledTime)
+                }
             }
         }
+
         completionHandler()
+    }
+
+    /// Logs the doses of the slot that aren't logged yet.
+    ///
+    /// Idempotent by way of `PendingDose.unlogged`: `togglePill` is a toggle, so
+    /// without that filter a second "Take Now" would clear the mark it just set.
+    private func logDoses(medicationIds: [UUID], scheduledTime: Date) {
+        let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
+        let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
+
+        PendingDose.markTaken(
+            PendingDose.unlogged(medicationIds: medicationIds, scheduledTime: scheduledTime, in: dbService),
+            dbService: dbService,
+            notificationService: notifService
+        )
     }
 }

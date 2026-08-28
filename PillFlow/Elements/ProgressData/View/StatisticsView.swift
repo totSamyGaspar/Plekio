@@ -16,20 +16,15 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
     @State private var selectedMedForRefill: MedicationItem?
     
     @State private var showSuccessToast = false
-    @State private var successMessage = ""
+    @State private var successMessage: LocalizedStringKey = ""
     
-    let purpleAccent = Color(red: 0.7, green: 0.4, blue: 0.9)
-    let warningBg = Color(red: 0.2, green: 0.05, blue: 0.08)
-    let targetBlueBg = Color(red: 0.35, green: 0.4, blue: 0.95)
     
     init(viewModel: @autoclosure @escaping () -> VM) {
         self._viewModel = StateObject(wrappedValue: viewModel())
     }
     
     var body: some View {
-        // Убрали NavigationStack, ZStack с задним фоном и ScrollView
         VStack(spacing: 22) {
-            // SECTION 1: ADHERENCE & ALERTS
             VStack(alignment: .leading, spacing: 16) {
                 Text("Adherence & Alerts")
                     .font(.system(size: 24, weight: .heavy, design: .serif))
@@ -51,18 +46,14 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                         lowStockWarningCard(for: med)
                     }
                 }
-                
-                dailyPracticeCard
             }
             .padding(.top, 20)
             
-            // SECTION 2: ADHERENCE TARGET
             adherenceTargetSection
                 .padding(.horizontal)
             
         }
         .overlay(alignment: .top) {
-            // Тоаст поверх блока статистики
             if showSuccessToast {
                 HStack(spacing: 12) {
                     Image(systemName: "checkmark.circle.fill")
@@ -116,7 +107,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 Text("LOW STOCK WARNING")
             }
             .font(.caption.weight(.heavy))
-            .foregroundColor(Color(red: 0.9, green: 0.4, blue: 0.4))
+            .foregroundColor(.warningAccent)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(med.name) is running low")
@@ -143,28 +134,9 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
             .padding(.top, 4)
         }
         .padding(20)
-        .background(warningBg)
+        .background(Color.warningBg)
         .cornerRadius(20)
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color(red: 0.9, green: 0.4, blue: 0.4).opacity(0.3), lineWidth: 1))
-        .padding(.horizontal)
-    }
-    
-    private var dailyPracticeCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("DAILY PRACTICE CODE")
-                .font(.caption.weight(.heavy))
-                .foregroundColor(.neonMint)
-            Text("\"Taking Magnesium with a light snack can significantly improve absorption and reduce stomach upset.\"")
-                .font(.body).italic().foregroundColor(.white.opacity(0.9)).lineSpacing(4)
-            HStack {
-                Spacer()
-                Text("Tip rotates every 18s").font(.caption2).foregroundColor(.neonMint.opacity(0.7))
-            }
-        }
-        .padding(20)
-        .background(Color.cardDark)
-        .cornerRadius(20)
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(purpleAccent.opacity(0.2), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.warningAccent.opacity(0.3), lineWidth: 1))
         .padding(.horizontal)
     }
     
@@ -177,17 +149,17 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 .padding(.top, 24)
 
             HStack(alignment: .center, spacing: 16) {
-                CircularProgressView(
-                    progress: viewModel.progress > 0 ? viewModel.progress : 0,
-                    goal: 90
-                )
+                CircularProgressView(progress: viewModel.progress)
                 .frame(height: 100)
                 
-                HStack(spacing: 10) {
-                    Text("🔥")
+                VStack(spacing: 10) {
+                    Text(verbatim: "🔥")
+                        .font(.headline.weight(.bold))
                     Text("\(viewModel.streakDays) days streak!")
                         .font(.headline.weight(.bold))
                         .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.7)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
@@ -204,21 +176,21 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
 // MARK: - DI Extension & Preview
 extension StatisticsView where VM == StatisticsViewModel {
     init() {
-        self.init(viewModel: DIContainer.shared.resolve((any StatisticsViewModelProtocol).self) as! VM)
+        self.init(viewModel: DIContainer.shared.resolve(StatisticsViewModel.self))
     }
 }
 
+#if DEBUG
 final class MockStatisticsViewModel: StatisticsViewModelProtocol {
-    @Published var takenCount: Int = 13
-    @Published var totalCount: Int = 14
-    var progress: Double { return 0.93 }
+    var progress: Double { 0.93 }
     @Published var streakDays: Int = 1
     @Published var lowStockItems: [MedicationItem] = []
-    
+
     init() {}
     func loadStats() {}
     func refill(medication: MedicationItem, amount: Int) {}
 }
+#endif
 
 #Preview {
     StatisticsView(viewModel: MockStatisticsViewModel())

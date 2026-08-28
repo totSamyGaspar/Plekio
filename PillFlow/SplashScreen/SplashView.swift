@@ -8,10 +8,13 @@
 import SwiftUI
 
 struct SplashView: View {
+    /// Nothing loads behind the splash — it is pure branding, so it stays up
+    /// exactly as long as the logo fade-in takes, not the 2.5s it used to.
+    private static let displayDuration: TimeInterval = 1.2
+
     @State private var isActive = false
     @State private var logoOpacity = 0.0
     
-    // Animation state flags
     @State private var isPulsing = false
     @State private var isFloating = false
     
@@ -20,7 +23,6 @@ struct SplashView: View {
             ContentView()
         } else {
             ZStack {
-                // Dark gradient background for the splash screen
                 LinearGradient(
                     colors: [
                         Color(red: 0.05, green: 0.25, blue: 0.22),
@@ -37,7 +39,6 @@ struct SplashView: View {
                     
                     // MARK: - Animated logo
                     ZStack {
-                        // Heart (gradient fill + pulse + dynamic glow)
                         Image(systemName: "heart.fill")
                             .resizable()
                             .scaledToFit()
@@ -55,7 +56,6 @@ struct SplashView: View {
                                     y: isPulsing ? 10 : 5)
                             .scaleEffect(isPulsing ? 1.05 : 0.95)
                         
-                        // Clock (cutout with a subtle inner highlight)
                         Image(systemName: "clock.fill")
                             .resizable()
                             .scaledToFit()
@@ -64,7 +64,6 @@ struct SplashView: View {
                             .background(Circle().fill(Color.white.opacity(0.1)).frame(width: 26, height: 26))
                             .offset(x: -20, y: -20)
                         
-                        // Pills (neon gradient + floating motion)
                         Image(systemName: "pills.fill")
                             .resizable()
                             .scaledToFit()
@@ -105,24 +104,20 @@ struct SplashView: View {
             }
             .preferredColorScheme(.dark)
             .onAppear {
-                // Fade in the whole screen
                 withAnimation(.easeOut(duration: 1.2)) {
                     self.logoOpacity = 1.0
                 }
 
-                // Start heartbeat (fast pulse)
                 withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
                     self.isPulsing = true
                 }
 
-                // Start pill floating motion (slow drift)
                 withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
                     self.isFloating = true
                 }
 
-                // Transition to the main screen
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                    withAnimation(.easeInOut(duration: 0.5)) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Self.displayDuration) {
+                    withAnimation(.easeInOut(duration: RootTransition.duration)) {
                         self.isActive = true
                     }
                 }

@@ -53,7 +53,7 @@ struct CourseRowView: View {
                 .padding(.top, 4)
             
             HStack {
-                Text(viewModel.medicationsCountText)
+                Text("Medications: \(viewModel.medicationsCount)")
                     .font(.caption.weight(.medium))
                     .foregroundColor(.white.opacity(0.5))
                 

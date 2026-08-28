@@ -7,11 +7,9 @@
 //  real UNUserNotificationCenter: grouping medications that share a trigger
 //  time into one push, and skipping doses already marked as taken.
 //
-//  Note: buildScheduleMap always builds a "today + next 2 days" window (see
-//  maxDate internally). Where a test isn't specifically exercising that
-//  window, the course is deliberately limited to a single day
-//  (startDate == endDate) so exactly one day lands in the schedule and the
-//  assertions stay unambiguous.
+//  Note: buildScheduleMap always covers a "today + next 2 days" window. Unless
+//  a test exercises that window, its course is limited to a single day
+//  (startDate == endDate) so exactly one day lands in the schedule.
 //
 
 import Testing
@@ -32,8 +30,6 @@ struct NotificationSchedulingTests {
 
         let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor)
 
-        // Both medications are at 9:00 on the course's one and only day —
-        // should produce exactly one key (one trigger time), not two separate pushes.
         #expect(map.count == 1)
         let entries = map.values.first
         #expect(entries?.count == 2)
@@ -47,7 +43,6 @@ struct NotificationSchedulingTests {
         let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: anchor)
 
         let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
-        // Marked as taken ahead of time.
         let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), isTaken: true)
         med.logs.append(log)
         course.medications.append(med)
@@ -73,9 +68,8 @@ struct NotificationSchedulingTests {
 
     @Test("A time in the past relative to now is excluded from the schedule")
     func testExcludesPastTimes() async throws {
-        // "Now" is 22:00. The 09:00 dose that day is already in the past,
-        // the 23:00 dose is still upcoming. The course is limited to one day
-        // so the "today+2 days" window doesn't pick up doses from later days.
+        // "Now" is 22:00: the 09:00 dose is already past, the 23:00 one still
+        // upcoming. One-day course so the three-day window adds nothing else.
         let now = testDate(2026, 6, 15, 22, 0)
         let dayStart = testDate(2026, 6, 15)
         let course = TreatmentCourse(name: "Курс", startDate: dayStart, endDate: dayStart)
@@ -92,7 +86,7 @@ struct NotificationSchedulingTests {
 
         let map = NotificationService.buildScheduleMap(activeCourses: [course], now: now)
 
-        #expect(map.count == 1) // only 23:00 — the past 09:00 dose is excluded
+        #expect(map.count == 1)
     }
 
     @Test("The schedule only covers today and the next 2 days")
@@ -105,7 +99,6 @@ struct NotificationSchedulingTests {
 
         let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor)
 
-        // Today, +1 day, +2 days — three slots. +3 days is outside the window.
         #expect(map.count == 3)
         let expectedDays: Set<Date> = [
             Calendar.current.startOfDay(for: anchor),

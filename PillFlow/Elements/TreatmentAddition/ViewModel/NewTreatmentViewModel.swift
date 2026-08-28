@@ -30,13 +30,15 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     func addMedication(_ draft: MedicationDraft) { medications.append(draft) }
     func deleteMedication(at offsets: IndexSet) { medications.remove(atOffsets: offsets) }
     
-    func saveCourse() {
-        // 1. Save to the database
-        dbService.saveCourse(name: courseName, startDate: startDate, endDate: endDate, drafts: medications)
+    /// Returns `false` if the save failed — the view then keeps the screen open
+    /// instead of losing what was typed.
+    @discardableResult
+    func saveCourse() -> Bool {
+        guard AppErrorPresenter.shared.run({
+            try dbService.saveCourse(name: courseName, startDate: startDate, endDate: endDate, drafts: medications)
+        }) else { return false }
 
-        // 2. Refresh notifications (via the protocol, not directly through UNUserNotificationCenter)
-        notificationService.removeAllPending()
-        let activeCourses = dbService.fetchAllCourses().filter { $0.endDate >= Date() }
-        notificationService.scheduleNotifications(activeCourses: activeCourses)
+        notificationService.rescheduleAll(using: dbService)
+        return true
     }
 }

@@ -12,13 +12,18 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
 
     @StateObject private var viewModel: VM
 
-    // Whether we're editing an existing medication (vs adding a new one)
-    private let isEditing: Bool
+    /// The medication being edited (nil means adding a new one). Consumed in
+    /// `.task` rather than `init`: SwiftUI re-creates the view struct many times.
+    private let medicationToEdit: MedicationItem?
+    private var isEditing: Bool { medicationToEdit != nil }
+
     var onSave: (MedicationDraft) -> Void
 
-    init(viewModel: @autoclosure @escaping () -> VM, isEditing: Bool = false, onSave: @escaping (MedicationDraft) -> Void) {
+    init(viewModel: @autoclosure @escaping () -> VM,
+         editingMedication: MedicationItem? = nil,
+         onSave: @escaping (MedicationDraft) -> Void) {
         self._viewModel = StateObject(wrappedValue: viewModel())
-        self.isEditing = isEditing
+        self.medicationToEdit = editingMedication
         self.onSave = onSave
     }
 
@@ -97,7 +102,11 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                             Text("Total in package (pcs)")
                                 .foregroundColor(.white)
                             Spacer()
-                            TextField("30", value: $viewModel.draft.stockCount, format: .number)
+                            // These fields accepted any number, negatives included.
+                            TextField("30", value: Binding(
+                                get: { viewModel.draft.stockCount },
+                                set: { viewModel.draft.stockCount = min(max($0, 0), 9999) }
+                            ), format: .number)
                                 .keyboardType(.numberPad)
                                 .multilineTextAlignment(.trailing)
                                 .foregroundColor(.neonMint)
@@ -109,7 +118,10 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                             Text("Remind when remaining")
                                 .foregroundColor(.white)
                             Spacer()
-                            TextField("10", value: $viewModel.draft.lowStockThreshold, format: .number)
+                            TextField("10", value: Binding(
+                                get: { viewModel.draft.lowStockThreshold },
+                                set: { viewModel.draft.lowStockThreshold = min(max($0, 0), 9999) }
+                            ), format: .number)
                                 .keyboardType(.numberPad)
                                 .multilineTextAlignment(.trailing)
                                 .foregroundColor(.yellow)
@@ -122,12 +134,9 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     // MARK: - Frequency and Dosage
                     Section(header: Text("Intake Frequency").foregroundColor(.white.opacity(0.6))) {
                         Picker("Interval", selection: $viewModel.draft.frequencyDays) {
-                            Text("Every day").tag(1)
-                            Text("Every other day").tag(2)
-                            Text("Every 3 days").tag(3)
-                            Text("Once a week").tag(7)
-                            Text("Every 2 weeks").tag(14)
-                            Text("Once a month").tag(30)
+                            ForEach(DoseFrequency.allCases) { frequency in
+                                Text(frequency.title).tag(frequency.rawValue)
+                            }
                         }
                         .pickerStyle(.menu)
                         .accentColor(.neonMint)
@@ -143,14 +152,30 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
 
                     // MARK: - Intake Time
                     Section(header: Text("Intake Time").foregroundColor(.white.opacity(0.6))) {
-                        ForEach(0..<viewModel.draft.timesOfDay.count, id: \.self) { index in
+                        // ForEach over 0..<count needs a CONSTANT range, but this
+                        // array changes on screen: adding or removing a time caused
+                        // glitches and access by a stale index. Iterate the
+                        // collection instead and bounds-check each element access.
+                        ForEach(Array(viewModel.draft.timesOfDay.enumerated()), id: \.offset) { index, _ in
                             DatePicker("Dose \(index + 1)", selection: Binding(
-                                get: { viewModel.draft.timesOfDay[index] },
-                                set: { viewModel.draft.timesOfDay[index] = $0 }
+                                get: {
+                                    viewModel.draft.timesOfDay.indices.contains(index)
+                                        ? viewModel.draft.timesOfDay[index]
+                                        : Date()
+                                },
+                                set: {
+                                    guard viewModel.draft.timesOfDay.indices.contains(index) else { return }
+                                    viewModel.draft.timesOfDay[index] = $0
+                                }
                             ), displayedComponents: .hourAndMinute)
                             .foregroundColor(.white)
                         }
-                        .onDelete { viewModel.draft.timesOfDay.remove(atOffsets: $0) }
+                        .onDelete { offsets in
+                            // A medication with no intake times lands in neither the
+                            // schedule nor the notifications — keep at least one slot.
+                            guard viewModel.draft.timesOfDay.count > offsets.count else { return }
+                            viewModel.draft.timesOfDay.remove(atOffsets: offsets)
+                        }
 
                         Button(action: {
                             let lastTime = viewModel.draft.timesOfDay.last ?? Date()
@@ -190,6 +215,10 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     viewModel.requestImageSelection(source: .photoLibrary)
                 }
                 Button("Cancel", role: .cancel) { }
+            }
+            .task {
+                guard let medicationToEdit else { return }
+                await viewModel.startEditing(medicationToEdit)
             }
         }
     }
@@ -231,35 +260,21 @@ struct ImagePreviewView: View {
 // MARK: - Extensions for Init
 extension AddMedicationView where VM == AddMedicationViewModel {
 
-    // Standard initializer for adding a new medication
     init(onSave: @escaping (MedicationDraft) -> Void) {
-        let resolvedVM = DIContainer.shared.resolve((any AddMedicationViewModelProtocol).self) as! VM
-        self.init(viewModel: resolvedVM, isEditing: false, onSave: onSave)
+        self.init(
+            viewModel: DIContainer.shared.resolve(AddMedicationViewModel.self),
+            onSave: onSave
+        )
     }
 
-    // Initializer for editing an existing medication
+    /// Opens the form on an existing medication. Filling the draft and loading the
+    /// photo is done by `startEditing(_:)` from `.task`.
     init(editingMedication: MedicationItem, onSave: @escaping (MedicationDraft) -> Void) {
-        let resolvedVM = DIContainer.shared.resolve((any AddMedicationViewModelProtocol).self) as! VM
-
-        // Copy data from the existing medication into the draft
-        resolvedVM.draft.name = editingMedication.name
-        resolvedVM.draft.formSystemImage = editingMedication.formSystemImage
-        // Convert dosage if it's stored as a string; assign directly if it's already an Int
-        resolvedVM.draft.dosage = Int(editingMedication.dosage)
-        resolvedVM.draft.stockCount = editingMedication.stockCount
-        resolvedVM.draft.lowStockThreshold = editingMedication.lowStockThreshold
-        resolvedVM.draft.frequencyDays = editingMedication.frequencyDays
-        resolvedVM.draft.timesOfDay = editingMedication.timesOfDay
-
-        // Load the existing photo from disk. We populate draft.medicationImageData
-        // here too (not just selectedImage) so that saving edits without changing
-        // the photo isn't mistaken by DatabaseService for an explicit photo removal.
-        if let imageData = ImageCache.shared.loadDataFromDisk(for: editingMedication.id) {
-            resolvedVM.selectedImage = UIImage(data: imageData)
-            resolvedVM.draft.medicationImageData = imageData
-        }
-
-        self.init(viewModel: resolvedVM, isEditing: true, onSave: onSave)
+        self.init(
+            viewModel: DIContainer.shared.resolve(AddMedicationViewModel.self),
+            editingMedication: editingMedication,
+            onSave: onSave
+        )
     }
 }
 

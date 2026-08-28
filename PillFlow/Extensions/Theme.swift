@@ -14,7 +14,19 @@ extension Color {
     /// Color for cards and panels on the dark background
     static let cardDark = Color(red: 0.11, green: 0.13, blue: 0.19)
 
-    /// Neon accent color (defaults to standard .mint; change here to adjust
-    /// the accent everywhere at once)
+    /// The primary accent. It used to be referenced under two names —
+    /// `Color.neonMint` and plain `Color.mint` — mixed together, sometimes on
+    /// adjacent lines, so changing the accent in one place no longer worked.
+    /// This is now the only name for it.
     static let neonMint = Color.mint
+
+    /// Companion to the accent for gradients (progress ring, hero card).
+    static let neonTeal = Color.teal
+
+    /// Accent for diary milestone tags. The literal was duplicated in three files.
+    static let milestonePurple = Color(red: 0.7, green: 0.4, blue: 0.9)
+
+    /// Background and accent for the low-stock warning.
+    static let warningBg = Color(red: 0.2, green: 0.05, blue: 0.08)
+    static let warningAccent = Color(red: 0.9, green: 0.4, blue: 0.4)
 }

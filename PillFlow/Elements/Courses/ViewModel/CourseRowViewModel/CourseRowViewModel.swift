@@ -7,9 +7,11 @@
 
 import Foundation
 
-struct CourseRowViewModel: CourseRowViewModelProtocol {
+struct CourseRowViewModel {
     let title: String
-    let medicationsCountText: String
+    
+    let medicationsCount: Int
+    
     let dateRangeText: String
     let totalDays: Int
     let currentDayNumber: Int
@@ -17,9 +19,13 @@ struct CourseRowViewModel: CourseRowViewModelProtocol {
 
     init(course: TreatmentCourse) {
         self.title = course.name
-        self.medicationsCountText = "Medications: \(course.medications.count)"
-        self.dateRangeText =
-            "\(course.startDate.formatted(date: .abbreviated, time: .omitted)) - \(course.endDate.formatted(date: .abbreviated, time: .omitted))"
+        self.medicationsCount = course.medications.count
+        
+        let rangeStart = course.startDate
+        let rangeEnd = max(rangeStart, course.endDate)
+        self.dateRangeText = rangeStart == rangeEnd
+            ? rangeStart.formatted(date: .abbreviated, time: .omitted)
+            : (rangeStart ..< rangeEnd).formatted(date: .abbreviated, time: .omitted)
 
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: course.startDate)

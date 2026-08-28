@@ -8,13 +8,19 @@
 import SwiftUI
 
 struct PeriodSectionView: View {
-    let title: String
-    let timeString: String
+    let title: LocalizedStringResource
     let pills: [PillDose]
-    let isToday: Bool
-    let onTogglePill: (UUID) -> Void
+    let onTogglePill: (PillDose.ID) -> Void
     let onPillTap: (PillDose) -> Void
     
+    private var timeString: String {
+        guard let first = pills.first?.time else { return "" }
+        let firstText = first.formatted(date: .omitted, time: .shortened)
+
+        guard let last = pills.last?.time, last != first else { return firstText }
+        return "\(firstText) – \(last.formatted(date: .omitted, time: .shortened))"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -28,7 +34,6 @@ struct PeriodSectionView: View {
             ForEach(pills) { pill in
                 MedicationCardView(
                     pill: pill,
-                    isToday: isToday,
                     onToggle: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                             onTogglePill(pill.id)

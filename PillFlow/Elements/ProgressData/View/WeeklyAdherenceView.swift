@@ -8,21 +8,25 @@
 import SwiftUI
 
 struct WeeklyAdherenceView: View {
-    // Temporary mock data for the visuals (wire up to real stats later)
     let percentages: [Double]
     let days: [String]
     let recentAverage: Int
 
-    // Reuse the shared color from Theme instead of a hardcoded RGB value
+    /// Ratio/label pairs. The view used to run ForEach(0..<7) and index into
+    /// both arrays: a length mismatch — and `weeklyDays` starts empty — crashed
+    /// during rendering.
+    private var bars: [(offset: Int, element: (Double, String))] {
+        Array(zip(percentages, days).enumerated())
+    }
+
     let cardDark = Color.cardDark
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Header
             VStack(alignment: .leading, spacing: 4) {
                 Text("WEEKLY ADHERENCE HISTORY")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.mint)
+                    .foregroundColor(.neonMint)
                     .tracking(1.0)
                 
                 Text("Compliance rates over past 7 cycles")
@@ -30,23 +34,23 @@ struct WeeklyAdherenceView: View {
                     .foregroundColor(.white.opacity(0.7))
             }
             
-            // Capsule chart
             HStack(spacing: 12) {
-                ForEach(0..<7, id: \.self) { index in
+                ForEach(bars, id: \.offset) { _, bar in
+                    let (percent, label) = bar
                     VStack(spacing: 8) {
                         GeometryReader { geo in
                             ZStack(alignment: .bottom) {
                                 TopRoundedBar()
                                     .fill(Color.white.opacity(0.05))
                                 TopRoundedBar()
-                                    .fill(Color.mint)
-                                    .frame(height: geo.size.height * percentages[index])
-                                    .shadow(color: Color.mint.opacity(0.3), radius: 5, x: 0, y: -5)
+                                    .fill(Color.neonMint)
+                                    .frame(height: geo.size.height * min(max(percent, 0), 1))
+                                    .shadow(color: Color.neonMint.opacity(0.3), radius: 5, x: 0, y: -5)
                             }
                         }
                         .frame(height: 80)
 
-                        Text(days[index])
+                        Text(label)
                             .font(.caption2.weight(.bold))
                             .foregroundColor(.white.opacity(0.5))
                     }
@@ -55,18 +59,14 @@ struct WeeklyAdherenceView: View {
             
             Divider().background(Color.white.opacity(0.2))
             
-            // Summary
             HStack(alignment: .bottom) {
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                    Text("\(recentAverage)")
-                        .font(.system(size: 40, weight: .bold, design: .serif))
-                        .foregroundColor(.white)
-                        .italic()
-                    Text("%")
-                        .font(.title2.weight(.bold))
-                        .foregroundColor(.white)
-                        .italic()
-                }
+                // One value formatted as .percent instead of a number plus a separate
+                // "%": the order and the spacing before the sign differ by locale and
+                // cannot be expressed by concatenation.
+                Text(Double(recentAverage) / 100, format: .percent.precision(.fractionLength(0)))
+                    .font(.system(size: 40, weight: .bold, design: .serif))
+                    .foregroundColor(.white)
+                    .italic()
                 
                 Text("recent average")
                     .font(.subheadline)
@@ -77,10 +77,10 @@ struct WeeklyAdherenceView: View {
                 
                 Text("Optimal")
                     .font(.caption.weight(.bold))
-                    .foregroundColor(.mint)
+                    .foregroundColor(.neonMint)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color.mint.opacity(0.15))
+                    .background(Color.neonMint.opacity(0.15))
                     .cornerRadius(10)
                     .padding(.bottom, 6)
             }

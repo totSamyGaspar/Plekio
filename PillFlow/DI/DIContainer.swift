@@ -25,7 +25,8 @@ final class DIContainer {
 
         // MARK: - Services (mostly singletons)
 
-        // .container scope = singleton. There must be only one database instance for the whole app.
+        // .container scope = singleton: there must be exactly one database instance
+        // for the whole app.
         container.register(DatabaseServiceProtocol.self) { _ in
             DatabaseService.shared
         }.inObjectScope(.container)
@@ -41,58 +42,58 @@ final class DIContainer {
         // MARK: - View models
 
         // .transient scope = a fresh instance is created every time (clean screen state).
-        container.register((any OnboardingViewModelProtocol).self) { _ in
+        container.register(OnboardingViewModel.self) { _ in
             OnboardingViewModel()
         }.inObjectScope(.transient)
 
         // Dashboard needs notifService too: marking a dose as taken has to
         // reschedule pending notifications so a stale reminder doesn't linger.
-        container.register((any DashboardViewModelProtocol).self) { r in
-            let dbService = r.resolve(DatabaseServiceProtocol.self)!
-            let notifService = r.resolve(NotificationServiceProtocol.self)!
-            return DashboardViewModel(dbService: dbService, notificationService: notifService)
+        container.register(DashboardViewModel.self) { r in
+            DashboardViewModel(
+                dbService: r.resolve(DatabaseServiceProtocol.self)!,
+                notificationService: r.resolve(NotificationServiceProtocol.self)!
+            )
         }.inObjectScope(.transient)
 
-        container.register((any NewTreatmentViewModelProtocol).self) { r in
-            let dbService = r.resolve(DatabaseServiceProtocol.self)!
-            let notifService = r.resolve(NotificationServiceProtocol.self)!
-            return NewTreatmentViewModel(dbService: dbService, notificationService: notifService)
+        container.register(NewTreatmentViewModel.self) { r in
+            NewTreatmentViewModel(
+                dbService: r.resolve(DatabaseServiceProtocol.self)!,
+                notificationService: r.resolve(NotificationServiceProtocol.self)!
+            )
         }.inObjectScope(.transient)
 
-        container.register((any CoursesListViewModelProtocol).self) { r in
-            let dbService = r.resolve(DatabaseServiceProtocol.self)!
-            let notifService = r.resolve(NotificationServiceProtocol.self)!
-            return CoursesListViewModel(dbService: dbService, notificationService: notifService)
+        container.register(CoursesListViewModel.self) { r in
+            CoursesListViewModel(
+                dbService: r.resolve(DatabaseServiceProtocol.self)!,
+                notificationService: r.resolve(NotificationServiceProtocol.self)!
+            )
         }.inObjectScope(.transient)
 
-        container.register((any CourseDetailViewModelProtocol).self) { (r, course: TreatmentCourse) in
-            let dbService = r.resolve(DatabaseServiceProtocol.self)!
-            let notifService = r.resolve(NotificationServiceProtocol.self)!
-            return CourseDetailViewModel(course: course, dbService: dbService, notificationService: notifService)
+        container.register(CourseDetailViewModel.self) { (r, course: TreatmentCourse) in
+            CourseDetailViewModel(
+                course: course,
+                dbService: r.resolve(DatabaseServiceProtocol.self)!,
+                notificationService: r.resolve(NotificationServiceProtocol.self)!
+            )
         }.inObjectScope(.transient)
 
-        container.register((any StatisticsViewModelProtocol).self) { r in
-            return StatisticsViewModel(dbService: r.resolve(DatabaseServiceProtocol.self)!)
+        container.register(StatisticsViewModel.self) { r in
+            StatisticsViewModel(dbService: r.resolve(DatabaseServiceProtocol.self)!)
         }.inObjectScope(.transient)
 
-        // Note: CourseRowViewModelProtocol is intentionally not registered here —
-        // CourseRowView constructs CourseRowViewModel(course:) directly in its
-        // own init, bypassing the container, so a factory here would be dead code.
-
-        container.register((any AddMedicationViewModelProtocol).self) { r in
-            let mediaService = r.resolve(MediaPickerServiceProtocol.self)!
-            return AddMedicationViewModel(mediaPickerService: mediaService)
+        container.register(AddMedicationViewModel.self) { r in
+            AddMedicationViewModel(mediaPickerService: r.resolve(MediaPickerServiceProtocol.self)!)
         }.inObjectScope(.transient)
 
-        container.register((any DiaryViewModelProtocol).self) { r in
-            let dbService = r.resolve(DatabaseServiceProtocol.self)!
-            return DiaryViewModel(dbService: dbService)
+        container.register(DiaryViewModel.self) { r in
+            DiaryViewModel(dbService: r.resolve(DatabaseServiceProtocol.self)!)
         }.inObjectScope(.transient)
 
-        container.register((any DiaryCheckInViewModelProtocol).self) { r in
-            let dbService = r.resolve(DatabaseServiceProtocol.self)!
-            let mediaService = r.resolve(MediaPickerServiceProtocol.self)!
-            return DiaryCheckInViewModel(dbService: dbService, mediaPickerService: mediaService)
+        container.register(DiaryCheckInViewModel.self) { r in
+            DiaryCheckInViewModel(
+                dbService: r.resolve(DatabaseServiceProtocol.self)!,
+                mediaPickerService: r.resolve(MediaPickerServiceProtocol.self)!
+            )
         }.inObjectScope(.transient)
     }
 

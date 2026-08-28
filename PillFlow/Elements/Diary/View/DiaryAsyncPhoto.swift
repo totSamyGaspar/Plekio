@@ -31,8 +31,8 @@ struct DiaryAsyncPhoto: View {
                 Color.white.opacity(0.05)
             }
         }
-        .onAppear {
-            ImageCache.shared.loadAsync(for: photoId) { self.image = $0 }
+        .task(id: photoId) {
+            image = await ImageCache.shared.image(for: photoId)
         }
     }
 }

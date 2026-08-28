@@ -8,32 +8,29 @@
 import SwiftUI
 
 struct CircularProgressView: View {
-    let progress: Double // 0.0 to 1.0
-    let goal: Int // goal in percent, e.g. 90
+    let progress: Double
 
-    // Gradient for the filled portion
     let ringGradient = LinearGradient(
-        colors: [Color.mint, Color.teal],
+        colors: [Color.neonMint, Color.neonTeal],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
     
     var body: some View {
         ZStack {
-            // Background ring (translucent mint so it stands out against the blue)
             Circle()
-                .stroke(Color.mint.opacity(0.2), lineWidth: 16)
+                .stroke(Color.neonMint.opacity(0.2), lineWidth: 16)
 
-            // Filled ring
             Circle()
                 .trim(from: 0.0, to: CGFloat(min(progress, 1.0)))
                 .stroke(ringGradient, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.spring(response: 0.8, dampingFraction: 0.7), value: progress)
 
-            // Text inside the ring
+            // .percent, not a number with a "%" glued on: the placement and spacing of
+            // the sign follow the locale, which manual concatenation breaks.
             VStack(spacing: 2) {
-                Text("\(Int(progress * 100))%")
+                Text(min(max(progress, 0), 1), format: .percent.precision(.fractionLength(0)))
                     .font(.system(size: 15, weight: .semibold, design: .serif))
                     .foregroundColor(.white)
             }

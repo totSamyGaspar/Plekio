@@ -24,7 +24,7 @@ struct CalendarDayView: View {
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 16)
-        .background(isSelected ? Color.mint : Color.white.opacity(0.05))
+        .background(isSelected ? Color.neonMint : Color.white.opacity(0.05))
         .cornerRadius(16)
     }
 }

@@ -19,3 +19,23 @@ struct MedicationDraft: Identifiable, Equatable {
     var stockCount: Int = 30
     var lowStockThreshold: Int = 10
 }
+
+extension MedicationDraft {
+    /// The single place MedicationItem fields are moved into the form; copying them
+    /// by hand elsewhere loses one too easily — same reason as
+    /// `DiaryEntryDraft.init(from:)`. The photo is not carried over: it lives on
+    /// disk and is loaded off the main thread by `AddMedicationViewModel.startEditing`.
+    init(from medication: MedicationItem) {
+        self.init(
+            id: medication.id,
+            name: medication.name,
+            formSystemImage: medication.formSystemImage,
+            dosage: medication.dosage,
+            timesOfDay: medication.timesOfDay,
+            frequencyDays: medication.frequencyDays,
+            medicationImageData: nil,
+            stockCount: medication.stockCount,
+            lowStockThreshold: medication.lowStockThreshold
+        )
+    }
+}

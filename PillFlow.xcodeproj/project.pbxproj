@@ -25,9 +25,22 @@
 		12E9B4092FD44E9C00EDFB8C /* PillFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PillFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1290E1F830405D9300276C01 /* Exceptions for "PillFlow" folder in "PillFlow" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 123BA6E52FA61C8500FFA528 /* PillFlow */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		123BA6E82FA61C8500FFA528 /* PillFlow */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1290E1F830405D9300276C01 /* Exceptions for "PillFlow" folder in "PillFlow" target */,
+			);
 			path = PillFlow;
 			sourceTree = "<group>";
 		};
@@ -149,6 +162,15 @@
 			knownRegions = (
 				en,
 				Base,
+				uk,
+				ru,
+				es,
+				de,
+				ro,
+				ja,
+				fr,
+				kk,
+				it,
 			);
 			mainGroup = 123BA6DD2FA61C8500FFA528;
 			minimizedProjectReferenceProxies = 1;
@@ -270,6 +292,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -328,6 +351,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -342,6 +366,7 @@
 				DEVELOPMENT_TEAM = CZ5Y366HYY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PillFlow/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "PillFlow uses the camera so you can attach a photo of your medication.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "PillFlow uses your photo library so you can attach a photo of your medication.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -376,6 +401,7 @@
 				DEVELOPMENT_TEAM = CZ5Y366HYY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PillFlow/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "PillFlow uses the camera so you can attach a photo of your medication.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "PillFlow uses your photo library so you can attach a photo of your medication.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

@@ -8,26 +8,24 @@
 import Foundation
 
 enum Route: Hashable {
-    case courseDetail(TreatmentCourse)
-
-    // Add more cases here as the app grows, e.g.:
-    // case medicationDetail(MedicationItem)
-    // case statistics
+    /// An id rather than the @Model object itself: NavigationPath holds a route
+    /// longer than the record lives. A course deleted while its screen sat on the
+    /// stack left the path pointing at a deleted object.
+    case courseDetail(courseId: UUID)
 }
 
 enum SheetRoute: Identifiable {
     
     case newTreatment
-    case addMedication(onSave: (MedicationDraft) -> Void)
     case takePill(pills: [PillDose], onTake: () -> Void, onSkip: () -> Void)
-    
+
     // Identifiable is required for .sheet(item:).
     var id: String {
         switch self {
-        case .newTreatment:       return "newTreatment"
-        case .addMedication:      return "addMedication"
+        case .newTreatment:
+            return "newTreatment"
         case .takePill(let pills, _, _):
-            return "takePill-\(pills.map { $0.id.uuidString }.joined(separator: "-"))"
+            return "takePill-" + pills.map(\.id).joined(separator: "-")
         }
     }
 }

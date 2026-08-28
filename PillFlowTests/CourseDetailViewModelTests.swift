@@ -20,12 +20,11 @@ struct CourseDetailViewModelTests {
 
     @Test("Initialization assigns the correct initial values from the course")
     func testInitialization() async throws {
-        // Arrange
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
         let startDate = Date()
-        let endDate = Date().addingTimeInterval(86400 * 7) // +7 days
+        let endDate = Date().addingTimeInterval(86400 * 7)
 
         let dummyCourse = TreatmentCourse(
             name: "Антибиотики",
@@ -33,10 +32,8 @@ struct CourseDetailViewModelTests {
             endDate: endDate
         )
 
-        // Act
         let vm = CourseDetailViewModel(course: dummyCourse, dbService: mockDB, notificationService: mockNotifications)
 
-        // Assert
         #expect(vm.courseName == "Антибиотики")
         #expect(vm.startDate == startDate)
         #expect(vm.endDate == endDate)
@@ -47,7 +44,6 @@ struct CourseDetailViewModelTests {
 
     @Test("addNewMedication saves the medication to the DB and reschedules pushes via the protocol")
     func testAddNewMedicationTriggersSaveAndReschedule() async throws {
-        // Arrange
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
@@ -57,14 +53,10 @@ struct CourseDetailViewModelTests {
         let vm = CourseDetailViewModel(course: course, dbService: mockDB, notificationService: mockNotifications)
         let draft = MedicationDraft(name: "Витамин D")
 
-        // Act
         vm.addNewMedication(draft)
 
-        // Assert
         #expect(mockDB.addedMedicationDraft?.name == "Витамин D")
         #expect(mockDB.addedToCourse === course)
-        // Verifies notifications go through notificationService rather than
-        // touching UNUserNotificationCenter directly.
         #expect(mockNotifications.didCallRemoveAllPending == true)
         #expect(mockNotifications.scheduledCourses != nil)
     }
@@ -73,7 +65,6 @@ struct CourseDetailViewModelTests {
 
     @Test("deleteMedication cancels notifications and removes the medication from the DB")
     func testDeleteMedicationCancelsNotificationsAndDeletes() async throws {
-        // Arrange
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
@@ -90,10 +81,8 @@ struct CourseDetailViewModelTests {
 
         let vm = CourseDetailViewModel(course: course, dbService: mockDB, notificationService: mockNotifications)
 
-        // Act
         vm.deleteMedication(at: IndexSet(integer: 0))
 
-        // Assert
         #expect(mockDB.deletedMedication === med)
         #expect(mockNotifications.cancelledMedicationIds.contains(med.id))
         #expect(vm.medications.isEmpty)

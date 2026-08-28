@@ -6,7 +6,16 @@
 //
 
 import Foundation
+import OSLog
 import UserNotifications
+
+/// Push action identifiers. Pulled out of string literals so that registering
+/// the category and parsing the response in AppDelegate cannot drift apart.
+enum NotificationAction {
+    static let take = "ACTION_TAKE"
+    static let snooze = "ACTION_SNOOZE"
+    static let skip = "ACTION_SKIP"
+}
 
 final class NotificationService: NotificationServiceProtocol {
 
@@ -14,17 +23,45 @@ final class NotificationService: NotificationServiceProtocol {
     /// title and the actual scheduled trigger can't drift out of sync.
     private static let snoozeInterval: TimeInterval = 15 * 60
 
+    private static let categoryIdentifier = "PILL_REMINDER_CATEGORY"
+
+    /// iOS will not schedule more than 64 local notifications per app; leave
+    /// some headroom.
+    private static let maxScheduled = 60
+
+    // MARK: - Init
+
+    init() {
+        // The category is registered when the service is created, not only inside
+        // requestPermission: on a second launch permission is already granted, the
+        // authorization callback may never reach registration, and reminders would
+        // arrive without their buttons.
+        registerNotificationCategories()
+    }
+
     // MARK: - Notification Categories
 
     private func registerNotificationCategories() {
         let center = UNUserNotificationCenter.current()
 
-        let takeAction = UNNotificationAction(identifier: "ACTION_TAKE", title: "Take Now", options: .foreground)
-        let snoozeAction = UNNotificationAction(identifier: "ACTION_SNOOZE", title: "Snooze 15m", options: [])
-        let skipAction = UNNotificationAction(identifier: "ACTION_SKIP", title: "Skip", options: .destructive)
+        let takeAction = UNNotificationAction(
+            identifier: NotificationAction.take,
+            title: "Take Now",
+            options: .foreground
+        )
+        let snoozeAction = UNNotificationAction(
+            identifier: NotificationAction.snooze,
+            title: "Snooze 15m",
+            options: []
+        )
+        let skipAction = UNNotificationAction(
+            identifier: NotificationAction.skip,
+            title: "Skip",
+            options: .destructive
+        )
 
         let category = UNNotificationCategory(
-            identifier: "PILL_REMINDER_CATEGORY",
+            identifier: Self.categoryIdentifier,
             actions: [takeAction, snoozeAction, skipAction],
             intentIdentifiers: [],
             options: .customDismissAction
@@ -38,11 +75,10 @@ final class NotificationService: NotificationServiceProtocol {
     func requestPermission() {
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if granted {
-                print("✅ Notifications authorized by user")
-                self.registerNotificationCategories()
-            } else if let error = error {
-                print("🚨 Permission error: \(error.localizedDescription)")
+            if let error {
+                AppLog.notifications.error("Permission request failed: \(error.localizedDescription, privacy: .public)")
+            } else if !granted {
+                AppLog.notifications.info("Notifications declined by user")
             }
         }
     }
@@ -51,6 +87,87 @@ final class NotificationService: NotificationServiceProtocol {
     /// don't reach into UNUserNotificationCenter directly.
     func removeAllPending() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+
+    // MARK: - Request building
+
+    /// Request building in one place: initial scheduling and regrouping after one
+    /// medication is cancelled both go through here, so the text and the userInfo
+    /// payload cannot diverge.
+    private static func makeReminderRequest(
+        identifier: String,
+        medicationIds: [String],
+        medicationNames: [String],
+        triggerDate: Date,
+        trigger: UNNotificationTrigger
+    ) -> UNNotificationRequest {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "💊 Time to take your meds")
+        // Foundation builds the list: the separator and the conjunction before the
+        // last item differ from language to language.
+        let names = medicationNames.formatted(.list(type: .and))
+        content.body = String(localized: "Time to take: \(names)")
+        content.sound = .default
+        content.categoryIdentifier = categoryIdentifier
+        content.userInfo = [
+            "medicationIds": medicationIds,
+            // Names are needed to rebuild a group reminder without one medication, and
+            // so a snoozed notification still knows what it is reminding about.
+            "medicationNames": medicationNames,
+            "time": triggerDate.timeIntervalSince1970
+        ]
+        return UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+    }
+
+    private static func medicationIds(in content: UNNotificationContent) -> [String] {
+        content.userInfo["medicationIds"] as? [String] ?? []
+    }
+
+    private static func medicationNames(in content: UNNotificationContent) -> [String] {
+        content.userInfo["medicationNames"] as? [String] ?? []
+    }
+
+    /// One single way to build a snooze identifier. It used to be scheduled under
+    /// `SNOOZE_<all ids joined by _>` but cancelled under `SNOOZE_<one id>`, so a
+    /// group snooze could never be cancelled.
+    private static func snoozeIdentifier(for medicationIds: [String]) -> String {
+        "SNOOZE_" + medicationIds.sorted().joined(separator: "_")
+    }
+
+    // MARK: - Delivered cleanup
+
+    /// Removes an already delivered notification for the `scheduledTime` slot, but
+    /// only when EVERY medication in that group is marked taken.
+    ///
+    /// One notification can cover several medications at once (see
+    /// `buildScheduleMap` — slots are grouped by time). While any medication in the
+    /// group is untaken the reminder is still valid, so only fully closed slots
+    /// are removed.
+    func clearDelivered(takenMedicationIds: [UUID], scheduledTime: Date) {
+        guard !takenMedicationIds.isEmpty else { return }
+
+        let center = UNUserNotificationCenter.current()
+        let takenIds = Set(takenMedicationIds.map { $0.uuidString })
+        let slot = scheduledTime.timeIntervalSince1970
+
+        center.getDeliveredNotifications { notifications in
+            let toRemove = notifications.compactMap { notif -> String? in
+                let ids = Self.medicationIds(in: notif.request.content)
+                guard !ids.isEmpty,
+                      let time = notif.request.content.userInfo["time"] as? TimeInterval,
+                      // Both dates are built the same way, but a Double round-tripped
+                      // through userInfo should not be compared exactly — allow a
+                      // second of drift.
+                      abs(time - slot) < 1,
+                      Set(ids).isSubset(of: takenIds)
+                else { return nil }
+                return notif.request.identifier
+            }
+
+            guard !toRemove.isEmpty else { return }
+            center.removeDeliveredNotifications(withIdentifiers: toRemove)
+            AppLog.notifications.debug("Removed delivered reminders for a fully logged slot: \(toRemove.count)")
+        }
     }
 
     // MARK: - Schedule Building
@@ -69,7 +186,6 @@ final class NotificationService: NotificationServiceProtocol {
         let today = calendar.startOfDay(for: now)
         let maxDate = calendar.date(byAdding: .day, value: 2, to: today) ?? today
 
-        // Groups medications by their exact trigger time.
         var scheduleMap: [Date: [(courseName: String, medication: MedicationItem)]] = [:]
 
         for course in activeCourses {
@@ -77,6 +193,12 @@ final class NotificationService: NotificationServiceProtocol {
             let endDay = calendar.startOfDay(for: course.endDate)
 
             for med in course.medications {
+                // The loop step is frequencyDays. At zero the date never advances and
+                // the while loop hangs the main thread. Zero is unreachable from the UI
+                // (the picker offers 1/2/3/7/14/30), but data can arrive from a
+                // migration or an import.
+                guard med.frequencyDays > 0 else { continue }
+
                 var currentDate = startDay
                 while currentDate <= endDay {
                     if currentDate >= today && currentDate <= maxDate {
@@ -116,67 +238,61 @@ final class NotificationService: NotificationServiceProtocol {
 
         let scheduleMap = Self.buildScheduleMap(activeCourses: activeCourses, now: Date(), calendar: calendar)
 
-        // Sort by trigger date so that, if the count exceeds iOS's 60-notification
+        // Sort by trigger date so that, if the count exceeds iOS's notification
         // limit, it's the soonest reminders that get scheduled rather than an
         // arbitrary Dictionary iteration order.
         let sortedEntries = scheduleMap.sorted { $0.key < $1.key }
 
         var scheduledCount = 0
         for (triggerDate, medsAtTime) in sortedEntries {
-            guard scheduledCount < 60 else { break } // iOS limit
-
-            let content = UNMutableNotificationContent()
-
-            // e.g. "Omega-3, Vitamin D"
-            let medicationNames = medsAtTime.map { $0.medication.name }.joined(separator: ", ")
-            let medicationIds = medsAtTime.map { $0.medication.id.uuidString }
-
-            content.title = "💊 Время приема"
-            content.body = "Пора принять: \(medicationNames)"
-            content.sound = .default
-            content.categoryIdentifier = "PILL_REMINDER_CATEGORY"
-
-            content.userInfo = [
-                "medicationIds": medicationIds,
-                "time": triggerDate.timeIntervalSince1970
-            ]
+            guard scheduledCount < Self.maxScheduled else { break }
 
             let triggerComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate)
             let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
 
-            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+            let request = Self.makeReminderRequest(
+                identifier: UUID().uuidString,
+                medicationIds: medsAtTime.map { $0.medication.id.uuidString },
+                medicationNames: medsAtTime.map { $0.medication.name },
+                triggerDate: triggerDate,
+                trigger: trigger
+            )
+
             center.add(request) { error in
-                if let error = error { print("🚨 Error: \(error)") }
+                if let error {
+                    AppLog.notifications.error("Failed to schedule: \(error.localizedDescription, privacy: .public)")
+                }
             }
             scheduledCount += 1
         }
-        print("🔔 Grouped and scheduled notifications: \(scheduledCount)")
+
+        if sortedEntries.count > scheduledCount {
+            AppLog.notifications.warning("Slots beyond the iOS limit were not scheduled: \(sortedEntries.count - scheduledCount)")
+        }
+        AppLog.notifications.debug("Grouped and scheduled notifications: \(scheduledCount)")
     }
 
     // MARK: - Snooze
 
-    func scheduleSnooze(for medicationIds: [String], combinedNames: String) {
+    func scheduleSnooze(for medicationIds: [String], names: [String]) {
+        guard !medicationIds.isEmpty else { return }
+
         let center = UNUserNotificationCenter.current()
-        let content = UNMutableNotificationContent()
-
-        content.title = "Напоминание (Snooze)"
-        content.body = "Вы откладывали: \(combinedNames)"
-        content.sound = .default
-        content.categoryIdentifier = "PILL_REMINDER_CATEGORY"
-
         let triggerDate = Date().addingTimeInterval(Self.snoozeInterval)
-        content.userInfo = [
-            "medicationIds": medicationIds,
-            "time": triggerDate.timeIntervalSince1970
-        ]
-
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Self.snoozeInterval, repeats: false)
-        // Joined IDs form a unique identifier for this group snooze.
-        let uniqueIdentifier = "SNOOZE_\(medicationIds.joined(separator: "_"))"
 
-        let request = UNNotificationRequest(identifier: uniqueIdentifier, content: content, trigger: trigger)
+        let request = Self.makeReminderRequest(
+            identifier: Self.snoozeIdentifier(for: medicationIds),
+            medicationIds: medicationIds,
+            medicationNames: names,
+            triggerDate: triggerDate,
+            trigger: trigger
+        )
+
         center.add(request) { error in
-            if let error = error { print("🚨 Snooze error: \(error)") }
+            if let error {
+                AppLog.notifications.error("Snooze failed: \(error.localizedDescription, privacy: .public)")
+            }
         }
     }
 
@@ -184,38 +300,71 @@ final class NotificationService: NotificationServiceProtocol {
 
     func cancelNotifications(for medicationId: UUID) {
         let center = UNUserNotificationCenter.current()
-        let targetIdString = medicationId.uuidString
+        let targetId = medicationId.uuidString
 
-        // 1. Remove already-delivered notifications (from the lock screen)
+        // A delivered notification cannot be edited, so only those that referred
+        // to this medication EXCLUSIVELY are removed. It used to remove any
+        // notification mentioning the id, taking the reminder for the other
+        // medications in the same slot with it.
         center.getDeliveredNotifications { notifications in
-            let deliveredToRemove = notifications.compactMap { notif -> String? in
-                if let reqMedIds = notif.request.content.userInfo["medicationIds"] as? [String],
-                   reqMedIds.contains(targetIdString) {
-                    return notif.request.identifier
-                }
-                return nil
-            }
-            if !deliveredToRemove.isEmpty {
-                center.removeDeliveredNotifications(withIdentifiers: deliveredToRemove)
-                print("🧹 Removed from lock screen: \(deliveredToRemove.count)")
-            }
+            let toRemove = notifications
+                .filter { Self.medicationIds(in: $0.request.content) == [targetId] }
+                .map(\.request.identifier)
+
+            guard !toRemove.isEmpty else { return }
+            center.removeDeliveredNotifications(withIdentifiers: toRemove)
+            AppLog.notifications.debug("Removed from lock screen: \(toRemove.count)")
         }
 
-        // 2. Cancel future (pending) notifications for this medication
+        // Pending ones, snoozes included — they are recognised by userInfo, not
+        // by identifier format. A group reminder is rebuilt without this
+        // medication rather than dropped whole.
         center.getPendingNotificationRequests { requests in
-            let pendingToRemove = requests.compactMap { request -> String? in
-                if let reqMedIds = request.content.userInfo["medicationIds"] as? [String],
-                   reqMedIds.contains(targetIdString) {
-                    return request.identifier
-                }
-                return nil
+            var identifiersToRemove: [String] = []
+            var replacements: [UNNotificationRequest] = []
+
+            for request in requests {
+                let ids = Self.medicationIds(in: request.content)
+                guard ids.contains(targetId) else { continue }
+
+                identifiersToRemove.append(request.identifier)
+
+                let names = Self.medicationNames(in: request.content)
+                // Names came later: requests scheduled by an older version do not carry
+                // them, so there is nothing to rebuild the text from — just remove.
+                guard names.count == ids.count else { continue }
+
+                let kept = zip(ids, names).filter { $0.0 != targetId }
+                guard !kept.isEmpty,
+                      let trigger = request.trigger,
+                      let time = request.content.userInfo["time"] as? TimeInterval
+                else { continue }
+
+                replacements.append(
+                    Self.makeReminderRequest(
+                        identifier: request.identifier,
+                        medicationIds: kept.map(\.0),
+                        medicationNames: kept.map(\.1),
+                        triggerDate: Date(timeIntervalSince1970: time),
+                        // The trigger is reused as is. For a calendar trigger that is
+                        // exact; an interval (snooze) trigger restarts its countdown,
+                        // which is acceptable for 15 minutes.
+                        trigger: trigger
+                    )
+                )
             }
-            if !pendingToRemove.isEmpty {
-                center.removePendingNotificationRequests(withIdentifiers: pendingToRemove)
-                print("🗑 Cancelled pending notifications: \(pendingToRemove.count)")
+
+            guard !identifiersToRemove.isEmpty else { return }
+            center.removePendingNotificationRequests(withIdentifiers: identifiersToRemove)
+            AppLog.notifications.debug("Cancelled pending notifications: \(identifiersToRemove.count)")
+
+            for request in replacements {
+                center.add(request) { error in
+                    if let error {
+                        AppLog.notifications.error("Regroup failed: \(error.localizedDescription, privacy: .public)")
+                    }
+                }
             }
         }
-
-        center.removePendingNotificationRequests(withIdentifiers: ["SNOOZE_\(targetIdString)"])
     }
 }

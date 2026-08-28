@@ -67,24 +67,39 @@ struct DiaryViewModelTests {
         #expect(mockDb.savedDiaryDraft?.isQuickLog == true)
     }
 
+    @Test("quickLog обновляет сегодняшнюю запись, а не создаёт вторую")
+    func testQuickLogUpdatesTodaysEntryInsteadOfDuplicating() async throws {
+        let mockDb = MockDatabaseService()
+        let today = makeEntry(daysAgo: 0, moodScore: 3, energyLevel: 3, sleepHours: 7, photoCount: 0)
+        mockDb.diaryEntriesToReturn = [today]
+
+        let vm = DiaryViewModel(dbService: mockDb)
+        vm.quickLog(mood: .great)
+
+        // Duplicates for one day used to pile up silently: todaysEntry showed only
+        // the first, "Edit Entry" edited that same one, but the averages counted all.
+        #expect(mockDb.savedDiaryDraft == nil)
+        #expect(mockDb.updatedDiaryEntry === today)
+        #expect(mockDb.updatedDiaryDraft?.mood == .great)
+    }
+
     @Test("avgEnergyLevel and avgSleepHours exclude quick-logged entries, but avgMoodScore includes them")
     func testQuickLoggedEntriesExcludedFromEnergyAndSleepAverages() async throws {
         let mockDb = MockDatabaseService()
         mockDb.diaryEntriesToReturn = [
             // A full check-in: real energyLevel/sleepHours.
             makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 2, sleepHours: 6, photoCount: 0),
-            // A quick mood log: energyLevel/sleepHours are just
-            // DiaryEntryDraft's static defaults (4 and 7.5), never actually
-            // entered by the user — must not be averaged in as real data.
+            // A quick mood log: its energyLevel/sleepHours are DiaryEntryDraft's static
+            // defaults (4 and 7.5), never entered by the user, so they must not be
+            // averaged in as real data.
             makeEntry(daysAgo: 0, moodScore: 2, energyLevel: 4, sleepHours: 7.5, photoCount: 0, isQuickLog: true),
         ]
         let vm = DiaryViewModel(dbService: mockDb)
 
-        // Energy/sleep averages come from the one detailed entry only.
         #expect(vm.avgEnergyLevel == 2.0)
         #expect(vm.avgSleepHours == 6.0)
-        // Mood average legitimately includes both — quick-logging a mood is
-        // still a real, user-provided mood report.
+        // Mood legitimately averages both: a quick-logged mood is still a real
+        // mood the user reported.
         #expect(vm.avgMoodScore == 3.0) // (4 + 2) / 2
     }
 
