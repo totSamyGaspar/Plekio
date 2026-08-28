@@ -14,14 +14,14 @@ struct LinearProgressBar: View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(Color.textPrimary.opacity(0.1))
                     .frame(height: 8)
 
                 Capsule()
-                    .fill(Color.neonMint)
+                    .fill(Color.accentPrimary)
                     .frame(width: geo.size.width * CGFloat(min(progress, 1.0)), height: 8)
                     .animation(.spring(response: 0.6, dampingFraction: 0.8), value: progress)
-                    .shadow(color: Color.neonMint.opacity(0.4), radius: 4, x: 0, y: 0)
+                    .shadow(color: Color.accentPrimary.opacity(0.4), radius: 4, x: 0, y: 0)
             }
         }
         .frame(height: 8)

@@ -23,30 +23,30 @@ struct CourseRowView: View {
             HStack {
                 Text(viewModel.title)
                     .font(.headline.weight(.bold))
-                    .foregroundColor(isHistory ? .white.opacity(0.5) : .white)
+                    .foregroundColor(isHistory ? .textPrimary.opacity(0.5) : .textPrimary)
                 
                 Spacer()
                 
                 if isHistory {
                     Image(systemName: "checkmark.seal.fill")
-                        .foregroundColor(.neonMint)
+                        .foregroundColor(.accentPrimary)
                 } else {
                     Text("Day \(viewModel.currentDayNumber) of \(viewModel.totalDays)")
                         .font(.caption.weight(.heavy))
-                        .foregroundColor(Color.bgDark)
+                        .foregroundColor(Color.onAccent)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
-                        .background(Color.neonMint)
+                        .background(Color.accentPrimary)
                         .cornerRadius(10)
                 }
             }
             
             HStack(spacing: 6) {
                 Image(systemName: "calendar")
-                    .foregroundColor(.neonMint.opacity(0.8))
+                    .foregroundColor(.accentPrimary.opacity(0.8))
                 Text(viewModel.dateRangeText)
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.textPrimary.opacity(0.7))
             }
             
             LinearProgressBar(progress: animatedProgress)
@@ -55,19 +55,19 @@ struct CourseRowView: View {
             HStack {
                 Text("Medications: \(viewModel.medicationsCount)")
                     .font(.caption.weight(.medium))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.textPrimary.opacity(0.5))
                 
                 Spacer()
                 
                 if isHistory {
                     Text("Course completed")
                         .font(.caption.weight(.bold))
-                        .foregroundColor(.neonMint)
+                        .foregroundColor(.accentPrimary)
                 }
             }
         }
         .padding(20)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(24)
         .opacity(isHistory ? 0.7 : 1.0)
         .onAppear {

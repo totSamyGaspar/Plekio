@@ -24,11 +24,11 @@ struct PeriodSectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Circle().fill(Color.neonMint).frame(width: 10, height: 10)
-                    .shadow(color: .neonMint.opacity(0.5), radius: 4)
-                Text(title).font(.headline).foregroundColor(.white)
+                Circle().fill(Color.accentPrimary).frame(width: 10, height: 10)
+                    .shadow(color: .accentPrimary.opacity(0.5), radius: 4)
+                Text(title).font(.headline).foregroundColor(.textPrimary)
                 Spacer()
-                Text(timeString).font(.subheadline).foregroundColor(.white.opacity(0.5))
+                Text(timeString).font(.subheadline).foregroundColor(.textPrimary.opacity(0.5))
             }
 
             ForEach(pills) { pill in

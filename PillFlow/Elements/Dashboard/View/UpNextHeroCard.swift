@@ -14,9 +14,9 @@ struct UpNextHeroCard: View {
     private var gradientColors: [Color] {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<12:  return [Color.neonMint, Color.neonTeal]
-        case 12..<18: return [Color.orange, Color.yellow]
-        default:      return [Color.purple, Color.indigo]
+        case 5..<12:  return [Color.heroMorningStart, Color.heroMorningEnd]
+        case 12..<18: return [Color.heroNoonStart, Color.heroNoonEnd]
+        default:      return [Color.heroEveningStart, Color.heroEveningEnd]
         }
     }
     

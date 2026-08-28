@@ -33,7 +33,7 @@ struct OnboardingPageView: View {
                     .opacity(isPulsing ? 0.8 : 0.3)
                 
                 Circle()
-                    .fill(Color.cardDark)
+                    .fill(Color.appSurface)
                     .frame(width: 200, height: 200)
                     .overlay(
                         Circle().stroke(page.imageColor.opacity(0.4), lineWidth: 2)
@@ -60,12 +60,12 @@ struct OnboardingPageView: View {
             VStack(spacing: 16) {
                 Text(page.title)
                     .font(.system(.title2, design: .serif).weight(.bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.center)
                 
                 Text(page.description)
                     .font(.body)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.textPrimary.opacity(0.7))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .lineSpacing(4)
@@ -87,10 +87,10 @@ struct OnboardingPageView: View {
 
 #Preview {
     ZStack {
-        Color.bgDark.ignoresSafeArea()
+        Color.appBackground.ignoresSafeArea()
         OnboardingPageView(page: OnboardingPage(
             imageSystemName: "bell.badge.fill",
-            imageColor: .orange,
+            imageColor: .warmAccent,
             title: "Smart reminders",
             description: "Get timely notifications and log your medication right from the lock screen."
         ))

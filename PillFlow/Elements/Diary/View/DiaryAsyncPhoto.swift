@@ -28,7 +28,7 @@ struct DiaryAsyncPhoto: View {
                     .resizable()
                     .scaledToFill()
             } else {
-                Color.white.opacity(0.05)
+                Color.textPrimary.opacity(0.05)
             }
         }
         .task(id: photoId) {

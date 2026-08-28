@@ -34,16 +34,16 @@ struct DiaryMoodTrendsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Mood & Well-being Progression")
                     .font(.system(size: 18, weight: .bold, design: .serif))
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
                 Text("Daily reported emotional and physical state")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.textPrimary.opacity(0.5))
             }
 
             if moodChartEntries.isEmpty {
                 Text("Log a few check-ins to see your mood trend here.")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.textPrimary.opacity(0.4))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 30)
             } else {
@@ -60,15 +60,15 @@ struct DiaryMoodTrendsView: View {
             // stays: it really is derived from the entries.
             Text(moodBaselineLabel)
                 .font(.caption2.weight(.semibold))
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.textPrimary.opacity(0.6))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(Color.bgDark)
+                .background(Color.appBackground)
                 .clipShape(Capsule())
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(18)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(20)
     }
 
@@ -84,16 +84,16 @@ struct DiaryMoodTrendsView: View {
         return VStack(spacing: 8) {
             ZStack(alignment: .bottom) {
                 TopRoundedBar()
-                    .fill(Color.white.opacity(0.06))
+                    .fill(Color.textPrimary.opacity(0.06))
                 TopRoundedBar()
-                    .fill(Color.neonMint)
+                    .fill(Color.accentPrimary)
                     .frame(height: max(16, 80 * heightFraction))
-                    .shadow(color: Color.neonMint.opacity(0.3), radius: 5, x: 0, y: -5)
+                    .shadow(color: Color.accentPrimary.opacity(0.3), radius: 5, x: 0, y: -5)
                     .overlay(alignment: .top) {
                         Text(mood?.emoji ?? "🙂")
                             .font(.caption2)
                             .padding(4)
-                            .background(Circle().fill(Color.cardDark))
+                            .background(Circle().fill(Color.appSurface))
                             .offset(y: -10)
                     }
             }
@@ -101,7 +101,7 @@ struct DiaryMoodTrendsView: View {
 
             Text(entry.checkInDate.formatted(.dateTime.weekday(.abbreviated)))
                 .font(.caption2.weight(.bold))
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(.textPrimary.opacity(0.4))
         }
         .frame(width: moodBarWidth)
     }
@@ -124,10 +124,10 @@ struct DiaryMoodTrendsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Physical Energy & Rest")
                     .font(.system(size: 18, weight: .bold, design: .serif))
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
                 Text("Impact of sleep hours on daytime vitality")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.textPrimary.opacity(0.5))
             }
 
             metricBar(
@@ -139,15 +139,15 @@ struct DiaryMoodTrendsView: View {
             )
 
             metricBar(
-                icon: "bolt.fill", iconColor: .orange,
+                icon: "bolt.fill", iconColor: .warmAccent,
                 title: "Daytime Energy Baseline",
                 valueText: "\(avgEnergyLevel, format: .number.precision(.fractionLength(1))) / 5",
                 progress: min(avgEnergyLevel / 5.0, 1.0),
-                tint: .orange
+                tint: .warmAccent
             )
         }
         .padding(18)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(20)
     }
 
@@ -156,7 +156,7 @@ struct DiaryMoodTrendsView: View {
             HStack {
                 HStack(spacing: 6) {
                     Image(systemName: icon).foregroundColor(iconColor)
-                    Text(title).foregroundColor(.white.opacity(0.8))
+                    Text(title).foregroundColor(.textPrimary.opacity(0.8))
                 }
                 .font(.subheadline.weight(.semibold))
                 Spacer()
@@ -166,7 +166,7 @@ struct DiaryMoodTrendsView: View {
             }
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 6).fill(Color.white.opacity(0.08))
+                    RoundedRectangle(cornerRadius: 6).fill(Color.textPrimary.opacity(0.08))
                     RoundedRectangle(cornerRadius: 6).fill(tint).frame(width: max(4, geo.size.width * progress))
                 }
             }

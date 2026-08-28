@@ -17,11 +17,11 @@ struct EmptyStateView: View {
         VStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 46))
-                .foregroundColor(.white.opacity(0.2))
+                .foregroundColor(.textPrimary.opacity(0.2))
 
             Text(title)
                 .font(.headline)
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.textPrimary.opacity(0.6))
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -31,7 +31,7 @@ struct EmptyStateView: View {
 
 #Preview {
     ZStack {
-        Color.bgDark.ignoresSafeArea()
+        Color.appBackground.ignoresSafeArea()
         EmptyStateView(icon: "pills", title: "Nothing for today")
     }
 }

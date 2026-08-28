@@ -20,25 +20,25 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
     
     var body: some View {
         ZStack {
-            Color.bgDark.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
             
             Form {
-                Section(header: Text("Course Settings").foregroundColor(.white.opacity(0.6))) {
+                Section(header: Text("Course Settings").foregroundColor(.textPrimary.opacity(0.6))) {
                     TextField("Course Name", text: $viewModel.courseName)
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                         .onSubmit { viewModel.saveCourseChanges() }
                     DatePicker("Start", selection: $viewModel.startDate, displayedComponents: .date)
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                     DatePicker("End", selection: $viewModel.endDate,
                                in: viewModel.startDate..., displayedComponents: .date)
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
                 }
-                .listRowBackground(Color.cardDark)
+                .listRowBackground(Color.appSurface)
                 
-                Section(header: Text("Medications in Course").foregroundColor(.white.opacity(0.6))) {
+                Section(header: Text("Medications in Course").foregroundColor(.textPrimary.opacity(0.6))) {
                     if viewModel.medications.isEmpty {
                         Text("No medications in this course")
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.textPrimary.opacity(0.5))
                     } else {
                         ForEach(viewModel.medications) { med in
                             HStack(spacing: 12) {
@@ -48,7 +48,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                                 }) {
                                     Image(systemName: "pencil")
                                         .font(.title2)
-                                        .foregroundColor(.white.opacity(0.4))
+                                        .foregroundColor(.textPrimary.opacity(0.4))
                                 }
                                 .buttonStyle(.borderless)
                             }
@@ -56,7 +56,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                         .onDelete(perform: viewModel.deleteMedication)
                     }
                 }
-                .listRowBackground(Color.cardDark)
+                .listRowBackground(Color.appSurface)
             }
             .scrollContentBackground(.hidden)
         }
@@ -68,7 +68,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                     showingAddMedication = true
                 }) {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.neonMint)
+                        .foregroundColor(.accentPrimary)
                 }
             }
         }
@@ -104,7 +104,7 @@ struct CourseDetailDestination: View {
             CourseDetailView(course: course)
         } else {
             ZStack {
-                Color.bgDark.ignoresSafeArea()
+                Color.appBackground.ignoresSafeArea()
                 ContentUnavailableView(
                     "Course deleted",
                     systemImage: "trash",

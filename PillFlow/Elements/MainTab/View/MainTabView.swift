@@ -17,12 +17,13 @@ struct MainTabView: View {
     static func configureTabBarAppearance() {
         let appearance = UITabBarAppearance()
         appearance.configureWithDefaultBackground()
-        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-        appearance.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        // The plain material, not the ...Dark variant: it resolves per trait
+        // collection, so the bar follows the theme without being rebuilt.
+        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        appearance.backgroundColor = .appTabBarWash
 
-        let neonMint = UIColor(Color.neonMint)
-        appearance.stackedLayoutAppearance.selected.iconColor = neonMint
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: neonMint]
+        appearance.stackedLayoutAppearance.selected.iconColor = .appAccent
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.appAccent]
         appearance.stackedLayoutAppearance.normal.iconColor = UIColor.systemGray
         appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.systemGray]
 
@@ -60,8 +61,8 @@ struct MainTabView: View {
             .tabItem { Label("Settings", systemImage: "gearshape.fill") }
             .tag(3)
         }
-        .tint(.neonMint)
-        .preferredColorScheme(.dark)
+        .tint(.accentPrimary)
+        .appTheme()
         .sheet(item: $router.activeSheet) { sheet in
             sheetContent(for: sheet)
         }
@@ -142,7 +143,7 @@ struct MainTabView: View {
 
         case .newTreatment:
             NewTreatmentView()
-                .preferredColorScheme(.dark)
+                .appTheme()
 
         case .takePill(let pills, let onTake, let onSkip):
             TakePillModalView(pills: pills, onTake: {

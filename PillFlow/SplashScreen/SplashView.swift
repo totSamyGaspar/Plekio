@@ -25,9 +25,9 @@ struct SplashView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(red: 0.05, green: 0.25, blue: 0.22),
-                        Color.bgDark,
-                        Color.bgDark
+                        Color.splashTint,
+                        Color.appBackground,
+                        Color.appBackground
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -60,8 +60,8 @@ struct SplashView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 38, height: 38)
-                            .foregroundColor(Color.bgDark)
-                            .background(Circle().fill(Color.white.opacity(0.1)).frame(width: 26, height: 26))
+                            .foregroundColor(Color.onAccent)
+                            .background(Circle().fill(Color.textPrimary.opacity(0.1)).frame(width: 26, height: 26))
                             .offset(x: -20, y: -20)
                         
                         Image(systemName: "pills.fill")
@@ -70,12 +70,12 @@ struct SplashView: View {
                             .frame(width: 45, height: 45)
                             .foregroundStyle(
                                 LinearGradient(
-                                    colors: [.neonMint, .teal],
+                                    colors: [.accentPrimary, .teal],
                                     startPoint: .top,
                                     endPoint: .bottom
                                 )
                             )
-                            .shadow(color: Color.neonMint.opacity(0.8), radius: isFloating ? 15 : 5, x: 0, y: 0)
+                            .shadow(color: Color.accentPrimary.opacity(0.8), radius: isFloating ? 15 : 5, x: 0, y: 0)
                             .offset(x: 22, y: isFloating ? 10 : 20)
                             .rotationEffect(.degrees(isFloating ? -10 : -20))
                     }
@@ -84,12 +84,12 @@ struct SplashView: View {
                     VStack(spacing: 8) {
                         Text("PillFlow")
                             .font(.system(size: 42, weight: .heavy, design: .serif))
-                            .foregroundColor(.white)
+                            .foregroundColor(.textPrimary)
                             .italic()
                         
                         Text("Your minimalist tracker")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.neonMint)
+                            .foregroundColor(.accentPrimary)
                             .tracking(1.5)
                     }
                     .opacity(logoOpacity)
@@ -97,12 +97,12 @@ struct SplashView: View {
                     Spacer()
                     
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .neonMint))
+                        .progressViewStyle(CircularProgressViewStyle(tint: .accentPrimary))
                         .scaleEffect(1.2)
                         .padding(.bottom, 60)
                 }
             }
-            .preferredColorScheme(.dark)
+            .appTheme()
             .onAppear {
                 withAnimation(.easeOut(duration: 1.2)) {
                     self.logoOpacity = 1.0

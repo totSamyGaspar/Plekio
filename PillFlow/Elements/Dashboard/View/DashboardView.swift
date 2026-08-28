@@ -17,7 +17,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            Color.bgDark.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
             let allTakenStates = (viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills).map { $0.isTaken }
 
             ScrollView(showsIndicators: false) {
@@ -78,7 +78,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             Text("PillFlow")
                 .font(.system(size: 36, weight: .heavy, design: .serif))
                 .italic()
-                .foregroundColor(.white)
+                .foregroundColor(.textPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
@@ -94,25 +94,25 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 // user moved off today.
                 Text(viewModel.selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
                     .font(.title3.weight(.bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
 
                 let total = viewModel.morningPills.count + viewModel.noonPills.count + viewModel.eveningPills.count
                 let taken = (viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills).filter { $0.isTaken }.count
 
                 Text("\(taken) of \(total) doses logged")
                     .font(.subheadline)
-                    .foregroundColor(.neonMint)
+                    .foregroundColor(.accentPrimary)
             }
             Spacer()
             Circle()
-                .fill(Color.neonMint)
+                .fill(Color.accentPrimary)
                 .frame(width: 46, height: 46)
                 .overlay(
-                    Text("PF").font(.headline.weight(.heavy)).foregroundColor(Color.bgDark)
+                    Text("PF").font(.headline.weight(.heavy)).foregroundColor(Color.onAccent)
                 )
         }
         .padding(20)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(20)
         .padding(.horizontal)
     }
@@ -147,10 +147,10 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Daily Dosage Timeline")
                         .font(.system(size: 24, weight: .heavy, design: .serif))
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                     Text("Your medications for today")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.textPrimary.opacity(0.7))
                 }
                 Spacer()
             }
@@ -200,5 +200,5 @@ extension DashboardView where VM == DashboardViewModel {
 #Preview {
     DashboardView(viewModel: MockDashboardViewModel())
         .environmentObject(AppRouter())
-        .preferredColorScheme(.dark)
+        .appTheme()
 }

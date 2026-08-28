@@ -87,7 +87,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
 
     var body: some View {
         ZStack {
-            Color.bgDark.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
@@ -104,11 +104,11 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showingCheckIn) {
             DiaryCheckInView()
-                .preferredColorScheme(.dark)
+                .appTheme()
         }
         .sheet(item: $entryBeingEdited) { entry in
             DiaryCheckInView(editingEntry: entry)
-                .preferredColorScheme(.dark)
+                .appTheme()
         }
         .sheet(item: $inspectingPhoto) { photo in
             PhotoZoomView(photoId: photo.id)
@@ -119,7 +119,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 beforePhotoId: payload.beforeId,
                 afterPhotoId: payload.afterId
             )
-            .preferredColorScheme(.dark)
+            .appTheme()
         }
         .alert("Delete Check-in?", isPresented: $showingDeleteAlert, presenting: entryToDelete) { entry in
             Button("Delete", role: .destructive) {
@@ -138,24 +138,24 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             HStack {
                 Text("WELLNESS DIARY & PROGRESS LOG")
                     .font(.caption2.weight(.heavy))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.textPrimary.opacity(0.6))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color.cardDark)
+                    .background(Color.appSurface)
                     .clipShape(Capsule())
                 Spacer()
                 Text("· \(Date().formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.textPrimary.opacity(0.4))
             }
 
             Text("Daily Health & Mood Diary")
                 .font(.system(size: 30, weight: .heavy, design: .serif))
-                .foregroundColor(.white)
+                .foregroundColor(.textPrimary)
 
             Text("Track how your body responds to your regimen, log symptoms, record daily energy levels, and compare progress photos over time.")
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.textPrimary.opacity(0.6))
 
             HStack(spacing: 12) {
                 Button {
@@ -163,10 +163,10 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 } label: {
                     Label("Compare Progress", systemImage: "arrow.triangle.2.circlepath")
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.textPrimary.opacity(0.8))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
-                        .background(Color.cardDark)
+                        .background(Color.appSurface)
                         .cornerRadius(14)
                 }
                 .buttonStyle(.plain)
@@ -176,11 +176,11 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 } label: {
                     Label("Add New Entry", systemImage: "plus")
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(Color.bgDark)
+                        .foregroundColor(Color.onAccent)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                         .frame(maxWidth: .infinity)
-                        .background(Color.neonMint)
+                        .background(Color.accentPrimary)
                         .cornerRadius(14)
                 }
                 .buttonStyle(.plain)
@@ -208,11 +208,11 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 Image(systemName: "sparkles").foregroundColor(.yellow)
                 Text("TODAY'S WELLNESS CHECK-IN IS PENDING")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.textPrimary.opacity(0.7))
             }
             Text("How are you feeling right now? Tap a mood to log quickly or fill in detailed notes & photos.")
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.textPrimary.opacity(0.5))
 
             HStack(spacing: 10) {
                 ForEach(quickMoods, id: \.mood) { item in
@@ -224,10 +224,10 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                             Text(item.label)
                                 .font(.caption.weight(.semibold))
                         }
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.textPrimary.opacity(0.8))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Color.bgDark)
+                        .background(Color.appBackground)
                         .cornerRadius(14)
                     }
                     .buttonStyle(.plain)
@@ -235,9 +235,9 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             }
         }
         .padding(18)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(20)
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.neonMint.opacity(0.2), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.accentPrimary.opacity(0.2), lineWidth: 1))
     }
 
     private func loggedTodayCard(_ entry: DiaryEntry) -> some View {
@@ -248,31 +248,31 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             HStack {
                 Text("TODAY'S CHECK-IN LOGGED")
                     .font(.caption2.weight(.heavy))
-                    .foregroundColor(.neonMint)
+                    .foregroundColor(.accentPrimary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(Color.neonMint.opacity(0.12))
+                    .background(Color.accentPrimary.opacity(0.12))
                     .clipShape(Capsule())
                 Spacer()
                 Text("at \(entry.checkInDate.formatted(date: .omitted, time: .shortened))")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.textPrimary.opacity(0.4))
             }
 
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
-                    Circle().fill(Color.neonMint.opacity(0.15)).frame(width: 40, height: 40)
+                    Circle().fill(Color.accentPrimary.opacity(0.15)).frame(width: 40, height: 40)
                     Text(mood?.emoji ?? "📝").font(.title3)
                 }
                 VStack(alignment: .leading, spacing: 6) {
                     todaySummaryLine(entry)
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                     if !quote.isEmpty {
                         Text("“\(quote)”")
                             .font(.subheadline)
                             .italic()
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.textPrimary.opacity(0.6))
                             .lineLimit(2)
                     }
                 }
@@ -285,16 +285,16 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 } label: {
                     Label("Edit Entry", systemImage: "pencil")
                         .font(.caption.weight(.bold))
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.textPrimary.opacity(0.8))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
-                        .overlay(Capsule().stroke(Color.white.opacity(0.15), lineWidth: 1))
+                        .overlay(Capsule().stroke(Color.textPrimary.opacity(0.15), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(18)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(20)
     }
 
@@ -325,8 +325,8 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             // locale, printing "4.2" where "4,2" is expected; `format: .number` does
             // respect the locale.
             statCard(title: "7-DAY AVG MOOD", value: "\(viewModel.avgMoodScore, format: .number.precision(.fractionLength(1))) /5", icon: "sun.max.fill", iconColor: .yellow)
-            statCard(title: "7-DAY AVG ENERGY", value: "\(viewModel.avgEnergyLevel, format: .number.precision(.fractionLength(1))) /5", icon: "bolt.fill", iconColor: .neonMint)
-            statCard(title: "PROGRESS PHOTOS · ALL TIME", value: "\(viewModel.totalPhotosLogged) logged", icon: "camera.fill", iconColor: .white.opacity(0.6))
+            statCard(title: "7-DAY AVG ENERGY", value: "\(viewModel.avgEnergyLevel, format: .number.precision(.fractionLength(1))) /5", icon: "bolt.fill", iconColor: .accentPrimary)
+            statCard(title: "PROGRESS PHOTOS · ALL TIME", value: "\(viewModel.totalPhotosLogged) logged", icon: "camera.fill", iconColor: .textPrimary.opacity(0.6))
             statCard(title: "7-DAY SLEEP AVERAGE", value: "\(viewModel.avgSleepHours, format: .number.precision(.fractionLength(1))) hrs", icon: "moon.fill", iconColor: .purple)
         }
         .padding(.horizontal)
@@ -337,17 +337,17 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
                     .font(.caption2.weight(.heavy))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.textPrimary.opacity(0.4))
                 Text(value)
                     .font(.title3.weight(.bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
             }
             Spacer()
             Image(systemName: icon)
                 .foregroundColor(iconColor)
         }
         .padding(16)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(16)
     }
 
@@ -370,21 +370,21 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                         if let count = subTabCount(tab) {
                             Text("(\(count))")
                                 .font(.caption2)
-                                .foregroundColor(.white.opacity(0.4))
+                                .foregroundColor(.textPrimary.opacity(0.4))
                         }
                     }
-                    .foregroundColor(selectedSubTab == tab ? .neonMint : .white.opacity(0.5))
+                    .foregroundColor(selectedSubTab == tab ? .accentPrimary : .textPrimary.opacity(0.5))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)
-                    .background(selectedSubTab == tab ? Color.cardDark : Color.clear)
+                    .background(selectedSubTab == tab ? Color.appSurface : Color.clear)
                     .cornerRadius(12)
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(4)
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.textPrimary.opacity(0.08), lineWidth: 1))
         .cornerRadius(14)
         .padding(.horizontal)
     }
@@ -465,6 +465,6 @@ extension DiaryView where VM == DiaryViewModel {
 #Preview {
     NavigationStack {
         DiaryView(viewModel: MockDiaryViewModel())
-            .preferredColorScheme(.dark)
+            .appTheme()
     }
 }

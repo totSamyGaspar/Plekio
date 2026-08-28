@@ -48,16 +48,16 @@ struct BeforeAfterComparisonView: View {
 
     var body: some View {
         ZStack {
-            Color.bgDark.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 18) {
                     header
 
-                    photoSelectorRow(label: "BEFORE PHOTO (A):", tint: .neonMint, checkpoint: beforeCheckpoint) {
+                    photoSelectorRow(label: "BEFORE PHOTO (A):", tint: .accentPrimary, checkpoint: beforeCheckpoint) {
                         pickerTarget = .before
                     }
-                    photoSelectorRow(label: "AFTER PHOTO (B):", tint: .orange, checkpoint: afterCheckpoint) {
+                    photoSelectorRow(label: "AFTER PHOTO (B):", tint: .warmAccent, checkpoint: afterCheckpoint) {
                         pickerTarget = .after
                     }
 
@@ -86,19 +86,19 @@ struct BeforeAfterComparisonView: View {
     private var header: some View {
         HStack(alignment: .top, spacing: 12) {
             ZStack {
-                Circle().fill(Color.neonMint.opacity(0.15)).frame(width: 40, height: 40)
+                Circle().fill(Color.accentPrimary.opacity(0.15)).frame(width: 40, height: 40)
                 Image(systemName: "arrow.left.arrow.right")
                     .font(.subheadline)
-                    .foregroundColor(.neonMint)
+                    .foregroundColor(.accentPrimary)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Visual Progress Comparison")
                     .font(.system(size: 18, weight: .bold, design: .serif))
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
                 Text("Track your recovery, skin changes & wellness transformation")
                     .font(.caption2)
-                    .foregroundColor(.white.opacity(0.55))
+                    .foregroundColor(.textPrimary.opacity(0.55))
             }
 
             Spacer(minLength: 4)
@@ -107,9 +107,9 @@ struct BeforeAfterComparisonView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.textPrimary.opacity(0.7))
                         .padding(7)
-                        .background(Color.white.opacity(0.08))
+                        .background(Color.textPrimary.opacity(0.08))
                         .clipShape(Circle())
                 }
                 modeToggle
@@ -133,11 +133,11 @@ struct BeforeAfterComparisonView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
-                .foregroundColor(isActive ? Color.bgDark : .white.opacity(0.6))
+                .foregroundColor(isActive ? Color.onAccent : .textPrimary.opacity(0.6))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
                 .frame(minWidth: 56)
-                .background(isActive ? Color.neonMint : Color.white.opacity(0.06))
+                .background(isActive ? Color.accentPrimary : Color.textPrimary.opacity(0.06))
                 .cornerRadius(10)
         }
         .buttonStyle(.plain)
@@ -156,17 +156,17 @@ struct BeforeAfterComparisonView: View {
                 HStack {
                     Text(captionText(for: checkpoint))
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.85))
+                        .foregroundColor(.textPrimary.opacity(0.85))
                         .lineLimit(1)
                         .truncationMode(.tail)
                     Spacer(minLength: 6)
                     Image(systemName: "chevron.down")
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(.textPrimary.opacity(0.4))
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-                .background(Color.cardDark)
+                .background(Color.appSurface)
                 .cornerRadius(10)
             }
             .buttonStyle(.plain)
@@ -194,18 +194,18 @@ struct BeforeAfterComparisonView: View {
                     HStack {
                         Text(captionText(for: item))
                             .font(.subheadline)
-                            .foregroundColor(.white)
+                            .foregroundColor(.textPrimary)
                             .multilineTextAlignment(.leading)
                         Spacer()
                         Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
-                            .foregroundColor(.neonMint)
+                            .foregroundColor(.accentPrimary)
                     }
                 }
-                .listRowBackground(Color.cardDark)
+                .listRowBackground(Color.appSurface)
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .background(Color.bgDark)
+            .background(Color.appBackground)
             .navigationTitle(slot == .before ? "Select Before Photo" : "Select After Photo")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -214,7 +214,7 @@ struct BeforeAfterComparisonView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
+        .appTheme()
         .presentationDetents([.medium, .large])
     }
 
@@ -231,7 +231,7 @@ struct BeforeAfterComparisonView: View {
                             .frame(width: geo.size.width, height: geo.size.height)
                             .clipped()
                     } else {
-                        Color.white.opacity(0.05)
+                        Color.textPrimary.opacity(0.05)
                     }
                     if let beforeImage {
                         Image(uiImage: beforeImage)
@@ -266,9 +266,9 @@ struct BeforeAfterComparisonView: View {
 
                     VStack {
                         HStack {
-                            tag("BEFORE (\(shortDate(beforeCheckpoint)))", tint: .neonMint)
+                            tag("BEFORE (\(shortDate(beforeCheckpoint)))", tint: .accentPrimary)
                             Spacer()
-                            tag("AFTER (\(shortDate(afterCheckpoint)))", tint: .orange)
+                            tag("AFTER (\(shortDate(afterCheckpoint)))", tint: .warmAccent)
                         }
                         .padding(12)
                         Spacer()
@@ -281,12 +281,12 @@ struct BeforeAfterComparisonView: View {
             HStack(spacing: 12) {
                 Text("Before")
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.neonMint)
+                    .foregroundColor(.accentPrimary)
                 Slider(value: $sliderPosition)
                     .tint(.white)
                 Text("After")
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.orange)
+                    .foregroundColor(.warmAccent)
             }
         }
     }
@@ -294,7 +294,7 @@ struct BeforeAfterComparisonView: View {
     private func tag(_ text: LocalizedStringKey, tint: Color) -> some View {
         Text(text)
             .font(.caption2.weight(.heavy))
-            .foregroundColor(Color.bgDark)
+            .foregroundColor(Color.onAccent)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(tint)
@@ -310,8 +310,8 @@ struct BeforeAfterComparisonView: View {
 
     private var sideBySideView: some View {
         VStack(spacing: 16) {
-            stateCard(title: "STATE A (EARLIER BASELINE)", tint: .neonMint, checkpoint: beforeCheckpoint, image: beforeImage)
-            stateCard(title: "STATE B (RECENT / PROGRESS)", tint: .orange, checkpoint: afterCheckpoint, image: afterImage)
+            stateCard(title: "STATE A (EARLIER BASELINE)", tint: .accentPrimary, checkpoint: beforeCheckpoint, image: beforeImage)
+            stateCard(title: "STATE B (RECENT / PROGRESS)", tint: .warmAccent, checkpoint: afterCheckpoint, image: afterImage)
         }
     }
 
@@ -323,7 +323,7 @@ struct BeforeAfterComparisonView: View {
             HStack {
                 Text(title)
                     .font(.caption2.weight(.heavy))
-                    .foregroundColor(Color.bgDark)
+                    .foregroundColor(Color.onAccent)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(tint)
@@ -331,7 +331,7 @@ struct BeforeAfterComparisonView: View {
                 Spacer()
                 Text(shortDate(checkpoint))
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.textPrimary.opacity(0.5))
             }
 
             Group {
@@ -340,7 +340,7 @@ struct BeforeAfterComparisonView: View {
                         .resizable()
                         .scaledToFill()
                 } else {
-                    Color.white.opacity(0.05)
+                    Color.textPrimary.opacity(0.05)
                 }
             }
             .frame(height: 220)
@@ -351,12 +351,12 @@ struct BeforeAfterComparisonView: View {
             if !boldLine.isEmpty {
                 Text(boldLine)
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(.textPrimary.opacity(0.9))
             }
             if !quote.isEmpty && quote != boldLine {
                 Text(quote)
                     .font(.caption.italic())
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.textPrimary.opacity(0.5))
                     .lineLimit(2)
             }
             if let checkpoint {
@@ -366,7 +366,7 @@ struct BeforeAfterComparisonView: View {
             }
         }
         .padding(14)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(18)
     }
 
@@ -376,7 +376,7 @@ struct BeforeAfterComparisonView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("AVAILABLE PROGRESS PHOTOS (\(checkpoints.count))")
                 .font(.caption2.weight(.heavy))
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(.textPrimary.opacity(0.4))
                 .tracking(0.5)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -402,19 +402,19 @@ struct BeforeAfterComparisonView: View {
                 .clipped()
                 .cornerRadius(12)
                 .overlay(alignment: .topLeading) {
-                    if isBefore { slotBadge("A", tint: .neonMint) }
+                    if isBefore { slotBadge("A", tint: .accentPrimary) }
                 }
                 .overlay(alignment: .topTrailing) {
-                    if isAfter { slotBadge("B", tint: .orange) }
+                    if isAfter { slotBadge("B", tint: .warmAccent) }
                 }
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke((isBefore || isAfter) ? Color.neonMint.opacity(0.8) : Color.clear, lineWidth: 2)
+                        .stroke((isBefore || isAfter) ? Color.accentPrimary.opacity(0.8) : Color.clear, lineWidth: 2)
                 )
 
             Text(item.entry.checkInDate.formatted(Self.dateLabelStyle))
                 .font(.caption2)
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(.textPrimary.opacity(0.4))
         }
         .onTapGesture {
             // Every tap does something: tapping the current "before" photo
@@ -433,7 +433,7 @@ struct BeforeAfterComparisonView: View {
     private func slotBadge(_ letter: String, tint: Color) -> some View {
         Text(letter)
             .font(.caption2.weight(.heavy))
-            .foregroundColor(Color.bgDark)
+            .foregroundColor(Color.onAccent)
             .frame(width: 18, height: 18)
             .background(tint)
             .clipShape(Circle())

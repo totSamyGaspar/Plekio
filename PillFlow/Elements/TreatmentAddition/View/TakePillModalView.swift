@@ -16,8 +16,8 @@ struct TakePillModalView: View {
     var onSkip: () -> Void
     var onSnooze: () -> Void
 
-    let cardDark = Color.cardDark
-    let bgDark = Color.bgDark
+    let appSurface = Color.appSurface
+    let appBackground = Color.appBackground
 
     var body: some View {
         ZStack {
@@ -34,7 +34,7 @@ struct TakePillModalView: View {
                 // MARK: - Header
                 ZStack(alignment: .topTrailing) {
                     LinearGradient(
-                        colors: [Color.blue.opacity(0.8), Color.neonMint.opacity(0.9)],
+                        colors: [Color.blue.opacity(0.8), Color.accentPrimary.opacity(0.9)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -92,28 +92,28 @@ struct TakePillModalView: View {
                                 HStack(spacing: 16) {
                                     ZStack {
                                         RoundedRectangle(cornerRadius: 16)
-                                            .fill(Color.neonMint.opacity(0.1))
+                                            .fill(Color.accentPrimary.opacity(0.1))
                                             .frame(width: 50, height: 50)
                                         Image(systemName: pill.formSystemImage)
                                             .font(.title2)
-                                            .foregroundColor(.neonMint)
+                                            .foregroundColor(.accentPrimary)
                                     }
 
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(pill.name)
                                             .font(.headline.weight(.bold))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.textPrimary)
                                         // Separate Text values: each piece is its
                                         // own translatable string, not a
                                         // concatenation with rawValue.
                                         (Text("\(pill.dosage) pcs") + Text(verbatim: " • ") + Text(pill.period.title))
                                             .font(.subheadline.weight(.semibold))
-                                            .foregroundColor(.neonMint)
+                                            .foregroundColor(.accentPrimary)
                                     }
                                     Spacer()
                                 }
                                 .padding(16)
-                                .background(cardDark)
+                                .background(appSurface)
                                 .cornerRadius(16)
                             }
                         }
@@ -127,9 +127,9 @@ struct TakePillModalView: View {
                     // calls router.dismissSheet from these same callbacks); dismiss()
                     // used to be duplicated here.
                     HStack(spacing: 12) {
-                        ActionButton(icon: "xmark", title: pills.count > 1 ? "Skip All" : "Skip", color: .white, bgColor: cardDark, action: onSkip)
+                        ActionButton(icon: "xmark", title: pills.count > 1 ? "Skip All" : "Skip", color: .textPrimary, bgColor: appSurface, action: onSkip)
 
-                        ActionButton(icon: "clock", title: "Snooze 15m", color: .yellow, bgColor: Color.yellow.opacity(0.15), action: onSnooze)
+                        ActionButton(icon: "clock", title: "Snooze 15m", color: .warningAmber, bgColor: Color.warningAmber.opacity(0.15), action: onSnooze)
 
                         Button(action: onTake) {
                             VStack(spacing: 8) {
@@ -140,21 +140,21 @@ struct TakePillModalView: View {
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.75)
                             }
-                            .foregroundColor(bgDark)
+                            .foregroundColor(Color.onAccent)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Color.neonMint)
+                            .background(Color.accentPrimary)
                             .cornerRadius(16)
                         }
                     }
                     .frame(height: 85)
                 }
                 .padding(24)
-                .background(bgDark)
+                .background(appBackground)
             }
             .frame(maxWidth: 340)
             .fixedSize(horizontal: false, vertical: true)
             .cornerRadius(24)
-            .shadow(color: .black.opacity(0.6), radius: 40, x: 0, y: 20)
+            .shadow(color: .appShadow, radius: 40, x: 0, y: 20)
         }
     }
 }
@@ -198,5 +198,5 @@ struct ActionButton: View {
         ],
         onTake: {}, onSkip: {}, onSnooze: {}
     )
-    .preferredColorScheme(.dark)
+    .appTheme()
 }
