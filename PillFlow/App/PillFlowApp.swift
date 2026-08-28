@@ -37,14 +37,7 @@ struct PillFlowApp: App {
     private func refreshAllNotifications() {
         let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
         let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-        
-        let activeCourses = dbService.fetchAllCourses().filter { $0.endDate >= Date() }
 
-        // Goes through NotificationServiceProtocol rather than calling
-        // UNUserNotificationCenter directly, consistent with the rest of the
-        // app's DI usage and mockable in tests.
-        notifService.removeAllPending()
-
-        notifService.scheduleNotifications(activeCourses: activeCourses)
+        notifService.rescheduleAll(using: dbService)
     }
 }

@@ -48,11 +48,9 @@ struct DiaryCheckInViewModelTests {
         vm.addCustomSymptom("  Neck pain  ")
         #expect(vm.draft.symptoms == ["Neck pain"])
 
-        // Duplicate (already present) — ignored.
         vm.addCustomSymptom("Neck pain")
         #expect(vm.draft.symptoms == ["Neck pain"])
 
-        // Blank input — ignored.
         vm.addCustomSymptom("   ")
         #expect(vm.draft.symptoms == ["Neck pain"])
     }
@@ -93,6 +91,69 @@ struct DiaryCheckInViewModelTests {
         #expect(mockDb.updatedDiaryEntry == nil) // no editingEntry set → this is a create, not an update
     }
 
+    @Test("startEditing переносит ВСЕ поля записи в черновик, включая isQuickLog")
+    func testStartEditingCopiesEveryField() async throws {
+        let mockDb = MockDatabaseService()
+        let vm = DiaryCheckInViewModel(dbService: mockDb, mediaPickerService: MockMediaPickerService())
+
+        // A quick log: its energy/sleep/water are DiaryEntryDraft's static defaults,
+        // not values the user entered.
+        let quickEntry = DiaryEntry(
+            checkInDate: testDate(2026, 7, 3, 8, 30),
+            moodLabel: DiaryMood.exhausted.rawValue,
+            moodScore: DiaryMood.exhausted.score,
+            physicalSummary: "",
+            energyLevel: 4,
+            discomfortLevel: 0,
+            sleepHours: 7.5,
+            sleepQuality: SleepQuality.good.rawValue,
+            waterGlasses: 6,
+            symptoms: [],
+            reflectionNotes: "",
+            milestoneTags: [],
+            isQuickLog: true
+        )
+
+        await vm.startEditing(quickEntry)
+
+        // The regression this pins down: the flag must survive editing, or the entry
+        // becomes a "detailed" one carrying invented numbers.
+        #expect(vm.draft.isQuickLog == true)
+
+        #expect(vm.draft.id == quickEntry.id)
+        #expect(vm.draft.mood == .exhausted)
+        #expect(vm.draft.checkInDate == quickEntry.checkInDate)
+        #expect(vm.draft.photosModified == false)
+    }
+
+    @Test("правка быстрой записи сохраняет её быстрой")
+    func testEditingQuickLogKeepsFlagOnSave() async throws {
+        let mockDb = MockDatabaseService()
+        let vm = DiaryCheckInViewModel(dbService: mockDb, mediaPickerService: MockMediaPickerService())
+
+        let quickEntry = DiaryEntry(
+            checkInDate: Date(),
+            moodLabel: DiaryMood.good.rawValue,
+            moodScore: 4,
+            physicalSummary: "",
+            energyLevel: 4,
+            discomfortLevel: 0,
+            sleepHours: 7.5,
+            sleepQuality: SleepQuality.good.rawValue,
+            waterGlasses: 6,
+            symptoms: [],
+            reflectionNotes: "",
+            milestoneTags: [],
+            isQuickLog: true
+        )
+
+        await vm.startEditing(quickEntry)
+        vm.draft.mood = .great
+        vm.save()
+
+        #expect(mockDb.updatedDiaryDraft?.isQuickLog == true)
+    }
+
     @Test("save() updates the existing entry instead of creating a new one when editing")
     func testSaveUpdatesExistingEntryWhenEditing() async throws {
         let mockDb = MockDatabaseService()
@@ -112,7 +173,7 @@ struct DiaryCheckInViewModelTests {
             reflectionNotes: "",
             milestoneTags: []
         )
-        vm.editingEntry = existingEntry
+        await vm.startEditing(existingEntry)
         vm.draft.physicalSummary = "Updated summary."
 
         vm.save()

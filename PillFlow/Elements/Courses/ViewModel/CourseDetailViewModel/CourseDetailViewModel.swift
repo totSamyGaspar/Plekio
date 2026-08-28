@@ -33,41 +33,52 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
     }
     
     func saveCourseChanges() {
-        dbService.updateCourseDetails(course: course, name: courseName, startDate: startDate, endDate: endDate)
+        guard course.name != courseName
+                || course.startDate != startDate
+                || course.endDate != endDate
+        else { return }
+
+        guard AppErrorPresenter.shared.run({
+            try dbService.updateCourseDetails(course: course, name: courseName, startDate: startDate, endDate: endDate)
+        }) else { return }
+
+        notificationService.rescheduleAll(using: dbService)
     }
-    
+
     func addNewMedication(_ draft: MedicationDraft) {
-        // 1. Persist to the database
-        dbService.addMedication(draft: draft, to: course)
+        guard AppErrorPresenter.shared.run({
+            try dbService.addMedication(draft: draft, to: course)
+        }) else { return }
 
-        // 2. Reschedule notifications (via the protocol, not directly through UNUserNotificationCenter)
-        notificationService.removeAllPending()
-        let activeCourses = dbService.fetchAllCourses().filter { $0.endDate >= Date() }
-        notificationService.scheduleNotifications(activeCourses: activeCourses)
-
-        // 3. Refresh the local list for the UI
-        self.medications = course.medications.sorted(by: { $0.name < $1.name })
+        notificationService.rescheduleAll(using: dbService)
+        refreshMedications()
     }
-    
+
     func deleteMedication(at offsets: IndexSet) {
-        for index in offsets {
-            let med = medications[index]
+        let toDelete = offsets.map { medications[$0] }
+
+        guard AppErrorPresenter.shared.run({
+            for med in toDelete {
+                try dbService.deleteMedication(med)
+            }
+        }) else { return }
+
+        for med in toDelete {
             notificationService.cancelNotifications(for: med.id)
-            dbService.deleteMedication(med)
         }
         medications.remove(atOffsets: offsets)
     }
-    
+
     func updateMedication(medication: MedicationItem, with draft: MedicationDraft) {
-        // 1. Persist changes to the database
-        dbService.updateMedication(medication, with: draft)
+        guard AppErrorPresenter.shared.run({
+            try dbService.updateMedication(medication, with: draft)
+        }) else { return }
 
-        // 2. Reschedule notifications (via the protocol, not directly through UNUserNotificationCenter)
-        notificationService.removeAllPending()
-        let activeCourses = dbService.fetchAllCourses().filter { $0.endDate >= Date() }
-        notificationService.scheduleNotifications(activeCourses: activeCourses)
+        notificationService.rescheduleAll(using: dbService)
+        refreshMedications()
+    }
 
-        // 3. Refresh the local list for the UI
-        self.medications = course.medications.sorted(by: { $0.name < $1.name })
+    private func refreshMedications() {
+        medications = course.medications.sorted { $0.name < $1.name }
     }
 }

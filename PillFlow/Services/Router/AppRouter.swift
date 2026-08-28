@@ -11,27 +11,13 @@ import Combine
 @MainActor
 final class AppRouter: ObservableObject {
     
-    // Each tab has its own independent navigation stack.
     @Published var coursesPath = NavigationPath()
 
-    // Currently presented sheet / full-screen cover.
     @Published var activeSheet: SheetRoute?
     @Published var activeFullScreen: SheetRoute?
 
     @Published var selectedTab: Int = 0
 
-    // MARK: - Push navigation
-
-    func push(_ route: Route) {
-        // Only pushes onto the courses tab for now; add a `tab` parameter
-        // here if navigation needs to scale to other tabs.
-        coursesPath.append(route)
-    }
-    
-    func popToRoot() {
-        coursesPath = NavigationPath()
-    }
-    
     // MARK: - Sheet presentation
     
     func present(_ sheet: SheetRoute) {
@@ -55,7 +41,7 @@ final class AppRouter: ObservableObject {
         self.pendingPushTime = time
     }
     
-    // Holds a pending navigation target from a push notification until it's consumed.
+    // Push navigation target, parked here until the destination screen consumes it.
     @Published var pendingPushMedicationIds: [UUID]?
     @Published var pendingPushTime: Date?
     

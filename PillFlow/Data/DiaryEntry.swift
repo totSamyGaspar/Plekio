@@ -27,14 +27,11 @@ final class DiaryEntry {
     // photo — see ImageCache.swift), keyed by the ids in this array, rather than
     // as blobs on the model.
     var photoIds: [UUID]
-    // True when this entry was created via the home screen's one-tap "quick
-    // mood" chips rather than the full check-in form — those chips never show
-    // energyLevel/sleepHours/sleepQuality/waterGlasses to the user at all, so
-    // this entry's values for those fields are just DiaryEntryDraft's static
-    // defaults, not anything the user actually reported. Stats that average
-    // those specific fields (avgEnergyLevel, avgSleepHours) must exclude
-    // quick-logged entries, and any UI displaying them per-entry must hide
-    // them here too — otherwise fabricated numbers read as real input.
+    // True when the entry came from the home screen's one-tap "quick mood" chips
+    // instead of the full check-in form. Those chips never ask for energy, sleep or
+    // water, so those fields hold DiaryEntryDraft's defaults, not user input:
+    // averages over them and per-entry UI must exclude quick logs, or the
+    // fabricated numbers read as something the user actually reported.
     var isQuickLog: Bool
 
     init(
@@ -69,5 +66,16 @@ final class DiaryEntry {
         self.milestoneTags = milestoneTags
         self.photoIds = photoIds
         self.isQuickLog = isQuickLog
+    }
+}
+
+extension DiaryEntry {
+    var moodTitle: String {
+        guard let mood = DiaryMood(rawValue: moodLabel) else { return moodLabel }
+        return String(localized: mood.title)
+    }
+
+    var displayCaption: String {
+        physicalSummary.isEmpty ? reflectionNotes : physicalSummary
     }
 }

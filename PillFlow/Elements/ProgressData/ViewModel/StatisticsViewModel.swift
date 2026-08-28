@@ -18,6 +18,10 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
     
     private let dbService: DatabaseServiceProtocol
     private var cancellables = Set<AnyCancellable>()
+
+    private static let streakLookbackDays = 30
+    /// Fraction of a day's doses that has to be logged for the day to count.
+    private static let streakThreshold = 0.9
     
     var progress: Double {
         guard totalCount > 0 else { return 0 }
@@ -37,80 +41,79 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
     func loadStats() {
         let allCourses = dbService.fetchAllCourses()
         
-        // 1. Today's progress (fetchPills is used since this is today's schedule)
         let todaysPills = dbService.fetchPills(for: Date(), preFetchedCourses: allCourses)
         self.totalCount = todaysPills.count
         self.takenCount = todaysPills.filter { $0.isTaken }.count
 
-        // 2. Find medications that are running low on stock
-        var lowStock: [MedicationItem] = []
-        for course in allCourses {
-            for med in course.medications where med.stockCount <= med.lowStockThreshold {
-                lowStock.append(med)
-            }
+        // Unfinished courses only: there is no point reminding the user to restock
+        // a medication for a course that has already ended.
+        let startOfToday = Calendar.current.startOfDay(for: Date())
+        let activeCourses = allCourses.filter {
+            Calendar.current.startOfDay(for: $0.endDate) >= startOfToday
         }
-        self.lowStockItems = lowStock
+        self.lowStockItems = activeCourses
+            .flatMap(\.medications)
+            .filter { $0.stockCount <= $0.lowStockThreshold }
 
-        // 3. Optimized streak calculation
-        self.streakDays = calculateOptimizedStreak(courses: allCourses)
+        self.streakDays = calculateStreak(courses: allCourses)
     }
     
-    // MARK: - Optimized Streak Calculation
-    private func calculateOptimizedStreak(courses: [TreatmentCourse]) -> Int {
+    // MARK: - Streak
+
+    /// How many consecutive days adherence stayed at or above `streakThreshold`.
+    ///
+    /// Today counts once it is already fully logged, but it never breaks the
+    /// streak: the day is not over, and recording it as a miss at 10am would be
+    /// lying to the user.
+    ///
+    /// The denominator comes from the schedule (`fetchPills`), not from the number
+    /// of `DoseLog` records found. `total` used to be counted from the logs, and a
+    /// log exists only once a dose has been logged: a "took 1 of 3" day scored
+    /// 1/1 = 100%, so the streak grew more reliably the fewer doses a person
+    /// logged.
+    private func calculateStreak(courses: [TreatmentCourse]) -> Int {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        
-        guard let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: today) else { return 0 }
 
-        // Maps each day to (taken, total scheduled) counts
-        var dailyStats: [Date: (taken: Int, total: Int)] = [:]
+        var streak = 0
 
-        // Single pass over all logs to build the daily stats
-        for course in courses {
-            for med in course.medications {
-                // Only the last 30 days, excluding today
-                let recentLogs = med.logs.filter { $0.scheduledTime >= thirtyDaysAgo && $0.scheduledTime < today }
-
-                for log in recentLogs {
-                    let logDay = calendar.startOfDay(for: log.scheduledTime)
-
-                    if dailyStats[logDay] == nil {
-                        dailyStats[logDay] = (taken: 0, total: 0)
-                    }
-
-                    dailyStats[logDay]!.total += 1
-
-                    if log.isTaken {
-                        dailyStats[logDay]!.taken += 1
-                    }
-                }
-            }
+        // Today can only add: logged in full, the streak is already 1 without
+        // waiting for midnight; not logged, the day is simply skipped.
+        if let todayAdherence = adherence(on: today, courses: courses),
+           todayAdherence >= Self.streakThreshold {
+            streak += 1
         }
 
-        var currentStreak = 0
+        // Backwards from yesterday: those days are closed and can break the streak.
+        for offset in 1...Self.streakLookbackDays {
+            guard let day = calendar.date(byAdding: .day, value: -offset, to: today) else { break }
 
-        // Walk backwards from yesterday, up to 30 days
-        for i in 1...30 {
-            let targetDate = calendar.date(byAdding: .day, value: -i, to: today)!
+            // A day with nothing scheduled neither breaks nor extends the streak —
+            // there is nothing to measure. Otherwise a once-a-week course could never
+            // build one at all.
+            guard let dayAdherence = adherence(on: day, courses: courses) else { continue }
+            guard dayAdherence >= Self.streakThreshold else { break }
 
-            // Stop the streak on any day with no scheduled pills
-            if let stats = dailyStats[targetDate], stats.total > 0 {
-                let percent = Double(stats.taken) / Double(stats.total)
-                
-                if percent >= 0.9 {
-                    currentStreak += 1
-                } else {
-                    break
-                }
-            } else { break }
+            streak += 1
         }
-        return currentStreak
+
+        return streak
+    }
+
+    /// Fraction of the day's doses that were logged; `nil` if nothing was scheduled.
+    private func adherence(on day: Date, courses: [TreatmentCourse]) -> Double? {
+        let scheduled = dbService.fetchPills(for: day, preFetchedCourses: courses)
+        guard !scheduled.isEmpty else { return nil }
+        let taken = scheduled.filter(\.isTaken).count
+        return Double(taken) / Double(scheduled.count)
     }
     
     // MARK: - Refill
     func refill(medication: MedicationItem, amount: Int) {
-        dbService.refillStock(for: medication, amount: amount)
-        
+        guard AppErrorPresenter.shared.run({
+            try dbService.refillStock(for: medication, amount: amount)
+        }) else { return }
+
         loadStats()
     }
 }

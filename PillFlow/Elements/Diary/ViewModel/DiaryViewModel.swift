@@ -12,6 +12,12 @@ import Combine
 final class DiaryViewModel: DiaryViewModelProtocol {
     @Published var entries: [DiaryEntry] = []
 
+    /// Every entry's photos as checkpoints, newest first (entries are already
+    /// sorted by descending date). This used to be a computed property on the
+    /// view, so the flatMap over all entries and photos re-ran several times per
+    /// body pass; now it is recomputed once per data change.
+    @Published private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
+
     private let dbService: DatabaseServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
@@ -31,21 +37,39 @@ final class DiaryViewModel: DiaryViewModelProtocol {
 
     func fetchEntries() {
         entries = dbService.fetchAllDiaryEntries()
+        photoCheckpoints = entries.flatMap { entry in
+            entry.photoIds.map { DiaryPhotoCheckpoint(photoId: $0, entry: entry) }
+        }
     }
 
     func deleteEntry(_ entry: DiaryEntry) {
-        dbService.deleteDiaryEntry(entry)
+        guard AppErrorPresenter.shared.run({ try dbService.deleteDiaryEntry(entry) }) else { return }
         fetchEntries()
     }
 
     func quickLog(mood: DiaryMood) {
+        // Update today's entry rather than adding a second one. Without this guard
+        // duplicates piled up: todaysEntry and "Edit Entry" only ever saw the first
+        // of them, while the averages counted them all.
+        if let existing = todaysEntry {
+            var draft = DiaryEntryDraft(from: existing)
+            draft.mood = mood
+            guard AppErrorPresenter.shared.run({
+                try dbService.updateDiaryEntry(existing, with: draft)
+            }) else { return }
+            fetchEntries()
+            return
+        }
+
         var draft = DiaryEntryDraft()
         draft.mood = mood
         // The quick-mood chips never show the energy/sleep/water fields, so
         // draft's static defaults for them aren't real input — flag this
         // entry so stats that average those fields exclude it.
         draft.isQuickLog = true
-        dbService.saveDiaryEntry(draft: draft)
+
+        guard AppErrorPresenter.shared.run({ try dbService.saveDiaryEntry(draft: draft) }) else { return }
+        fetchEntries()
     }
 
     // MARK: - Stats
@@ -65,10 +89,6 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     /// those specific fields must exclude them or it silently reports
     /// fabricated numbers as real trends. Mood is exempt: quick-logging IS a
     /// genuine mood report, just without the rest of the form.
-    private var detailedEntries: [DiaryEntry] {
-        entries.filter { !$0.isQuickLog }
-    }
-
     private var recentDetailedEntries: [DiaryEntry] {
         recentEntries.filter { !$0.isQuickLog }
     }
@@ -87,9 +107,12 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         entries.reduce(0) { $0 + $1.photoIds.count }
     }
 
+    /// Same 7-day window as mood and energy. Sleep used to be averaged over all
+    /// time, even though the four stat tiles share one grid and read as
+    /// comparable numbers.
     var avgSleepHours: Double {
-        guard !detailedEntries.isEmpty else { return 0 }
-        return detailedEntries.reduce(0.0) { $0 + $1.sleepHours } / Double(detailedEntries.count)
+        guard !recentDetailedEntries.isEmpty else { return 0 }
+        return recentDetailedEntries.reduce(0.0) { $0 + $1.sleepHours } / Double(recentDetailedEntries.count)
     }
 
     var hasCheckedInToday: Bool {
@@ -103,8 +126,10 @@ final class DiaryViewModel: DiaryViewModelProtocol {
 
 // MARK: - Mock (previews)
 
+#if DEBUG
 final class MockDiaryViewModel: DiaryViewModelProtocol {
     @Published var entries: [DiaryEntry] = []
+    @Published private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
 
     var avgMoodScore: Double = 4.0
     var avgEnergyLevel: Double = 3.3
@@ -119,3 +144,4 @@ final class MockDiaryViewModel: DiaryViewModelProtocol {
     func deleteEntry(_ entry: DiaryEntry) {}
     func quickLog(mood: DiaryMood) {}
 }
+#endif

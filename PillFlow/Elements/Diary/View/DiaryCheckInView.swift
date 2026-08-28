@@ -19,12 +19,17 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     @State private var customSymptomText = ""
     @State private var customMilestoneText = ""
 
-    private let milestoneAccent = Color(red: 0.7, green: 0.4, blue: 0.9)
     private let allSymptomOptions = DiarySymptomOptions.all
     private let allMilestoneOptions = DiaryMilestoneOptions.all
 
-    init(viewModel: @autoclosure @escaping () -> VM) {
+    /// The entry being edited, or nil when creating a new one. Consumed in
+    /// `.task` rather than `init`: SwiftUI re-creates the view struct many
+    /// times, so any work done in the initializer runs again each time.
+    private let entryToEdit: DiaryEntry?
+
+    init(viewModel: @autoclosure @escaping () -> VM, editingEntry: DiaryEntry? = nil) {
         self._viewModel = StateObject(wrappedValue: viewModel())
+        self.entryToEdit = editingEntry
     }
 
     var body: some View {
@@ -53,6 +58,10 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
                 bottomBar
             }
+        }
+        .task {
+            guard let entryToEdit else { return }
+            await viewModel.startEditing(entryToEdit)
         }
     }
 
@@ -109,7 +118,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
         }
     }
 
-    private func labeledField<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+    private func labeledField<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.caption2.weight(.heavy))
@@ -157,7 +166,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack(spacing: 12) {
                 Text(mood.emoji).font(.title2)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(mood.rawValue)
+                    Text(mood.title)
                         .font(.subheadline.weight(.bold))
                         .foregroundColor(.white)
                     Text("Score: \(mood.score)/5")
@@ -242,7 +251,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
         .cornerRadius(18)
     }
 
-    private var energyLabel: String {
+    private var energyLabel: LocalizedStringKey {
         switch viewModel.draft.energyLevel {
         case ..<2: return "Low Energy"
         case 2...3: return "Moderate Energy"
@@ -250,7 +259,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
         }
     }
 
-    private var discomfortLabel: String {
+    private var discomfortLabel: LocalizedStringKey {
         switch viewModel.draft.discomfortLevel {
         case 0: return "Zero Pain"
         case 1...3: return "Mild"
@@ -260,9 +269,9 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     }
 
     private func sliderRow(
-        icon: String, iconColor: Color, title: String, trailingLabel: String,
+        icon: String, iconColor: Color, title: LocalizedStringKey, trailingLabel: LocalizedStringKey,
         value: Binding<Double>, range: ClosedRange<Double>, tint: Color,
-        minLabel: String, midLabel: String, maxLabel: String
+        minLabel: LocalizedStringKey, midLabel: LocalizedStringKey, maxLabel: LocalizedStringKey
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -280,11 +289,16 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             Slider(value: value, in: range, step: 1)
                 .tint(tint)
             HStack {
+                // Three labels share one row ("0 (None) / 5 (Manageable) / 10 (Severe)");
+                // the middle one is noticeably longer in German and Romanian.
                 Text(minLabel).font(.caption2).foregroundColor(.white.opacity(0.4))
-                Spacer()
+                    .lineLimit(1).minimumScaleFactor(0.8)
+                Spacer(minLength: 4)
                 Text(midLabel).font(.caption2).foregroundColor(.white.opacity(0.4))
-                Spacer()
+                    .lineLimit(1).minimumScaleFactor(0.8)
+                Spacer(minLength: 4)
                 Text(maxLabel).font(.caption2).foregroundColor(.white.opacity(0.4))
+                    .lineLimit(1).minimumScaleFactor(0.8)
             }
         }
     }
@@ -302,7 +316,12 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 }
                 HStack(spacing: 12) {
                     HStack(spacing: 6) {
-                        TextField("7.5", value: $viewModel.draft.sleepHours, format: .number)
+                        // The field used to accept anything — negative values,
+                        // dozens of hours — and those numbers fed the averages.
+                        TextField("7.5", value: Binding(
+                            get: { viewModel.draft.sleepHours },
+                            set: { viewModel.draft.sleepHours = min(max($0, 0), 24) }
+                        ), format: .number)
                             .keyboardType(.decimalPad)
                             .foregroundColor(.white)
                             .frame(width: 40)
@@ -320,7 +339,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                             Button {
                                 viewModel.draft.sleepQuality = quality
                             } label: {
-                                Text(quality.rawValue)
+                                Text(quality.initial)
                                     .font(.caption.weight(.heavy))
                                     .frame(width: 30, height: 30)
                                     .background(viewModel.draft.sleepQuality == quality ? Color.neonMint : Color.bgDark)
@@ -394,7 +413,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             FlowLayout(spacing: 10) {
                 ForEach(allSymptomOptions, id: \.self) { symptom in
                     tagChip(
-                        text: symptom,
+                        text: DiarySymptomOptions.title(for: symptom),
                         isSelected: viewModel.draft.symptoms.contains(symptom),
                         accent: .neonMint,
                         prefix: "+"
@@ -563,9 +582,9 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             FlowLayout(spacing: 10) {
                 ForEach(allMilestoneOptions, id: \.self) { tag in
                     tagChip(
-                        text: tag,
+                        text: DiaryMilestoneOptions.title(for: tag),
                         isSelected: viewModel.draft.milestoneTags.contains(tag),
-                        accent: milestoneAccent,
+                        accent: .milestonePurple,
                         prefix: "#"
                     ) {
                         viewModel.toggleMilestone(tag)
@@ -589,7 +608,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(milestoneAccent)
+                .background(Color.milestonePurple)
                 .cornerRadius(12)
             }
         }
@@ -632,8 +651,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             .buttonStyle(.plain)
 
             Button(action: {
-                viewModel.save()
-                dismiss()
+                if viewModel.save() { dismiss() }
             }) {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
@@ -657,44 +675,17 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
 extension DiaryCheckInView where VM == DiaryCheckInViewModel {
     init() {
-        self.init(viewModel: DIContainer.shared.resolve((any DiaryCheckInViewModelProtocol).self) as! VM)
+        self.init(viewModel: DIContainer.shared.resolve(DiaryCheckInViewModel.self))
     }
 
-    /// Opens the form pre-filled with an existing entry's data — saving then
-    /// updates that entry in place instead of creating a new one. Mirrors
-    /// AddMedicationView.init(editingMedication:).
+    /// Opens the form on an existing entry: saving updates it rather than
+    /// creating a new one. The draft itself is filled by `startEditing(_:)`
+    /// from `.task`.
     init(editingEntry: DiaryEntry) {
-        let resolvedVM = DIContainer.shared.resolve((any DiaryCheckInViewModelProtocol).self) as! VM
-
-        resolvedVM.draft.checkInDate = editingEntry.checkInDate
-        resolvedVM.draft.mood = DiaryMood(rawValue: editingEntry.moodLabel) ?? .good
-        resolvedVM.draft.physicalSummary = editingEntry.physicalSummary
-        resolvedVM.draft.energyLevel = editingEntry.energyLevel
-        resolvedVM.draft.discomfortLevel = editingEntry.discomfortLevel
-        resolvedVM.draft.sleepHours = editingEntry.sleepHours
-        resolvedVM.draft.sleepQuality = SleepQuality(rawValue: editingEntry.sleepQuality) ?? .good
-        resolvedVM.draft.waterGlasses = editingEntry.waterGlasses
-        resolvedVM.draft.symptoms = editingEntry.symptoms
-        resolvedVM.draft.reflectionNotes = editingEntry.reflectionNotes
-        resolvedVM.draft.milestoneTags = editingEntry.milestoneTags
-
-        // Load the existing photos from disk so saving without touching them
-        // isn't mistaken for removing them all (same reasoning as
-        // AddMedicationView.init(editingMedication:)).
-        var loadedImages: [UIImage] = []
-        var loadedData: [Data] = []
-        for photoId in editingEntry.photoIds {
-            if let data = ImageCache.shared.loadDataFromDisk(for: photoId), let image = UIImage(data: data) {
-                loadedImages.append(image)
-                loadedData.append(data)
-            }
-        }
-        resolvedVM.selectedImages = loadedImages
-        resolvedVM.draft.photos = loadedData
-
-        resolvedVM.editingEntry = editingEntry
-
-        self.init(viewModel: resolvedVM)
+        self.init(
+            viewModel: DIContainer.shared.resolve(DiaryCheckInViewModel.self),
+            editingEntry: editingEntry
+        )
     }
 }
 

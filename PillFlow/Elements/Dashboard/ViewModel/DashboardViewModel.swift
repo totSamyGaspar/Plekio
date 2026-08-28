@@ -24,6 +24,12 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     private let notificationService: NotificationServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
+    private static let weekdayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("EEE")
+        return formatter
+    }()
+
     // MARK: - Init
 
     init(dbService: DatabaseServiceProtocol, notificationService: NotificationServiceProtocol) {
@@ -56,43 +62,39 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     // MARK: - Data Loading
 
     private func fetchData() {
-        // Load all courses once from the database...
         let allCourses = dbService.fetchAllCourses()
 
-        // ...and reuse that list for both the selected date's pills...
-        allPills = dbService.fetchPills(for: selectedDate, preFetchedCourses: allCourses)
+        let pills = dbService.fetchPills(for: selectedDate, preFetchedCourses: allCourses)
 
-        // ...and the weekly stats calculation, avoiding repeated DB queries.
+        if pills != allPills {
+            allPills = pills
+        }
+
         calculateWeeklyStats(with: allCourses)
     }
 
     // MARK: - Actions
 
-    func togglePill(id: UUID) {
+    func togglePill(id: PillDose.ID) {
         guard let pill = allPills.first(where: { $0.id == id }) else { return }
+        let wasTaken = pill.isTaken
 
-        dbService.togglePill(medicationId: pill.medicationId, scheduledTime: pill.time)
+        guard AppErrorPresenter.shared.run({
+            try dbService.togglePill(medicationId: pill.medicationId, scheduledTime: pill.time)
+        }) else { return }
 
-        // Marking a dose taken must also keep pending push notifications in
-        // sync (otherwise a reminder can still fire after the dose was
-        // logged). Full reset + reschedule, same approach used elsewhere
-        // (CourseDetailViewModel, NewTreatmentViewModel); scheduleNotifications
-        // itself skips slots already marked taken.
-        notificationService.removeAllPending()
-        let activeCourses = dbService.fetchAllCourses().filter { $0.endDate >= Date() }
-        notificationService.scheduleNotifications(activeCourses: activeCourses)
+        notificationService.rescheduleAll(using: dbService)
 
         fetchData()
-    }
 
-    func handlePushTap(medicationId: UUID, time: Date, completion: @escaping (PillDose?) -> Void) {
-        // Setting selectedDate triggers fetchData via its didSet.
-        selectedDate = time
-
-        // Give the UI a moment to redraw and finish loading before reading allPills.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            let pill = self.allPills.first(where: { $0.medicationId == medicationId })
-            completion(pill)
+        if !wasTaken {
+            let takenAtSlot = allPills
+                .filter { $0.time == pill.time && $0.isTaken }
+                .map(\.medicationId)
+            notificationService.clearDelivered(
+                takenMedicationIds: takenAtSlot,
+                scheduledTime: pill.time
+            )
         }
     }
 
@@ -100,15 +102,14 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         let calendar = Calendar.current
         var percentages: [Double] = []
         var daysLabels: [String] = []
-        var totalAverage = 0.0
-        
+
+        var adherenceSum = 0.0
+        var daysWithDoses = 0
+
         for i in (0..<7).reversed() {
             let date = calendar.date(byAdding: .day, value: -i, to: Date()) ?? Date()
-            
-            // Format the weekday label (Fri, Sat...)
-            let formatter = DateFormatter()
-            formatter.dateFormat = "EEE"
-            daysLabels.append(formatter.string(from: date))
+
+            daysLabels.append(Self.weekdayFormatter.string(from: date))
 
             // Reuse the cached course list here too, to avoid a query per day.
             let dailyPills = dbService.fetchPills(for: date, preFetchedCourses: allCourses)
@@ -118,12 +119,17 @@ final class DashboardViewModel: DashboardViewModelProtocol {
                 let taken = dailyPills.filter { $0.isTaken }.count
                 let percent = Double(taken) / Double(dailyPills.count)
                 percentages.append(percent)
-                totalAverage += percent
+                adherenceSum += percent
+                daysWithDoses += 1
             }
         }
+
+        if weeklyPercentages != percentages { weeklyPercentages = percentages }
+        if weeklyDays != daysLabels { weeklyDays = daysLabels }
         
-        self.weeklyPercentages = percentages
-        self.weeklyDays = daysLabels
-        self.recentAverage = Int((totalAverage / 7.0) * 100)
+        let average = daysWithDoses > 0
+            ? Int((adherenceSum / Double(daysWithDoses)) * 100)
+            : 0
+        if recentAverage != average { recentAverage = average }
     }
 }

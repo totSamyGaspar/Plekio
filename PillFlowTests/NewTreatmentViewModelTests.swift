@@ -44,13 +44,13 @@ struct NewTreatmentViewModelTests {
         let mockNotifications = MockNotificationService()
         let vm = NewTreatmentViewModel(dbService: mockDB, notificationService: mockNotifications)
 
-        #expect(vm.isSaveEnabled == false) // empty name, no medications
+        #expect(vm.isSaveEnabled == false)
 
         vm.courseName = "   " // whitespace only — also counts as empty
         #expect(vm.isSaveEnabled == false)
 
         vm.courseName = "Курс"
-        #expect(vm.isSaveEnabled == false) // name is set, but no medications yet
+        #expect(vm.isSaveEnabled == false)
 
         vm.addMedication(MedicationDraft(name: "Аспирин"))
         #expect(vm.isSaveEnabled == true)

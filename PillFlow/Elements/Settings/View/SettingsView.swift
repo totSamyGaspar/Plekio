@@ -13,9 +13,9 @@ struct SettingsView: View {
             Color.bgDark.ignoresSafeArea()
             
             List {
-                Section(header: Text("О приложении").foregroundColor(.white.opacity(0.6))) {
+                Section(header: Text("About").foregroundColor(.white.opacity(0.6))) {
                     HStack {
-                        Text("Версия")
+                        Text("Version")
                             .foregroundColor(.white)
                         Spacer()
                         Text("1.0.0")
@@ -23,7 +23,7 @@ struct SettingsView: View {
                     }
                     
                     HStack {
-                        Text("Разработчик")
+                        Text("Developer")
                             .foregroundColor(.white)
                         Spacer()
                         Text("Edward Gasparian")
@@ -36,7 +36,7 @@ struct SettingsView: View {
                     Button(action: {
                         // No action yet
                     }) {
-                        Label("Поддержать проект", systemImage: "cup.and.saucer.fill")
+                        Label("Support the project", systemImage: "cup.and.saucer.fill")
                             .foregroundColor(.neonMint)
                     }
                 }
@@ -44,7 +44,7 @@ struct SettingsView: View {
             }
             .scrollContentBackground(.hidden) // Remove the list's default gray background
         }
-        .navigationTitle("Настройки")
+        .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
     }
 }

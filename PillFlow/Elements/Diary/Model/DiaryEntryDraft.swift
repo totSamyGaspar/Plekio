@@ -18,6 +18,21 @@ enum DiaryMood: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// Display label for the mood. `rawValue` is the stored key
+    /// (`DiaryEntry.moodLabel`) and has to stay an unchanging English string —
+    /// translating it would orphan every entry already saved.
+    var title: LocalizedStringResource {
+        switch self {
+        case .great:     return "Great"
+        case .good:      return "Good"
+        case .neutral:   return "Neutral"
+        case .downLow:   return "Down / Low"
+        case .stressed:  return "Stressed"
+        case .exhausted: return "Exhausted"
+        case .inPain:    return "In Pain"
+        }
+    }
+
     var emoji: String {
         switch self {
         case .great: return "⭐"
@@ -53,11 +68,23 @@ enum SleepQuality: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var label: String {
+    /// Single-letter label for the compact buttons. `rawValue` won't do here:
+    /// P/F/G/E are storage keys and mean nothing in other languages.
+    var initial: LocalizedStringResource {
         switch self {
-        case .poor: return "Poor"
-        case .fair: return "Fair"
-        case .good: return "Good"
+        case .poor:      return "P"
+        case .fair:      return "F"
+        case .good:      return "G"
+        case .excellent: return "E"
+        }
+    }
+
+    /// As with DiaryMood, `rawValue` is the storage key and this is the UI label.
+    var title: LocalizedStringResource {
+        switch self {
+        case .poor:      return "Poor"
+        case .fair:      return "Fair"
+        case .good:      return "Good"
         case .excellent: return "Excellent"
         }
     }
@@ -96,12 +123,55 @@ struct DiaryEntryDraft: Identifiable, Equatable {
     var photosModified: Bool = false
 }
 
+extension DiaryEntryDraft {
+    
+    init(from entry: DiaryEntry) {
+        self.init(
+            id: entry.id,
+            checkInDate: entry.checkInDate,
+            mood: DiaryMood(rawValue: entry.moodLabel) ?? .good,
+            physicalSummary: entry.physicalSummary,
+            energyLevel: entry.energyLevel,
+            discomfortLevel: entry.discomfortLevel,
+            sleepHours: entry.sleepHours,
+            sleepQuality: SleepQuality(rawValue: entry.sleepQuality) ?? .good,
+            waterGlasses: entry.waterGlasses,
+            symptoms: entry.symptoms,
+            reflectionNotes: entry.reflectionNotes,
+            milestoneTags: entry.milestoneTags,
+            photos: [],
+            isQuickLog: entry.isQuickLog,
+            photosModified: false
+        )
+    }
+}
+
 enum DiarySymptomOptions {
     static let all = [
         "Headache", "Fatigue", "Brain Fog", "Mild Nausea", "Muscle Tension",
         "Joint Stiffness", "Dizziness", "Restlessness", "Digestive Discomfort",
         "Insomnia", "Dry Mouth", "Elevated Heartbeat",
     ]
+
+    private static let titles: [String: LocalizedStringResource] = [
+        "Headache": "Headache",
+        "Fatigue": "Fatigue",
+        "Brain Fog": "Brain Fog",
+        "Mild Nausea": "Mild Nausea",
+        "Muscle Tension": "Muscle Tension",
+        "Joint Stiffness": "Joint Stiffness",
+        "Dizziness": "Dizziness",
+        "Restlessness": "Restlessness",
+        "Digestive Discomfort": "Digestive Discomfort",
+        "Insomnia": "Insomnia",
+        "Dry Mouth": "Dry Mouth",
+        "Elevated Heartbeat": "Elevated Heartbeat",
+    ]
+
+    static func title(for key: String) -> String {
+        guard let resource = titles[key] else { return key }
+        return String(localized: resource)
+    }
 }
 
 enum DiaryMilestoneOptions {
@@ -110,4 +180,26 @@ enum DiaryMilestoneOptions {
         "Low Stress Day", "Hydration Goal Met", "Medication Adjusted",
         "Doctor Consultation", "Restorative Sleep",
     ]
+
+    private static let titles: [String: LocalizedStringResource] = [
+        "Day 14 Milestone": "Day 14 Milestone",
+        "Consistent Routine": "Consistent Routine",
+        "Morning Walk": "Morning Walk",
+        "Post-Workout": "Post-Workout",
+        "Low Stress Day": "Low Stress Day",
+        "Hydration Goal Met": "Hydration Goal Met",
+        "Medication Adjusted": "Medication Adjusted",
+        "Doctor Consultation": "Doctor Consultation",
+        "Restorative Sleep": "Restorative Sleep",
+    ]
+
+    static func title(for key: String) -> String {
+        guard let resource = titles[key] else { return key }
+        return String(localized: resource)
+    }
+    
+    static func categoryTitle(for key: String?) -> String {
+        guard let key else { return String(localized: "Diary photo") }
+        return title(for: key)
+    }
 }

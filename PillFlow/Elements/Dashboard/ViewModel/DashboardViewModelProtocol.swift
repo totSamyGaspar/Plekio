@@ -21,6 +21,5 @@ protocol DashboardViewModelProtocol: ObservableObject {
     
     var isEmpty: Bool { get }
     
-    func togglePill(id: UUID)
-    func handlePushTap(medicationId: UUID, time: Date, completion: @escaping (PillDose?) -> Void)
+    func togglePill(id: PillDose.ID)
 }

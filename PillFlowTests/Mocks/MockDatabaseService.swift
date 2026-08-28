@@ -6,6 +6,9 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
     // MARK: - Stub properties (control what the mock returns)
     var pillsToReturn: [PillDose] = []
+    /// Per-day schedule, keyed by start of day. A date with no entry falls back to
+    /// `pillsToReturn`, so tests written before this existed still work.
+    var pillsByDay: [Date: [PillDose]] = [:]
     var coursesToReturn: [TreatmentCourse] = []
     var diaryEntriesToReturn: [DiaryEntry] = []
 
@@ -40,58 +43,74 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
     // MARK: - Protocol Implementation
 
-    func saveCourse(name: String, startDate: Date, endDate: Date, drafts: [MedicationDraft]) {
+    func saveCourse(name: String, startDate: Date, endDate: Date, drafts: [MedicationDraft]) throws {
         didCallSaveCourse = true
         savedCourseName = name
     }
 
     func fetchPills(for date: Date, preFetchedCourses: [TreatmentCourse]? = nil) -> [PillDose] {
         fetchedPillsDate = date
+        if let scheduled = pillsByDay[Calendar.current.startOfDay(for: date)] {
+            return scheduled
+        }
         return pillsToReturn
     }
 
-    func togglePill(medicationId: UUID, scheduledTime: Date) {
+    func togglePill(medicationId: UUID, scheduledTime: Date) throws {
         toggledPillMedicationId = medicationId
         toggledPillScheduledTime = scheduledTime
+
+        // Mirror the real service: the next fetchPills must return the slot with its
+        // new isTaken. Without this there is no way to test view-model logic that
+        // inspects the state AFTER the write, such as "is the whole slot closed".
+        for index in pillsToReturn.indices
+        where pillsToReturn[index].medicationId == medicationId
+            && pillsToReturn[index].time == scheduledTime {
+            pillsToReturn[index].isTaken.toggle()
+        }
     }
 
     func fetchAllCourses() -> [TreatmentCourse] {
         return coursesToReturn
     }
 
-    func deleteCourse(_ course: TreatmentCourse) {
+    func fetchCourse(id: UUID) -> TreatmentCourse? {
+        coursesToReturn.first { $0.id == id }
+    }
+
+    func deleteCourse(_ course: TreatmentCourse) throws {
         deletedCourse = course
     }
 
-    func deleteMedication(_ medication: MedicationItem) {
+    func deleteMedication(_ medication: MedicationItem) throws {
         deletedMedication = medication
     }
 
-    func updateCourseDetails(course: TreatmentCourse, name: String, startDate: Date, endDate: Date) {
+    func updateCourseDetails(course: TreatmentCourse, name: String, startDate: Date, endDate: Date) throws {
         didCallUpdateCourseDetails = true
         updatedCourseName = name
     }
 
-    func updateMedication(_ medication: MedicationItem, with draft: MedicationDraft) {
+    func updateMedication(_ medication: MedicationItem, with draft: MedicationDraft) throws {
         updatedMedication = medication
         updatedMedicationDraft = draft
     }
 
-    func addMedication(draft: MedicationDraft, to course: TreatmentCourse) {
+    func addMedication(draft: MedicationDraft, to course: TreatmentCourse) throws {
         addedMedicationDraft = draft
         addedToCourse = course
     }
 
-    func refillStock(for medication: MedicationItem, amount: Int) {
+    func refillStock(for medication: MedicationItem, amount: Int) throws {
         refilledMedication = medication
         refilledAmount = amount
     }
 
-    func saveDiaryEntry(draft: DiaryEntryDraft) {
+    func saveDiaryEntry(draft: DiaryEntryDraft) throws {
         savedDiaryDraft = draft
     }
 
-    func updateDiaryEntry(_ entry: DiaryEntry, with draft: DiaryEntryDraft) {
+    func updateDiaryEntry(_ entry: DiaryEntry, with draft: DiaryEntryDraft) throws {
         updatedDiaryEntry = entry
         updatedDiaryDraft = draft
     }
@@ -100,7 +119,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
         return diaryEntriesToReturn
     }
 
-    func deleteDiaryEntry(_ entry: DiaryEntry) {
+    func deleteDiaryEntry(_ entry: DiaryEntry) throws {
         deletedDiaryEntry = entry
     }
 }

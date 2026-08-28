@@ -10,12 +10,11 @@ import  SwiftUI
 struct UpNextHeroCard: View {
     let pills: [PillDose]
     var onLogNow: () -> Void
-    @State private var isPressed = false
     
     private var gradientColors: [Color] {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<12:  return [Color.mint, Color.teal]
+        case 5..<12:  return [Color.neonMint, Color.neonTeal]
         case 12..<18: return [Color.orange, Color.yellow]
         default:      return [Color.purple, Color.indigo]
         }
@@ -60,18 +59,10 @@ struct UpNextHeroCard: View {
                 
                 Spacer()
                 
-                Button(action: {
-                    let impact = UIImpactFeedbackGenerator(style: .medium)
-                    impact.impactOccurred()
-                    
-                    withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) {
-                        isPressed = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                        isPressed = false
-                        onLogNow()
-                    }
-                }) {
+                Button {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    onLogNow()
+                } label: {
                     Text(pills.count > 1 ? "LOG ALL" : "LOG NOW")
                         .font(.subheadline.weight(.heavy))
                         .foregroundColor(Color(red: 0.05, green: 0.3, blue: 0.2))
@@ -79,13 +70,21 @@ struct UpNextHeroCard: View {
                         .padding(.vertical, 14)
                         .background(Color.white)
                         .cornerRadius(24)
-                        .scaleEffect(isPressed ? 0.92 : 1.0)
                 }
+                .buttonStyle(PressableButtonStyle())
             }
         }
         .padding(24)
         .background(LinearGradient(colors: gradientColors, startPoint: .topLeading, endPoint: .bottomTrailing))
         .cornerRadius(32)
         .padding(.horizontal)
+    }
+}
+
+private struct PressableButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
+            .animation(.spring(response: 0.2, dampingFraction: 0.5), value: configuration.isPressed)
     }
 }

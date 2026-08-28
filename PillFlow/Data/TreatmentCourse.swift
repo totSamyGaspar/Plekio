@@ -15,7 +15,6 @@ final class TreatmentCourse {
     var startDate: Date
     var endDate: Date
     
-    // Cascade delete: deleting a course deletes all of its medications.
     @Relationship(deleteRule: .cascade, inverse: \MedicationItem.course)
     var medications: [MedicationItem]
     

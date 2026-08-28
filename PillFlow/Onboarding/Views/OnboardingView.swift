@@ -51,9 +51,9 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.mint)
+                    .background(Color.neonMint)
                     .cornerRadius(16)
-                    .shadow(color: Color.mint.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .shadow(color: Color.neonMint.opacity(0.3), radius: 10, x: 0, y: 5)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
@@ -69,7 +69,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
 
 extension OnboardingView where VM == OnboardingViewModel {
     init() {
-        let resolvedViewModel = DIContainer.shared.resolve((any OnboardingViewModelProtocol).self) as! VM
+        let resolvedViewModel = DIContainer.shared.resolve(OnboardingViewModel.self)
         self.init(viewModel: resolvedViewModel)
     }
 }
