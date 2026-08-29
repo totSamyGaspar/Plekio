@@ -163,11 +163,14 @@ extension Color {
     /// The same opacity means different contrast in each theme, because ink and
     /// ground swap roles: 0.5 held 5.0:1 on the dark card but only 3.2:1 on the
     /// cream one, so the ladder quietly failed everywhere the light theme went.
-    /// Fixed here at ~4.9:1 in both — just over the AA floor, so text darkens
-    /// no more than legibility requires.
+    /// Fixed here at ~4.7:1 on the tinted chip fills this text actually sits on,
+    /// which is stricter than it looks: measured against the clean surfaces
+    /// alone it came to 4.49 on a chip, and Accessibility Inspector caught the
+    /// hundredth. Still only just over the AA floor, so text darkens no more
+    /// than legibility requires.
     static let textSecondary = adaptive(
-        light: rgb(0.392, 0.408, 0.435),
-        dark: rgb(0.529, 0.557, 0.600),
+        light: rgb(0.380, 0.396, 0.424),
+        dark: rgb(0.553, 0.580, 0.624),
         lightIncreased: rgb(0.286, 0.302, 0.329),
         darkIncreased: rgb(0.659, 0.682, 0.722)
     )

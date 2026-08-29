@@ -26,7 +26,10 @@ struct UpNextHeroCard: View {
                 .font(.caption.weight(.heavy))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(Color.white.opacity(0.25))
+                // Black, not white: a white wash lightened the ground under
+                // white text and left the label at 3.4:1. Darkening instead
+                // keeps the glass look and takes it past 7:1.
+                .background(Color.black.opacity(0.15))
                 .cornerRadius(20)
                 .foregroundColor(.white)
             

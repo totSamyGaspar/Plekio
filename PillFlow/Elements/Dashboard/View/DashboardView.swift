@@ -113,6 +113,9 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 .overlay(
                     Text("PF").font(.headline.weight(.heavy)).foregroundColor(Color.onAccent)
                 )
+                // Decoration: the app's name is already the screen title, and
+                // "PF" read out as two letters is noise, not information.
+                .accessibilityHidden(true)
         }
         .padding(20)
         .background(Color.appSurface)
