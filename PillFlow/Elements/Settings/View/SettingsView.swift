@@ -26,9 +26,35 @@ struct SettingsView: View {
                             Spacer()
                         }
 
-                        Picker("Theme", selection: $theme) {
-                            ForEach(AppTheme.allCases) { option in
-                                Text(option.title).tag(option)
+            VStack(alignment: .leading, spacing: 0) {
+                // Drawn rather than left to the navigation bar: the other three
+                // tabs draw their own titles, and a system large title here was
+                // the one screen that behaved differently. The header trait is
+                // added by hand because that is what the system title provided
+                // and VoiceOver still needs.
+                Text("Settings")
+                    .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
+                    .foregroundColor(.textPrimary)
+                    .accessibilityAddTraits(.isHeader)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
+
+                            Picker("Theme", selection: $theme) {
+                                ForEach(AppTheme.allCases) { option in
+                                    Text(option.title).tag(option)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
+
+                List {
+                    Section(header: Text("Appearance").foregroundColor(.textSecondary)) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Label("Theme", systemImage: theme.iconName)
+                                    .foregroundColor(.textPrimary)
+                                Spacer()
                             }
                         }
                         .pickerStyle(.segmented)
@@ -38,21 +64,22 @@ struct SettingsView: View {
                 }
                 .listRowBackground(Color.appSurface)
 
-                Section(header: Text("About").foregroundColor(.textPrimary.opacity(0.6))) {
-                    HStack {
-                        Text("Version")
-                            .foregroundColor(.textPrimary)
-                        Spacer()
-                        Text("1.0.0")
-                            .foregroundColor(.textPrimary.opacity(0.5))
-                    }
+                    Section(header: Text("About").foregroundColor(.textSecondary)) {
+                        HStack {
+                            Text("Version")
+                                .foregroundColor(.textPrimary)
+                            Spacer()
+                            Text("1.0.0")
+                                .foregroundColor(.textSecondary)
+                        }
                     
-                    HStack {
-                        Text("Developer")
-                            .foregroundColor(.textPrimary)
-                        Spacer()
-                        Text("Edward Gasparian")
-                            .foregroundColor(.textPrimary.opacity(0.5))
+                        HStack {
+                            Text("Developer")
+                                .foregroundColor(.textPrimary)
+                            Spacer()
+                            Text("Edward Gasparian")
+                                .foregroundColor(.textSecondary)
+                        }
                     }
                 }
                 .listRowBackground(Color.appSurface) // Card background for settings rows

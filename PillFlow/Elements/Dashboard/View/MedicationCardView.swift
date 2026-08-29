@@ -36,7 +36,7 @@ struct MedicationCardView: View {
                 HStack {
                     Text(pill.name)
                         .font(.headline.weight(.bold))
-                        .foregroundColor(pill.isTaken ? .textPrimary.opacity(0.5) : .textPrimary)
+                        .foregroundColor(pill.isTaken ? .textSecondary : .textPrimary)
                         .strikethrough(pill.isTaken)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
@@ -106,15 +106,15 @@ struct MedicationCardView: View {
                         .font(.caption2.weight(.heavy))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.red.opacity(0.15))
-                        .foregroundColor(.red)
+                        .background(Color.warningAccent.opacity(0.12))
+                        .foregroundColor(.warningAccent)
                         .cornerRadius(6)
                 }
                 
                 Button(action: onToggle) {
                     Image(systemName: "checkmark.circle")
                         .font(.title)
-                        .foregroundColor(pill.isMissed ? .red.opacity(0.75) : .textPrimary.opacity(0.3))
+                        .foregroundColor(pill.isMissed ? .warningAccent : .textTertiary)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(

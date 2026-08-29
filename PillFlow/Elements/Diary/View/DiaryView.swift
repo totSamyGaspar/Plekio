@@ -146,7 +146,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 Spacer()
                 Text("· \(Date().formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
                     .font(.caption)
-                    .foregroundColor(.textPrimary.opacity(0.4))
+                    .foregroundColor(.textSecondary)
             }
 
             Text("Daily Health & Mood Diary")
@@ -155,7 +155,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
 
             Text("Track how your body responds to your regimen, log symptoms, record daily energy levels, and compare progress photos over time.")
                 .font(.subheadline)
-                .foregroundColor(.textPrimary.opacity(0.6))
+                .foregroundColor(.textSecondary)
 
             HStack(spacing: 12) {
                 Button {
@@ -212,7 +212,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             }
             Text("How are you feeling right now? Tap a mood to log quickly or fill in detailed notes & photos.")
                 .font(.subheadline)
-                .foregroundColor(.textPrimary.opacity(0.5))
+                .foregroundColor(.textSecondary)
 
             HStack(spacing: 10) {
                 ForEach(quickMoods, id: \.mood) { item in
@@ -256,7 +256,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 Spacer()
                 Text("at \(entry.checkInDate.formatted(date: .omitted, time: .shortened))")
                     .font(.caption)
-                    .foregroundColor(.textPrimary.opacity(0.4))
+                    .foregroundColor(.textSecondary)
             }
 
             HStack(alignment: .top, spacing: 12) {
@@ -272,7 +272,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                         Text("“\(quote)”")
                             .font(.subheadline)
                             .italic()
-                            .foregroundColor(.textPrimary.opacity(0.6))
+                            .foregroundColor(.textSecondary)
                             .lineLimit(2)
                     }
                 }
@@ -337,7 +337,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
                     .font(.caption2.weight(.heavy))
-                    .foregroundColor(.textPrimary.opacity(0.4))
+                    .foregroundColor(.textSecondary)
                 Text(value)
                     .font(.title3.weight(.bold))
                     .foregroundColor(.textPrimary)
@@ -370,10 +370,10 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                         if let count = subTabCount(tab) {
                             Text("(\(count))")
                                 .font(.caption2)
-                                .foregroundColor(.textPrimary.opacity(0.4))
+                                .foregroundColor(.textSecondary)
                         }
                     }
-                    .foregroundColor(selectedSubTab == tab ? .accentPrimary : .textPrimary.opacity(0.5))
+                    .foregroundColor(selectedSubTab == tab ? .accentPrimary : .textSecondary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)

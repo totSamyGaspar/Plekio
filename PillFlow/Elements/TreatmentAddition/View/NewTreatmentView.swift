@@ -24,13 +24,13 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                 Color.appBackground.ignoresSafeArea()
                 
                 Form {
-                    Section(header: Text("Basic Information").foregroundColor(.textPrimary.opacity(0.6))) {
+                    Section(header: Text("Basic Information").foregroundColor(.textSecondary)) {
                         TextField("Course Name (e.g., Vitamins)", text: $viewModel.courseName)
                             .foregroundColor(.textPrimary)
                     }
                     .listRowBackground(Color.appSurface)
                     
-                    Section(header: Text("Course Duration").foregroundColor(.textPrimary.opacity(0.6))) {
+                    Section(header: Text("Course Duration").foregroundColor(.textSecondary)) {
                         DatePicker("Start", selection: $viewModel.startDate, displayedComponents: .date)
                             .foregroundColor(.textPrimary)
                         // A course can't end before it starts: such a course saved
@@ -42,7 +42,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                     }
                     .listRowBackground(Color.appSurface)
                     
-                    Section(header: Text("Medications").foregroundColor(.textPrimary.opacity(0.6))) {
+                    Section(header: Text("Medications").foregroundColor(.textSecondary)) {
                         ForEach(viewModel.medications) { med in
                             HStack {
                                 Image(systemName: med.formSystemImage)
@@ -55,7 +55,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                                 // translatable string.
                                 (Text("\(med.dosage) pcs") + Text(verbatim: ", ") + Text("\(med.timesOfDay.count) times/day"))
                                     .font(.caption)
-                                    .foregroundColor(.textPrimary.opacity(0.5))
+                                    .foregroundColor(.textSecondary)
                             }
                         }
                         .onDelete(perform: viewModel.deleteMedication)
@@ -80,6 +80,16 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                                 .frame(maxWidth: .infinity)
                                 .foregroundColor(viewModel.isSaveEnabled ? Color.onAccent : .textPrimary.opacity(0.3))
                         }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    // Dismiss only if the write actually succeeded — otherwise
+                    // what was typed would go with the screen.
+                    Button("Save") {
+                        if viewModel.saveCourse() { dismiss() }
+                    }
+                    .font(.headline)
+                    .foregroundColor(viewModel.isSaveEnabled ? .accentPrimary : .textTertiary)
+                    .disabled(!viewModel.isSaveEnabled)
+                }
                     }
                     .listRowBackground(viewModel.isSaveEnabled ? Color.accentPrimary : Color.textPrimary.opacity(0.1))
                     .disabled(!viewModel.isSaveEnabled)

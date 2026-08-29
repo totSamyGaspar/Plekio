@@ -16,7 +16,7 @@ struct CalendarDayView: View {
         VStack(spacing: 8) {
             Text(date.formatted(.dateTime.weekday(.abbreviated)))
                 .font(.caption2.weight(.bold))
-                .foregroundColor(isSelected ? .onAccent : .textPrimary.opacity(0.5))
+                .foregroundColor(isSelected ? .onAccent : .textSecondary)
             
             Text(date.formatted(.dateTime.day()))
                 .font(.title3.weight(.bold))

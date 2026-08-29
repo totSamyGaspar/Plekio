@@ -43,7 +43,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     // MARK: - Photo Section
                     Section(
                         header: Text("Image")
-                            .foregroundColor(.textPrimary.opacity(0.6))
+                            .foregroundColor(.textSecondary)
                     ) {
                         HStack {
                             Spacer()
@@ -81,7 +81,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     }
 
                     // MARK: - Basic Details
-                    Section(header: Text("Medication").foregroundColor(.textPrimary.opacity(0.6))) {
+                    Section(header: Text("Medication").foregroundColor(.textSecondary)) {
                         TextField("Name (e.g., Ibuprofen)", text: $viewModel.draft.name)
                             .foregroundColor(.textPrimary)
 
@@ -97,7 +97,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     .listRowBackground(Color.appSurface)
 
                     // MARK: - Inventory Tracking
-                    Section(header: Text("Inventory Tracking").foregroundColor(.textPrimary.opacity(0.6))) {
+                    Section(header: Text("Inventory Tracking").foregroundColor(.textSecondary)) {
                         HStack {
                             Text("Total in package (pcs)")
                                 .foregroundColor(.textPrimary)
@@ -132,7 +132,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     .listRowBackground(Color.appSurface)
 
                     // MARK: - Frequency and Dosage
-                    Section(header: Text("Intake Frequency").foregroundColor(.textPrimary.opacity(0.6))) {
+                    Section(header: Text("Intake Frequency").foregroundColor(.textSecondary)) {
                         Picker("Interval", selection: $viewModel.draft.frequencyDays) {
                             ForEach(DoseFrequency.allCases) { frequency in
                                 Text(frequency.title).tag(frequency.rawValue)
@@ -144,14 +144,14 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     }
                     .listRowBackground(Color.appSurface)
 
-                    Section(header: Text("Dosage").foregroundColor(.textPrimary.opacity(0.6))) {
+                    Section(header: Text("Dosage").foregroundColor(.textSecondary)) {
                         Stepper("Quantity: \(viewModel.draft.dosage)", value: $viewModel.draft.dosage, in: 1...10)
                             .foregroundColor(.textPrimary)
                     }
                     .listRowBackground(Color.appSurface)
 
                     // MARK: - Intake Time
-                    Section(header: Text("Intake Time").foregroundColor(.textPrimary.opacity(0.6))) {
+                    Section(header: Text("Intake Time").foregroundColor(.textSecondary)) {
                         // ForEach over 0..<count needs a CONSTANT range, but this
                         // array changes on screen: adding or removing a time caused
                         // glitches and access by a stale index. Iterate the
@@ -203,7 +203,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                         dismiss()
                     }
                     .font(.headline)
-                    .foregroundColor(viewModel.draft.name.isEmpty ? .textPrimary.opacity(0.3) : .accentPrimary)
+                    .foregroundColor(viewModel.draft.name.isEmpty ? .textTertiary : .accentPrimary)
                     .disabled(viewModel.draft.name.isEmpty)
                 }
             }
@@ -250,7 +250,7 @@ struct ImagePreviewView: View {
                     Text("Photo")
                         .font(.caption2)
                 }
-                .foregroundColor(.textPrimary.opacity(0.5))
+                .foregroundColor(.textSecondary)
             }
         }
         .buttonStyle(PlainButtonStyle())

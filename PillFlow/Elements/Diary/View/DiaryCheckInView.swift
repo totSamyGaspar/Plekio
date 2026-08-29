@@ -82,7 +82,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     .foregroundColor(.textPrimary)
                 Text("Log how your body feels, mood scores & track visual progress")
                     .font(.caption)
-                    .foregroundColor(.textPrimary.opacity(0.5))
+                    .foregroundColor(.textSecondary)
             }
 
             Spacer()
@@ -104,16 +104,38 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     private var dateTimeSection: some View {
         HStack(spacing: 12) {
             labeledField(title: "CHECK-IN DATE") {
-                DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .date)
-                    .labelsHidden()
-                    .datePickerStyle(.compact)
-                    .appColorScheme()
+                valueButton(
+                    text: viewModel.draft.checkInDate.formatted(date: .abbreviated, time: .omitted),
+                    label: "CHECK-IN DATE"
+                ) { showingDatePicker = true }
+                .popover(isPresented: $showingDatePicker) {
+                    // A popover sizes itself to its content, and the graphical
+                    // picker has no width of its own to offer — left to itself it
+                    // collapsed into a column two digits wide. A month grid needs
+                    // roughly 320pt, which still fits inside a popover on the
+                    // narrowest phone iOS 26 runs on.
+                    DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .date)
+                        .datePickerStyle(.graphical)
+                        .labelsHidden()
+                        .frame(width: 320)
+                        .padding(8)
+                        .presentationCompactAdaptation(.popover)
+                        .appColorScheme()
+                }
             }
             labeledField(title: "TIME") {
-                DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
-                    .datePickerStyle(.compact)
-                    .appColorScheme()
+                valueButton(
+                    text: viewModel.draft.checkInDate.formatted(date: .omitted, time: .shortened),
+                    label: "TIME"
+                ) { showingTimePicker = true }
+                .popover(isPresented: $showingTimePicker) {
+                    DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .hourAndMinute)
+                        .datePickerStyle(.wheel)
+                        .labelsHidden()
+                        .padding()
+                        .presentationCompactAdaptation(.popover)
+                        .appColorScheme()
+                }
             }
         }
     }
@@ -122,7 +144,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.caption2.weight(.heavy))
-                .foregroundColor(.textPrimary.opacity(0.5))
+                .foregroundColor(.textSecondary)
                 .tracking(0.5)
             content()
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -140,7 +162,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack {
                 Text("OVERALL MOOD TODAY")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.textPrimary.opacity(0.6))
+                    .foregroundColor(.textSecondary)
                     .tracking(0.5)
                 Spacer()
                 Text("SELECT DOMINANT MOOD")
@@ -171,7 +193,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                         .foregroundColor(.textPrimary)
                     Text("Score: \(mood.score)/5")
                         .font(.caption2)
-                        .foregroundColor(.textPrimary.opacity(0.5))
+                        .foregroundColor(.textSecondary)
                 }
                 Spacer()
             }
@@ -194,7 +216,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("HOW ARE YOU FEELING PHYSICALLY TODAY?")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.textPrimary.opacity(0.6))
+                    .foregroundColor(.textSecondary)
                 Spacer()
                 Text("ONE SENTENCE SUMMARY")
                     .font(.caption2.weight(.semibold))
@@ -284,21 +306,21 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 Spacer()
                 Text(trailingLabel)
                     .font(.caption)
-                    .foregroundColor(.textPrimary.opacity(0.5))
+                    .foregroundColor(.textSecondary)
             }
             Slider(value: value, in: range, step: 1)
                 .tint(tint)
             HStack {
                 // Three labels share one row ("0 (None) / 5 (Manageable) / 10 (Severe)");
                 // the middle one is noticeably longer in German and Romanian.
-                Text(minLabel).font(.caption2).foregroundColor(.textPrimary.opacity(0.4))
-                    .lineLimit(1).minimumScaleFactor(0.8)
+                Text(minLabel).font(.caption2).foregroundColor(.textSecondary)
+                    .lineLimit(2).minimumScaleFactor(0.9)
                 Spacer(minLength: 4)
-                Text(midLabel).font(.caption2).foregroundColor(.textPrimary.opacity(0.4))
-                    .lineLimit(1).minimumScaleFactor(0.8)
+                Text(midLabel).font(.caption2).foregroundColor(.textSecondary)
+                    .lineLimit(2).minimumScaleFactor(0.9)
                 Spacer(minLength: 4)
-                Text(maxLabel).font(.caption2).foregroundColor(.textPrimary.opacity(0.4))
-                    .lineLimit(1).minimumScaleFactor(0.8)
+                Text(maxLabel).font(.caption2).foregroundColor(.textSecondary)
+                    .lineLimit(2).minimumScaleFactor(0.9)
             }
         }
     }
@@ -325,7 +347,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                             .keyboardType(.decimalPad)
                             .foregroundColor(.textPrimary)
                             .frame(width: 40)
-                        Text("hours").foregroundColor(.textPrimary.opacity(0.5)).font(.caption)
+                        Text("hours").foregroundColor(.textSecondary).font(.caption)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -343,7 +365,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                                     .font(.caption.weight(.heavy))
                                     .frame(width: 30, height: 30)
                                     .background(viewModel.draft.sleepQuality == quality ? Color.accentPrimary : Color.appBackground)
-                                    .foregroundColor(viewModel.draft.sleepQuality == quality ? Color.onAccent : .textPrimary.opacity(0.6))
+                                    .foregroundColor(viewModel.draft.sleepQuality == quality ? Color.onAccent : .textSecondary)
                                     .clipShape(Circle())
                             }
                             .buttonStyle(.plain)
@@ -380,7 +402,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                             .foregroundColor(.textPrimary)
                         Text("(~\(viewModel.draft.waterGlasses * 250)ml)")
                             .font(.caption2)
-                            .foregroundColor(.textPrimary.opacity(0.5))
+                            .foregroundColor(.textSecondary)
                     }
                     Spacer()
 
@@ -408,7 +430,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("PHYSICAL SYMPTOMS & SENSATIONS")
                 .font(.caption.weight(.heavy))
-                .foregroundColor(.textPrimary.opacity(0.6))
+                .foregroundColor(.textSecondary)
 
             FlowLayout(spacing: 10) {
                 ForEach(allSymptomOptions, id: \.self) { symptom in
@@ -452,7 +474,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("PERSONAL REFLECTION & DIARY NOTES")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.textPrimary.opacity(0.6))
+                    .foregroundColor(.textSecondary)
                 Spacer()
                 Text("SIDE EFFECTS, PROGRESS NOTES, GRATITUDE")
                     .font(.caption2.weight(.semibold))
@@ -464,7 +486,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 if viewModel.draft.reflectionNotes.isEmpty {
                     Text("Describe your day in detail: how your medications felt, energy shifts, dietary response, wellness milestones, or questions for your next doctor appointment...")
                         .font(.subheadline)
-                        .foregroundColor(.textPrimary.opacity(0.3))
+                        .foregroundColor(.textTertiary)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 14)
                         .allowsHitTesting(false)
@@ -494,7 +516,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                             .foregroundColor(.textPrimary)
                         Text("Add photos to track skin changes, body posture, wellness milestones or recovery progress")
                             .font(.caption2)
-                            .foregroundColor(.textPrimary.opacity(0.5))
+                            .foregroundColor(.textSecondary)
                     }
                 }
                 Spacer()
@@ -513,13 +535,13 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 VStack(spacing: 8) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.title2)
-                        .foregroundColor(.textPrimary.opacity(0.4))
+                        .foregroundColor(.textTertiary)
                     Text("Click or drag photos here")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.textPrimary.opacity(0.6))
+                        .foregroundColor(.textSecondary)
                     Text("Supports mobile camera snapshots & image gallery (JPG, PNG, WebP)")
                         .font(.caption2)
-                        .foregroundColor(.textPrimary.opacity(0.35))
+                        .foregroundColor(.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
@@ -577,7 +599,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("TAGS & MILESTONES")
                 .font(.caption.weight(.heavy))
-                .foregroundColor(.textPrimary.opacity(0.6))
+                .foregroundColor(.textSecondary)
 
             FlowLayout(spacing: 10) {
                 ForEach(allMilestoneOptions, id: \.self) { tag in

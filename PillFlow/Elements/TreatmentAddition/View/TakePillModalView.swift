@@ -10,6 +10,10 @@ import SwiftUI
 struct TakePillModalView: View {
     @Environment(\.dismiss) private var dismiss
 
+    /// With Reduce Transparency on, the blur behind the modal becomes a solid
+    /// fill rather than a thinner blur.
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     // Pills scheduled for the same time
     let pills: [PillDose]
     var onTake: () -> Void
@@ -26,7 +30,9 @@ struct TakePillModalView: View {
                 .onTapGesture { dismiss() }
 
             Rectangle()
-                .fill(.ultraThinMaterial)
+                .fill(reduceTransparency
+                      ? AnyShapeStyle(Color.appBackground)
+                      : AnyShapeStyle(.ultraThinMaterial))
                 .ignoresSafeArea()
                 .onTapGesture { dismiss() }
 

@@ -52,7 +52,7 @@ struct WeeklyAdherenceView: View {
 
                         Text(label)
                             .font(.caption2.weight(.bold))
-                            .foregroundColor(.textPrimary.opacity(0.5))
+                            .foregroundColor(.textSecondary)
                     }
                 }
             }

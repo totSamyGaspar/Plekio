@@ -18,6 +18,7 @@ struct PillFlowApp: App {
     init() {
         _ = DIContainer.shared
         MainTabView.configureTabBarAppearance()
+        AppAppearance.configureSliders()
     }
     
     var body: some Scene {

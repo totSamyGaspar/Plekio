@@ -23,7 +23,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
             Color.appBackground.ignoresSafeArea()
             
             Form {
-                Section(header: Text("Course Settings").foregroundColor(.textPrimary.opacity(0.6))) {
+                Section(header: Text("Course Settings").foregroundColor(.textSecondary)) {
                     TextField("Course Name", text: $viewModel.courseName)
                         .foregroundColor(.textPrimary)
                         .onSubmit { viewModel.saveCourseChanges() }
@@ -35,10 +35,10 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                 }
                 .listRowBackground(Color.appSurface)
                 
-                Section(header: Text("Medications in Course").foregroundColor(.textPrimary.opacity(0.6))) {
+                Section(header: Text("Medications in Course").foregroundColor(.textSecondary)) {
                     if viewModel.medications.isEmpty {
                         Text("No medications in this course")
-                            .foregroundColor(.textPrimary.opacity(0.5))
+                            .foregroundColor(.textSecondary)
                     } else {
                         ForEach(viewModel.medications) { med in
                             HStack(spacing: 12) {
@@ -48,7 +48,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                                 }) {
                                     Image(systemName: "pencil")
                                         .font(.title2)
-                                        .foregroundColor(.textPrimary.opacity(0.4))
+                                        .foregroundColor(.textTertiary)
                                 }
                                 .buttonStyle(.borderless)
                             }

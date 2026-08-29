@@ -61,7 +61,7 @@ struct DiaryJournalFeedView: View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.textPrimary.opacity(0.4))
+                    .foregroundColor(.textTertiary)
                 TextField("Search notes", text: $searchText)
                     .foregroundColor(.textPrimary)
             }

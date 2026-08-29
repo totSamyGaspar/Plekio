@@ -16,11 +16,20 @@ struct MainTabView: View {
 
     static func configureTabBarAppearance() {
         let appearance = UITabBarAppearance()
-        appearance.configureWithDefaultBackground()
-        // The plain material, not the ...Dark variant: it resolves per trait
-        // collection, so the bar follows the theme without being rebuilt.
-        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        appearance.backgroundColor = .appTabBarWash
+
+        if UIAccessibility.isReduceTransparencyEnabled {
+            // Reduce Transparency asks for a solid bar, not a thinner blur.
+            // Read once here: an appearance applies to bars as they are created,
+            // so a mid-session change to the setting lands on the next launch.
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .appSurfaceOpaque
+        } else {
+            appearance.configureWithDefaultBackground()
+            // The plain material, not the ...Dark variant: it resolves per trait
+            // collection, so the bar follows the theme without being rebuilt.
+            appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+            appearance.backgroundColor = .appTabBarWash
+        }
 
         appearance.stackedLayoutAppearance.selected.iconColor = .appAccent
         appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.appAccent]

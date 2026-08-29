@@ -60,7 +60,7 @@ struct DiaryProgressGalleryView: View {
         HStack {
             Text("Category:")
                 .font(.subheadline.weight(.semibold))
-                .foregroundColor(.textPrimary.opacity(0.6))
+                .foregroundColor(.textSecondary)
             Menu {
                 Button("All Photos (\(checkpoints.count))") { categoryFilter = nil }
                 ForEach(availableCategories, id: \.self) { cat in
@@ -99,7 +99,7 @@ struct DiaryProgressGalleryView: View {
                         : "\(selection.count)/2 checkpoints selected."
                 )
                 .font(.caption)
-                .foregroundColor(.textPrimary.opacity(0.6))
+                .foregroundColor(.textSecondary)
 
                 Button {
                     onLaunchComparison()
@@ -114,7 +114,7 @@ struct DiaryProgressGalleryView: View {
                     }
                     .font(.caption.weight(.heavy))
                     .lineLimit(1)
-                    .foregroundColor(selection.count == 2 ? Color.onAccent : .textPrimary.opacity(0.35))
+                    .foregroundColor(selection.count == 2 ? Color.onAccent : .textTertiary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
                     .background(selection.count == 2 ? Color.accentPrimary : Color.textPrimary.opacity(0.06))
@@ -172,7 +172,7 @@ struct DiaryProgressGalleryView: View {
                 HStack {
                     Label(item.entry.checkInDate.formatted(date: .numeric, time: .omitted), systemImage: "calendar")
                         .font(.caption)
-                        .foregroundColor(.textPrimary.opacity(0.5))
+                        .foregroundColor(.textSecondary)
                     Spacer()
                     Text("Mood: \(item.entry.moodTitle)")
                         .font(.caption2.weight(.semibold))
@@ -187,7 +187,7 @@ struct DiaryProgressGalleryView: View {
                 if !caption.isEmpty {
                     Text(caption)
                         .font(.caption)
-                        .foregroundColor(.textPrimary.opacity(0.6))
+                        .foregroundColor(.textSecondary)
                         .lineLimit(2)
                 }
 

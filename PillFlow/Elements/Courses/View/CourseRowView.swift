@@ -23,7 +23,7 @@ struct CourseRowView: View {
             HStack {
                 Text(viewModel.title)
                     .font(.headline.weight(.bold))
-                    .foregroundColor(isHistory ? .textPrimary.opacity(0.5) : .textPrimary)
+                    .foregroundColor(isHistory ? .textSecondary : .textPrimary)
                 
                 Spacer()
                 
@@ -55,7 +55,7 @@ struct CourseRowView: View {
             HStack {
                 Text("Medications: \(viewModel.medicationsCount)")
                     .font(.caption.weight(.medium))
-                    .foregroundColor(.textPrimary.opacity(0.5))
+                    .foregroundColor(.textSecondary)
                 
                 Spacer()
                 

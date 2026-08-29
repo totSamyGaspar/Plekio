@@ -98,7 +98,7 @@ struct BeforeAfterComparisonView: View {
                     .foregroundColor(.textPrimary)
                 Text("Track your recovery, skin changes & wellness transformation")
                     .font(.caption2)
-                    .foregroundColor(.textPrimary.opacity(0.55))
+                    .foregroundColor(.textSecondary)
             }
 
             Spacer(minLength: 4)
@@ -132,8 +132,7 @@ struct BeforeAfterComparisonView: View {
                 .font(.caption2.weight(.bold))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
-                .minimumScaleFactor(0.8)
-                .foregroundColor(isActive ? Color.onAccent : .textPrimary.opacity(0.6))
+                .foregroundColor(isActive ? Color.onAccent : .textSecondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
                 .frame(minWidth: 56)
@@ -162,7 +161,7 @@ struct BeforeAfterComparisonView: View {
                     Spacer(minLength: 6)
                     Image(systemName: "chevron.down")
                         .font(.caption2)
-                        .foregroundColor(.textPrimary.opacity(0.4))
+                        .foregroundColor(.textTertiary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
@@ -331,7 +330,7 @@ struct BeforeAfterComparisonView: View {
                 Spacer()
                 Text(shortDate(checkpoint))
                     .font(.caption)
-                    .foregroundColor(.textPrimary.opacity(0.5))
+                    .foregroundColor(.textSecondary)
             }
 
             Group {
@@ -356,7 +355,7 @@ struct BeforeAfterComparisonView: View {
             if !quote.isEmpty && quote != boldLine {
                 Text(quote)
                     .font(.caption.italic())
-                    .foregroundColor(.textPrimary.opacity(0.5))
+                    .foregroundColor(.textSecondary)
                     .lineLimit(2)
             }
             if let checkpoint {
@@ -376,7 +375,7 @@ struct BeforeAfterComparisonView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("AVAILABLE PROGRESS PHOTOS (\(checkpoints.count))")
                 .font(.caption2.weight(.heavy))
-                .foregroundColor(.textPrimary.opacity(0.4))
+                .foregroundColor(.textSecondary)
                 .tracking(0.5)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -414,7 +413,7 @@ struct BeforeAfterComparisonView: View {
 
             Text(item.entry.checkInDate.formatted(Self.dateLabelStyle))
                 .font(.caption2)
-                .foregroundColor(.textPrimary.opacity(0.4))
+                .foregroundColor(.textSecondary)
         }
         .onTapGesture {
             // Every tap does something: tapping the current "before" photo

@@ -28,7 +28,7 @@ struct PeriodSectionView: View {
                     .shadow(color: .accentPrimary.opacity(0.5), radius: 4)
                 Text(title).font(.headline).foregroundColor(.textPrimary)
                 Spacer()
-                Text(timeString).font(.subheadline).foregroundColor(.textPrimary.opacity(0.5))
+                Text(timeString).font(.subheadline).foregroundColor(.textSecondary)
             }
 
             ForEach(pills) { pill in

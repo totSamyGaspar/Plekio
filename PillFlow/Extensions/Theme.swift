@@ -16,32 +16,43 @@ import UIKit
 /// any view without an observable object in between: every screen that needs
 /// the scheme reads the same key and re-renders on its own when it changes.
 enum AppTheme: String, CaseIterable, Identifiable {
-    case dark
+    /// Follows the iOS setting, which is what HIG asks an app to do by default.
+    /// Listed first: `allCases` is what the picker in Settings renders.
+    case system
     case light
+    case dark
 
     /// One name for the defaults key, so a typo cannot split the setting in two.
     static let storageKey = "appTheme"
 
     var id: String { rawValue }
 
-    var colorScheme: ColorScheme {
+    /// `nil` hands the choice back to the system — `preferredColorScheme(nil)`
+    /// stops overriding rather than picking a side.
+    var colorScheme: ColorScheme? {
+        // Explicit returns rather than a switch expression: mixing `nil` with
+        // implicit member syntax leans on optional promotion that the shorthand
+        // form does not always infer.
         switch self {
-        case .dark: .dark
-        case .light: .light
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
         }
     }
 
     var title: LocalizedStringKey {
         switch self {
-        case .dark: "Dark"
+        case .system: "System"
         case .light: "Light"
+        case .dark: "Dark"
         }
     }
 
     var iconName: String {
         switch self {
-        case .dark: "moon.stars.fill"
+        case .system: "circle.lefthalf.filled"
         case .light: "sun.max.fill"
+        case .dark: "moon.stars.fill"
         }
     }
 }
@@ -65,8 +76,12 @@ struct AppThemeModifier: ViewModifier {
 struct AppColorSchemeModifier: ViewModifier {
     @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .dark
 
+    /// On `.system` there is nothing to override, so the scheme already in the
+    /// environment is passed straight back through.
+    @Environment(\.colorScheme) private var inheritedScheme
+
     func body(content: Content) -> some View {
-        content.environment(\.colorScheme, theme.colorScheme)
+        content.environment(\.colorScheme, theme.colorScheme ?? inheritedScheme)
     }
 }
 
@@ -80,9 +95,23 @@ extension View {
 /// Resolves against the trait collection, so one `Color` covers both themes and
 /// every existing call site switches with the app instead of being duplicated
 /// per scheme.
-private func adaptive(light: UIColor, dark: UIColor) -> Color {
+///
+/// The increased-contrast variants are optional and answer the system's
+/// "Increase Contrast" setting. Only the muted tokens need them — they are the
+/// ones sitting near the AA floor by design; everything else is already far
+/// above it and would only get harsher.
+private func adaptive(
+    light: UIColor,
+    dark: UIColor,
+    lightIncreased: UIColor? = nil,
+    darkIncreased: UIColor? = nil
+) -> Color {
     Color(UIColor { traits in
-        traits.userInterfaceStyle == .dark ? dark : light
+        let increased = traits.accessibilityContrast == .high
+        if traits.userInterfaceStyle == .dark {
+            return increased ? (darkIncreased ?? dark) : dark
+        }
+        return increased ? (lightIncreased ?? light) : light
     })
 }
 
@@ -127,6 +156,35 @@ extension Color {
         dark: rgb(1.0, 1.0, 1.0)
     )
 
+    /// Secondary text: labels, captions, section headers — everything that
+    /// recedes but still has to be read.
+    ///
+    /// Deliberately a solid color rather than a step on `textPrimary.opacity`.
+    /// The same opacity means different contrast in each theme, because ink and
+    /// ground swap roles: 0.5 held 5.0:1 on the dark card but only 3.2:1 on the
+    /// cream one, so the ladder quietly failed everywhere the light theme went.
+    /// Fixed here at ~4.9:1 in both — just over the AA floor, so text darkens
+    /// no more than legibility requires.
+    static let textSecondary = adaptive(
+        light: rgb(0.392, 0.408, 0.435),
+        dark: rgb(0.529, 0.557, 0.600),
+        lightIncreased: rgb(0.286, 0.302, 0.329),
+        darkIncreased: rgb(0.659, 0.682, 0.722)
+    )
+
+    /// Tertiary: disabled controls, decorative glyphs, placeholder text. Held at
+    /// ~3.2:1 — the floor for non-text and large text, and low enough to still
+    /// read as inactive.
+    /// Under Increase Contrast it steps up to the normal secondary value, which
+    /// is exactly one level of the hierarchy — muted text stops being muted
+    /// rather than becoming a second primary.
+    static let textTertiary = adaptive(
+        light: rgb(0.518, 0.533, 0.561),
+        dark: rgb(0.412, 0.439, 0.486),
+        lightIncreased: rgb(0.392, 0.408, 0.435),
+        darkIncreased: rgb(0.529, 0.557, 0.600)
+    )
+
     /// Text and icons drawn *on* the accent fill, where the contrast runs the
     /// other way: the dark theme's accent is a light mint, the light theme's is
     /// a deep teal.
@@ -144,6 +202,9 @@ extension Color {
     ///
     /// The light theme darkens it: system mint on white sits far below the
     /// contrast floor for text and small icons.
+    /// Mirrored in `Assets.xcassets/AccentColor` so UIKit-provided controls the
+    /// app never tints by hand — alert buttons, the caret in a text field,
+    /// swipe actions — match instead of falling back to system blue.
     static let accentPrimary = Color(UIColor.appAccent)
 
     /// Companion to the accent for gradients (progress ring).
@@ -181,9 +242,13 @@ extension Color {
         dark: rgb(0.2, 0.05, 0.08)
     )
 
+    /// Also the app's danger color: system red sits at 3.6:1 on a white card and
+    /// 2.9:1 inside its own tinted badge, so "MISSED" and the delete action use
+    /// this instead. The dark value is lifted slightly from the original
+    /// (0.9, 0.4, 0.4) to clear AA inside that badge.
     static let warningAccent = adaptive(
         light: rgb(0.753, 0.224, 0.169),
-        dark: rgb(0.9, 0.4, 0.4)
+        dark: rgb(0.922, 0.451, 0.439)
     )
 
     // MARK: Effects
@@ -242,6 +307,20 @@ extension Color {
     )
 }
 
+// MARK: - UIKit-level appearance
+
+/// Appearance that SwiftUI has no modifier for.
+enum AppAppearance {
+
+    /// A slider's `.tint` colors its filled track only — the round thumb stays
+    /// white in both themes and SwiftUI exposes no way to change it, so it goes
+    /// through UIKit's appearance proxy. Applies to every slider in the app,
+    /// including the before/after split handle.
+    static func configureSliders() {
+        UISlider.appearance().thumbTintColor = .appAccent
+    }
+}
+
 // MARK: - UIKit twins
 
 /// The tab bar is configured through `UITabBarAppearance`, which takes UIColor
@@ -254,6 +333,14 @@ extension UIColor {
         traits.userInterfaceStyle == .dark
             ? UIColor.systemMint.resolvedColor(with: darkTraits)
             : UIColor(red: 0.122, green: 0.478, blue: 0.396, alpha: 1)
+    }
+
+    /// The surface color with no transparency, for the tab bar when Reduce
+    /// Transparency rules the blur out.
+    static let appSurfaceOpaque = UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.11, green: 0.13, blue: 0.19, alpha: 1)
+            : UIColor(red: 1, green: 1, blue: 1, alpha: 1)
     }
 
     /// Wash over the tab bar blur: darkens the bar in the dark theme, lifts it

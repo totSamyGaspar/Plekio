@@ -21,7 +21,7 @@ struct EmptyStateView: View {
 
             Text(title)
                 .font(.headline)
-                .foregroundColor(.textPrimary.opacity(0.6))
+                .foregroundColor(.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)

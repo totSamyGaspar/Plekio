@@ -37,13 +37,13 @@ struct DiaryMoodTrendsView: View {
                     .foregroundColor(.textPrimary)
                 Text("Daily reported emotional and physical state")
                     .font(.caption)
-                    .foregroundColor(.textPrimary.opacity(0.5))
+                    .foregroundColor(.textSecondary)
             }
 
             if moodChartEntries.isEmpty {
                 Text("Log a few check-ins to see your mood trend here.")
                     .font(.caption)
-                    .foregroundColor(.textPrimary.opacity(0.4))
+                    .foregroundColor(.textSecondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 30)
             } else {
@@ -60,7 +60,7 @@ struct DiaryMoodTrendsView: View {
             // stays: it really is derived from the entries.
             Text(moodBaselineLabel)
                 .font(.caption2.weight(.semibold))
-                .foregroundColor(.textPrimary.opacity(0.6))
+                .foregroundColor(.textSecondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(Color.appBackground)
@@ -101,7 +101,7 @@ struct DiaryMoodTrendsView: View {
 
             Text(entry.checkInDate.formatted(.dateTime.weekday(.abbreviated)))
                 .font(.caption2.weight(.bold))
-                .foregroundColor(.textPrimary.opacity(0.4))
+                .foregroundColor(.textSecondary)
         }
         .frame(width: moodBarWidth)
     }
@@ -127,7 +127,7 @@ struct DiaryMoodTrendsView: View {
                     .foregroundColor(.textPrimary)
                 Text("Impact of sleep hours on daytime vitality")
                     .font(.caption)
-                    .foregroundColor(.textPrimary.opacity(0.5))
+                    .foregroundColor(.textSecondary)
             }
 
             metricBar(
