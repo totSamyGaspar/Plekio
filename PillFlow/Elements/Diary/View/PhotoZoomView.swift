@@ -36,6 +36,7 @@ struct PhotoZoomView: View {
                             .background(Color.white.opacity(0.15))
                             .clipShape(Circle())
                     }
+                    .expandTouchTarget(5)
                 }
                 Spacer()
             }

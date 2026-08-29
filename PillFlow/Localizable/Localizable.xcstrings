@@ -15741,7 +15741,8 @@
         }
       }
     },
-    "Restlessness" : {
+    "Remove photo" : {
+      "comment" : "VoiceOver label of the button deleting one attached check-in photo.",
       "localizations" : {
         "de" : {
           "stringUnit" : {

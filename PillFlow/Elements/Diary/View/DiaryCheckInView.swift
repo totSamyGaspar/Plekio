@@ -137,6 +137,25 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                         .appColorScheme()
                 }
             }
+    /// The date or time value as plain text, tappable across the whole field.
+    ///
+    /// The compact `DatePicker` paints its own grey capsule and SwiftUI offers
+    /// no way to turn that off. Hiding it under a transparent overlay does not
+    /// work either — it stops receiving touches — so the value is drawn as text
+    /// and the picker moved into a popover this opens.
+    private func valueButton(text: String, label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(text)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.textPrimary)
+                .frame(maxWidth: .infinity, minHeight: 24)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityValue(text)
+    }
+
         }
     }
 
@@ -394,6 +413,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
+                    .expandTouchTarget(6)
 
                     Spacer()
                     VStack(spacing: 2) {
@@ -416,6 +436,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
+                    .expandTouchTarget(6)
                 }
             }
         }
@@ -464,6 +485,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 .background(Color.accentPrimary)
                 .cornerRadius(12)
             }
+                .contentShape(Rectangle())
         }
     }
 
@@ -578,7 +600,10 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     }
                 }
             }
+                                        .frame(width: 44, height: 44, alignment: .topTrailing)
+                                        .contentShape(Rectangle())
         }
+                                .accessibilityLabel("Remove photo")
         .padding(18)
         .background(Color.appSurface)
         .cornerRadius(18)
@@ -640,6 +665,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
     private func tagChip(text: String, isSelected: Bool, accent: Color, prefix: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
+                .contentShape(Rectangle())
             HStack(spacing: 4) {
                 Text(isSelected ? "✓" : prefix)
                 Text(text)

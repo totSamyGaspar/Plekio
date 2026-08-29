@@ -125,11 +125,13 @@ struct DiaryEntryRowView: View {
                         .font(.caption.weight(.semibold))
                         .foregroundColor(.textSecondary)
                 }
+                .expandTouchTarget(vertical: 14, horizontal: 6)
                 Button(action: onDelete) {
                     Label("Delete", systemImage: "trash")
                         .font(.caption.weight(.semibold))
                         .foregroundColor(.warningAccent)
                 }
+                .expandTouchTarget(vertical: 14, horizontal: 6)
                 Spacer()
             }
             .buttonStyle(.plain)

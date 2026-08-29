@@ -112,6 +112,7 @@ struct BeforeAfterComparisonView: View {
                         .background(Color.textPrimary.opacity(0.08))
                         .clipShape(Circle())
                 }
+                .expandTouchTarget(10)
                 modeToggle
             }
         }

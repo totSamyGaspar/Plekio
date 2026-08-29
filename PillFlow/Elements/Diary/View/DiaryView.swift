@@ -403,6 +403,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     private var content: some View {
         switch selectedSubTab {
         case .journalFeed:
+                .expandTouchTarget(vertical: 4, horizontal: 0)
             DiaryJournalFeedView(
                 entries: viewModel.entries,
                 onEdit: { entryBeingEdited = $0 },
