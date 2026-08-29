@@ -94,7 +94,7 @@ struct BeforeAfterComparisonView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Visual Progress Comparison")
-                    .font(.system(size: 18, weight: .bold, design: .serif))
+                    .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
                     .foregroundColor(.textPrimary)
                 Text("Track your recovery, skin changes & wellness transformation")
                     .font(.caption2)
@@ -431,10 +431,12 @@ struct BeforeAfterComparisonView: View {
     }
 
     private func slotBadge(_ letter: String, tint: Color) -> some View {
+    @ScaledMetric(relativeTo: .caption2) private var slotBadgeSize: CGFloat = 18
+
         Text(letter)
             .font(.caption2.weight(.heavy))
             .foregroundColor(Color.onAccent)
-            .frame(width: 18, height: 18)
+            .frame(width: slotBadgeSize, height: slotBadgeSize)
             .background(tint)
             .clipShape(Circle())
             .padding(4)

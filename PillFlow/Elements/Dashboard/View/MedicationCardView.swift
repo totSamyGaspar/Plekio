@@ -38,8 +38,7 @@ struct MedicationCardView: View {
                         .font(.headline.weight(.bold))
                         .foregroundColor(pill.isTaken ? .textSecondary : .textPrimary)
                         .strikethrough(pill.isTaken)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .lineLimit(2)
                     
                     Text(pill.time.formatted(date: .omitted, time: .shortened))
                         .font(.caption2.weight(.heavy))
@@ -61,7 +60,7 @@ struct MedicationCardView: View {
                             .foregroundColor(.warningAmber)
                         
                         Text("LOW")
-                            .font(.system(size: 9, weight: .heavy))
+                            .scaledFont(size: 11, relativeTo: .caption2, weight: .heavy)
                             .foregroundColor(.warningAmber)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)

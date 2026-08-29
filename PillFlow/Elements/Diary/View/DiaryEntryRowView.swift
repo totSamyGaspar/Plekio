@@ -39,7 +39,7 @@ struct DiaryEntryRowView: View {
             }
 
             Text(entry.checkInDate.formatted(.dateTime.weekday(.wide).month(.wide).day().year()))
-                .font(.system(size: 19, weight: .bold, design: .serif))
+                .scaledFont(size: 19, relativeTo: .headline, weight: .bold, design: .serif)
                 .foregroundColor(.textPrimary)
 
             // A quick-logged entry (home screen's one-tap mood chips) never

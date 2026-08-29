@@ -27,7 +27,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
         VStack(spacing: 22) {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Adherence & Alerts")
-                    .font(.system(size: 24, weight: .heavy, design: .serif))
+                    .scaledFont(size: 24, relativeTo: .title2, weight: .heavy, design: .serif)
                     .foregroundColor(.textPrimary)
                     .tracking(1.5)
                     .padding(.horizontal)
@@ -159,7 +159,6 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                         .font(.headline.weight(.bold))
                         .foregroundColor(.textPrimary)
                         .multilineTextAlignment(.center)
-                        .minimumScaleFactor(0.7)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)

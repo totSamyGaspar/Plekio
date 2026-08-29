@@ -76,7 +76,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("PillFlow")
-                .font(.system(size: 36, weight: .heavy, design: .serif))
+                .scaledFont(size: 36, relativeTo: .largeTitle, weight: .heavy, design: .serif)
                 .italic()
                 .foregroundColor(.textPrimary)
         }
@@ -84,6 +84,9 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         .padding(.horizontal)
         .padding(.top, 10)
     }
+
+    /// The monogram circle holds text, so it follows the text size.
+    @ScaledMetric(relativeTo: .headline) private var monogramSize: CGFloat = 46
 
     private var dateSummaryCard: some View {
         HStack {
@@ -106,7 +109,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             Spacer()
             Circle()
                 .fill(Color.accentPrimary)
-                .frame(width: 46, height: 46)
+                .frame(width: monogramSize, height: monogramSize)
                 .overlay(
                     Text("PF").font(.headline.weight(.heavy)).foregroundColor(Color.onAccent)
                 )
@@ -146,7 +149,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Daily Dosage Timeline")
-                        .font(.system(size: 24, weight: .heavy, design: .serif))
+                        .scaledFont(size: 24, relativeTo: .title2, weight: .heavy, design: .serif)
                         .foregroundColor(.textPrimary)
                     Text("Your medications for today")
                         .font(.subheadline)

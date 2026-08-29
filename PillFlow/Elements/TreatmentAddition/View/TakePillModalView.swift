@@ -23,6 +23,10 @@ struct TakePillModalView: View {
     let appSurface = Color.appSurface
     let appBackground = Color.appBackground
 
+    /// The three action buttons stack an icon over a label; at larger text
+    /// sizes a fixed 85pt would clip the label.
+    @ScaledMetric(relativeTo: .caption) private var actionRowHeight: CGFloat = 85
+
     var body: some View {
         ZStack {
             Color.black.opacity(0.4)
@@ -143,8 +147,8 @@ struct TakePillModalView: View {
                                     .font(.title3.weight(.bold))
                                 Text(pills.count > 1 ? "Take All" : "Take Now")
                                     .font(.caption.weight(.bold))
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.75)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.9)
                             }
                             .foregroundColor(Color.onAccent)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -152,7 +156,7 @@ struct TakePillModalView: View {
                             .cornerRadius(16)
                         }
                     }
-                    .frame(height: 85)
+                    .frame(height: actionRowHeight)
                 }
                 .padding(24)
                 .background(appBackground)
@@ -186,8 +190,8 @@ struct ActionButton: View {
                 Text(title)
                     .font(.caption.weight(.bold))
                     .foregroundColor(color.opacity(0.8))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.9)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(bgColor)

@@ -91,7 +91,7 @@ struct DiaryProgressGalleryView: View {
             }
             VStack(alignment: .leading, spacing: 8) {
                 Text("Compare Visual Transformation")
-                    .font(.system(size: 18, weight: .bold, design: .serif))
+                    .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
                     .foregroundColor(.textPrimary)
                 Text(
                     selection.isEmpty
@@ -219,8 +219,7 @@ struct DiaryProgressGalleryView: View {
                             }
                             Text(isSelected ? "Selected" : "Compare")
                                 .font(.caption.weight(.bold))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
+                                .lineLimit(2)
                         }
                         .foregroundColor(isSelected ? Color.onAccent : .textPrimary.opacity(0.7))
                         .padding(.horizontal, 14)

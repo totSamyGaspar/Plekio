@@ -87,7 +87,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("My Courses")
-                    .font(.system(size: 30, weight: .heavy, design: .serif))
+                    .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
                     .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)

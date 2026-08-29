@@ -83,12 +83,12 @@ struct SplashView: View {
                     
                     VStack(spacing: 8) {
                         Text("PillFlow")
-                            .font(.system(size: 42, weight: .heavy, design: .serif))
+                            .scaledFont(size: 42, relativeTo: .largeTitle, weight: .heavy, design: .serif)
                             .foregroundColor(.textPrimary)
                             .italic()
                         
                         Text("Your minimalist tracker")
-                            .font(.system(size: 11, weight: .bold))
+                            .scaledFont(size: 11, relativeTo: .caption2, weight: .bold)
                             .foregroundColor(.accentPrimary)
                             .tracking(1.5)
                     }

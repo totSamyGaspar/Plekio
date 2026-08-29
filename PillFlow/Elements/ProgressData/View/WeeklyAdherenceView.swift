@@ -64,7 +64,7 @@ struct WeeklyAdherenceView: View {
                 // "%": the order and the spacing before the sign differ by locale and
                 // cannot be expressed by concatenation.
                 Text(Double(recentAverage) / 100, format: .percent.precision(.fractionLength(0)))
-                    .font(.system(size: 40, weight: .bold, design: .serif))
+                    .scaledFont(size: 40, relativeTo: .largeTitle, weight: .bold, design: .serif)
                     .foregroundColor(.textPrimary)
                     .italic()
                 

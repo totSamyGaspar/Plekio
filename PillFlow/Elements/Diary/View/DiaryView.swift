@@ -136,13 +136,9 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("WELLNESS DIARY & PROGRESS LOG")
-                    .font(.caption2.weight(.heavy))
-                    .foregroundColor(.textPrimary.opacity(0.6))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.appSurface)
-                    .clipShape(Capsule())
+                Text("Daily Health & Mood Diary")
+                    .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
+                    .foregroundColor(.textPrimary)
                 Spacer()
                 Text("· \(Date().formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
                     .font(.caption)
@@ -365,8 +361,8 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                         // is "Fortschrittsgalerie" in German.
                         Text(tab.title)
                             .font(.caption.weight(.bold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.9)
                         if let count = subTabCount(tab) {
                             Text("(\(count))")
                                 .font(.caption2)

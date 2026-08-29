@@ -34,7 +34,7 @@ struct UpNextHeroCard: View {
                 ForEach(pills) { pill in
                     HStack(spacing: 12) {
                         Image(systemName: pill.isTaken ? "checkmark.circle.fill" : "circle.dotted.circle")
-                            .font(.system(size: 18, weight: .bold))
+                            .scaledFont(size: 18, relativeTo: .headline, weight: .bold)
                             .foregroundColor(pill.isTaken ? .white.opacity(0.6) : .white)
                         
                         Text(pill.name)
@@ -53,7 +53,7 @@ struct UpNextHeroCard: View {
             HStack {
                 if let firstTime = pills.first?.time {
                     Text(firstTime.formatted(date: .omitted, time: .shortened))
-                        .font(.system(size: 30, weight: .bold, design: .monospaced))
+                        .scaledFont(size: 30, relativeTo: .title, weight: .bold, design: .monospaced)
                         .foregroundColor(.white)
                 }
                 

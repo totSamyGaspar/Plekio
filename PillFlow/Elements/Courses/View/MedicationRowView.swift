@@ -21,7 +21,7 @@ struct MedicationRowView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.accentPrimary.opacity(0.12))
                     Image(systemName: med.formSystemImage)
-                        .font(.system(size: 20))
+                        .scaledFont(size: 20, relativeTo: .title3)
                         .foregroundColor(.accentPrimary)
                 }
             }

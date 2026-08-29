@@ -31,7 +31,7 @@ struct CircularProgressView: View {
             // the sign follow the locale, which manual concatenation breaks.
             VStack(spacing: 2) {
                 Text(min(max(progress, 0), 1), format: .percent.precision(.fractionLength(0)))
-                    .font(.system(size: 15, weight: .semibold, design: .serif))
+                    .scaledFont(size: 15, relativeTo: .subheadline, weight: .semibold, design: .serif)
                     .foregroundColor(.textPrimary)
             }
         }

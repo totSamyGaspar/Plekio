@@ -33,7 +33,7 @@ struct DiaryMoodTrendsView: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Mood & Well-being Progression")
-                    .font(.system(size: 18, weight: .bold, design: .serif))
+                    .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
                     .foregroundColor(.textPrimary)
                 Text("Daily reported emotional and physical state")
                     .font(.caption)
@@ -123,7 +123,7 @@ struct DiaryMoodTrendsView: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Physical Energy & Rest")
-                    .font(.system(size: 18, weight: .bold, design: .serif))
+                    .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
                     .foregroundColor(.textPrimary)
                 Text("Impact of sleep hours on daytime vitality")
                     .font(.caption)
