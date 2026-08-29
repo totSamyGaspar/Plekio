@@ -113,6 +113,7 @@ struct BeforeAfterComparisonView: View {
                         .clipShape(Circle())
                 }
                 .expandTouchTarget(10)
+                .accessibilityLabel("Close")
                 modeToggle
             }
         }
@@ -142,6 +143,7 @@ struct BeforeAfterComparisonView: View {
                 .cornerRadius(10)
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isActive ? .isSelected : [])
     }
 
     // MARK: Photo selector rows + picker sheet

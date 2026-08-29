@@ -26,6 +26,9 @@ struct CalendarDayView: View {
         .padding(.horizontal, 16)
         .background(isSelected ? Color.accentPrimary : Color.textPrimary.opacity(0.05))
         .cornerRadius(16)
+        // Tapped through onTapGesture, so the button trait is added by hand too.
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
 

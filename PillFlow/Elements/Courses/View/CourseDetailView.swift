@@ -51,6 +51,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                                         .foregroundColor(.textTertiary)
                                 }
                                 .buttonStyle(.borderless)
+                                .accessibilityLabel("Edit medication")
                             }
                         }
                         .onDelete(perform: viewModel.deleteMedication)
@@ -70,6 +71,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.accentPrimary)
                 }
+                .accessibilityLabel("Add Medication")
             }
         }
         .sheet(isPresented: $showingAddMedication) {

@@ -91,6 +91,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                     .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
             }
             
             Spacer(minLength: 0)
@@ -104,6 +105,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                     .overlay(Circle().stroke(Color.textPrimary.opacity(0.06), lineWidth: 1))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("New Course")
             .padding(.top, 6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

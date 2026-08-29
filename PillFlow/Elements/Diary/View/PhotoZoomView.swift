@@ -37,6 +37,7 @@ struct PhotoZoomView: View {
                             .clipShape(Circle())
                     }
                     .expandTouchTarget(5)
+                    .accessibilityLabel("Close")
                 }
                 Spacer()
             }

@@ -226,6 +226,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             .cornerRadius(14)
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     // MARK: - Physical Summary
@@ -388,6 +389,9 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                                     .clipShape(Circle())
                             }
                             .buttonStyle(.plain)
+                            .accessibilityAddTraits(
+                                viewModel.draft.sleepQuality == quality ? .isSelected : []
+                            )
                         }
                     }
                 }
@@ -437,6 +441,22 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     }
                     .buttonStyle(.plain)
                     .expandTouchTarget(6)
+                }
+                // One adjustable element instead of three stops: VoiceOver
+                // announces "Water Hydration, 6 glasses" and takes swipe up and
+                // down, which is how a stepper is expected to behave.
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Water Hydration")
+                .accessibilityValue("\(viewModel.draft.waterGlasses) glasses")
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment:
+                        viewModel.draft.waterGlasses += 1
+                    case .decrement:
+                        if viewModel.draft.waterGlasses > 0 { viewModel.draft.waterGlasses -= 1 }
+                    @unknown default:
+                        break
+                    }
                 }
             }
         }

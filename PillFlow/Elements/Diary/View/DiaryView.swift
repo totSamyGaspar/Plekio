@@ -153,6 +153,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 Text("Daily Health & Mood Diary")
                     .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
                     .foregroundColor(.textPrimary)
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 Text("· \(Date().formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
                     .font(.caption)
@@ -365,6 +366,9 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 .foregroundColor(iconColor)
         }
         .padding(16)
+        // Read as one stop — "7-day average mood, 4.5 /5" — rather than three,
+        // with the decorative icon folded in and silent.
+        .accessibilityElement(children: .combine)
         // Fills the grid row, so a tile whose title wraps to two lines does not
         // stand taller than the one beside it; the spare height goes below the
         // value rather than centring it.
@@ -404,6 +408,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 }
                 .buttonStyle(.plain)
                 .expandTouchTarget(vertical: 4, horizontal: 0)
+                .accessibilityAddTraits(selectedSubTab == tab ? .isSelected : [])
             }
         }
         .padding(4)

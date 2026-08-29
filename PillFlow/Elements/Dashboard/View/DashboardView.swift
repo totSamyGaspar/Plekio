@@ -79,6 +79,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 .scaledFont(size: 36, relativeTo: .largeTitle, weight: .heavy, design: .serif)
                 .italic()
                 .foregroundColor(.textPrimary)
+                .accessibilityAddTraits(.isHeader)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)

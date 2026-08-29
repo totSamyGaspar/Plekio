@@ -54,6 +54,11 @@ struct WeeklyAdherenceView: View {
                             .font(.caption2.weight(.bold))
                             .foregroundColor(.textSecondary)
                     }
+                    // The bars are Shapes, which VoiceOver does not see at all, so
+                    // the column used to read as a bare weekday with no number.
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(label)
+                    .accessibilityValue(Text(percent, format: .percent.precision(.fractionLength(0))))
                 }
             }
             

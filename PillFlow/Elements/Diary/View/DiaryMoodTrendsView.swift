@@ -104,6 +104,9 @@ struct DiaryMoodTrendsView: View {
                 .foregroundColor(.textSecondary)
         }
         .frame(width: moodBarWidth)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(entry.checkInDate.formatted(.dateTime.weekday(.wide)))
+        .accessibilityValue(Text(mood?.title ?? DiaryMood.neutral.title))
     }
 
     private var moodBaselineLabel: LocalizedStringKey {
