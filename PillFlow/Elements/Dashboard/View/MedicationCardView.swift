@@ -95,8 +95,8 @@ struct MedicationCardView: View {
                     .font(.title)
                     .foregroundColor(.accentPrimary)
             }
-            .expandTouchTarget(8)
             .buttonStyle(.plain)
+            .expandTouchTarget(8)
             .disabled(!pill.isLoggable)
             .accessibilityLabel("Undo logging \(pill.name)")
         } else if pill.isLoggable {
@@ -116,8 +116,8 @@ struct MedicationCardView: View {
                         .font(.title)
                         .foregroundColor(pill.isMissed ? .warningAccent : .textTertiary)
                 }
-                .expandTouchTarget(8)
                 .buttonStyle(.plain)
+                .expandTouchTarget(8)
                 .accessibilityLabel(
                     pill.isMissed
                     ? "Log the missed dose of \(pill.name)"

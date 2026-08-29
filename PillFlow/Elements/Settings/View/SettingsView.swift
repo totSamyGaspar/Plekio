@@ -16,15 +16,6 @@ struct SettingsView: View {
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
-            
-            List {
-                Section(header: Text("Appearance").foregroundColor(.textPrimary.opacity(0.6))) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Label("Theme", systemImage: theme.iconName)
-                                .foregroundColor(.textPrimary)
-                            Spacer()
-                        }
 
             VStack(alignment: .leading, spacing: 0) {
                 // Drawn rather than left to the navigation bar: the other three
@@ -40,14 +31,6 @@ struct SettingsView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
 
-                            Picker("Theme", selection: $theme) {
-                                ForEach(AppTheme.allCases) { option in
-                                    Text(option.title).tag(option)
-                                }
-                            }
-                            .pickerStyle(.segmented)
-                            .labelsHidden()
-
                 List {
                     Section(header: Text("Appearance").foregroundColor(.textSecondary)) {
                         VStack(alignment: .leading, spacing: 10) {
@@ -56,13 +39,18 @@ struct SettingsView: View {
                                     .foregroundColor(.textPrimary)
                                 Spacer()
                             }
+
+                            Picker("Theme", selection: $theme) {
+                                ForEach(AppTheme.allCases) { option in
+                                    Text(option.title).tag(option)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
                         }
-                        .pickerStyle(.segmented)
-                        .labelsHidden()
+                        .padding(.vertical, 6)
                     }
-                    .padding(.vertical, 6)
-                }
-                .listRowBackground(Color.appSurface)
+                    .listRowBackground(Color.appSurface)
 
                     Section(header: Text("About").foregroundColor(.textSecondary)) {
                         HStack {
@@ -81,24 +69,24 @@ struct SettingsView: View {
                                 .foregroundColor(.textSecondary)
                         }
                     }
-                }
-                .listRowBackground(Color.appSurface) // Card background for settings rows
+                    .listRowBackground(Color.appSurface) // Card background for settings rows
 
-                Section {
-                    Button(action: {
-                        // No action yet
-                    }) {
-                        Label("Support the project", systemImage: "cup.and.saucer.fill")
-                            .foregroundColor(.accentPrimary)
+                    Section {
+                        Button(action: {
+                            // No action yet
+                        }) {
+                            Label("Support the project", systemImage: "cup.and.saucer.fill")
+                                .foregroundColor(.accentPrimary)
+                        }
                     }
+                    .listRowBackground(Color.appSurface)
                 }
-                .listRowBackground(Color.appSurface)
+                .scrollContentBackground(.hidden) // Remove the list's default gray background
+                .tint(.accentPrimary)
             }
-            .scrollContentBackground(.hidden) // Remove the list's default gray background
-            .tint(.accentPrimary)
         }
         .navigationTitle("Settings")
-        .navigationBarTitleDisplayMode(.large)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

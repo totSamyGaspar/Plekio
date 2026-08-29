@@ -81,7 +81,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 .foregroundColor(.textPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
         .padding(.top, 10)
     }
 

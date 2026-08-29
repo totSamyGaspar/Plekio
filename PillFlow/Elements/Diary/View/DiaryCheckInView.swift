@@ -19,6 +19,11 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     @State private var customSymptomText = ""
     @State private var customMilestoneText = ""
 
+    /// Separate flags rather than one enum: each popover anchors to its own
+    /// field, which is what puts the arrow under the value being edited.
+    @State private var showingDatePicker = false
+    @State private var showingTimePicker = false
+
     private let allSymptomOptions = DiarySymptomOptions.all
     private let allMilestoneOptions = DiaryMilestoneOptions.all
 
@@ -78,7 +83,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Daily Health & Mood Check-in")
-                    .font(.title3.weight(.bold))
+                    .font(.system(.title3, design: .serif, weight: .bold))
                     .foregroundColor(.textPrimary)
                 Text("Log how your body feels, mood scores & track visual progress")
                     .font(.caption)
@@ -87,14 +92,6 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
             Spacer()
 
-            Button(action: { dismiss() }) {
-                Image(systemName: "xmark")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundColor(.textPrimary.opacity(0.6))
-                    .padding(8)
-                    .background(Color.textPrimary.opacity(0.08))
-                    .clipShape(Circle())
-            }
         }
         .padding()
     }
@@ -102,7 +99,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     // MARK: - Date / Time
 
     private var dateTimeSection: some View {
-        HStack(spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
             labeledField(title: "CHECK-IN DATE") {
                 valueButton(
                     text: viewModel.draft.checkInDate.formatted(date: .abbreviated, time: .omitted),
@@ -137,6 +134,9 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                         .appColorScheme()
                 }
             }
+        }
+    }
+
     /// The date or time value as plain text, tappable across the whole field.
     ///
     /// The compact `DatePicker` paints its own grey capsule and SwiftUI offers
@@ -156,9 +156,6 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
         .accessibilityValue(text)
     }
 
-        }
-    }
-
     private func labeledField<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
@@ -166,7 +163,10 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 .foregroundColor(.textSecondary)
                 .tracking(0.5)
             content()
-                .frame(maxWidth: .infinity, alignment: .leading)
+                // Centred, not leading: the compact DatePicker renders as a pill
+                // that hugs its text, so aligning it leading left it floating in
+                // the corner of a much wider box.
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
                 .background(Color.appSurface)
@@ -482,10 +482,12 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 .foregroundColor(Color.onAccent)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
+                .frame(maxHeight: .infinity)
                 .background(Color.accentPrimary)
                 .cornerRadius(12)
-            }
                 .contentShape(Rectangle())
+            }
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -587,23 +589,28 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                                     .frame(width: 72, height: 72)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                                // The thumbnail itself has no tap action, so the
+                                // 44pt target can grow inward over the photo: the
+                                // glyph stays pinned in the corner where it was and
+                                // there is nothing underneath to hit by mistake.
                                 Button {
                                     withAnimation { viewModel.removePhoto(at: index) }
                                 } label: {
                                     Image(systemName: "xmark.circle.fill")
+                                        .font(.title3)
                                         .foregroundColor(.white)
                                         .background(Circle().fill(Color.black.opacity(0.6)))
+                                        .frame(width: 44, height: 44, alignment: .topTrailing)
+                                        .contentShape(Rectangle())
                                 }
+                                .accessibilityLabel("Remove photo")
                                 .padding(4)
                             }
                         }
                     }
                 }
             }
-                                        .frame(width: 44, height: 44, alignment: .topTrailing)
-                                        .contentShape(Rectangle())
         }
-                                .accessibilityLabel("Remove photo")
         .padding(18)
         .background(Color.appSurface)
         .cornerRadius(18)
@@ -652,12 +659,15 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     customMilestoneText = ""
                 }
                 .font(.subheadline.weight(.bold))
-                .foregroundColor(.white)
+                .foregroundColor(Color.onAccent)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(Color.milestonePurple)
+                .frame(maxHeight: .infinity)
+                .background(Color.accentPrimary)
                 .cornerRadius(12)
+                .contentShape(Rectangle())
             }
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -665,7 +675,6 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
     private func tagChip(text: String, isSelected: Bool, accent: Color, prefix: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-                .contentShape(Rectangle())
             HStack(spacing: 4) {
                 Text(isSelected ? "✓" : prefix)
                 Text(text)
@@ -686,13 +695,15 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     // MARK: - Bottom Bar
 
     private var bottomBar: some View {
+        // The confirm label wraps to two lines in most languages while "Cancel"
+        // never does, so both stretch to the row and the row takes the taller.
         HStack(spacing: 12) {
             Button(action: { dismiss() }) {
                 Text("CANCEL")
                     .font(.subheadline.weight(.heavy))
                     .foregroundColor(.textPrimary.opacity(0.7))
-                    .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.appSurface)
                     .cornerRadius(16)
             }
@@ -707,13 +718,14 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 }
                 .font(.subheadline.weight(.heavy))
                 .foregroundColor(Color.onAccent)
-                .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.accentPrimary)
                 .cornerRadius(16)
             }
             .buttonStyle(.plain)
         }
+        .fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal)
         .padding(.top, 12)
         .padding(.bottom, 8)

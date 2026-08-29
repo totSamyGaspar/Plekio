@@ -125,6 +125,7 @@ struct BeforeAfterComparisonView: View {
             modeButton("Side by Side", isActive: mode == .sideBySide) { mode = .sideBySide }
             modeButton("Split Slider", isActive: mode == .splitSlider) { mode = .splitSlider }
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private func modeButton(_ title: LocalizedStringKey, isActive: Bool, action: @escaping () -> Void) -> some View {
@@ -136,7 +137,7 @@ struct BeforeAfterComparisonView: View {
                 .foregroundColor(isActive ? Color.onAccent : .textSecondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
-                .frame(minWidth: 56)
+                .frame(minWidth: 56, maxHeight: .infinity)
                 .background(isActive ? Color.accentPrimary : Color.textPrimary.opacity(0.06))
                 .cornerRadius(10)
         }
@@ -430,9 +431,9 @@ struct BeforeAfterComparisonView: View {
         }
     }
 
-    private func slotBadge(_ letter: String, tint: Color) -> some View {
     @ScaledMetric(relativeTo: .caption2) private var slotBadgeSize: CGFloat = 18
 
+    private func slotBadge(_ letter: String, tint: Color) -> some View {
         Text(letter)
             .font(.caption2.weight(.heavy))
             .foregroundColor(Color.onAccent)

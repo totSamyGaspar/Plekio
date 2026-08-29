@@ -59,6 +59,9 @@ private struct DiaryComparisonPayload: Identifiable {
     let afterId: UUID
 }
 
+/// One id shared by the zoom transition's source and destination.
+private let comparisonSourceID = "diary.comparison"
+
 struct DiaryView<VM: DiaryViewModelProtocol>: View {
     @StateObject private var viewModel: VM
 
@@ -74,6 +77,10 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     @State private var comparisonSelection: [UUID] = []
     @State private var comparisonPayload: DiaryComparisonPayload?
     @State private var inspectingPhoto: DiaryPhotoInspection?
+
+    /// Ties the "Compare Progress" button to the comparison sheet, so the sheet
+    /// grows out of the button instead of sliding up from the bottom edge.
+    @Namespace private var comparisonTransition
 
     /// The chip labels differ from the DiaryMood titles ("Okay" rather than
     /// "Neutral"), so they are held separately — still localizable.
@@ -122,6 +129,10 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 beforePhotoId: payload.beforeId,
                 afterPhotoId: payload.afterId
             )
+            // Zooms out of the header button. The same sheet also opens from the
+            // gallery's own compare button; when that one is used the source is
+            // off-screen and the system falls back to the standard presentation.
+            .navigationTransition(.zoom(sourceID: comparisonSourceID, in: comparisonTransition))
             .appTheme()
         }
         .alert("Delete Check-in?", isPresented: $showingDeleteAlert, presenting: entryToDelete) { entry in
@@ -148,42 +159,49 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                     .foregroundColor(.textSecondary)
             }
 
-            Text("Daily Health & Mood Diary")
-                .font(.system(size: 30, weight: .heavy, design: .serif))
-                .foregroundColor(.textPrimary)
+            
 
             Text("Track how your body responds to your regimen, log symptoms, record daily energy levels, and compare progress photos over time.")
                 .font(.subheadline)
                 .foregroundColor(.textSecondary)
 
+            // Both labels stretch to the row's height, and the row takes the
+            // height of the taller one. Without this the button whose label wraps
+            // — "Порівняти прогрес" in Ukrainian, "Fortschritt vergleichen" in
+            // German — stands taller than its neighbour.
             HStack(spacing: 12) {
                 Button {
                     openComparison()
                 } label: {
                     Label("Compare Progress", systemImage: "arrow.triangle.2.circlepath")
+                        .labelStyle(.centered)
                         .font(.subheadline.weight(.bold))
                         .foregroundColor(.textPrimary.opacity(0.8))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.appSurface)
                         .cornerRadius(14)
                 }
                 .buttonStyle(.plain)
+                .matchedTransitionSource(id: comparisonSourceID, in: comparisonTransition)
 
                 Button {
                     showingCheckIn = true
                 } label: {
                     Label("Add New Entry", systemImage: "plus")
+                        .labelStyle(.centered)
                         .font(.subheadline.weight(.bold))
                         .foregroundColor(Color.onAccent)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.accentPrimary)
                         .cornerRadius(14)
                 }
                 .buttonStyle(.plain)
             }
+            .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal)
     }
@@ -224,14 +242,15 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                                 .font(.caption.weight(.semibold))
                         }
                         .foregroundColor(.textPrimary.opacity(0.8))
-                        .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.appBackground)
                         .cornerRadius(14)
                     }
                     .buttonStyle(.plain)
                 }
             }
+            .fixedSize(horizontal: false, vertical: true)
         }
         .padding(18)
         .background(Color.appSurface)
@@ -346,6 +365,10 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 .foregroundColor(iconColor)
         }
         .padding(16)
+        // Fills the grid row, so a tile whose title wraps to two lines does not
+        // stand taller than the one beside it; the spare height goes below the
+        // value rather than centring it.
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color.appSurface)
         .cornerRadius(16)
     }
@@ -380,6 +403,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                     .cornerRadius(12)
                 }
                 .buttonStyle(.plain)
+                .expandTouchTarget(vertical: 4, horizontal: 0)
             }
         }
         .padding(4)
@@ -402,7 +426,6 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     private var content: some View {
         switch selectedSubTab {
         case .journalFeed:
-                .expandTouchTarget(vertical: 4, horizontal: 0)
             DiaryJournalFeedView(
                 entries: viewModel.entries,
                 onEdit: { entryBeingEdited = $0 },

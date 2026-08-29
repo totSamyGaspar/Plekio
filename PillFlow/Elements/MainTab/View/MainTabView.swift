@@ -42,9 +42,11 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $router.selectedTab) {
-            DashboardView()
-                .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
-                .tag(0)
+            NavigationStack {
+                DashboardView()
+            }
+            .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
+            .tag(0)
 
             NavigationStack(path: $router.coursesPath) {
                 CoursesListView()

@@ -68,31 +68,6 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                         }
                     }
                     .listRowBackground(Color.appSurface)
-                    
-                    Section {
-                        Button(action: {
-                            // Dismiss only if the write actually succeeded —
-                            // otherwise what was typed would go with the screen.
-                            if viewModel.saveCourse() { dismiss() }
-                        }) {
-                            Text("Save Course")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .foregroundColor(viewModel.isSaveEnabled ? Color.onAccent : .textPrimary.opacity(0.3))
-                        }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    // Dismiss only if the write actually succeeded — otherwise
-                    // what was typed would go with the screen.
-                    Button("Save") {
-                        if viewModel.saveCourse() { dismiss() }
-                    }
-                    .font(.headline)
-                    .foregroundColor(viewModel.isSaveEnabled ? .accentPrimary : .textTertiary)
-                    .disabled(!viewModel.isSaveEnabled)
-                }
-                    }
-                    .listRowBackground(viewModel.isSaveEnabled ? Color.accentPrimary : Color.textPrimary.opacity(0.1))
-                    .disabled(!viewModel.isSaveEnabled)
                 }
                 .scrollContentBackground(.hidden)
             }
@@ -104,6 +79,16 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
                         .foregroundColor(.textPrimary.opacity(0.7))
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    // Dismiss only if the write actually succeeded — otherwise
+                    // what was typed would go with the screen.
+                    Button("Save") {
+                        if viewModel.saveCourse() { dismiss() }
+                    }
+                    .font(.headline)
+                    .foregroundColor(viewModel.isSaveEnabled ? .accentPrimary : .textTertiary)
+                    .disabled(!viewModel.isSaveEnabled)
                 }
             }
             .appTheme()

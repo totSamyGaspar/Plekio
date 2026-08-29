@@ -97,7 +97,7 @@ struct TakePillModalView: View {
                         Spacer()
                     }
                     .padding(24)
-                    .padding(.top, 16)
+                    .padding(.top, 36)
                 }
 
                 // MARK: - Content Body
@@ -192,8 +192,10 @@ struct ActionButton: View {
                     .font(.title3.weight(.bold))
                     .foregroundColor(color)
                 // The three buttons split the modal's width evenly, about 95pt each.
-                // "Snooze 15m" in German ("15 Min. später") does not fit, so the label
-                // scales down instead of being truncated.
+                // "Snooze 15m" in German ("15 Min. später") does not fit on one line,
+                // so the label wraps to two. Shrinking is left as a last resort and
+                // only by a tenth: it used to go to 0.75, which handed someone who had
+                // raised their text size a smaller label than everyone else.
                 Text(title)
                     .font(.caption.weight(.bold))
                     .foregroundColor(color.opacity(0.8))
