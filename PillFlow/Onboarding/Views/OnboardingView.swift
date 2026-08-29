@@ -17,7 +17,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
     
     var body: some View {
         ZStack {
-            Color.bgDark.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
             
             VStack {
                 TabView(selection: $viewModel.currentPage) {
@@ -51,9 +51,9 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.neonMint)
+                    .background(Color.accentPrimary)
                     .cornerRadius(16)
-                    .shadow(color: Color.neonMint.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .shadow(color: Color.accentPrimary.opacity(0.3), radius: 10, x: 0, y: 5)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 40)

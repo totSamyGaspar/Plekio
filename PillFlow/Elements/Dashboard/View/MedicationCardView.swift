@@ -13,7 +13,7 @@ struct MedicationCardView: View {
     let onToggle: () -> Void
     let onTapCard: () -> Void
     
-    let cardDark = Color.cardDark
+    let appSurface = Color.appSurface
     
     var body: some View {
         HStack(spacing: 16) {
@@ -21,13 +21,13 @@ struct MedicationCardView: View {
             
             MedicationPhotoView(medicationId: pill.medicationId, size: 48, cornerRadius: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12).fill(Color.white)
+                    RoundedRectangle(cornerRadius: 12).fill(Color.iconTile)
                     Image(systemName: pill.formSystemImage)
                         .font(.title2)
-                        .foregroundColor(.neonMint)
+                        .foregroundColor(.accentPrimary)
                 }
             }
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.textPrimary.opacity(0.1), lineWidth: 1))
             .opacity(pill.isTaken ? 0.6 : 1.0)
             
             // MARK: - Info Text
@@ -36,38 +36,37 @@ struct MedicationCardView: View {
                 HStack {
                     Text(pill.name)
                         .font(.headline.weight(.bold))
-                        .foregroundColor(pill.isTaken ? .white.opacity(0.5) : .white)
+                        .foregroundColor(pill.isTaken ? .textSecondary : .textPrimary)
                         .strikethrough(pill.isTaken)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .lineLimit(2)
                     
                     Text(pill.time.formatted(date: .omitted, time: .shortened))
                         .font(.caption2.weight(.heavy))
-                        .foregroundColor(.neonMint)
+                        .foregroundColor(.accentPrimary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.neonMint.opacity(0.15))
+                        .background(Color.accentPrimary.opacity(0.15))
                         .cornerRadius(8)
                 }
                 
                 Text("\(pill.dosage) pcs")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.textPrimary.opacity(0.7))
                 
                 if let stock = pill.stockCount, stock <= pill.lowStockThreshold {
                     HStack(spacing: 4) {
                         Text("Stock: \(stock) remaining")
                             .font(.caption2)
-                            .foregroundColor(.yellow)
+                            .foregroundColor(.warningAmber)
                         
                         Text("LOW")
-                            .font(.system(size: 9, weight: .heavy))
-                            .foregroundColor(.yellow)
+                            .scaledFont(size: 11, relativeTo: .caption2, weight: .heavy)
+                            .foregroundColor(.warningAmber)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.yellow.opacity(0.2))
+                            .background(Color.warningAmber.opacity(0.2))
                             .cornerRadius(4)
-                            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.yellow, lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.warningAmber, lineWidth: 1))
                     }
                 }
             }
@@ -79,7 +78,7 @@ struct MedicationCardView: View {
             statusIndicator
         }
         .padding()
-        .background(cardDark)
+        .background(appSurface)
         .cornerRadius(20)
         .onTapGesture {
             if pill.isLoggable && !pill.isTaken && !pill.isMissed { onTapCard() }
@@ -94,9 +93,10 @@ struct MedicationCardView: View {
             Button(action: onToggle) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.title)
-                    .foregroundColor(.neonMint)
+                    .foregroundColor(.accentPrimary)
             }
             .buttonStyle(.plain)
+            .expandTouchTarget(8)
             .disabled(!pill.isLoggable)
             .accessibilityLabel("Undo logging \(pill.name)")
         } else if pill.isLoggable {
@@ -106,17 +106,18 @@ struct MedicationCardView: View {
                         .font(.caption2.weight(.heavy))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.red.opacity(0.15))
-                        .foregroundColor(.red)
+                        .background(Color.warningAccent.opacity(0.12))
+                        .foregroundColor(.warningAccent)
                         .cornerRadius(6)
                 }
                 
                 Button(action: onToggle) {
                     Image(systemName: "checkmark.circle")
                         .font(.title)
-                        .foregroundColor(pill.isMissed ? .red.opacity(0.75) : .white.opacity(0.3))
+                        .foregroundColor(pill.isMissed ? .warningAccent : .textTertiary)
                 }
                 .buttonStyle(.plain)
+                .expandTouchTarget(8)
                 .accessibilityLabel(
                     pill.isMissed
                     ? "Log the missed dose of \(pill.name)"
@@ -127,7 +128,7 @@ struct MedicationCardView: View {
             
             Image(systemName: "checkmark.circle")
                 .font(.title)
-                .foregroundColor(.white.opacity(0.1))
+                .foregroundColor(.textPrimary.opacity(0.1))
         }
     }
 }
@@ -136,7 +137,7 @@ struct MedicationCardView: View {
 
 #Preview {
     ZStack {
-        Color(red: 0.06, green: 0.08, blue: 0.12).ignoresSafeArea()
+        Color.appBackground.ignoresSafeArea()
         
         VStack(spacing: 20) {
             MedicationCardView(
@@ -189,5 +190,5 @@ struct MedicationCardView: View {
         }
         .padding()
     }
-    .preferredColorScheme(.dark)
+    .appTheme()
 }

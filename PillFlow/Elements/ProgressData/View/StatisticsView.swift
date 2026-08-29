@@ -27,17 +27,17 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
         VStack(spacing: 22) {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Adherence & Alerts")
-                    .font(.system(size: 24, weight: .heavy, design: .serif))
-                    .foregroundColor(.white)
+                    .scaledFont(size: 24, relativeTo: .title2, weight: .heavy, design: .serif)
+                    .foregroundColor(.textPrimary)
                     .tracking(1.5)
                     .padding(.horizontal)
                 
                 if viewModel.lowStockItems.isEmpty {
                     HStack {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.neonMint)
+                            .foregroundColor(.accentPrimary)
                         Text("All medications are well stocked")
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(.textPrimary.opacity(0.7))
                             .font(.subheadline)
                     }
                     .padding(.horizontal)
@@ -58,17 +58,17 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 HStack(spacing: 12) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.neonMint)
+                        .foregroundColor(.accentPrimary)
                     Text(successMessage)
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 14)
-                .background(Color.cardDark)
+                .background(Color.appSurface)
                 .cornerRadius(24)
-                .overlay(RoundedRectangle(cornerRadius: 24).stroke(Color.neonMint.opacity(0.3), lineWidth: 1))
-                .shadow(color: Color.neonMint.opacity(0.2), radius: 10, x: 0, y: 5)
+                .overlay(RoundedRectangle(cornerRadius: 24).stroke(Color.accentPrimary.opacity(0.3), lineWidth: 1))
+                .shadow(color: Color.accentPrimary.opacity(0.2), radius: 10, x: 0, y: 5)
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .zIndex(100)
             }
@@ -112,10 +112,10 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(med.name) is running low")
                     .font(.headline.weight(.bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
                 Text("Remaining count: \(med.stockCount) pills")
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.textPrimary.opacity(0.7))
             }
             
             Button(action: {
@@ -125,10 +125,10 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
             }) {
                 Text("REFILL STOCK")
                     .font(.subheadline.weight(.heavy))
-                    .foregroundColor(Color.bgDark)
+                    .foregroundColor(Color.onAccent)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color.neonMint)
+                    .background(Color.accentPrimary)
                     .cornerRadius(12)
             }
             .padding(.top, 4)
@@ -144,7 +144,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
         VStack {
             Text("ADHERENCE TARGET")
                 .font(.headline.weight(.heavy))
-                .foregroundColor(.neonMint)
+                .foregroundColor(.accentPrimary)
                 .tracking(1.5)
                 .padding(.top, 24)
 
@@ -157,18 +157,17 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                         .font(.headline.weight(.bold))
                     Text("\(viewModel.streakDays) days streak!")
                         .font(.headline.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                         .multilineTextAlignment(.center)
-                        .minimumScaleFactor(0.7)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
-                .background(Color.white.opacity(0.15))
+                .background(Color.textPrimary.opacity(0.15))
                 .cornerRadius(20)
             }
         }
         .frame(maxWidth: .infinity)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(20)
     }
 }
@@ -194,5 +193,5 @@ final class MockStatisticsViewModel: StatisticsViewModelProtocol {
 
 #Preview {
     StatisticsView(viewModel: MockStatisticsViewModel())
-        .preferredColorScheme(.dark)
+        .appTheme()
 }

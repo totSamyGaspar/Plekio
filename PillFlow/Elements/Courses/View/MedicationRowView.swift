@@ -19,15 +19,15 @@ struct MedicationRowView: View {
             MedicationPhotoView(medicationId: med.id, size: 40, cornerRadius: 8) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.neonMint.opacity(0.12))
+                        .fill(Color.accentPrimary.opacity(0.12))
                     Image(systemName: med.formSystemImage)
-                        .font(.system(size: 20))
-                        .foregroundColor(.neonMint)
+                        .scaledFont(size: 20, relativeTo: .title3)
+                        .foregroundColor(.accentPrimary)
                 }
             }
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                    .stroke(Color.textPrimary.opacity(0.12), lineWidth: 0.5)
             )
             
             // MARK: - Information Block

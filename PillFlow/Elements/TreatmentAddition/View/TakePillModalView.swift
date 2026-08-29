@@ -10,14 +10,22 @@ import SwiftUI
 struct TakePillModalView: View {
     @Environment(\.dismiss) private var dismiss
 
+    /// With Reduce Transparency on, the blur behind the modal becomes a solid
+    /// fill rather than a thinner blur.
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     // Pills scheduled for the same time
     let pills: [PillDose]
     var onTake: () -> Void
     var onSkip: () -> Void
     var onSnooze: () -> Void
 
-    let cardDark = Color.cardDark
-    let bgDark = Color.bgDark
+    let appSurface = Color.appSurface
+    let appBackground = Color.appBackground
+
+    /// The three action buttons stack an icon over a label; at larger text
+    /// sizes a fixed 85pt would clip the label.
+    @ScaledMetric(relativeTo: .caption) private var actionRowHeight: CGFloat = 85
 
     var body: some View {
         ZStack {
@@ -26,7 +34,9 @@ struct TakePillModalView: View {
                 .onTapGesture { dismiss() }
 
             Rectangle()
-                .fill(.ultraThinMaterial)
+                .fill(reduceTransparency
+                      ? AnyShapeStyle(Color.appBackground)
+                      : AnyShapeStyle(.ultraThinMaterial))
                 .ignoresSafeArea()
                 .onTapGesture { dismiss() }
 
@@ -34,7 +44,7 @@ struct TakePillModalView: View {
                 // MARK: - Header
                 ZStack(alignment: .topTrailing) {
                     LinearGradient(
-                        colors: [Color.blue.opacity(0.8), Color.neonMint.opacity(0.9)],
+                        colors: [Color.blue.opacity(0.8), Color.accentPrimary.opacity(0.9)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -70,17 +80,24 @@ struct TakePillModalView: View {
                                 .foregroundColor(.white.opacity(0.8))
                                 .tracking(1.0)
 
-                            // One string with the count, not a ternary: Russian and
-                            // Ukrainian have three plural forms that two branches
-                            // can't express. The "one" variant may drop the number.
-                            Text("Time for your \(pills.count) pills")
-                                .font(.title2.weight(.heavy))
+                            // "meds", not "pills": the count here would be
+                            // medications, and one of them can be several tablets —
+                            // the rows below say "2 pcs".
+                            //
+                            // And no count at all, deliberately: with one, every
+                            // language needs its own plural forms (three each in
+                            // Russian and Ukrainian) for a number the list right
+                            // below already shows. Countless wording stays correct
+                            // for any number, and matches the push notification
+                            // that opens this modal.
+                            Text("Time for your meds")
+                                .font(.title3.weight(.heavy))
                                 .foregroundColor(.white)
                         }
                         Spacer()
                     }
                     .padding(24)
-                    .padding(.top, 16)
+                    .padding(.top, 36)
                 }
 
                 // MARK: - Content Body
@@ -92,28 +109,28 @@ struct TakePillModalView: View {
                                 HStack(spacing: 16) {
                                     ZStack {
                                         RoundedRectangle(cornerRadius: 16)
-                                            .fill(Color.neonMint.opacity(0.1))
+                                            .fill(Color.accentPrimary.opacity(0.1))
                                             .frame(width: 50, height: 50)
                                         Image(systemName: pill.formSystemImage)
                                             .font(.title2)
-                                            .foregroundColor(.neonMint)
+                                            .foregroundColor(.accentPrimary)
                                     }
 
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(pill.name)
                                             .font(.headline.weight(.bold))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.textPrimary)
                                         // Separate Text values: each piece is its
                                         // own translatable string, not a
                                         // concatenation with rawValue.
                                         (Text("\(pill.dosage) pcs") + Text(verbatim: " • ") + Text(pill.period.title))
                                             .font(.subheadline.weight(.semibold))
-                                            .foregroundColor(.neonMint)
+                                            .foregroundColor(.accentPrimary)
                                     }
                                     Spacer()
                                 }
                                 .padding(16)
-                                .background(cardDark)
+                                .background(appSurface)
                                 .cornerRadius(16)
                             }
                         }
@@ -127,9 +144,9 @@ struct TakePillModalView: View {
                     // calls router.dismissSheet from these same callbacks); dismiss()
                     // used to be duplicated here.
                     HStack(spacing: 12) {
-                        ActionButton(icon: "xmark", title: pills.count > 1 ? "Skip All" : "Skip", color: .white, bgColor: cardDark, action: onSkip)
+                        ActionButton(icon: "xmark", title: pills.count > 1 ? "Skip All" : "Skip", color: .textPrimary, bgColor: appSurface, action: onSkip)
 
-                        ActionButton(icon: "clock", title: "Snooze 15m", color: .yellow, bgColor: Color.yellow.opacity(0.15), action: onSnooze)
+                        ActionButton(icon: "clock", title: "Snooze 15m", color: .warningAmber, bgColor: Color.warningAmber.opacity(0.15), action: onSnooze)
 
                         Button(action: onTake) {
                             VStack(spacing: 8) {
@@ -137,24 +154,24 @@ struct TakePillModalView: View {
                                     .font(.title3.weight(.bold))
                                 Text(pills.count > 1 ? "Take All" : "Take Now")
                                     .font(.caption.weight(.bold))
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.75)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.9)
                             }
-                            .foregroundColor(bgDark)
+                            .foregroundColor(Color.onAccent)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Color.neonMint)
+                            .background(Color.accentPrimary)
                             .cornerRadius(16)
                         }
                     }
-                    .frame(height: 85)
+                    .frame(height: actionRowHeight)
                 }
                 .padding(24)
-                .background(bgDark)
+                .background(appBackground)
             }
             .frame(maxWidth: 340)
             .fixedSize(horizontal: false, vertical: true)
             .cornerRadius(24)
-            .shadow(color: .black.opacity(0.6), radius: 40, x: 0, y: 20)
+            .shadow(color: .appShadow, radius: 40, x: 0, y: 20)
         }
     }
 }
@@ -175,13 +192,15 @@ struct ActionButton: View {
                     .font(.title3.weight(.bold))
                     .foregroundColor(color)
                 // The three buttons split the modal's width evenly, about 95pt each.
-                // "Snooze 15m" in German ("15 Min. später") does not fit, so the label
-                // scales down instead of being truncated.
+                // "Snooze 15m" in German ("15 Min. später") does not fit on one line,
+                // so the label wraps to two. Shrinking is left as a last resort and
+                // only by a tenth: it used to go to 0.75, which handed someone who had
+                // raised their text size a smaller label than everyone else.
                 Text(title)
                     .font(.caption.weight(.bold))
                     .foregroundColor(color.opacity(0.8))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.9)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(bgColor)
@@ -198,5 +217,5 @@ struct ActionButton: View {
         ],
         onTake: {}, onSkip: {}, onSnooze: {}
     )
-    .preferredColorScheme(.dark)
+    .appTheme()
 }

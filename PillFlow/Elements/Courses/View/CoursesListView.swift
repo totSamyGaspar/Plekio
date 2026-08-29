@@ -21,7 +21,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
     
     var body: some View {
         ZStack {
-            Color.bgDark.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
             
             VStack(spacing: 0) {
                 header
@@ -32,7 +32,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                 }
                 .pickerStyle(.segmented)
                 .padding()
-                .background(Color.bgDark)
+                .background(Color.appBackground)
                 
                 let currentList = selectedSegment == 0 ? viewModel.activeCourses : viewModel.historyCourses
                 
@@ -87,10 +87,11 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("My Courses")
-                    .font(.system(size: 30, weight: .heavy, design: .serif))
-                    .foregroundColor(.white)
+                    .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
+                    .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
             }
             
             Spacer(minLength: 0)
@@ -98,12 +99,13 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
             Button(action: { router.present(.newTreatment) }) {
                 Image(systemName: "plus.circle.fill")
                     .font(.title3)
-                    .foregroundColor(.neonMint)
+                    .foregroundColor(.accentPrimary)
                     .frame(width: 44, height: 44)
-                    .background(Circle().fill(Color.white.opacity(0.04)))
-                    .overlay(Circle().stroke(Color.white.opacity(0.06), lineWidth: 1))
+                    .background(Circle().fill(Color.textPrimary.opacity(0.04)))
+                    .overlay(Circle().stroke(Color.textPrimary.opacity(0.06), lineWidth: 1))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("New Course")
             .padding(.top, 6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -123,6 +125,6 @@ extension CoursesListView where VM == CoursesListViewModel {
 #Preview {
     NavigationStack {
         CoursesListView()
-            .preferredColorScheme(.dark)
+            .appTheme()
     }
 }

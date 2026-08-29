@@ -14,9 +14,9 @@ struct UpNextHeroCard: View {
     private var gradientColors: [Color] {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<12:  return [Color.neonMint, Color.neonTeal]
-        case 12..<18: return [Color.orange, Color.yellow]
-        default:      return [Color.purple, Color.indigo]
+        case 5..<12:  return [Color.heroMorningStart, Color.heroMorningEnd]
+        case 12..<18: return [Color.heroNoonStart, Color.heroNoonEnd]
+        default:      return [Color.heroEveningStart, Color.heroEveningEnd]
         }
     }
     
@@ -26,7 +26,10 @@ struct UpNextHeroCard: View {
                 .font(.caption.weight(.heavy))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(Color.white.opacity(0.25))
+                // Black, not white: a white wash lightened the ground under
+                // white text and left the label at 3.4:1. Darkening instead
+                // keeps the glass look and takes it past 7:1.
+                .background(Color.black.opacity(0.15))
                 .cornerRadius(20)
                 .foregroundColor(.white)
             
@@ -34,7 +37,7 @@ struct UpNextHeroCard: View {
                 ForEach(pills) { pill in
                     HStack(spacing: 12) {
                         Image(systemName: pill.isTaken ? "checkmark.circle.fill" : "circle.dotted.circle")
-                            .font(.system(size: 18, weight: .bold))
+                            .scaledFont(size: 18, relativeTo: .headline, weight: .bold)
                             .foregroundColor(pill.isTaken ? .white.opacity(0.6) : .white)
                         
                         Text(pill.name)
@@ -53,7 +56,7 @@ struct UpNextHeroCard: View {
             HStack {
                 if let firstTime = pills.first?.time {
                     Text(firstTime.formatted(date: .omitted, time: .shortened))
-                        .font(.system(size: 30, weight: .bold, design: .monospaced))
+                        .scaledFont(size: 30, relativeTo: .title, weight: .bold, design: .monospaced)
                         .foregroundColor(.white)
                 }
                 

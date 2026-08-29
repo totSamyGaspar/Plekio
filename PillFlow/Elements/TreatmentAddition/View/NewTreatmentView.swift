@@ -21,41 +21,41 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bgDark.ignoresSafeArea()
+                Color.appBackground.ignoresSafeArea()
                 
                 Form {
-                    Section(header: Text("Basic Information").foregroundColor(.white.opacity(0.6))) {
+                    Section(header: Text("Basic Information").foregroundColor(.textSecondary)) {
                         TextField("Course Name (e.g., Vitamins)", text: $viewModel.courseName)
-                            .foregroundColor(.white)
+                            .foregroundColor(.textPrimary)
                     }
-                    .listRowBackground(Color.cardDark)
+                    .listRowBackground(Color.appSurface)
                     
-                    Section(header: Text("Course Duration").foregroundColor(.white.opacity(0.6))) {
+                    Section(header: Text("Course Duration").foregroundColor(.textSecondary)) {
                         DatePicker("Start", selection: $viewModel.startDate, displayedComponents: .date)
-                            .foregroundColor(.white)
+                            .foregroundColor(.textPrimary)
                         // A course can't end before it starts: such a course saved
                         // silently and then produced no doses at all. CourseDetailView
                         // already had this constraint; here it was missing.
                         DatePicker("End", selection: $viewModel.endDate,
                                    in: viewModel.startDate..., displayedComponents: .date)
-                            .foregroundColor(.white)
+                            .foregroundColor(.textPrimary)
                     }
-                    .listRowBackground(Color.cardDark)
+                    .listRowBackground(Color.appSurface)
                     
-                    Section(header: Text("Medications").foregroundColor(.white.opacity(0.6))) {
+                    Section(header: Text("Medications").foregroundColor(.textSecondary)) {
                         ForEach(viewModel.medications) { med in
                             HStack {
                                 Image(systemName: med.formSystemImage)
-                                    .foregroundColor(.neonMint)
+                                    .foregroundColor(.accentPrimary)
                                     .frame(width: 30)
-                                Text(med.name).foregroundColor(.white)
+                                Text(med.name).foregroundColor(.textPrimary)
                                 Spacer()
                                 // Two plurals in one string: Russian and Ukrainian
                                 // decline them independently, so each gets its own
                                 // translatable string.
                                 (Text("\(med.dosage) pcs") + Text(verbatim: ", ") + Text("\(med.timesOfDay.count) times/day"))
                                     .font(.caption)
-                                    .foregroundColor(.white.opacity(0.5))
+                                    .foregroundColor(.textSecondary)
                             }
                         }
                         .onDelete(perform: viewModel.deleteMedication)
@@ -64,40 +64,34 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                             showingAddMedication = true
                         }) {
                             Label("Add Medication", systemImage: "plus")
-                                .foregroundColor(.neonMint)
+                                .foregroundColor(.accentPrimary)
                         }
                     }
-                    .listRowBackground(Color.cardDark)
-                    
-                    Section {
-                        Button(action: {
-                            // Dismiss only if the write actually succeeded —
-                            // otherwise what was typed would go with the screen.
-                            if viewModel.saveCourse() { dismiss() }
-                        }) {
-                            Text("Save Course")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .foregroundColor(viewModel.isSaveEnabled ? Color.bgDark : .white.opacity(0.3))
-                        }
-                    }
-                    .listRowBackground(viewModel.isSaveEnabled ? Color.neonMint : Color.white.opacity(0.1))
-                    .disabled(!viewModel.isSaveEnabled)
+                    .listRowBackground(Color.appSurface)
                 }
                 .scrollContentBackground(.hidden)
             }
             .navigationTitle("New Course")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color.bgDark, for: .navigationBar)
+            .toolbarBackground(Color.appBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.textPrimary.opacity(0.7))
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    // Dismiss only if the write actually succeeded — otherwise
+                    // what was typed would go with the screen.
+                    Button("Save") {
+                        if viewModel.saveCourse() { dismiss() }
+                    }
+                    .font(.headline)
+                    .foregroundColor(viewModel.isSaveEnabled ? .accentPrimary : .textTertiary)
+                    .disabled(!viewModel.isSaveEnabled)
                 }
             }
-            .preferredColorScheme(.dark)
+            .appTheme()
             .sheet(isPresented: $showingAddMedication) {
                 AddMedicationView { draft in
                     withAnimation { viewModel.addMedication(draft) }

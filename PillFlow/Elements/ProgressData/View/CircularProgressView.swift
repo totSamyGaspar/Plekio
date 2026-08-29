@@ -11,7 +11,7 @@ struct CircularProgressView: View {
     let progress: Double
 
     let ringGradient = LinearGradient(
-        colors: [Color.neonMint, Color.neonTeal],
+        colors: [Color.accentPrimary, Color.accentSecondary],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
@@ -19,7 +19,7 @@ struct CircularProgressView: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.neonMint.opacity(0.2), lineWidth: 16)
+                .stroke(Color.accentPrimary.opacity(0.2), lineWidth: 16)
 
             Circle()
                 .trim(from: 0.0, to: CGFloat(min(progress, 1.0)))
@@ -31,8 +31,8 @@ struct CircularProgressView: View {
             // the sign follow the locale, which manual concatenation breaks.
             VStack(spacing: 2) {
                 Text(min(max(progress, 0), 1), format: .percent.precision(.fractionLength(0)))
-                    .font(.system(size: 15, weight: .semibold, design: .serif))
-                    .foregroundColor(.white)
+                    .scaledFont(size: 15, relativeTo: .subheadline, weight: .semibold, design: .serif)
+                    .foregroundColor(.textPrimary)
             }
         }
         .padding(20)

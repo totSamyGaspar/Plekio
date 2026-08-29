@@ -25,22 +25,22 @@ struct DiaryEntryRowView: View {
                         .font(.caption.weight(.heavy))
                         .textCase(.uppercase)
                 }
-                .foregroundColor(.neonMint)
+                .foregroundColor(.accentPrimary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(Color.neonMint.opacity(0.12))
+                .background(Color.accentPrimary.opacity(0.12))
                 .cornerRadius(10)
 
                 Spacer()
 
                 Text("at \(entry.checkInDate.formatted(date: .omitted, time: .shortened))")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.textSecondary)
             }
 
             Text(entry.checkInDate.formatted(.dateTime.weekday(.wide).month(.wide).day().year()))
-                .font(.system(size: 19, weight: .bold, design: .serif))
-                .foregroundColor(.white)
+                .scaledFont(size: 19, relativeTo: .headline, weight: .bold, design: .serif)
+                .foregroundColor(.textPrimary)
 
             // A quick-logged entry (home screen's one-tap mood chips) never
             // showed the energy/sleep/water fields to the user at all — their
@@ -50,7 +50,7 @@ struct DiaryEntryRowView: View {
             if entry.isQuickLog {
                 Text("Quick mood log — no detailed metrics recorded")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.textSecondary)
             } else {
                 HStack(spacing: 10) {
                     statChip(icon: "bolt.fill", iconColor: .yellow, text: "Energy: \(entry.energyLevel)/5")
@@ -71,24 +71,24 @@ struct DiaryEntryRowView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("PHYSICAL STATE & SENSATIONS")
                         .font(.caption2.weight(.heavy))
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(.textSecondary)
                     Text(entry.physicalSummary)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(.textPrimary.opacity(0.9))
                 }
             }
 
             if !entry.reflectionNotes.isEmpty {
                 Text(entry.reflectionNotes)
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.textPrimary.opacity(0.7))
                     .lineLimit(4)
             }
 
             if !entry.symptoms.isEmpty || !entry.milestoneTags.isEmpty {
                 FlowLayout(spacing: 6) {
                     ForEach(entry.symptoms, id: \.self) { symptom in
-                        smallTag(text: DiarySymptomOptions.title(for: symptom), color: .neonMint)
+                        smallTag(text: DiarySymptomOptions.title(for: symptom), color: .accentPrimary)
                     }
                     ForEach(entry.milestoneTags, id: \.self) { tag in
                         smallTag(text: "#\(DiaryMilestoneOptions.title(for: tag))", color: .milestonePurple)
@@ -101,11 +101,11 @@ struct DiaryEntryRowView: View {
                     HStack {
                         Text("PROGRESS PHOTOS (\(entry.photoIds.count))")
                             .font(.caption2.weight(.heavy))
-                            .foregroundColor(.white.opacity(0.4))
+                            .foregroundColor(.textSecondary)
                         Spacer()
                         Text("Tap photo to zoom")
                             .font(.caption2)
-                            .foregroundColor(.white.opacity(0.3))
+                            .foregroundColor(.textSecondary)
                     }
                     ScrollView(.horizontal, showsIndicators: false) {
                         LazyHStack(spacing: 8) {
@@ -123,31 +123,33 @@ struct DiaryEntryRowView: View {
                 Button(action: onEdit) {
                     Label("Edit", systemImage: "pencil")
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(.textSecondary)
                 }
+                .expandTouchTarget(vertical: 14, horizontal: 6)
                 Button(action: onDelete) {
                     Label("Delete", systemImage: "trash")
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(.red.opacity(0.7))
+                        .foregroundColor(.warningAccent)
                 }
+                .expandTouchTarget(vertical: 14, horizontal: 6)
                 Spacer()
             }
             .buttonStyle(.plain)
         }
         .padding(20)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(24)
     }
 
     private func statChip(icon: String, iconColor: Color, text: LocalizedStringKey) -> some View {
         HStack(spacing: 4) {
             Image(systemName: icon).foregroundColor(iconColor)
-            Text(text).foregroundColor(.white.opacity(0.8))
+            Text(text).foregroundColor(.textPrimary.opacity(0.8))
         }
         .font(.caption2.weight(.semibold))
         .padding(.horizontal, 8)
         .padding(.vertical, 5)
-        .background(Color.bgDark)
+        .background(Color.appBackground)
         .cornerRadius(8)
     }
 
@@ -181,6 +183,6 @@ struct DiaryEntryRowView: View {
         onEdit: {}, onDelete: {}
     )
     .padding()
-    .background(Color.bgDark)
-    .preferredColorScheme(.dark)
+    .background(Color.appBackground)
+    .appTheme()
 }

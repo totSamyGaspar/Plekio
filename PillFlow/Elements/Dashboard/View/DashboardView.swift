@@ -17,7 +17,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            Color.bgDark.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
             let allTakenStates = (viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills).map { $0.isTaken }
 
             ScrollView(showsIndicators: false) {
@@ -76,14 +76,18 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("PillFlow")
-                .font(.system(size: 36, weight: .heavy, design: .serif))
+                .scaledFont(size: 36, relativeTo: .largeTitle, weight: .heavy, design: .serif)
                 .italic()
-                .foregroundColor(.white)
+                .foregroundColor(.textPrimary)
+                .accessibilityAddTraits(.isHeader)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
         .padding(.top, 10)
     }
+
+    /// The monogram circle holds text, so it follows the text size.
+    @ScaledMetric(relativeTo: .headline) private var monogramSize: CGFloat = 46
 
     private var dateSummaryCard: some View {
         HStack {
@@ -94,25 +98,28 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 // user moved off today.
                 Text(viewModel.selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
                     .font(.title3.weight(.bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
 
                 let total = viewModel.morningPills.count + viewModel.noonPills.count + viewModel.eveningPills.count
                 let taken = (viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills).filter { $0.isTaken }.count
 
                 Text("\(taken) of \(total) doses logged")
                     .font(.subheadline)
-                    .foregroundColor(.neonMint)
+                    .foregroundColor(.accentPrimary)
             }
             Spacer()
             Circle()
-                .fill(Color.neonMint)
-                .frame(width: 46, height: 46)
+                .fill(Color.accentPrimary)
+                .frame(width: monogramSize, height: monogramSize)
                 .overlay(
-                    Text("PF").font(.headline.weight(.heavy)).foregroundColor(Color.bgDark)
+                    Text("PF").font(.headline.weight(.heavy)).foregroundColor(Color.onAccent)
                 )
+                // Decoration: the app's name is already the screen title, and
+                // "PF" read out as two letters is noise, not information.
+                .accessibilityHidden(true)
         }
         .padding(20)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(20)
         .padding(.horizontal)
     }
@@ -146,11 +153,11 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Daily Dosage Timeline")
-                        .font(.system(size: 24, weight: .heavy, design: .serif))
-                        .foregroundColor(.white)
+                        .scaledFont(size: 24, relativeTo: .title2, weight: .heavy, design: .serif)
+                        .foregroundColor(.textPrimary)
                     Text("Your medications for today")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.textPrimary.opacity(0.7))
                 }
                 Spacer()
             }
@@ -200,5 +207,5 @@ extension DashboardView where VM == DashboardViewModel {
 #Preview {
     DashboardView(viewModel: MockDashboardViewModel())
         .environmentObject(AppRouter())
-        .preferredColorScheme(.dark)
+        .appTheme()
 }

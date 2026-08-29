@@ -16,16 +16,19 @@ struct CalendarDayView: View {
         VStack(spacing: 8) {
             Text(date.formatted(.dateTime.weekday(.abbreviated)))
                 .font(.caption2.weight(.bold))
-                .foregroundColor(isSelected ? .bgDark : .white.opacity(0.5))
+                .foregroundColor(isSelected ? .onAccent : .textSecondary)
             
             Text(date.formatted(.dateTime.day()))
                 .font(.title3.weight(.bold))
-                .foregroundColor(isSelected ? .bgDark : .white)
+                .foregroundColor(isSelected ? .onAccent : .textPrimary)
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 16)
-        .background(isSelected ? Color.neonMint : Color.white.opacity(0.05))
+        .background(isSelected ? Color.accentPrimary : Color.textPrimary.opacity(0.05))
         .cornerRadius(16)
+        // Tapped through onTapGesture, so the button trait is added by hand too.
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
 

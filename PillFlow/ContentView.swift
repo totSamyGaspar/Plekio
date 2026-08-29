@@ -42,7 +42,7 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: RootTransition.duration), value: hasSeenOnboarding)
-        .preferredColorScheme(.dark)
+        .appTheme()
     }
 }
 

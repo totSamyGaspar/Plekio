@@ -6,7 +6,7 @@
 //
 //  Layout mirrors the "Daily Health & Mood Check-in" reference design 1:1
 //  (sections, fields, sliders, chip grids), recolored to PillFlow's dark
-//  theme (Color.bgDark / Color.cardDark / Color.neonMint) instead of the
+//  theme (Color.appBackground / Color.appSurface / Color.accentPrimary) instead of the
 //  reference's light card-on-white palette.
 //
 
@@ -18,6 +18,11 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
     @State private var customSymptomText = ""
     @State private var customMilestoneText = ""
+
+    /// Separate flags rather than one enum: each popover anchors to its own
+    /// field, which is what puts the arrow under the value being edited.
+    @State private var showingDatePicker = false
+    @State private var showingTimePicker = false
 
     private let allSymptomOptions = DiarySymptomOptions.all
     private let allMilestoneOptions = DiaryMilestoneOptions.all
@@ -34,7 +39,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
     var body: some View {
         ZStack {
-            Color.bgDark.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header
@@ -70,31 +75,23 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     private var header: some View {
         HStack(alignment: .top, spacing: 14) {
             ZStack {
-                Circle().fill(Color.neonMint.opacity(0.15)).frame(width: 44, height: 44)
+                Circle().fill(Color.accentPrimary.opacity(0.15)).frame(width: 44, height: 44)
                 Image(systemName: "face.smiling.fill")
                     .font(.title2)
-                    .foregroundColor(.neonMint)
+                    .foregroundColor(.accentPrimary)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Daily Health & Mood Check-in")
-                    .font(.title3.weight(.bold))
-                    .foregroundColor(.white)
+                    .font(.system(.title3, design: .serif, weight: .bold))
+                    .foregroundColor(.textPrimary)
                 Text("Log how your body feels, mood scores & track visual progress")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.textSecondary)
             }
 
             Spacer()
 
-            Button(action: { dismiss() }) {
-                Image(systemName: "xmark")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundColor(.white.opacity(0.6))
-                    .padding(8)
-                    .background(Color.white.opacity(0.08))
-                    .clipShape(Circle())
-            }
         }
         .padding()
     }
@@ -102,33 +99,77 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     // MARK: - Date / Time
 
     private var dateTimeSection: some View {
-        HStack(spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
             labeledField(title: "CHECK-IN DATE") {
-                DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .date)
-                    .labelsHidden()
-                    .datePickerStyle(.compact)
-                    .colorScheme(.dark)
+                valueButton(
+                    text: viewModel.draft.checkInDate.formatted(date: .abbreviated, time: .omitted),
+                    label: "CHECK-IN DATE"
+                ) { showingDatePicker = true }
+                .popover(isPresented: $showingDatePicker) {
+                    // A popover sizes itself to its content, and the graphical
+                    // picker has no width of its own to offer — left to itself it
+                    // collapsed into a column two digits wide. A month grid needs
+                    // roughly 320pt, which still fits inside a popover on the
+                    // narrowest phone iOS 26 runs on.
+                    DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .date)
+                        .datePickerStyle(.graphical)
+                        .labelsHidden()
+                        .frame(width: 320)
+                        .padding(8)
+                        .presentationCompactAdaptation(.popover)
+                        .appColorScheme()
+                }
             }
             labeledField(title: "TIME") {
-                DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
-                    .datePickerStyle(.compact)
-                    .colorScheme(.dark)
+                valueButton(
+                    text: viewModel.draft.checkInDate.formatted(date: .omitted, time: .shortened),
+                    label: "TIME"
+                ) { showingTimePicker = true }
+                .popover(isPresented: $showingTimePicker) {
+                    DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .hourAndMinute)
+                        .datePickerStyle(.wheel)
+                        .labelsHidden()
+                        .padding()
+                        .presentationCompactAdaptation(.popover)
+                        .appColorScheme()
+                }
             }
         }
+    }
+
+    /// The date or time value as plain text, tappable across the whole field.
+    ///
+    /// The compact `DatePicker` paints its own grey capsule and SwiftUI offers
+    /// no way to turn that off. Hiding it under a transparent overlay does not
+    /// work either — it stops receiving touches — so the value is drawn as text
+    /// and the picker moved into a popover this opens.
+    private func valueButton(text: String, label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(text)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.textPrimary)
+                .frame(maxWidth: .infinity, minHeight: 24)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityValue(text)
     }
 
     private func labeledField<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.caption2.weight(.heavy))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.textSecondary)
                 .tracking(0.5)
             content()
-                .frame(maxWidth: .infinity, alignment: .leading)
+                // Centred, not leading: the compact DatePicker renders as a pill
+                // that hugs its text, so aligning it leading left it floating in
+                // the corner of a much wider box.
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-                .background(Color.cardDark)
+                .background(Color.appSurface)
                 .cornerRadius(12)
         }
     }
@@ -140,12 +181,12 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack {
                 Text("OVERALL MOOD TODAY")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.textSecondary)
                     .tracking(0.5)
                 Spacer()
                 Text("SELECT DOMINANT MOOD")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(.neonMint.opacity(0.8))
+                    .foregroundColor(.accentPrimary.opacity(0.8))
             }
 
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
@@ -168,23 +209,24 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(mood.title)
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                     Text("Score: \(mood.score)/5")
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(.textSecondary)
                 }
                 Spacer()
             }
             .padding(12)
             .frame(maxWidth: .infinity)
-            .background(isSelected ? Color.neonMint.opacity(0.15) : Color.cardDark)
+            .background(isSelected ? Color.accentPrimary.opacity(0.15) : Color.appSurface)
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(isSelected ? Color.neonMint : Color.white.opacity(0.06), lineWidth: isSelected ? 1.5 : 1)
+                    .stroke(isSelected ? Color.accentPrimary : Color.textPrimary.opacity(0.06), lineWidth: isSelected ? 1.5 : 1)
             )
             .cornerRadius(14)
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     // MARK: - Physical Summary
@@ -194,20 +236,20 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("HOW ARE YOU FEELING PHYSICALLY TODAY?")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.textSecondary)
                 Spacer()
                 Text("ONE SENTENCE SUMMARY")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(.neonMint.opacity(0.8))
+                    .foregroundColor(.accentPrimary.opacity(0.8))
             }
 
             TextField(
                 "e.g., Clear-headed and relaxed, slight shoulder stiffness",
                 text: $viewModel.draft.physicalSummary
             )
-            .foregroundColor(.white)
+            .foregroundColor(.textPrimary)
             .padding(14)
-            .background(Color.cardDark)
+            .background(Color.appSurface)
             .cornerRadius(14)
         }
     }
@@ -226,7 +268,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     set: { viewModel.draft.energyLevel = Int($0.rounded()) }
                 ),
                 range: 1...5,
-                tint: .neonMint,
+                tint: .accentPrimary,
                 minLabel: "Low", midLabel: "Moderate", maxLabel: "Peak"
             )
 
@@ -247,7 +289,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             )
         }
         .padding(18)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(18)
     }
 
@@ -279,26 +321,26 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     Image(systemName: icon).foregroundColor(iconColor)
                     Text(title)
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                 }
                 Spacer()
                 Text(trailingLabel)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.textSecondary)
             }
             Slider(value: value, in: range, step: 1)
                 .tint(tint)
             HStack {
                 // Three labels share one row ("0 (None) / 5 (Manageable) / 10 (Severe)");
                 // the middle one is noticeably longer in German and Romanian.
-                Text(minLabel).font(.caption2).foregroundColor(.white.opacity(0.4))
-                    .lineLimit(1).minimumScaleFactor(0.8)
+                Text(minLabel).font(.caption2).foregroundColor(.textSecondary)
+                    .lineLimit(2).minimumScaleFactor(0.9)
                 Spacer(minLength: 4)
-                Text(midLabel).font(.caption2).foregroundColor(.white.opacity(0.4))
-                    .lineLimit(1).minimumScaleFactor(0.8)
+                Text(midLabel).font(.caption2).foregroundColor(.textSecondary)
+                    .lineLimit(2).minimumScaleFactor(0.9)
                 Spacer(minLength: 4)
-                Text(maxLabel).font(.caption2).foregroundColor(.white.opacity(0.4))
-                    .lineLimit(1).minimumScaleFactor(0.8)
+                Text(maxLabel).font(.caption2).foregroundColor(.textSecondary)
+                    .lineLimit(2).minimumScaleFactor(0.9)
             }
         }
     }
@@ -312,7 +354,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     Image(systemName: "moon.stars.fill").foregroundColor(.purple)
                     Text("Sleep Duration & Quality")
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                 }
                 HStack(spacing: 12) {
                     HStack(spacing: 6) {
@@ -323,13 +365,13 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                             set: { viewModel.draft.sleepHours = min(max($0, 0), 24) }
                         ), format: .number)
                             .keyboardType(.decimalPad)
-                            .foregroundColor(.white)
+                            .foregroundColor(.textPrimary)
                             .frame(width: 40)
-                        Text("hours").foregroundColor(.white.opacity(0.5)).font(.caption)
+                        Text("hours").foregroundColor(.textSecondary).font(.caption)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Color.bgDark)
+                    .background(Color.appBackground)
                     .cornerRadius(10)
 
                     Spacer()
@@ -342,11 +384,14 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                                 Text(quality.initial)
                                     .font(.caption.weight(.heavy))
                                     .frame(width: 30, height: 30)
-                                    .background(viewModel.draft.sleepQuality == quality ? Color.neonMint : Color.bgDark)
-                                    .foregroundColor(viewModel.draft.sleepQuality == quality ? Color.bgDark : .white.opacity(0.6))
+                                    .background(viewModel.draft.sleepQuality == quality ? Color.accentPrimary : Color.appBackground)
+                                    .foregroundColor(viewModel.draft.sleepQuality == quality ? Color.onAccent : .textSecondary)
                                     .clipShape(Circle())
                             }
                             .buttonStyle(.plain)
+                            .accessibilityAddTraits(
+                                viewModel.draft.sleepQuality == quality ? .isSelected : []
+                            )
                         }
                     }
                 }
@@ -359,7 +404,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     Image(systemName: "drop.fill").foregroundColor(.blue)
                     Text("Water Hydration")
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary)
                 }
                 HStack {
                     Button {
@@ -367,20 +412,21 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     } label: {
                         Image(systemName: "minus")
                             .frame(width: 32, height: 32)
-                            .background(Color.bgDark)
-                            .foregroundColor(.white)
+                            .background(Color.appBackground)
+                            .foregroundColor(.textPrimary)
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
+                    .expandTouchTarget(6)
 
                     Spacer()
                     VStack(spacing: 2) {
                         Text("\(viewModel.draft.waterGlasses) glasses")
                             .font(.subheadline.weight(.bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.textPrimary)
                         Text("(~\(viewModel.draft.waterGlasses * 250)ml)")
                             .font(.caption2)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.textSecondary)
                     }
                     Spacer()
 
@@ -389,16 +435,33 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     } label: {
                         Image(systemName: "plus")
                             .frame(width: 32, height: 32)
-                            .background(Color.neonMint)
-                            .foregroundColor(Color.bgDark)
+                            .background(Color.accentPrimary)
+                            .foregroundColor(Color.onAccent)
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
+                    .expandTouchTarget(6)
+                }
+                // One adjustable element instead of three stops: VoiceOver
+                // announces "Water Hydration, 6 glasses" and takes swipe up and
+                // down, which is how a stepper is expected to behave.
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Water Hydration")
+                .accessibilityValue("\(viewModel.draft.waterGlasses) glasses")
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment:
+                        viewModel.draft.waterGlasses += 1
+                    case .decrement:
+                        if viewModel.draft.waterGlasses > 0 { viewModel.draft.waterGlasses -= 1 }
+                    @unknown default:
+                        break
+                    }
                 }
             }
         }
         .padding(18)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(18)
     }
 
@@ -408,14 +471,14 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("PHYSICAL SYMPTOMS & SENSATIONS")
                 .font(.caption.weight(.heavy))
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.textSecondary)
 
             FlowLayout(spacing: 10) {
                 ForEach(allSymptomOptions, id: \.self) { symptom in
                     tagChip(
                         text: DiarySymptomOptions.title(for: symptom),
                         isSelected: viewModel.draft.symptoms.contains(symptom),
-                        accent: .neonMint,
+                        accent: .accentPrimary,
                         prefix: "+"
                     ) {
                         viewModel.toggleSymptom(symptom)
@@ -425,10 +488,10 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
             HStack(spacing: 10) {
                 TextField("Add other symptom...", text: $customSymptomText)
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .background(Color.cardDark)
+                    .background(Color.appSurface)
                     .cornerRadius(12)
 
                 Button("Add") {
@@ -436,12 +499,15 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     customSymptomText = ""
                 }
                 .font(.subheadline.weight(.bold))
-                .foregroundColor(Color.bgDark)
+                .foregroundColor(Color.onAccent)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(Color.neonMint)
+                .frame(maxHeight: .infinity)
+                .background(Color.accentPrimary)
                 .cornerRadius(12)
+                .contentShape(Rectangle())
             }
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -452,11 +518,11 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("PERSONAL REFLECTION & DIARY NOTES")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.textSecondary)
                 Spacer()
                 Text("SIDE EFFECTS, PROGRESS NOTES, GRATITUDE")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(.neonMint.opacity(0.8))
+                    .foregroundColor(.accentPrimary.opacity(0.8))
                     .multilineTextAlignment(.trailing)
             }
 
@@ -464,18 +530,18 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 if viewModel.draft.reflectionNotes.isEmpty {
                     Text("Describe your day in detail: how your medications felt, energy shifts, dietary response, wellness milestones, or questions for your next doctor appointment...")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.3))
+                        .foregroundColor(.textTertiary)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 14)
                         .allowsHitTesting(false)
                 }
                 TextEditor(text: $viewModel.draft.reflectionNotes)
                     .scrollContentBackground(.hidden)
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
                     .padding(10)
                     .frame(minHeight: 120)
             }
-            .background(Color.cardDark)
+            .background(Color.appSurface)
             .cornerRadius(14)
         }
     }
@@ -487,23 +553,23 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack(alignment: .top) {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "camera.fill")
-                        .foregroundColor(.neonMint)
+                        .foregroundColor(.accentPrimary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Progress Photos Tracking")
                             .font(.subheadline.weight(.bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.textPrimary)
                         Text("Add photos to track skin changes, body posture, wellness milestones or recovery progress")
                             .font(.caption2)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.textSecondary)
                     }
                 }
                 Spacer()
                 Text("\(viewModel.selectedImages.count) Attached")
                     .font(.caption2.weight(.bold))
-                    .foregroundColor(.neonMint)
+                    .foregroundColor(.accentPrimary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(Color.neonMint.opacity(0.12))
+                    .background(Color.accentPrimary.opacity(0.12))
                     .cornerRadius(8)
             }
 
@@ -513,13 +579,13 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 VStack(spacing: 8) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.title2)
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(.textTertiary)
                     Text("Click or drag photos here")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(.textSecondary)
                     Text("Supports mobile camera snapshots & image gallery (JPG, PNG, WebP)")
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.35))
+                        .foregroundColor(.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
@@ -527,7 +593,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 .background(
                     RoundedRectangle(cornerRadius: 14)
                         .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6]))
-                        .foregroundColor(.white.opacity(0.15))
+                        .foregroundColor(.textPrimary.opacity(0.15))
                 )
             }
             .buttonStyle(.plain)
@@ -543,13 +609,21 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                                     .frame(width: 72, height: 72)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                                // The thumbnail itself has no tap action, so the
+                                // 44pt target can grow inward over the photo: the
+                                // glyph stays pinned in the corner where it was and
+                                // there is nothing underneath to hit by mistake.
                                 Button {
                                     withAnimation { viewModel.removePhoto(at: index) }
                                 } label: {
                                     Image(systemName: "xmark.circle.fill")
+                                        .font(.title3)
                                         .foregroundColor(.white)
                                         .background(Circle().fill(Color.black.opacity(0.6)))
+                                        .frame(width: 44, height: 44, alignment: .topTrailing)
+                                        .contentShape(Rectangle())
                                 }
+                                .accessibilityLabel("Remove photo")
                                 .padding(4)
                             }
                         }
@@ -558,7 +632,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             }
         }
         .padding(18)
-        .background(Color.cardDark)
+        .background(Color.appSurface)
         .cornerRadius(18)
         .confirmationDialog("Add Photo", isPresented: $viewModel.showingPhotoSourceMenu, titleVisibility: .visible) {
             Button("Take Photo (Camera)") {
@@ -577,7 +651,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("TAGS & MILESTONES")
                 .font(.caption.weight(.heavy))
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.textSecondary)
 
             FlowLayout(spacing: 10) {
                 ForEach(allMilestoneOptions, id: \.self) { tag in
@@ -594,10 +668,10 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
             HStack(spacing: 10) {
                 TextField("Add custom milestone tag...", text: $customMilestoneText)
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .background(Color.cardDark)
+                    .background(Color.appSurface)
                     .cornerRadius(12)
 
                 Button("Add") {
@@ -605,12 +679,15 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     customMilestoneText = ""
                 }
                 .font(.subheadline.weight(.bold))
-                .foregroundColor(.white)
+                .foregroundColor(Color.onAccent)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(Color.milestonePurple)
+                .frame(maxHeight: .infinity)
+                .background(Color.accentPrimary)
                 .cornerRadius(12)
+                .contentShape(Rectangle())
             }
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -625,10 +702,10 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             .font(.caption.weight(.semibold))
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(isSelected ? accent.opacity(0.9) : Color.cardDark)
-            .foregroundColor(isSelected ? Color.bgDark : .white.opacity(0.8))
+            .background(isSelected ? accent.opacity(0.9) : Color.appSurface)
+            .foregroundColor(isSelected ? Color.onAccent : .textPrimary.opacity(0.8))
             .overlay(
-                Capsule().stroke(isSelected ? Color.clear : Color.white.opacity(0.1), lineWidth: 1)
+                Capsule().stroke(isSelected ? Color.clear : Color.textPrimary.opacity(0.1), lineWidth: 1)
             )
             .clipShape(Capsule())
         }
@@ -638,14 +715,16 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     // MARK: - Bottom Bar
 
     private var bottomBar: some View {
+        // The confirm label wraps to two lines in most languages while "Cancel"
+        // never does, so both stretch to the row and the row takes the taller.
         HStack(spacing: 12) {
             Button(action: { dismiss() }) {
                 Text("CANCEL")
                     .font(.subheadline.weight(.heavy))
-                    .foregroundColor(.white.opacity(0.7))
-                    .frame(maxWidth: .infinity)
+                    .foregroundColor(.textPrimary.opacity(0.7))
                     .padding(.vertical, 16)
-                    .background(Color.cardDark)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.appSurface)
                     .cornerRadius(16)
             }
             .buttonStyle(.plain)
@@ -658,18 +737,19 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     Text("RECORD DIARY CHECK-IN")
                 }
                 .font(.subheadline.weight(.heavy))
-                .foregroundColor(Color.bgDark)
-                .frame(maxWidth: .infinity)
+                .foregroundColor(Color.onAccent)
                 .padding(.vertical, 16)
-                .background(Color.neonMint)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.accentPrimary)
                 .cornerRadius(16)
             }
             .buttonStyle(.plain)
         }
+        .fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal)
         .padding(.top, 12)
         .padding(.bottom, 8)
-        .background(Color.bgDark)
+        .background(Color.appBackground)
     }
 }
 
@@ -691,5 +771,5 @@ extension DiaryCheckInView where VM == DiaryCheckInViewModel {
 
 #Preview {
     DiaryCheckInView(viewModel: MockDiaryCheckInViewModel())
-        .preferredColorScheme(.dark)
+        .appTheme()
 }

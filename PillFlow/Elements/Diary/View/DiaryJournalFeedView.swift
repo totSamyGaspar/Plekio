@@ -61,13 +61,13 @@ struct DiaryJournalFeedView: View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.textTertiary)
                 TextField("Search notes", text: $searchText)
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(Color.cardDark)
+            .background(Color.appSurface)
             .cornerRadius(12)
 
             HStack(spacing: 10) {
@@ -85,10 +85,10 @@ struct DiaryJournalFeedView: View {
                         Image(systemName: "chevron.down")
                     }
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.textPrimary.opacity(0.7))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Color.cardDark)
+                    .background(Color.appSurface)
                     .cornerRadius(10)
                 }
 
@@ -100,10 +100,10 @@ struct DiaryJournalFeedView: View {
                         Text("With Photos")
                     }
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(photosOnlyFilter ? Color.bgDark : .white.opacity(0.7))
+                    .foregroundColor(photosOnlyFilter ? Color.onAccent : .textPrimary.opacity(0.7))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(photosOnlyFilter ? Color.neonMint : Color.cardDark)
+                    .background(photosOnlyFilter ? Color.accentPrimary : Color.appSurface)
                     .cornerRadius(10)
                 }
                 .buttonStyle(.plain)

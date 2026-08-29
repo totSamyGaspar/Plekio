@@ -8,50 +8,91 @@
 import SwiftUI
 
 struct SettingsView: View {
+    /// Read straight from defaults rather than through a view model: every
+    /// screen that reacts to the theme reads the same key, so a store in
+    /// between would only add a second place for it to go stale.
+    @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .dark
+
     var body: some View {
         ZStack {
-            Color.bgDark.ignoresSafeArea()
-            
-            List {
-                Section(header: Text("About").foregroundColor(.white.opacity(0.6))) {
-                    HStack {
-                        Text("Version")
-                            .foregroundColor(.white)
-                        Spacer()
-                        Text("1.0.0")
-                            .foregroundColor(.white.opacity(0.5))
-                    }
-                    
-                    HStack {
-                        Text("Developer")
-                            .foregroundColor(.white)
-                        Spacer()
-                        Text("Edward Gasparian")
-                            .foregroundColor(.white.opacity(0.5))
-                    }
-                }
-                .listRowBackground(Color.cardDark) // Dark background for settings rows
+            Color.appBackground.ignoresSafeArea()
 
-                Section {
-                    Button(action: {
-                        // No action yet
-                    }) {
-                        Label("Support the project", systemImage: "cup.and.saucer.fill")
-                            .foregroundColor(.neonMint)
+            VStack(alignment: .leading, spacing: 0) {
+                // Drawn rather than left to the navigation bar: the other three
+                // tabs draw their own titles, and a system large title here was
+                // the one screen that behaved differently. The header trait is
+                // added by hand because that is what the system title provided
+                // and VoiceOver still needs.
+                Text("Settings")
+                    .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
+                    .foregroundColor(.textPrimary)
+                    .accessibilityAddTraits(.isHeader)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
+
+                List {
+                    Section(header: Text("Appearance").foregroundColor(.textSecondary)) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Label("Theme", systemImage: theme.iconName)
+                                    .foregroundColor(.textPrimary)
+                                Spacer()
+                            }
+
+                            Picker("Theme", selection: $theme) {
+                                ForEach(AppTheme.allCases) { option in
+                                    Text(option.title).tag(option)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
+                        }
+                        .padding(.vertical, 6)
                     }
+                    .listRowBackground(Color.appSurface)
+
+                    Section(header: Text("About").foregroundColor(.textSecondary)) {
+                        HStack {
+                            Text("Version")
+                                .foregroundColor(.textPrimary)
+                            Spacer()
+                            Text("1.0.0")
+                                .foregroundColor(.textSecondary)
+                        }
+                    
+                        HStack {
+                            Text("Developer")
+                                .foregroundColor(.textPrimary)
+                            Spacer()
+                            Text("Edward Gasparian")
+                                .foregroundColor(.textSecondary)
+                        }
+                    }
+                    .listRowBackground(Color.appSurface) // Card background for settings rows
+
+                    Section {
+                        Button(action: {
+                            // No action yet
+                        }) {
+                            Label("Support the project", systemImage: "cup.and.saucer.fill")
+                                .foregroundColor(.accentPrimary)
+                        }
+                    }
+                    .listRowBackground(Color.appSurface)
                 }
-                .listRowBackground(Color.cardDark)
+                .scrollContentBackground(.hidden) // Remove the list's default gray background
+                .tint(.accentPrimary)
             }
-            .scrollContentBackground(.hidden) // Remove the list's default gray background
         }
         .navigationTitle("Settings")
-        .navigationBarTitleDisplayMode(.large)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 
 #Preview {
     NavigationStack {
         SettingsView()
-            .preferredColorScheme(.dark)
+            .appTheme()
     }
 }
