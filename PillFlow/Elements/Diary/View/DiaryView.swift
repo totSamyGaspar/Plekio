@@ -17,7 +17,10 @@ private enum DiarySubTab: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
+    /// LocalizedStringKey, not String: with String the compiler does not
+    /// extract the literals into the catalog, which is why these three sub-tabs
+    /// stayed English in all nine languages.
+    var title: LocalizedStringKey {
         switch self {
         case .journalFeed: return "Journal Feed"
         case .progressGallery: return "Progress Gallery"

@@ -80,11 +80,18 @@ struct TakePillModalView: View {
                                 .foregroundColor(.white.opacity(0.8))
                                 .tracking(1.0)
 
-                            // One string with the count, not a ternary: Russian and
-                            // Ukrainian have three plural forms that two branches
-                            // can't express. The "one" variant may drop the number.
-                            Text("Time for your \(pills.count) pills")
-                                .font(.title2.weight(.heavy))
+                            // "meds", not "pills": the count here would be
+                            // medications, and one of them can be several tablets —
+                            // the rows below say "2 pcs".
+                            //
+                            // And no count at all, deliberately: with one, every
+                            // language needs its own plural forms (three each in
+                            // Russian and Ukrainian) for a number the list right
+                            // below already shows. Countless wording stays correct
+                            // for any number, and matches the push notification
+                            // that opens this modal.
+                            Text("Time for your meds")
+                                .font(.title3.weight(.heavy))
                                 .foregroundColor(.white)
                         }
                         Spacer()
