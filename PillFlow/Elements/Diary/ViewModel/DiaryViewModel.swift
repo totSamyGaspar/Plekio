@@ -18,6 +18,8 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     /// body pass; now it is recomputed once per data change.
     @Published private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
 
+    @Published private(set) var bloodPressureReadings: [BloodPressureReading] = []
+
     private let dbService: DatabaseServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
@@ -40,10 +42,30 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         photoCheckpoints = entries.flatMap { entry in
             entry.photoIds.map { DiaryPhotoCheckpoint(photoId: $0, entry: entry) }
         }
+        // Fetched alongside the entries because both answer the same
+        // .diaryDidUpdate signal — a separate path would mean two subscriptions
+        // for one screen.
+        bloodPressureReadings = dbService.fetchAllBloodPressureReadings()
     }
 
     func deleteEntry(_ entry: DiaryEntry) {
         guard AppErrorPresenter.shared.run({ try dbService.deleteDiaryEntry(entry) }) else { return }
+        fetchEntries()
+    }
+
+    func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {
+        guard AppErrorPresenter.shared.run({
+            try dbService.saveBloodPressureReading(
+                measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
+            )
+        }) else { return }
+        fetchEntries()
+    }
+
+    func deleteBloodPressureReading(_ reading: BloodPressureReading) {
+        guard AppErrorPresenter.shared.run({
+            try dbService.deleteBloodPressureReading(reading)
+        }) else { return }
         fetchEntries()
     }
 
@@ -130,6 +152,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
 final class MockDiaryViewModel: DiaryViewModelProtocol {
     @Published var entries: [DiaryEntry] = []
     @Published private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
+    @Published private(set) var bloodPressureReadings: [BloodPressureReading] = []
 
     var avgMoodScore: Double = 4.0
     var avgEnergyLevel: Double = 3.3
@@ -143,5 +166,7 @@ final class MockDiaryViewModel: DiaryViewModelProtocol {
     func fetchEntries() {}
     func deleteEntry(_ entry: DiaryEntry) {}
     func quickLog(mood: DiaryMood) {}
+    func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {}
+    func deleteBloodPressureReading(_ reading: BloodPressureReading) {}
 }
 #endif

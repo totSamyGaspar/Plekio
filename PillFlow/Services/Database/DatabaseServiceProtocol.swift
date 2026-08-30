@@ -30,6 +30,12 @@ protocol DatabaseServiceProtocol {
     func addMedication(draft: MedicationDraft, to course: TreatmentCourse) throws
     func refillStock(for medication: MedicationItem, amount: Int) throws
 
+    // MARK: - Blood pressure
+
+    func saveBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) throws
+    func fetchAllBloodPressureReadings() -> [BloodPressureReading]
+    func deleteBloodPressureReading(_ reading: BloodPressureReading) throws
+
     // MARK: - Diary
 
     func saveDiaryEntry(draft: DiaryEntryDraft) throws

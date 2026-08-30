@@ -11,6 +11,8 @@ final class MockNotificationService: NotificationServiceProtocol {
     var clearedDeliveredIds: [UUID]?
     var clearedDeliveredSlot: Date?
     var clearDeliveredCallCount = 0
+    var scheduledDiaryReminderMinute: Int?
+    var didCancelDiaryReminder = false
 
     func requestPermission() {
         didCallRequestPermission = true
@@ -30,6 +32,14 @@ final class MockNotificationService: NotificationServiceProtocol {
 
     func removeAllPending() {
         didCallRemoveAllPending = true
+    }
+
+    func scheduleDiaryReminder(minuteOfDay: Int) {
+        scheduledDiaryReminderMinute = minuteOfDay
+    }
+
+    func cancelDiaryReminder() {
+        didCancelDiaryReminder = true
     }
 
     func clearDelivered(takenMedicationIds: [UUID], scheduledTime: Date) {

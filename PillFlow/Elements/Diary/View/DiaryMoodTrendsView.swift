@@ -14,6 +14,9 @@ struct DiaryMoodTrendsView: View {
     let entries: [DiaryEntry]
     let avgEnergyLevel: Double
     let avgSleepHours: Double
+    let bloodPressureReadings: [BloodPressureReading]
+    var onAddBloodPressure: () -> Void
+    var onDeleteBloodPressure: (BloodPressureReading) -> Void
 
     /// Most recent entries, oldest first, so the chart reads left-to-right
     /// chronologically.
@@ -25,6 +28,11 @@ struct DiaryMoodTrendsView: View {
         VStack(spacing: 16) {
             moodProgressionCard
             physicalEnergyCard
+            BloodPressureCard(
+                readings: bloodPressureReadings,
+                onAdd: onAddBloodPressure,
+                onDelete: onDeleteBloodPressure
+            )
         }
         .padding(.horizontal)
     }
