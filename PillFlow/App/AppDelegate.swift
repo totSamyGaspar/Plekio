@@ -17,11 +17,20 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
 
     private var bufferedPush: (medicationIds: [UUID], time: Date)?
+    private var bufferedDiaryReminder = false
 
     private func flushBufferedPush() {
-        guard let router, let push = bufferedPush else { return }
-        bufferedPush = nil
-        router.handlePushNotification(medicationIds: push.medicationIds, time: push.time)
+        guard let router else { return }
+
+        if let push = bufferedPush {
+            bufferedPush = nil
+            router.handlePushNotification(medicationIds: push.medicationIds, time: push.time)
+        }
+
+        if bufferedDiaryReminder {
+            bufferedDiaryReminder = false
+            router.handleDiaryReminder()
+        }
     }
 
     func application(_ application: UIApplication,
@@ -35,6 +44,21 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
 
         let userInfo = response.notification.request.content.userInfo
+
+        // The diary reminder carries no medicationIds, so it has to be recognised
+        // before the dose branch's guard drops it as malformed.
+        if userInfo["kind"] as? String == "diary" {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                if let router = self.router {
+                    router.handleDiaryReminder()
+                } else {
+                    self.bufferedDiaryReminder = true
+                }
+            }
+            completionHandler()
+            return
+        }
 
         guard let medIdStrings = userInfo["medicationIds"] as? [String],
               let timeInterval = userInfo["time"] as? TimeInterval else {

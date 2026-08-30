@@ -18,6 +18,7 @@ enum SheetRoute: Identifiable {
     
     case newTreatment
     case takePill(pills: [PillDose], onTake: () -> Void, onSkip: () -> Void)
+    case diaryCheckIn
 
     // Identifiable is required for .sheet(item:).
     var id: String {
@@ -26,6 +27,8 @@ enum SheetRoute: Identifiable {
             return "newTreatment"
         case .takePill(let pills, _, _):
             return "takePill-" + pills.map(\.id).joined(separator: "-")
+        case .diaryCheckIn:
+            return "diaryCheckIn"
         }
     }
 }

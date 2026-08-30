@@ -12,6 +12,13 @@ protocol NotificationServiceProtocol {
     func scheduleNotifications(activeCourses: [TreatmentCourse])
     func cancelNotifications(for medicationId: UUID)
     func scheduleSnooze(for medicationIds: [String], names: [String])
+
+    /// Arms the daily diary reminder at `minuteOfDay` minutes past midnight,
+    /// replacing whatever was armed before. One repeating request, so it costs a
+    /// single slot of the 64 iOS allows however long the horizon is.
+    func scheduleDiaryReminder(minuteOfDay: Int)
+
+    func cancelDiaryReminder()
     /// Cancels ALL pending (not yet shown) local notifications. Single entry point,
     /// so a ViewModel/View never reaches into UNUserNotificationCenter itself.
     func removeAllPending()

@@ -13,6 +13,10 @@ struct SettingsView: View {
     /// between would only add a second place for it to go stale.
     @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .dark
 
+    @AppStorage(DiaryReminderSettings.enabledKey) private var diaryReminderEnabled = false
+    @AppStorage(DiaryReminderSettings.minuteOfDayKey)
+    private var reminderMinuteOfDay = DiaryReminderSettings.defaultMinuteOfDay
+
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
@@ -52,6 +56,28 @@ struct SettingsView: View {
                     }
                     .listRowBackground(Color.appSurface)
 
+                    Section(header: Text("Reminders").foregroundColor(.textSecondary)) {
+                        Toggle(isOn: $diaryReminderEnabled) {
+                            Label("Diary reminder", systemImage: "text.book.closed.fill")
+                                .foregroundColor(.textPrimary)
+                        }
+                        .tint(.accentPrimary)
+
+                        // Only once the reminder is on: a time picker for something
+                        // switched off is a control with nothing to control.
+                        if diaryReminderEnabled {
+                            DatePicker(
+                                "Reminder time",
+                                selection: reminderTime,
+                                displayedComponents: .hourAndMinute
+                            )
+                            .foregroundColor(.textPrimary)
+                        }
+                    }
+                    .listRowBackground(Color.appSurface)
+                    .onChange(of: diaryReminderEnabled) { _, _ in applyDiaryReminder() }
+                    .onChange(of: reminderMinuteOfDay) { _, _ in applyDiaryReminder() }
+
                     Section(header: Text("About").foregroundColor(.textSecondary)) {
                         HStack {
                             Text("Version")
@@ -87,6 +113,35 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         .toolbar(.hidden, for: .navigationBar)
+    }
+
+    /// The picker speaks Date; the setting stores minutes since midnight, since a
+    /// date would drag a day along with it for a time that repeats every day.
+    private var reminderTime: Binding<Date> {
+        Binding(
+            get: {
+                let (hour, minute) = DiaryReminderSettings.hourAndMinute(from: reminderMinuteOfDay)
+                return Calendar.current.date(
+                    bySettingHour: hour, minute: minute, second: 0, of: Date()
+                ) ?? Date()
+            },
+            set: { newValue in
+                let parts = Calendar.current.dateComponents([.hour, .minute], from: newValue)
+                reminderMinuteOfDay = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+            }
+        )
+    }
+
+    private func applyDiaryReminder() {
+        let service = DIContainer.shared.resolve(NotificationServiceProtocol.self)
+        guard diaryReminderEnabled else {
+            service.cancelDiaryReminder()
+            return
+        }
+        // Asked here rather than at launch: switching the reminder on is the moment
+        // the permission is actually for something.
+        service.requestPermission()
+        service.scheduleDiaryReminder(minuteOfDay: reminderMinuteOfDay)
     }
 }
 

@@ -29,6 +29,7 @@ final class DatabaseService: DatabaseServiceProtocol {
     private static func makeSchema() -> Schema {
         Schema([
             TreatmentCourse.self, MedicationItem.self, DoseLog.self, DiaryEntry.self,
+            BloodPressureReading.self,
         ])
     }
 
@@ -513,6 +514,35 @@ final class DatabaseService: DatabaseServiceProtocol {
         for (id, data) in pendingPhotos {
             ImageCache.shared.saveToDisk(data, for: id)
         }
+    }
+
+    // MARK: - Blood pressure
+
+    func saveBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) throws {
+        let reading = BloodPressureReading(
+            measuredAt: measuredAt,
+            // Same clamping idiom as sleepHours above: a typo like 1200/80 would
+            // otherwise flatten the whole chart.
+            systolic: BloodPressureReading.systolicRange.clamping(systolic),
+            diastolic: BloodPressureReading.diastolicRange.clamping(diastolic),
+            pulse: pulse.map { BloodPressureReading.pulseRange.clamping($0) }
+        )
+        context.insert(reading)
+        // Posted on the diary channel: the readings live on the diary's own
+        // screen, and it is the only subscriber that needs to redraw.
+        try commit(alsoPosting: .diaryDidUpdate)
+    }
+
+    func fetchAllBloodPressureReadings() -> [BloodPressureReading] {
+        let descriptor = FetchDescriptor<BloodPressureReading>(
+            sortBy: [SortDescriptor(\.measuredAt, order: .reverse)]
+        )
+        return (try? context.fetch(descriptor)) ?? []
+    }
+
+    func deleteBloodPressureReading(_ reading: BloodPressureReading) throws {
+        context.delete(reading)
+        try commit(alsoPosting: .diaryDidUpdate)
     }
 
     func fetchAllDiaryEntries() -> [DiaryEntry] {

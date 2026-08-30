@@ -41,6 +41,10 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     var updatedDiaryDraft: DiaryEntryDraft?
     var deletedDiaryEntry: DiaryEntry?
 
+    var bloodPressureReadingsToReturn: [BloodPressureReading] = []
+    var savedBloodPressure: (measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?)?
+    var deletedBloodPressureReading: BloodPressureReading?
+
     // MARK: - Protocol Implementation
 
     func saveCourse(name: String, startDate: Date, endDate: Date, drafts: [MedicationDraft]) throws {
@@ -104,6 +108,18 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     func refillStock(for medication: MedicationItem, amount: Int) throws {
         refilledMedication = medication
         refilledAmount = amount
+    }
+
+    func saveBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) throws {
+        savedBloodPressure = (measuredAt, systolic, diastolic, pulse)
+    }
+
+    func fetchAllBloodPressureReadings() -> [BloodPressureReading] {
+        bloodPressureReadingsToReturn
+    }
+
+    func deleteBloodPressureReading(_ reading: BloodPressureReading) throws {
+        deletedBloodPressureReading = reading
     }
 
     func saveDiaryEntry(draft: DiaryEntryDraft) throws {

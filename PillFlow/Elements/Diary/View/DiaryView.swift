@@ -66,6 +66,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     @StateObject private var viewModel: VM
 
     @State private var showingCheckIn = false
+    @State private var showingBloodPressureEntry = false
     @State private var entryBeingEdited: DiaryEntry?
     @State private var showingDeleteAlert = false
     @State private var entryToDelete: DiaryEntry?
@@ -115,6 +116,13 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         .sheet(isPresented: $showingCheckIn) {
             DiaryCheckInView()
                 .appTheme()
+        }
+        .sheet(isPresented: $showingBloodPressureEntry) {
+            BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
+                viewModel.addBloodPressureReading(
+                    measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
+                )
+            }
         }
         .sheet(item: $entryBeingEdited) { entry in
             DiaryCheckInView(editingEntry: entry)
@@ -452,7 +460,10 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             DiaryMoodTrendsView(
                 entries: viewModel.entries,
                 avgEnergyLevel: viewModel.avgEnergyLevel,
-                avgSleepHours: viewModel.avgSleepHours
+                avgSleepHours: viewModel.avgSleepHours,
+                bloodPressureReadings: viewModel.bloodPressureReadings,
+                onAddBloodPressure: { showingBloodPressureEntry = true },
+                onDeleteBloodPressure: { viewModel.deleteBloodPressureReading($0) }
             )
         }
     }

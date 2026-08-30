@@ -95,8 +95,10 @@ struct MainTabView: View {
         .task {
             try? await Task.sleep(for: .seconds(RootTransition.presentationDelay))
             consumePendingPush()
+            consumePendingDiaryCheckIn()
         }
         .onChange(of: router.pendingPushMedicationIds) { _, _ in consumePendingPush() }
+        .onChange(of: router.pendingDiaryCheckIn) { _, _ in consumePendingDiaryCheckIn() }
         .alert(
             "Couldn't save",
             isPresented: Binding(
@@ -148,12 +150,21 @@ struct MainTabView: View {
         )
     }
 
+    private func consumePendingDiaryCheckIn() {
+        guard router.consumePendingDiaryCheckIn() else { return }
+        router.present(.diaryCheckIn)
+    }
+
     @ViewBuilder
     private func sheetContent(for sheet: SheetRoute) -> some View {
         switch sheet {
 
         case .newTreatment:
             NewTreatmentView()
+                .appTheme()
+
+        case .diaryCheckIn:
+            DiaryCheckInView()
                 .appTheme()
 
         case .takePill(let pills, let onTake, let onSkip):

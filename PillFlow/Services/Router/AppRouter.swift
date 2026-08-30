@@ -45,6 +45,22 @@ final class AppRouter: ObservableObject {
     @Published var pendingPushMedicationIds: [UUID]?
     @Published var pendingPushTime: Date?
     
+    /// Diary reminder: switch to the diary and open the check-in form. Parked
+    /// the same way as a dose push, because the same thing breaks it — on a cold
+    /// launch the request arrives before the tab bar is in the hierarchy.
+    @Published var pendingDiaryCheckIn = false
+
+    func handleDiaryReminder() {
+        selectedTab = 2
+        pendingDiaryCheckIn = true
+    }
+
+    func consumePendingDiaryCheckIn() -> Bool {
+        guard pendingDiaryCheckIn else { return false }
+        pendingDiaryCheckIn = false
+        return true
+    }
+
     func consumePendingPush() -> ([UUID], Date)? {
         guard let ids = pendingPushMedicationIds, let time = pendingPushTime else { return nil }
         pendingPushMedicationIds = nil
