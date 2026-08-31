@@ -23,35 +23,33 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     headerSection
-                    dateSummaryCard
 
-                    let isToday = Calendar.current.isDateInToday(viewModel.selectedDate)
-
-                    if isToday {
-                        let allPills = viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills
-
-                        // Missed doses (past the 1-hour grace window) are excluded here too,
-                        // or one would still surface as "Up Next" with a working Log button,
-                        // bypassing the lock MedicationCardView enforces.
-                        if let earliestUntakenTime = allPills.filter({ !$0.isTaken && !$0.isMissed }).min(by: { $0.time < $1.time })?.time {
-
-                            let pillsAtThisTime = allPills.filter { Calendar.current.isDate($0.time, equalTo: earliestUntakenTime, toGranularity: .minute) }
-
-                            UpNextHeroCard(pills: pillsAtThisTime) {
-                                for pill in pillsAtThisTime where !pill.isTaken && !pill.isMissed {
-                                    viewModel.togglePill(id: pill.id)
-                                }
+                    if let upNextPills {
+                        UpNextHeroCard(
+                            pills: upNextPills,
+                            selectedDate: viewModel.selectedDate,
+                            takenCount: takenCount,
+                            totalCount: totalCount
+                        ) {
+                            for pill in upNextPills where !pill.isTaken && !pill.isMissed {
+                                viewModel.togglePill(id: pill.id)
                             }
-                            .zIndex(1)
-                            .transition(
-                                .asymmetric(
-                                    insertion: .move(edge: .bottom).combined(with: .opacity),
-                                    removal: .opacity
-                                        .combined(with: .scale(scale: 0.8))
-                                        .combined(with: .offset(y: -40))
-                                )
-                            )
                         }
+                        .zIndex(1)
+                        .transition(
+                            .asymmetric(
+                                insertion: .move(edge: .bottom).combined(with: .opacity),
+                                removal: .opacity
+                                    .combined(with: .scale(scale: 0.8))
+                                    .combined(with: .offset(y: -40))
+                            )
+                        )
+                    } else {
+                        // The hero carries the date and the tally, but it is only
+                        // there while today still has an unlogged dose. Everything
+                        // logged, or another day picked, and they would vanish with
+                        // it — so they fall back to a plain line.
+                        dateSummaryLine
                     }
 
                     calendarSection.padding(.top, 8)
@@ -86,42 +84,47 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         .padding(.top, 10)
     }
 
-    /// The monogram circle holds text, so it follows the text size.
-    @ScaledMetric(relativeTo: .headline) private var monogramSize: CGFloat = 46
+    private var allPills: [PillDose] {
+        viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills
+    }
 
-    private var dateSummaryCard: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 6) {
-                // The date and the counters now describe the same day. This used to
-                // print today's date with the word "today" while the counter was
-                // computed for the selected date, so the two disagreed as soon as the
-                // user moved off today.
-                Text(viewModel.selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
-                    .font(.title3.weight(.bold))
-                    .foregroundColor(.textPrimary)
+    private var totalCount: Int { allPills.count }
+    private var takenCount: Int { allPills.filter { $0.isTaken }.count }
 
-                let total = viewModel.morningPills.count + viewModel.noonPills.count + viewModel.eveningPills.count
-                let taken = (viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills).filter { $0.isTaken }.count
-
-                Text("\(taken) of \(total) doses logged")
-                    .font(.subheadline)
-                    .foregroundColor(.accentPrimary)
-            }
-            Spacer()
-            Circle()
-                .fill(Color.accentPrimary)
-                .frame(width: monogramSize, height: monogramSize)
-                .overlay(
-                    Text("PF").font(.headline.weight(.heavy)).foregroundColor(Color.onAccent)
-                )
-                // Decoration: the app's name is already the screen title, and
-                // "PF" read out as two letters is noise, not information.
-                .accessibilityHidden(true)
+    /// The pills of the next unlogged slot — and, by being nil or not, what
+    /// decides whether the hero card is on screen at all.
+    ///
+    /// Missed doses (past the 1-hour grace window) are excluded, or one would
+    /// still surface as "Up Next" with a working Log button, bypassing the lock
+    /// MedicationCardView enforces.
+    private var upNextPills: [PillDose]? {
+        guard Calendar.current.isDateInToday(viewModel.selectedDate) else { return nil }
+        guard let earliest = allPills
+            .filter({ !$0.isTaken && !$0.isMissed })
+            .min(by: { $0.time < $1.time })?.time
+        else { return nil }
+        return allPills.filter {
+            Calendar.current.isDate($0.time, equalTo: earliest, toGranularity: .minute)
         }
-        .padding(20)
-        .background(Color.appSurface)
-        .cornerRadius(20)
-        .padding(.horizontal)
+    }
+
+    /// Shown in the hero card's place. The date and the tally describe the
+    /// SELECTED day, not today — they used to disagree as soon as the user moved
+    /// off today, and that must not come back.
+    private var dateSummaryLine: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(viewModel.selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
+                .font(.title3.weight(.bold))
+                .foregroundColor(.textPrimary)
+
+            Text("\(takenCount) of \(totalCount) doses logged")
+                .font(.subheadline)
+                .foregroundColor(.accentPrimary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        // No card behind it: the surface belonged to the hero, and a second card
+        // here would read as a second thing to act on.
+        .padding(.horizontal, 20)
     }
 
     private var calendarSection: some View {

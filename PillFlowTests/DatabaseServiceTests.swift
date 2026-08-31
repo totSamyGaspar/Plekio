@@ -186,14 +186,24 @@ struct DatabaseServiceTests {
         draftWithPhoto.name = "Омега-3"
         let fakeJPEGBytes = Data([0xFF, 0xD8, 0xFF, 0x00, 0x01, 0x02])
         draftWithPhoto.medicationImageData = fakeJPEGBytes
+        draftWithPhoto.photoModified = true
 
         try db.updateMedication(med, with: draftWithPhoto)
         #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == fakeJPEGBytes)
 
-        // Saving with medicationImageData == nil must delete the file, not leave a
-        // stale one on disk.
+        // An edit that never touched the photo must leave the file alone, even
+        // though the draft carries no bytes — the preload may simply not have
+        // finished. This is what used to erase photos on a rename.
+        var renameOnly = MedicationDraft()
+        renameOnly.name = "Омега-3 форте"
+        try db.updateMedication(med, with: renameOnly)
+        #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == fakeJPEGBytes)
+
+        // Removing the photo (photoModified with no bytes) must delete the file,
+        // not leave a stale one on disk.
         var draftWithoutPhoto = MedicationDraft()
         draftWithoutPhoto.name = "Омега-3"
+        draftWithoutPhoto.photoModified = true
         try db.updateMedication(med, with: draftWithoutPhoto)
         #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == nil)
     }

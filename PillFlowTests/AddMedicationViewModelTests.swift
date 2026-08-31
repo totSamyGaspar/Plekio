@@ -25,6 +25,7 @@ struct AddMedicationViewModelTests {
 
         #expect(vm.selectedImage == nil)
         #expect(vm.draft.medicationImageData == nil)
+        #expect(vm.draft.photoModified == false)
         #expect(vm.showingPhotoSourceMenu == false)
     }
 
@@ -42,5 +43,8 @@ struct AddMedicationViewModelTests {
 
         #expect(vm.selectedImage == nil)
         #expect(vm.draft.medicationImageData == nil)
+        // Marks the removal as deliberate, so DatabaseService deletes the file
+        // instead of reading the empty draft as "not loaded yet".
+        #expect(vm.draft.photoModified == true)
     }
 }
