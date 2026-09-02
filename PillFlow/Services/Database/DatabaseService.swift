@@ -261,14 +261,18 @@ final class DatabaseService: DatabaseServiceProtocol {
 
         remapLogs(of: medication, from: previousTimes, to: draft.timesOfDay)
 
-        // Edit mode preloads the existing bytes into draft.medicationImageData (see
-        // AddMedicationView.init(editingMedication:)), so an unchanged photo can't be
-        // mistaken for a deleted one. Disk is touched only after a successful commit —
-        // a rollback must not leave the record without its file.
+        // Disk is touched only when the user actually changed the photo, and only
+        // after a successful commit — a rollback must not leave the record without
+        // its file. An untouched draft is left alone: it can be empty simply because
+        // the preload hasn't finished, and treating that as a deletion erased photos
+        // on an unrelated edit (a rename). Same contract as updateDiaryEntry.
+        let photoModified = draft.photoModified
         let newImageData = draft.medicationImageData
         let medicationId = medication.id
 
         try commit()
+
+        guard photoModified else { return }
 
         if let newImageData {
             ImageCache.shared.saveToDisk(newImageData, for: medicationId)

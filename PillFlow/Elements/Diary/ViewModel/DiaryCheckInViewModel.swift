@@ -67,11 +67,16 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
                 let image = try await mediaPickerService.pickImage(source: source)
 
                 // Compress off the main actor, same approach as AddMedicationViewModel.
+                // pngData is the fallback: jpegData returns nil for an image with no
+                // CGImage behind it, and the photo would then be dropped silently.
                 let compressedData = await Task.detached(priority: .userInitiated) {
-                    image.jpegData(compressionQuality: 0.6)
+                    image.jpegData(compressionQuality: 0.6) ?? image.pngData()
                 }.value
 
-                guard let compressedData else { return }
+                guard let compressedData else {
+                    AppLog.media.error("Picked image could not be encoded; diary photo not attached")
+                    return
+                }
                 selectedImages.append(image)
                 draft.photos.append(compressedData)
                 draft.photosModified = true

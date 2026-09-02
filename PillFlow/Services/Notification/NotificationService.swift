@@ -106,7 +106,29 @@ final class NotificationService: NotificationServiceProtocol {
         // queue, so a course edit would silently take it down with everything
         // else. Re-armed here rather than at the five call sites of
         // rescheduleAll, where forgetting it once is enough to lose it.
-        restoreDiaryReminderIfEnabled()
+        //
+        // Re-armed *after* the removal has actually been carried out — see
+        // afterPendingRemovalCompletes.
+        afterPendingRemovalCompletes { [weak self] in
+            self?.restoreDiaryReminderIfEnabled()
+        }
+    }
+
+    /// Runs `work` once the notification centre has processed everything queued
+    /// before this call.
+    ///
+    /// `removeAllPendingNotificationRequests()` is asynchronous: it returns at once
+    /// and the removal happens later, on the centre's own queue. Adding requests
+    /// straight afterwards — exactly what `rescheduleAll` does after every edit —
+    /// meant the removal could land on top of the freshly added ones and wipe them,
+    /// so a medication whose time was changed simply never fired again until the
+    /// next cold launch (which raced the same way). The centre processes calls in
+    /// order, so a read issued after the removal only calls back once the removal
+    /// is done.
+    private func afterPendingRemovalCompletes(_ work: @escaping () -> Void) {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { _ in
+            DispatchQueue.main.async(execute: work)
+        }
     }
 
     // MARK: - Diary reminder
@@ -308,33 +330,44 @@ final class NotificationService: NotificationServiceProtocol {
         // arbitrary Dictionary iteration order.
         let sortedEntries = scheduleMap.sorted { $0.key < $1.key }
 
-        var scheduledCount = 0
+        // Every request is built up front, while the SwiftData objects are still
+        // safe to touch on this actor. What goes to the centre afterwards is plain
+        // UNNotificationRequest values.
+        var requests: [UNNotificationRequest] = []
         for (triggerDate, medsAtTime) in sortedEntries {
-            guard scheduledCount < Self.maxScheduled else { break }
+            guard requests.count < Self.maxScheduled else { break }
 
             let triggerComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate)
             let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
 
-            let request = Self.makeReminderRequest(
-                identifier: UUID().uuidString,
-                medicationIds: medsAtTime.map { $0.medication.id.uuidString },
-                medicationNames: medsAtTime.map { $0.medication.name },
-                triggerDate: triggerDate,
-                trigger: trigger
+            requests.append(
+                Self.makeReminderRequest(
+                    identifier: UUID().uuidString,
+                    medicationIds: medsAtTime.map { $0.medication.id.uuidString },
+                    medicationNames: medsAtTime.map { $0.medication.name },
+                    triggerDate: triggerDate,
+                    trigger: trigger
+                )
             )
+        }
 
-            center.add(request) { error in
-                if let error {
-                    AppLog.notifications.error("Failed to schedule: \(error.localizedDescription, privacy: .public)")
+        if sortedEntries.count > requests.count {
+            AppLog.notifications.warning("Slots beyond the iOS limit were not scheduled: \(sortedEntries.count - requests.count)")
+        }
+
+        // Queued behind any pending removal: rescheduleAll clears everything first,
+        // and that clear is asynchronous.
+        let scheduledCount = requests.count
+        afterPendingRemovalCompletes {
+            for request in requests {
+                center.add(request) { error in
+                    if let error {
+                        AppLog.notifications.error("Failed to schedule: \(error.localizedDescription, privacy: .public)")
+                    }
                 }
             }
-            scheduledCount += 1
+            AppLog.notifications.debug("Grouped and scheduled notifications: \(scheduledCount)")
         }
-
-        if sortedEntries.count > scheduledCount {
-            AppLog.notifications.warning("Slots beyond the iOS limit were not scheduled: \(sortedEntries.count - scheduledCount)")
-        }
-        AppLog.notifications.debug("Grouped and scheduled notifications: \(scheduledCount)")
     }
 
     // MARK: - Snooze

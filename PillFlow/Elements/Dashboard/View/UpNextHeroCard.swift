@@ -9,6 +9,12 @@ import  SwiftUI
 
 struct UpNextHeroCard: View {
     let pills: [PillDose]
+    /// The day the dashboard is showing, and its dose tally. They used to live in
+    /// a card of their own above this one; here they sit on the same surface as
+    /// the dose they describe.
+    let selectedDate: Date
+    let takenCount: Int
+    let totalCount: Int
     var onLogNow: () -> Void
     
     private var gradientColors: [Color] {
@@ -22,16 +28,26 @@ struct UpNextHeroCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("UP NEXT TODAY")
-                .font(.caption.weight(.heavy))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                // Black, not white: a white wash lightened the ground under
-                // white text and left the label at 3.4:1. Darkening instead
-                // keeps the glass look and takes it past 7:1.
-                .background(Color.black.opacity(0.15))
-                .cornerRadius(20)
-                .foregroundColor(.white)
+            HStack(alignment: .center, spacing: 12) {
+                Text("UP NEXT TODAY")
+                    .font(.caption.weight(.heavy))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    // Black, not white: a white wash lightened the ground under
+                    // white text and left the label at 3.4:1. Darkening instead
+                    // keeps the glass look and takes it past 7:1.
+                    .background(Color.black.opacity(0.15))
+                    .cornerRadius(20)
+                    .foregroundColor(.white)
+
+                Spacer(minLength: 0)
+
+                Text(selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
+                    .font(.subheadline.weight(.bold))
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.trailing)
+            }
             
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(pills) { pill in
@@ -50,13 +66,17 @@ struct UpNextHeroCard: View {
                 }
             }
             .foregroundColor(.white)
-            
+
+            Text("\(takenCount) of \(totalCount) doses logged")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.85))
+
             Divider().background(Color.white.opacity(0.3))
             
             HStack {
                 if let firstTime = pills.first?.time {
                     Text(firstTime.formatted(date: .omitted, time: .shortened))
-                        .scaledFont(size: 30, relativeTo: .title, weight: .bold, design: .monospaced)
+                        .scaledFont(size: 30, relativeTo: .title, weight: .bold, design: .default)
                         .foregroundColor(.white)
                 }
                 

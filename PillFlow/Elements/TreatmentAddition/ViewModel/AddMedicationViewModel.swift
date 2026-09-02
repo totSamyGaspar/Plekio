@@ -42,8 +42,8 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
 
         guard let loaded else { return }
         selectedImage = loaded.1
-        // The bytes go into the draft too: saving without touching the photo must not
-        // look like a deletion to DatabaseService.updateMedication.
+        // The bytes go into the draft too, so the form has them if the user replaces
+        // the photo. `photoModified` stays false — see MedicationDraft.
         draft.medicationImageData = loaded.0
     }
     
@@ -52,13 +52,22 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
             do {
                 let image = try await mediaPickerService.pickImage(source: source)
                 
-                // Compress off the main actor so the UI thread isn't blocked
+                // Compress off the main actor so the UI thread isn't blocked.
+                // pngData is the fallback: jpegData returns nil for an image with no
+                // CGImage behind it, and the preview then showed a photo that was
+                // never written to disk — a placeholder everywhere else in the app.
                 let compressedData = await Task.detached(priority: .userInitiated) {
-                    return image.jpegData(compressionQuality: 0.7)
+                    return image.jpegData(compressionQuality: 0.7) ?? image.pngData()
                 }.value
+
+                guard let compressedData else {
+                    AppLog.media.error("Picked image could not be encoded; photo not attached")
+                    return
+                }
 
                 self.selectedImage = image
                 self.draft.medicationImageData = compressedData
+                self.draft.photoModified = true
             } catch {
                 AppLog.media.error("Photo selection failed: \(error.localizedDescription, privacy: .public)")
             }
@@ -68,5 +77,6 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
     func removeImage() {
         selectedImage = nil
         draft.medicationImageData = nil
+        draft.photoModified = true
     }
 }
