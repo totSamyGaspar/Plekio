@@ -76,7 +76,7 @@ struct UpNextHeroCard: View {
             HStack {
                 if let firstTime = pills.first?.time {
                     Text(firstTime.formatted(date: .omitted, time: .shortened))
-                        .scaledFont(size: 30, relativeTo: .title, weight: .bold, design: .monospaced)
+                        .scaledFont(size: 30, relativeTo: .title, weight: .bold, design: .default)
                         .foregroundColor(.white)
                 }
                 
