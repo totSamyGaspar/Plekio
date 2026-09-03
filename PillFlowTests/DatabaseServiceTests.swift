@@ -417,6 +417,51 @@ struct DatabaseServiceTests {
         #expect(db.fetchPills(for: otherDay).first?.stockCount == 28)
     }
 
+    @Test("любая запись сбрасывает кэш, не только отметка дозы")
+    func testAnyWriteInvalidatesTheCache() async throws {
+        // The invalidation moved out of the mutating methods and into commit(),
+        // which every write goes through. This is the half that was easy to forget
+        // when each method had to remember for itself: refillStock is not about
+        // doses at all, but the cached PillDose carries a copy of the stock.
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = makeCourseWithMed(db)
+
+        #expect(db.fetchPills(for: testDate(2026, 6, 10)).first?.stockCount == 30)
+
+        try db.refillStock(for: med, amount: 10)
+
+        #expect(db.fetchPills(for: testDate(2026, 6, 10)).first?.stockCount == 40)
+    }
+
+    // MARK: - Change payload
+
+    @Test("подписчик просыпается только на интересующие его области")
+    func testChangePayloadMatching() async throws {
+        func notification(_ changes: Set<DatabaseChange>) -> Notification {
+            Notification(
+                name: .databaseDidChange,
+                object: nil,
+                userInfo: [DatabaseChange.userInfoKey: changes]
+            )
+        }
+
+        // A diary write must not wake the dashboard, the course list or the
+        // statistics — that re-fetch on every unrelated write is what the payload
+        // exists to stop.
+        #expect(notification([.diary]).touchesDatabase([.courses, .doses]) == false)
+        #expect(notification([.diary]).touchesDatabase([.diary]) == true)
+
+        // A logged dose must not send every visible medication photo back to disk.
+        #expect(notification([.doses]).touchesDatabase([.courses]) == false)
+        #expect(notification([.doses]).touchesDatabase([.courses, .doses]) == true)
+
+        // Partial overlap is enough.
+        #expect(notification([.courses, .diary]).touchesDatabase([.doses, .diary]) == true)
+
+        // No payload means "assume everything changed".
+        #expect(Notification(name: .databaseDidChange).touchesDatabase([.courses]) == true)
+    }
+
     @Test("остаток не уходит в минус")
     func testStockNeverGoesNegative() async throws {
         let db = DatabaseService(inMemoryForTesting: true)

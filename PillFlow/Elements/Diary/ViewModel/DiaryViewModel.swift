@@ -27,11 +27,10 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         self.dbService = dbService
         fetchEntries()
 
-        // Diary subscribes to the narrower .diaryDidUpdate channel rather
-        // than the app-wide .databaseDidUpdate — otherwise every unrelated
-        // write (taking a pill, refilling stock, editing a course) would
-        // also trigger a full re-fetch of every diary entry.
-        NotificationCenter.default.publisher(for: .diaryDidUpdate)
+        // Only diary writes: otherwise every unrelated write — taking a pill,
+        // refilling stock, editing a course — would re-fetch every diary entry
+        // and rebuild the photo checkpoints with it.
+        NotificationCenter.default.publisher(forDatabaseChanges: [.diary])
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.fetchEntries() }
             .store(in: &cancellables)
@@ -42,9 +41,8 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         photoCheckpoints = entries.flatMap { entry in
             entry.photoIds.map { DiaryPhotoCheckpoint(photoId: $0, entry: entry) }
         }
-        // Fetched alongside the entries because both answer the same
-        // .diaryDidUpdate signal — a separate path would mean two subscriptions
-        // for one screen.
+        // Fetched alongside the entries because both answer the same .diary
+        // change — a separate path would mean two subscriptions for one screen.
         bloodPressureReadings = dbService.fetchAllBloodPressureReadings()
     }
 

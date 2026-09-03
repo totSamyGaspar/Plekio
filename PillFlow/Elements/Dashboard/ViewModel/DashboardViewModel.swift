@@ -37,7 +37,8 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         self.notificationService = notificationService
         fetchData()
         
-        NotificationCenter.default.publisher(for: .databaseDidUpdate)
+        // Doses as well as courses: this screen is where a dose is logged.
+        NotificationCenter.default.publisher(forDatabaseChanges: [.courses, .doses])
             .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.fetchData()

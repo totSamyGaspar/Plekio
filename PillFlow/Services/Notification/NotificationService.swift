@@ -44,13 +44,17 @@ final class NotificationService: NotificationServiceProtocol {
     /// diary reminder takes one slot permanently and a snooze takes one per group.
     /// The horizon below now stretches until this budget is spent, so the ceiling
     /// is reached in normal use rather than in theory — the headroom has to be
-    /// real. Not private: it is the default argument of `buildScheduleMap`.
-    static let maxScheduled = 56
+    /// real.
+    ///
+    /// `nonisolated` because it is the default argument of `buildScheduleMap`,
+    /// and a default argument is evaluated at the call site — outside this type's
+    /// main-actor isolation. Safe: an immutable Int carries no state to race over.
+    nonisolated static let maxScheduled = 56
 
     /// Hard stop for the day-by-day walk, so a course with a very rare frequency
     /// (or a corrupt end date) cannot spin. Reached only when the budget never
     /// fills up.
-    static let maxHorizonDays = 365
+    nonisolated static let maxHorizonDays = 365
 
     /// The most recently started rebuild. See `rescheduleAll`.
     private var rescheduleTask: Task<Void, Never>?
