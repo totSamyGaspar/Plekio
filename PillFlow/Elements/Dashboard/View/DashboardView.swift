@@ -190,7 +190,11 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                             },
                             onSkip: {
                                 let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-                                for p in sameTimePills { notifService.cancelNotifications(for: p.medicationId) }
+                                Task {
+                                    for p in sameTimePills {
+                                        await notifService.cancelNotifications(for: p.medicationId)
+                                    }
+                                }
                             }
                         )
                     )

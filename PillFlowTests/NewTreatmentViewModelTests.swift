@@ -33,6 +33,7 @@ struct NewTreatmentViewModelTests {
 
         #expect(mockDB.didCallSaveCourse == true)
         #expect(mockDB.savedCourseName == "Витамины")
+        #expect(await waitUntil { mockNotifications.scheduleCallCount == 1 })
         #expect(mockNotifications.didCallRemoveAllPending == true)
         #expect(mockNotifications.scheduledCourses?.count == 1)
         #expect(mockNotifications.scheduledCourses?.first === activeCourse)

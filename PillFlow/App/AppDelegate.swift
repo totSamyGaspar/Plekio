@@ -71,26 +71,33 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let scheduledTime = Date(timeIntervalSince1970: timeInterval)
         let action = response.actionIdentifier
 
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
+            // Called only once the work is done, not before it starts. iOS may
+            // suspend the app as soon as this returns, and logging a dose now ends
+            // in a full reschedule — announcing "handled" first meant that
+            // reschedule could be cut off halfway.
+            defer { completionHandler() }
+
             switch action {
             // The button already answers the question, so it logs the dose instead of
             // opening a modal asking it again — it only switches to today's tab.
             case NotificationAction.take:
-                self?.logDoses(medicationIds: medIds, scheduledTime: scheduledTime)
-                self?.router?.selectedTab = 0
+                guard let self else { return }
+                await self.logDoses(medicationIds: medIds, scheduledTime: scheduledTime)
+                self.router?.selectedTab = 0
 
             case NotificationAction.snooze:
                 let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-                notifService.scheduleSnooze(for: medIdStrings, names: names)
+                await notifService.scheduleSnooze(for: medIdStrings, names: names)
 
             // A skip is the absence of a log, not a state of its own. iOS removes the
             // notification itself once any action is chosen.
             case NotificationAction.skip:
-            break
+                break
 
             // A plain tap on the notification body: open the app and show the modal.
             default:
-            guard let self else { return }
+                guard let self else { return }
                 if let router = self.router {
                     router.handlePushNotification(medicationIds: medIds, time: scheduledTime)
                 } else {
@@ -98,19 +105,17 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 }
             }
         }
-
-        completionHandler()
     }
 
     /// Logs the doses of the slot that aren't logged yet.
     ///
     /// Idempotent by way of `PendingDose.unlogged`: `togglePill` is a toggle, so
     /// without that filter a second "Take Now" would clear the mark it just set.
-    private func logDoses(medicationIds: [UUID], scheduledTime: Date) {
+    private func logDoses(medicationIds: [UUID], scheduledTime: Date) async {
         let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
         let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
 
-        PendingDose.markTaken(
+        await PendingDose.markTaken(
             PendingDose.unlogged(medicationIds: medicationIds, scheduledTime: scheduledTime, in: dbService),
             dbService: dbService,
             notificationService: notifService

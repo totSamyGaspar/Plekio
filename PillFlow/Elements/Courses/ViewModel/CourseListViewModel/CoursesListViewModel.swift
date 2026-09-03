@@ -43,8 +43,10 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
 
         guard AppErrorPresenter.shared.run({ try dbService.deleteCourse(course) }) else { return }
 
-        for id in medicationIds {
-            notificationService.cancelNotifications(for: id)
+        Task { [notificationService] in
+            for id in medicationIds {
+                await notificationService.cancelNotifications(for: id)
+            }
         }
         fetchCourses()
     }

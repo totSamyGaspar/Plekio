@@ -54,6 +54,7 @@ struct DashboardViewModelTests {
         #expect(mockDB.toggledPillMedicationId == medId)
         #expect(mockDB.toggledPillScheduledTime == pill.time)
 
+        #expect(await waitUntil { mockNotifications.scheduleCallCount == 1 })
         #expect(mockNotifications.didCallRemoveAllPending == true)
         #expect(mockNotifications.scheduledCourses?.count == 1)
         #expect(mockNotifications.scheduledCourses?.first === activeCourse)
@@ -145,13 +146,13 @@ struct DashboardViewModelTests {
 
         // First medication logged — the slot is only half closed.
         vm.togglePill(id: first.id)
-        #expect(mockNotifications.clearDeliveredCallCount == 1)
+        #expect(await waitUntil { mockNotifications.clearDeliveredCallCount == 1 })
         #expect(mockNotifications.clearedDeliveredSlot == slot)
         #expect(mockNotifications.clearedDeliveredIds == [firstId])
 
         // Second logged — both doses in the slot are now taken.
         vm.togglePill(id: second.id)
-        #expect(mockNotifications.clearDeliveredCallCount == 2)
+        #expect(await waitUntil { mockNotifications.clearDeliveredCallCount == 2 })
         #expect(Set(mockNotifications.clearedDeliveredIds ?? []) == Set([firstId, secondId]))
     }
 
@@ -170,9 +171,12 @@ struct DashboardViewModelTests {
         let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
 
         vm.togglePill(id: pill.id)                       // logged
-        #expect(mockNotifications.clearDeliveredCallCount == 1)
+        #expect(await waitUntil { mockNotifications.clearDeliveredCallCount == 1 })
 
         vm.togglePill(id: pill.id)                       // un-logged
+        // Waits for the second rebuild, so this is "the cleanup did not happen",
+        // not "the cleanup has not happened yet".
+        #expect(await waitUntil { mockNotifications.scheduleCallCount == 2 })
         #expect(mockNotifications.clearDeliveredCallCount == 1)
     }
 }

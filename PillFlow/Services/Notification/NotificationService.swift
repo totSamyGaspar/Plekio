@@ -17,6 +17,10 @@ enum NotificationAction {
     static let skip = "ACTION_SKIP"
 }
 
+/// Explicit, though the module already builds with SWIFT_DEFAULT_ACTOR_ISOLATION
+/// = MainActor: this type reads SwiftData models and keeps `rescheduleTask`, and
+/// neither should silently lose its isolation if that build setting ever changes.
+@MainActor
 final class NotificationService: NotificationServiceProtocol {
 
     /// Single source of truth for the snooze delay, so the category action's
@@ -87,53 +91,82 @@ final class NotificationService: NotificationServiceProtocol {
 
     // MARK: - Permission
 
-    func requestPermission() {
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if let error {
-                AppLog.notifications.error("Permission request failed: \(error.localizedDescription, privacy: .public)")
-            } else if !granted {
+    /// Returns whether notifications are allowed, so the caller can react — the
+    /// callback version threw the answer away and the diary reminder was armed
+    /// even when the user had just refused.
+    @discardableResult
+    func requestPermission() async -> Bool {
+        do {
+            let granted = try await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound, .badge])
+            if !granted {
                 AppLog.notifications.info("Notifications declined by user")
             }
+            return granted
+        } catch {
+            AppLog.notifications.error("Permission request failed: \(error.localizedDescription, privacy: .public)")
+            return false
         }
+    }
+
+    // MARK: - Full rebuild
+
+    /// Clears the queue and refills it from the unfinished courses.
+    ///
+    /// Rebuilds are chained rather than run in parallel. Every call site is a
+    /// `Task { }` started from a synchronous closure — saving an edit, logging a
+    /// dose, the scene becoming active — so two of them overlapping is the normal
+    /// case, not the exception. Overlapping is what breaks: B's clear can land
+    /// between A's clear and A's adds, both sets then survive, and the user gets
+    /// every reminder twice.
+    func rescheduleAll(using dbService: DatabaseServiceProtocol) async {
+        // Read and reassigned with no await in between, so on the main actor this
+        // is atomic: whoever comes next chains onto this task, not onto the one it
+        // replaced.
+        let previous = rescheduleTask
+        let task = Task { [weak self] in
+            _ = await previous?.value
+            guard let self else { return }
+
+            await self.removeAllPending()
+            await self.scheduleNotifications(activeCourses: self.activeCourses(from: dbService))
+        }
+        rescheduleTask = task
+        await task.value
     }
 
     /// Single entry point for clearing all scheduled notifications, so callers
     /// don't reach into UNUserNotificationCenter directly.
-    func removeAllPending() {
+    ///
+    /// Does not return until the removal has actually been carried out — see
+    /// `waitForPendingRemoval`. Everything downstream depends on that: scheduling
+    /// straight after a removal that is still in flight is how a whole rebuild
+    /// used to get wiped.
+    func removeAllPending() async {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        await waitForPendingRemoval()
+
         // The diary reminder is not part of the course schedule but shares the
         // queue, so a course edit would silently take it down with everything
-        // else. Re-armed here rather than at the five call sites of
-        // rescheduleAll, where forgetting it once is enough to lose it.
-        //
-        // Re-armed *after* the removal has actually been carried out — see
-        // afterPendingRemovalCompletes.
-        afterPendingRemovalCompletes { [weak self] in
-            self?.restoreDiaryReminderIfEnabled()
-        }
+        // else. Re-armed here rather than at the call sites of rescheduleAll,
+        // where forgetting it once is enough to lose it.
+        await restoreDiaryReminderIfEnabled()
     }
 
-    /// Runs `work` once the notification centre has processed everything queued
-    /// before this call.
+    /// Waits for everything already queued on the notification centre to be
+    /// processed.
     ///
     /// `removeAllPendingNotificationRequests()` is asynchronous: it returns at once
-    /// and the removal happens later, on the centre's own queue. Adding requests
-    /// straight afterwards — exactly what `rescheduleAll` does after every edit —
-    /// meant the removal could land on top of the freshly added ones and wipe them,
-    /// so a medication whose time was changed simply never fired again until the
-    /// next cold launch (which raced the same way). The centre processes calls in
-    /// order, so a read issued after the removal only calls back once the removal
-    /// is done.
-    private func afterPendingRemovalCompletes(_ work: @escaping () -> Void) {
-        UNUserNotificationCenter.current().getPendingNotificationRequests { _ in
-            DispatchQueue.main.async(execute: work)
-        }
+    /// and the removal happens later, on the centre's own queue. The centre handles
+    /// calls in order, so a read issued after the removal only comes back once the
+    /// removal is done — which is all this is for.
+    private func waitForPendingRemoval() async {
+        _ = await UNUserNotificationCenter.current().pendingNotificationRequests()
     }
 
     // MARK: - Diary reminder
 
-    func scheduleDiaryReminder(minuteOfDay: Int) {
+    func scheduleDiaryReminder(minuteOfDay: Int) async {
         let center = UNUserNotificationCenter.current()
         center.removePendingNotificationRequests(withIdentifiers: [Self.diaryRequestIdentifier])
 
@@ -159,21 +192,23 @@ final class NotificationService: NotificationServiceProtocol {
             trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
         )
 
-        center.add(request) { error in
-            if let error {
-                AppLog.notifications.error("Diary reminder failed: \(error.localizedDescription, privacy: .public)")
-            }
+        do {
+            try await center.add(request)
+        } catch {
+            AppLog.notifications.error("Diary reminder failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
+    /// Stays synchronous: a removal by identifier has nothing to wait for, and no
+    /// caller needs to know when the daemon got round to it.
     func cancelDiaryReminder() {
         UNUserNotificationCenter.current()
             .removePendingNotificationRequests(withIdentifiers: [Self.diaryRequestIdentifier])
     }
 
-    private func restoreDiaryReminderIfEnabled() {
+    private func restoreDiaryReminderIfEnabled() async {
         guard DiaryReminderSettings.isEnabled else { return }
-        scheduleDiaryReminder(minuteOfDay: DiaryReminderSettings.minuteOfDay)
+        await scheduleDiaryReminder(minuteOfDay: DiaryReminderSettings.minuteOfDay)
     }
 
     // MARK: - Request building
@@ -230,30 +265,25 @@ final class NotificationService: NotificationServiceProtocol {
     /// `buildScheduleMap` — slots are grouped by time). While any medication in the
     /// group is untaken the reminder is still valid, so only fully closed slots
     /// are removed.
-    func clearDelivered(takenMedicationIds: [UUID], scheduledTime: Date) {
+    func clearDelivered(takenMedicationIds: [UUID], scheduledTime: Date) async {
         guard !takenMedicationIds.isEmpty else { return }
 
         let center = UNUserNotificationCenter.current()
         let takenIds = Set(takenMedicationIds.map { $0.uuidString })
         let slot = scheduledTime.timeIntervalSince1970
 
-        center.getDeliveredNotifications { notifications in
-            let toRemove = notifications.compactMap { notif -> String? in
-                let ids = Self.medicationIds(in: notif.request.content)
-                guard !ids.isEmpty,
-                      let time = notif.request.content.userInfo["time"] as? TimeInterval,
-                      // Both dates are built the same way, but a Double round-tripped
-                      // through userInfo should not be compared exactly — allow a
-                      // second of drift.
-                      abs(time - slot) < 1,
-                      Set(ids).isSubset(of: takenIds)
-                else { return nil }
-                return notif.request.identifier
-            }
-
-            guard !toRemove.isEmpty else { return }
-            center.removeDeliveredNotifications(withIdentifiers: toRemove)
-            AppLog.notifications.debug("Removed delivered reminders for a fully logged slot: \(toRemove.count)")
+        let delivered = await center.deliveredNotifications()
+        let toRemove = delivered.compactMap { notif -> String? in
+            let ids = Self.medicationIds(in: notif.request.content)
+            guard !ids.isEmpty,
+                  let time = notif.request.content.userInfo["time"] as? TimeInterval,
+                  // Both dates are built the same way, but a Double round-tripped
+                  // through userInfo should not be compared exactly — allow a
+                  // second of drift.
+                  abs(time - slot) < 1,
+                  Set(ids).isSubset(of: takenIds)
+            else { return nil }
+            return notif.request.identifier
         }
     }
 
@@ -312,6 +342,19 @@ final class NotificationService: NotificationServiceProtocol {
                     currentDate = calendar.date(byAdding: .day, value: med.frequencyDays, to: currentDate) ?? endDay.addingTimeInterval(1)
                 }
             }
+
+            guard !slotsForDay.isEmpty else { continue }
+
+            // Whole days only. Half a day inside the budget would give the user the
+            // 08:00 reminder and not the 20:00 one, which reads as the app losing
+            // doses rather than as a horizon. The exception is a first day that
+            // fills the budget on its own — covering it partly still beats covering
+            // nothing, and scheduleNotifications trims by time from there.
+            if !scheduleMap.isEmpty, scheduleMap.count + slotsForDay.count > slotBudget { break }
+
+            scheduleMap.merge(slotsForDay) { current, _ in current }
+
+            if scheduleMap.count >= slotBudget { break }
         }
 
         return scheduleMap
@@ -319,7 +362,7 @@ final class NotificationService: NotificationServiceProtocol {
 
     // MARK: - Scheduling
 
-    func scheduleNotifications(activeCourses: [TreatmentCourse]) {
+    func scheduleNotifications(activeCourses: [TreatmentCourse]) async {
         let center = UNUserNotificationCenter.current()
         let calendar = Calendar.current
 
@@ -330,9 +373,8 @@ final class NotificationService: NotificationServiceProtocol {
         // arbitrary Dictionary iteration order.
         let sortedEntries = scheduleMap.sorted { $0.key < $1.key }
 
-        // Every request is built up front, while the SwiftData objects are still
-        // safe to touch on this actor. What goes to the centre afterwards is plain
-        // UNNotificationRequest values.
+        // Every request is built before anything is sent, while the SwiftData
+        // objects behind them are still in hand.
         var requests: [UNNotificationRequest] = []
         for (triggerDate, medsAtTime) in sortedEntries {
             guard requests.count < Self.maxScheduled else { break }
@@ -366,16 +408,15 @@ final class NotificationService: NotificationServiceProtocol {
                     }
                 }
             }
-            AppLog.notifications.debug("Grouped and scheduled notifications: \(scheduledCount)")
         }
+        AppLog.notifications.debug("Grouped and scheduled notifications: \(requests.count)")
     }
 
     // MARK: - Snooze
 
-    func scheduleSnooze(for medicationIds: [String], names: [String]) {
+    func scheduleSnooze(for medicationIds: [String], names: [String]) async {
         guard !medicationIds.isEmpty else { return }
 
-        let center = UNUserNotificationCenter.current()
         let triggerDate = Date().addingTimeInterval(Self.snoozeInterval)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Self.snoozeInterval, repeats: false)
 
@@ -387,16 +428,16 @@ final class NotificationService: NotificationServiceProtocol {
             trigger: trigger
         )
 
-        center.add(request) { error in
-            if let error {
-                AppLog.notifications.error("Snooze failed: \(error.localizedDescription, privacy: .public)")
-            }
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            AppLog.notifications.error("Snooze failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
     // MARK: - Cancellation
 
-    func cancelNotifications(for medicationId: UUID) {
+    func cancelNotifications(for medicationId: UUID) async {
         let center = UNUserNotificationCenter.current()
         let targetId = medicationId.uuidString
 
@@ -404,64 +445,63 @@ final class NotificationService: NotificationServiceProtocol {
         // to this medication EXCLUSIVELY are removed. It used to remove any
         // notification mentioning the id, taking the reminder for the other
         // medications in the same slot with it.
-        center.getDeliveredNotifications { notifications in
-            let toRemove = notifications
-                .filter { Self.medicationIds(in: $0.request.content) == [targetId] }
-                .map(\.request.identifier)
+        let delivered = await center.deliveredNotifications()
+        let deliveredToRemove = delivered
+            .filter { Self.medicationIds(in: $0.request.content) == [targetId] }
+            .map(\.request.identifier)
 
-            guard !toRemove.isEmpty else { return }
-            center.removeDeliveredNotifications(withIdentifiers: toRemove)
-            AppLog.notifications.debug("Removed from lock screen: \(toRemove.count)")
+        if !deliveredToRemove.isEmpty {
+            center.removeDeliveredNotifications(withIdentifiers: deliveredToRemove)
+            AppLog.notifications.debug("Removed from lock screen: \(deliveredToRemove.count)")
         }
 
         // Pending ones, snoozes included — they are recognised by userInfo, not
         // by identifier format. A group reminder is rebuilt without this
         // medication rather than dropped whole.
-        center.getPendingNotificationRequests { requests in
-            var identifiersToRemove: [String] = []
-            var replacements: [UNNotificationRequest] = []
+        let pending = await center.pendingNotificationRequests()
+        var identifiersToRemove: [String] = []
+        var replacements: [UNNotificationRequest] = []
 
-            for request in requests {
-                let ids = Self.medicationIds(in: request.content)
-                guard ids.contains(targetId) else { continue }
+        for request in pending {
+            let ids = Self.medicationIds(in: request.content)
+            guard ids.contains(targetId) else { continue }
 
-                identifiersToRemove.append(request.identifier)
+            identifiersToRemove.append(request.identifier)
 
-                let names = Self.medicationNames(in: request.content)
-                // Names came later: requests scheduled by an older version do not carry
-                // them, so there is nothing to rebuild the text from — just remove.
-                guard names.count == ids.count else { continue }
+            let names = Self.medicationNames(in: request.content)
+            // Names came later: requests scheduled by an older version do not carry
+            // them, so there is nothing to rebuild the text from — just remove.
+            guard names.count == ids.count else { continue }
 
-                let kept = zip(ids, names).filter { $0.0 != targetId }
-                guard !kept.isEmpty,
-                      let trigger = request.trigger,
-                      let time = request.content.userInfo["time"] as? TimeInterval
-                else { continue }
+            let kept = zip(ids, names).filter { $0.0 != targetId }
+            guard !kept.isEmpty,
+                  let trigger = request.trigger,
+                  let time = request.content.userInfo["time"] as? TimeInterval
+            else { continue }
 
-                replacements.append(
-                    Self.makeReminderRequest(
-                        identifier: request.identifier,
-                        medicationIds: kept.map(\.0),
-                        medicationNames: kept.map(\.1),
-                        triggerDate: Date(timeIntervalSince1970: time),
-                        // The trigger is reused as is. For a calendar trigger that is
-                        // exact; an interval (snooze) trigger restarts its countdown,
-                        // which is acceptable for 15 minutes.
-                        trigger: trigger
-                    )
+            replacements.append(
+                Self.makeReminderRequest(
+                    identifier: request.identifier,
+                    medicationIds: kept.map(\.0),
+                    medicationNames: kept.map(\.1),
+                    triggerDate: Date(timeIntervalSince1970: time),
+                    // The trigger is reused as is. For a calendar trigger that is
+                    // exact; an interval (snooze) trigger restarts its countdown,
+                    // which is acceptable for 15 minutes.
+                    trigger: trigger
                 )
-            }
+            )
+        }
 
-            guard !identifiersToRemove.isEmpty else { return }
-            center.removePendingNotificationRequests(withIdentifiers: identifiersToRemove)
-            AppLog.notifications.debug("Cancelled pending notifications: \(identifiersToRemove.count)")
+        guard !identifiersToRemove.isEmpty else { return }
+        center.removePendingNotificationRequests(withIdentifiers: identifiersToRemove)
+        AppLog.notifications.debug("Cancelled pending notifications: \(identifiersToRemove.count)")
 
-            for request in replacements {
-                center.add(request) { error in
-                    if let error {
-                        AppLog.notifications.error("Regroup failed: \(error.localizedDescription, privacy: .public)")
-                    }
-                }
+        for request in replacements {
+            do {
+                try await center.add(request)
+            } catch {
+                AppLog.notifications.error("Regroup failed: \(error.localizedDescription, privacy: .public)")
             }
         }
     }

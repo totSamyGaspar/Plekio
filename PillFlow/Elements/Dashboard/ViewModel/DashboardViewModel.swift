@@ -83,17 +83,21 @@ final class DashboardViewModel: DashboardViewModelProtocol {
             try dbService.togglePill(medicationId: pill.medicationId, scheduledTime: pill.time)
         }) else { return }
 
-        notificationService.rescheduleAll(using: dbService)
-
+        // The UI is refreshed straight away; the notification work is ordered
+        // behind the rebuild inside one task rather than racing it.
         fetchData()
 
-        if !wasTaken {
-            let takenAtSlot = allPills
-                .filter { $0.time == pill.time && $0.isTaken }
-                .map(\.medicationId)
-            notificationService.clearDelivered(
+        let takenAtSlot = wasTaken ? [] : allPills
+            .filter { $0.time == pill.time && $0.isTaken }
+            .map(\.medicationId)
+        let slot = pill.time
+
+        Task { [notificationService, dbService] in
+            await notificationService.rescheduleAll(using: dbService)
+            guard !takenAtSlot.isEmpty else { return }
+            await notificationService.clearDelivered(
                 takenMedicationIds: takenAtSlot,
-                scheduledTime: pill.time
+                scheduledTime: slot
             )
         }
     }

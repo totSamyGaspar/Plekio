@@ -42,7 +42,7 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
             try dbService.updateCourseDetails(course: course, name: courseName, startDate: startDate, endDate: endDate)
         }) else { return }
 
-        notificationService.rescheduleAll(using: dbService)
+        reschedule()
     }
 
     func addNewMedication(_ draft: MedicationDraft) {
@@ -50,7 +50,7 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
             try dbService.addMedication(draft: draft, to: course)
         }) else { return }
 
-        notificationService.rescheduleAll(using: dbService)
+        reschedule()
         refreshMedications()
     }
 
@@ -63,8 +63,11 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
             }
         }) else { return }
 
-        for med in toDelete {
-            notificationService.cancelNotifications(for: med.id)
+        let deletedIds = toDelete.map(\.id)
+        Task { [notificationService] in
+            for id in deletedIds {
+                await notificationService.cancelNotifications(for: id)
+            }
         }
         medications.remove(atOffsets: offsets)
     }
@@ -74,8 +77,17 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
             try dbService.updateMedication(medication, with: draft)
         }) else { return }
 
-        notificationService.rescheduleAll(using: dbService)
+        reschedule()
         refreshMedications()
+    }
+
+    /// Rebuilding the schedule is asynchronous, and nothing on this screen waits
+    /// for it — NotificationService chains overlapping rebuilds itself, so firing
+    /// and forgetting is safe here.
+    private func reschedule() {
+        Task { [notificationService, dbService] in
+            await notificationService.rescheduleAll(using: dbService)
+        }
     }
 
     private func refreshMedications() {

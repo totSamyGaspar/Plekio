@@ -32,12 +32,15 @@ enum PendingDose {
     }
 
     /// Marks the doses as taken and rebuilds the notification schedule.
+    ///
+    /// Async because of the rebuild: AppDelegate has to know when this is finished
+    /// before it tells iOS the notification response is handled.
     @discardableResult
     static func markTaken(
         _ pills: [PillDose],
         dbService: DatabaseServiceProtocol,
         notificationService: NotificationServiceProtocol
-    ) -> Bool {
+    ) async -> Bool {
         guard !pills.isEmpty else { return true }
 
         guard AppErrorPresenter.shared.run({
@@ -46,7 +49,7 @@ enum PendingDose {
             }
         }) else { return false }
 
-        notificationService.rescheduleAll(using: dbService)
+        await notificationService.rescheduleAll(using: dbService)
         return true
     }
 }

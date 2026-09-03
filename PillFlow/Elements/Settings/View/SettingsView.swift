@@ -138,10 +138,13 @@ struct SettingsView: View {
             service.cancelDiaryReminder()
             return
         }
-        // Asked here rather than at launch: switching the reminder on is the moment
-        // the permission is actually for something.
-        service.requestPermission()
-        service.scheduleDiaryReminder(minuteOfDay: reminderMinuteOfDay)
+        Task {
+            // Asked here rather than at launch: switching the reminder on is the
+            // moment the permission is actually for something. Now that the answer
+            // comes back, there is no point arming a reminder that cannot fire.
+            guard await service.requestPermission() else { return }
+            await service.scheduleDiaryReminder(minuteOfDay: reminderMinuteOfDay)
+        }
     }
 }
 
