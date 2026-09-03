@@ -4,7 +4,7 @@
 //
 //  Medication photo, loaded lazily from ImageCache.
 //
-//  The same "@State uiImage + onAppear + reload on .databaseDidUpdate"
+//  The same "@State uiImage + onAppear + reload when the database changes"
 //  pairing was duplicated in MedicationCardView and MedicationRowView. The
 //  diary already folds that logic into DiaryAsyncPhoto; this is the same for
 //  medications.
@@ -35,8 +35,10 @@ struct MedicationPhotoView<Placeholder: View>: View {
         .task(id: medicationId) { await load() }
         // The medication id does not change on an edit (it is the same SwiftData
         // object), so .task never fires a second time — reload on the database
-        // signal instead.
-        .onReceive(NotificationCenter.default.publisher(for: .databaseDidUpdate)) { _ in
+        // signal instead. Courses only: this used to listen to every write, which
+        // meant each dose logged on the dashboard sent every visible photo back to
+        // disk to be read and decoded again.
+        .onReceive(NotificationCenter.default.publisher(forDatabaseChanges: [.courses])) { _ in
             Task { await load(force: true) }
         }
     }

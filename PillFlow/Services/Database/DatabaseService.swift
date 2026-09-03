@@ -85,12 +85,15 @@ final class DatabaseService: DatabaseServiceProtocol {
 
     /// The only place the context is saved.
     ///
-    /// Mutations used to end in `try? context.save()` and post
-    /// `.databaseDidUpdate` unconditionally, so a failed write still told the UI
-    /// everything was fine — silent data loss in a medication history. On failure
-    /// the context is rolled back, so memory never holds state that isn't on disk,
-    /// and the error is rethrown.
-    private func commit(alsoPosting extra: Notification.Name? = nil) throws {
+    /// Mutations used to end in `try? context.save()` and announce success
+    /// unconditionally, so a failed write still told the UI everything was fine —
+    /// silent data loss in a medication history. On failure the context is rolled
+    /// back, so memory never holds state that isn't on disk, and the error is
+    /// rethrown.
+    ///
+    /// `changes` has no default on purpose. Every mutation has to say what it
+    /// touched, and a new one cannot quietly inherit somebody else's answer.
+    private func commit(_ changes: Set<DatabaseChange>) throws {
         do {
             try context.save()
         } catch {
@@ -99,10 +102,17 @@ final class DatabaseService: DatabaseServiceProtocol {
             throw DatabaseError.saveFailed(underlying: error)
         }
 
-        NotificationCenter.default.post(name: .databaseDidUpdate, object: nil)
-        if let extra {
-            NotificationCenter.default.post(name: extra, object: nil)
-        }
+        // Invalidated here rather than at the top of each mutating method. Every
+        // write goes through this function and every write invalidates the cache,
+        // so the two belong together: the old arrangement was ten call sites that
+        // each had to remember, and forgetting one is a stale dose on screen.
+        dailyPillsCache.removeAll()
+
+        NotificationCenter.default.post(
+            name: .databaseDidChange,
+            object: nil,
+            userInfo: [DatabaseChange.userInfoKey: changes]
+        )
     }
 
     // MARK: - Save
@@ -113,8 +123,6 @@ final class DatabaseService: DatabaseServiceProtocol {
         endDate: Date,
         drafts: [MedicationDraft]
     ) throws {
-        dailyPillsCache.removeAll()
-
         let course = TreatmentCourse(
             name: name,
             startDate: startDate,
@@ -143,7 +151,7 @@ final class DatabaseService: DatabaseServiceProtocol {
             }
         }
 
-        try commit()
+        try commit([.courses])
 
         for (id, data) in pendingPhotos {
             ImageCache.shared.saveToDisk(data, for: id)
@@ -234,19 +242,13 @@ final class DatabaseService: DatabaseServiceProtocol {
     // MARK: - Refill
 
     func refillStock(for medication: MedicationItem, amount: Int) throws {
-        // Cached PillDose entries carry a copy of stockCount, so without this the
-        // "LOW" badge would survive a refill on every already-cached day.
-        dailyPillsCache.removeAll()
-
         medication.stockCount += amount
-        try commit()
+        try commit([.courses])
     }
 
     // MARK: - Update meds
 
     func updateMedication(_ medication: MedicationItem, with draft: MedicationDraft) throws {
-        dailyPillsCache.removeAll()
-
         // Captured before assigning: dose logs are keyed by hour+minute, so they
         // have to be remapped once the times move.
         let previousTimes = medication.timesOfDay
@@ -270,7 +272,7 @@ final class DatabaseService: DatabaseServiceProtocol {
         let newImageData = draft.medicationImageData
         let medicationId = medication.id
 
-        try commit()
+        try commit([.courses])
 
         guard photoModified else { return }
 
@@ -333,12 +335,6 @@ final class DatabaseService: DatabaseServiceProtocol {
     // MARK: - Toggle take
 
     func togglePill(medicationId: UUID, scheduledTime: Date) throws {
-        // The whole cache, not just this slot's day: logging a dose changes
-        // med.stockCount, which is copied into every cached PillDose. Targeted
-        // invalidation was nearly harmless while only today could be logged; now that
-        // past doses can be, other days would keep showing a stale count.
-        dailyPillsCache.removeAll()
-
         let descriptor = FetchDescriptor<MedicationItem>(
             predicate: #Predicate { $0.id == medicationId }
         )
@@ -371,7 +367,7 @@ final class DatabaseService: DatabaseServiceProtocol {
             // means storing the deducted amount on DoseLog — a schema change.
             med.stockCount = max(0, med.stockCount - med.dosage)
         }
-        try commit()
+        try commit([.doses])
     }
 
     // MARK: - Course Management
@@ -389,8 +385,6 @@ final class DatabaseService: DatabaseServiceProtocol {
     }
 
     func deleteCourse(_ course: TreatmentCourse) throws {
-        dailyPillsCache.removeAll()
-
         // Deleting the course cascades to its MedicationItem records, but photo files
         // on disk are not removed automatically. Ids are captured before the delete and
         // the files erased after a successful commit, so a rollback can't leave a course
@@ -398,7 +392,7 @@ final class DatabaseService: DatabaseServiceProtocol {
         let photoIds = course.medications.map(\.id)
 
         context.delete(course)
-        try commit()
+        try commit([.courses])
 
         for id in photoIds {
             ImageCache.shared.deleteFromDisk(for: id)
@@ -406,11 +400,9 @@ final class DatabaseService: DatabaseServiceProtocol {
     }
 
     func deleteMedication(_ medication: MedicationItem) throws {
-        dailyPillsCache.removeAll()
-
         let photoId = medication.id
         context.delete(medication)
-        try commit()
+        try commit([.courses])
 
         // After the record is gone, so a rollback can't leave the medication in the
         // store without its photo.
@@ -418,17 +410,13 @@ final class DatabaseService: DatabaseServiceProtocol {
     }
 
     func updateCourseDetails(course: TreatmentCourse, name: String, startDate: Date, endDate: Date) throws {
-        dailyPillsCache.removeAll()
-
         course.name = name
         course.startDate = startDate
         course.endDate = endDate
-        try commit()
+        try commit([.courses])
     }
 
     func addMedication(draft: MedicationDraft, to course: TreatmentCourse) throws {
-        dailyPillsCache.removeAll()
-
         let med = MedicationItem(
             id: draft.id,
             name: draft.name,
@@ -441,7 +429,7 @@ final class DatabaseService: DatabaseServiceProtocol {
         )
         course.medications.append(med)
 
-        try commit()
+        try commit([.courses])
 
         if let imageData = draft.medicationImageData {
             ImageCache.shared.saveToDisk(imageData, for: med.id)
@@ -474,7 +462,7 @@ final class DatabaseService: DatabaseServiceProtocol {
         entry.photoIds = pendingPhotos.map(\.0)
 
         context.insert(entry)
-        try commit(alsoPosting: .diaryDidUpdate)
+        try commit([.diary])
 
         for (id, data) in pendingPhotos {
             ImageCache.shared.saveToDisk(data, for: id)
@@ -509,7 +497,7 @@ final class DatabaseService: DatabaseServiceProtocol {
             entry.photoIds = pendingPhotos.map(\.0)
         }
 
-        try commit(alsoPosting: .diaryDidUpdate)
+        try commit([.diary])
 
         // Disk is synced only after the write succeeds.
         for id in removedPhotoIds {
@@ -534,7 +522,7 @@ final class DatabaseService: DatabaseServiceProtocol {
         context.insert(reading)
         // Posted on the diary channel: the readings live on the diary's own
         // screen, and it is the only subscriber that needs to redraw.
-        try commit(alsoPosting: .diaryDidUpdate)
+        try commit([.diary])
     }
 
     func fetchAllBloodPressureReadings() -> [BloodPressureReading] {
@@ -546,7 +534,7 @@ final class DatabaseService: DatabaseServiceProtocol {
 
     func deleteBloodPressureReading(_ reading: BloodPressureReading) throws {
         context.delete(reading)
-        try commit(alsoPosting: .diaryDidUpdate)
+        try commit([.diary])
     }
 
     func fetchAllDiaryEntries() -> [DiaryEntry] {
@@ -558,7 +546,7 @@ final class DatabaseService: DatabaseServiceProtocol {
         let photoIds = entry.photoIds
 
         context.delete(entry)
-        try commit(alsoPosting: .diaryDidUpdate)
+        try commit([.diary])
 
         // Clean up photo files on disk — they aren't removed automatically.
         for photoId in photoIds {
@@ -587,11 +575,3 @@ enum DatabaseError: LocalizedError {
     }
 }
 
-extension Notification.Name {
-    static let databaseDidUpdate = Notification.Name("databaseDidUpdate")
-    /// Narrower companion to `.databaseDidUpdate`, posted only by the diary
-    /// mutations. DiaryViewModel subscribes here so taking a pill or editing a
-    /// course no longer re-fetches every diary entry. `.databaseDidUpdate` is still
-    /// posted alongside it for subscribers that want the broad signal.
-    static let diaryDidUpdate = Notification.Name("diaryDidUpdate")
-}

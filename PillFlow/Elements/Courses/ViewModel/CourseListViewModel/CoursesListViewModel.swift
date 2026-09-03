@@ -22,7 +22,10 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
         self.notificationService = notificationService
         fetchCourses()
         
-        NotificationCenter.default.publisher(for: .databaseDidUpdate)
+        // Doses are included deliberately: logging one moves stock, and the rows
+        // show it. A needless re-fetch here is cheap; a row left showing a stock
+        // count that is no longer true is not.
+        NotificationCenter.default.publisher(forDatabaseChanges: [.courses, .doses])
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.fetchCourses() }
             .store(in: &cancellables)
@@ -43,8 +46,10 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
 
         guard AppErrorPresenter.shared.run({ try dbService.deleteCourse(course) }) else { return }
 
-        for id in medicationIds {
-            notificationService.cancelNotifications(for: id)
+        Task { [notificationService] in
+            for id in medicationIds {
+                await notificationService.cancelNotifications(for: id)
+            }
         }
         fetchCourses()
     }

@@ -34,7 +34,7 @@ struct ContentView: View {
                     .transition(.opacity)
                     .onAppear {
                         let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-                        notifService.requestPermission()
+                        Task { await notifService.requestPermission() }
                     }
             } else {
                 OnboardingView()

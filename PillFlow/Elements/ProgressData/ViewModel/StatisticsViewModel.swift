@@ -32,7 +32,8 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
         self.dbService = dbService
         loadStats()
 
-        NotificationCenter.default.publisher(for: .databaseDidUpdate)
+        // Adherence is computed from the schedule and the logs, so both matter.
+        NotificationCenter.default.publisher(forDatabaseChanges: [.courses, .doses])
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.loadStats() }
             .store(in: &cancellables)

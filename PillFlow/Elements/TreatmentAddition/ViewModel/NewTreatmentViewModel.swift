@@ -38,7 +38,9 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
             try dbService.saveCourse(name: courseName, startDate: startDate, endDate: endDate, drafts: medications)
         }) else { return false }
 
-        notificationService.rescheduleAll(using: dbService)
+        Task { [notificationService, dbService] in
+            await notificationService.rescheduleAll(using: dbService)
+        }
         return true
     }
 }

@@ -135,15 +135,19 @@ struct MainTabView: View {
             .takePill(
                 pills: pills,
                 onTake: {
-                    PendingDose.markTaken(
-                        pills,
-                        dbService: dbService,
-                        notificationService: notificationService
-                    )
+                    Task {
+                        await PendingDose.markTaken(
+                            pills,
+                            dbService: dbService,
+                            notificationService: notificationService
+                        )
+                    }
                 },
                 onSkip: {
-                    for pill in pills {
-                        notificationService.cancelNotifications(for: pill.medicationId)
+                    Task {
+                        for pill in pills {
+                            await notificationService.cancelNotifications(for: pill.medicationId)
+                        }
                     }
                 }
             )
@@ -178,7 +182,7 @@ struct MainTabView: View {
                 let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
                 let ids = pills.map { $0.medicationId.uuidString }
                 let names = pills.map { $0.name }
-                notifService.scheduleSnooze(for: ids, names: names)
+                Task { await notifService.scheduleSnooze(for: ids, names: names) }
                 router.dismissSheet()
             })
             .presentationBackground(.clear)

@@ -37,7 +37,8 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         self.notificationService = notificationService
         fetchData()
         
-        NotificationCenter.default.publisher(for: .databaseDidUpdate)
+        // Doses as well as courses: this screen is where a dose is logged.
+        NotificationCenter.default.publisher(forDatabaseChanges: [.courses, .doses])
             .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.fetchData()
@@ -83,17 +84,21 @@ final class DashboardViewModel: DashboardViewModelProtocol {
             try dbService.togglePill(medicationId: pill.medicationId, scheduledTime: pill.time)
         }) else { return }
 
-        notificationService.rescheduleAll(using: dbService)
-
+        // The UI is refreshed straight away; the notification work is ordered
+        // behind the rebuild inside one task rather than racing it.
         fetchData()
 
-        if !wasTaken {
-            let takenAtSlot = allPills
-                .filter { $0.time == pill.time && $0.isTaken }
-                .map(\.medicationId)
-            notificationService.clearDelivered(
+        let takenAtSlot = wasTaken ? [] : allPills
+            .filter { $0.time == pill.time && $0.isTaken }
+            .map(\.medicationId)
+        let slot = pill.time
+
+        Task { [notificationService, dbService] in
+            await notificationService.rescheduleAll(using: dbService)
+            guard !takenAtSlot.isEmpty else { return }
+            await notificationService.clearDelivered(
                 takenMedicationIds: takenAtSlot,
-                scheduledTime: pill.time
+                scheduledTime: slot
             )
         }
     }

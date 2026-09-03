@@ -57,6 +57,7 @@ struct CourseDetailViewModelTests {
 
         #expect(mockDB.addedMedicationDraft?.name == "Витамин D")
         #expect(mockDB.addedToCourse === course)
+        #expect(await waitUntil { mockNotifications.scheduleCallCount == 1 })
         #expect(mockNotifications.didCallRemoveAllPending == true)
         #expect(mockNotifications.scheduledCourses != nil)
     }
@@ -84,7 +85,7 @@ struct CourseDetailViewModelTests {
         vm.deleteMedication(at: IndexSet(integer: 0))
 
         #expect(mockDB.deletedMedication === med)
-        #expect(mockNotifications.cancelledMedicationIds.contains(med.id))
+        #expect(await waitUntil { mockNotifications.cancelledMedicationIds.contains(med.id) })
         #expect(vm.medications.isEmpty)
     }
 }
