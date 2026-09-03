@@ -17,9 +17,6 @@ private enum DiarySubTab: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// LocalizedStringKey, not String: with String the compiler does not
-    /// extract the literals into the catalog, which is why these three sub-tabs
-    /// stayed English in all nine languages.
     var title: LocalizedStringKey {
         switch self {
         case .journalFeed: return "Journal Feed"
@@ -72,19 +69,12 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     @State private var entryToDelete: DiaryEntry?
 
     @State private var selectedSubTab: DiarySubTab = .journalFeed
-
-    // Feed filters and the gallery category live inside the tabs themselves;
-    // only state shared by the header, the tabs and the sheets stays here.
     @State private var comparisonSelection: [UUID] = []
     @State private var comparisonPayload: DiaryComparisonPayload?
     @State private var inspectingPhoto: DiaryPhotoInspection?
 
-    /// Ties the "Compare Progress" button to the comparison sheet, so the sheet
-    /// grows out of the button instead of sliding up from the bottom edge.
     @Namespace private var comparisonTransition
 
-    /// The chip labels differ from the DiaryMood titles ("Okay" rather than
-    /// "Neutral"), so they are held separately — still localizable.
     private let quickMoods: [(label: LocalizedStringResource, emoji: String, mood: DiaryMood)] = [
         ("Great", "☀️", .great),
         ("Good", "🙂", .good),
@@ -137,9 +127,6 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 beforePhotoId: payload.beforeId,
                 afterPhotoId: payload.afterId
             )
-            // Zooms out of the header button. The same sheet also opens from the
-            // gallery's own compare button; when that one is used the source is
-            // off-screen and the system falls back to the standard presentation.
             .navigationTransition(.zoom(sourceID: comparisonSourceID, in: comparisonTransition))
             .appTheme()
         }
@@ -174,10 +161,6 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 .font(.subheadline)
                 .foregroundColor(.textSecondary)
 
-            // Both labels stretch to the row's height, and the row takes the
-            // height of the taller one. Without this the button whose label wraps
-            // — "Порівняти прогрес" in Ukrainian, "Fortschritt vergleichen" in
-            // German — stands taller than its neighbour.
             HStack(spacing: 12) {
                 Button {
                     openComparison()
@@ -325,14 +308,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         .cornerRadius(20)
     }
 
-    /// Built by concatenating `Text`, not by joining strings. The old
-    /// `joined(separator:)` and the ternary "s" on the photo count never reached
-    /// the string catalog at all, and languages such as Russian have four plural
-    /// forms rather than two. Each fragment is now its own translatable unit.
     private func todaySummaryLine(_ entry: DiaryEntry) -> Text {
-        // Quick-logged entries never captured a real energyLevel — it's just
-        // DiaryEntryDraft's static default — so showing "Energy: 4/5" here
-        // would present a fabricated number as if the user reported it.
         var line = Text("Mood: \(entry.moodTitle)") + Text(verbatim: " • ")
         line = line + (entry.isQuickLog ? Text("Quick log") : Text("Energy: \(entry.energyLevel)/5"))
 
@@ -346,11 +322,6 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
 
     private var statsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-            // Each tile names its period: three metrics cover seven days while the
-            // photo count covers all time, and nothing used to distinguish them.
-            // String(format:) takes the decimal separator from POSIX rather than the
-            // locale, printing "4.2" where "4,2" is expected; `format: .number` does
-            // respect the locale.
             statCard(title: "7-DAY AVG MOOD", value: "\(viewModel.avgMoodScore, format: .number.precision(.fractionLength(1))) /5", icon: "sun.max.fill", iconColor: .yellow)
             statCard(title: "7-DAY AVG ENERGY", value: "\(viewModel.avgEnergyLevel, format: .number.precision(.fractionLength(1))) /5", icon: "bolt.fill", iconColor: .accentPrimary)
             statCard(title: "PROGRESS PHOTOS · ALL TIME", value: "\(viewModel.totalPhotosLogged) logged", icon: "camera.fill", iconColor: .textPrimary.opacity(0.6))
@@ -374,12 +345,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 .foregroundColor(iconColor)
         }
         .padding(16)
-        // Read as one stop — "7-day average mood, 4.5 /5" — rather than three,
-        // with the decorative icon folded in and silent.
         .accessibilityElement(children: .combine)
-        // Fills the grid row, so a tile whose title wraps to two lines does not
-        // stand taller than the one beside it; the spare height goes below the
-        // value rather than centring it.
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color.appSurface)
         .cornerRadius(16)
@@ -471,27 +437,13 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     // MARK: - Comparison
 
     /// Opens the before/after comparison, from the header and from a gallery
-    /// card alike. With fewer than two checkpoints selected it falls back to the
-    /// earliest and the latest photo — baseline against latest progress; the
-    /// screen itself lets the user swap either one.
+    /// card alike.
     private func openComparison() {
-        let checkpoints = viewModel.photoCheckpoints
-
-        if comparisonSelection.count == 2 {
-            let selected = comparisonSelection
-                .compactMap { id in checkpoints.first { $0.id == id } }
-                .sorted { $0.entry.checkInDate < $1.entry.checkInDate }
-            guard selected.count == 2 else { return }
-            comparisonPayload = DiaryComparisonPayload(beforeId: selected[0].id, afterId: selected[1].id)
-            return
-        }
-
-        let sorted = checkpoints.sorted { $0.entry.checkInDate < $1.entry.checkInDate }
-        guard let first = sorted.first, let last = sorted.last, sorted.count >= 2 else {
+        guard let pair = viewModel.comparisonPair(for: comparisonSelection) else {
             withAnimation { selectedSubTab = .progressGallery }
             return
         }
-        comparisonPayload = DiaryComparisonPayload(beforeId: first.id, afterId: last.id)
+        comparisonPayload = DiaryComparisonPayload(beforeId: pair.before, afterId: pair.after)
     }
 }
 

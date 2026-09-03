@@ -103,6 +103,73 @@ struct DiaryViewModelTests {
         #expect(vm.avgMoodScore == 3.0) // (4 + 2) / 2
     }
 
+    // MARK: - Comparison pair
+
+    @Test("без выбора сравниваются самое раннее и самое позднее фото")
+    func testComparisonPairFallsBackToEarliestAndLatest() async throws {
+        let mockDb = MockDatabaseService()
+        mockDb.diaryEntriesToReturn = [
+            makeEntry(daysAgo: 10, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
+            makeEntry(daysAgo: 5, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
+            makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
+        ]
+        let vm = DiaryViewModel(dbService: mockDb)
+        let byDate = vm.photoCheckpoints.sorted { $0.entry.checkInDate < $1.entry.checkInDate }
+
+        let pair = try #require(vm.comparisonPair(for: []))
+
+        #expect(pair.before == byDate.first?.id)
+        #expect(pair.after == byDate.last?.id)
+    }
+
+    @Test("два выбранных сравниваются от старого к новому, в каком бы порядке их ни отметили")
+    func testComparisonPairOrdersSelectionByDate() async throws {
+        let mockDb = MockDatabaseService()
+        mockDb.diaryEntriesToReturn = [
+            makeEntry(daysAgo: 10, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
+            makeEntry(daysAgo: 5, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
+            makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
+        ]
+        let vm = DiaryViewModel(dbService: mockDb)
+        let byDate = vm.photoCheckpoints.sorted { $0.entry.checkInDate < $1.entry.checkInDate }
+        let older = byDate[0].id
+        let newer = byDate[1].id
+
+        // Ticked newest first on purpose.
+        let pair = try #require(vm.comparisonPair(for: [newer, older]))
+
+        #expect(pair.before == older)
+        #expect(pair.after == newer)
+    }
+
+    @Test("выбор, указывающий на удалённое фото, откатывается к раннему и позднему")
+    func testComparisonPairIgnoresStaleSelection() async throws {
+        // This used to leave the Compare button doing nothing at all.
+        let mockDb = MockDatabaseService()
+        mockDb.diaryEntriesToReturn = [
+            makeEntry(daysAgo: 10, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
+            makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
+        ]
+        let vm = DiaryViewModel(dbService: mockDb)
+        let byDate = vm.photoCheckpoints.sorted { $0.entry.checkInDate < $1.entry.checkInDate }
+
+        let pair = try #require(vm.comparisonPair(for: [byDate[1].id, UUID()]))
+
+        #expect(pair.before == byDate.first?.id)
+        #expect(pair.after == byDate.last?.id)
+    }
+
+    @Test("сравнивать нечего, пока фото меньше двух")
+    func testComparisonPairIsNilWithFewerThanTwoPhotos() async throws {
+        let mockDb = MockDatabaseService()
+        mockDb.diaryEntriesToReturn = [
+            makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
+        ]
+        let vm = DiaryViewModel(dbService: mockDb)
+
+        #expect(vm.comparisonPair(for: []) == nil)
+    }
+
     // MARK: - Helpers
 
     private func makeEntry(

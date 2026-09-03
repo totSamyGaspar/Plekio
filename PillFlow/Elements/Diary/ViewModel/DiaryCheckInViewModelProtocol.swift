@@ -19,6 +19,13 @@ protocol DiaryCheckInViewModelProtocol: ObservableObject {
     func toggleMilestone(_ tag: String)
     func addCustomMilestone(_ tag: String)
 
+    /// Whether a chip is on. Paired with the toggles above on purpose: the view
+    /// used to ask by reaching into `draft.symptoms.contains(_:)` itself, so a
+    /// change in how selection is stored would have broken it silently while
+    /// toggling kept working.
+    func isSymptomSelected(_ symptom: String) -> Bool
+    func isMilestoneSelected(_ tag: String) -> Bool
+
     func requestImageSelection(source: MediaSource)
     func removePhoto(at index: Int)
 
@@ -30,4 +37,17 @@ protocol DiaryCheckInViewModelProtocol: ObservableObject {
     /// Returns false when the save failed, so the form stays open.
     @discardableResult
     func save() -> Bool
+}
+
+extension DiaryCheckInViewModelProtocol {
+
+    // Both conformers store selection the same way, so the answer lives once
+    // here rather than being written out in the view model and again in the mock.
+    func isSymptomSelected(_ symptom: String) -> Bool {
+        draft.symptoms.contains(symptom)
+    }
+
+    func isMilestoneSelected(_ tag: String) -> Bool {
+        draft.milestoneTags.contains(tag)
+    }
 }
