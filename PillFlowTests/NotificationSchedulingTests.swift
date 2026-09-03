@@ -7,9 +7,11 @@
 //  real UNUserNotificationCenter: grouping medications that share a trigger
 //  time into one push, and skipping doses already marked as taken.
 //
-//  Note: buildScheduleMap always covers a "today + next 2 days" window. Unless
-//  a test exercises that window, its course is limited to a single day
-//  (startDate == endDate) so exactly one day lands in the schedule.
+//  Note: the horizon is no longer a fixed number of days — it runs until the
+//  notification budget is spent. Tests that are not about the horizon keep their
+//  course to a single day (startDate == endDate) so exactly one day lands in the
+//  schedule; the ones that are about it pass an explicit small `slotBudget`, so
+//  the expected numbers stay readable instead of tracking maxScheduled.
 //
 
 import Testing
@@ -89,9 +91,14 @@ struct NotificationSchedulingTests {
         #expect(map.count == 1)
     }
 
-    @Test("The schedule only covers today and the next 2 days")
-    func testLimitsToThreeDayWindow() async throws {
-        let anchor = testDate(2026, 6, 15) // midnight; a 09:00 dose that same day is still upcoming
+    // MARK: - Horizon
+
+    @Test("A course that fits in the budget is covered to its last day")
+    func testCoversWholeCourseWhenItFits() async throws {
+        // 31 days of one dose a day, well inside the default budget. The old
+        // three-day window stopped here at day three and the rest of the course
+        // arrived only if the user happened to open the app again.
+        let anchor = testDate(2026, 6, 15)
         let course = TreatmentCourse(name: "Долгий курс", startDate: anchor, endDate: addingDays(30, to: anchor))
 
         let med = MedicationItem(id: UUID(), name: "Витамин C", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
@@ -99,13 +106,95 @@ struct NotificationSchedulingTests {
 
         let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor)
 
-        #expect(map.count == 3)
-        let expectedDays: Set<Date> = [
-            Calendar.current.startOfDay(for: anchor),
-            Calendar.current.startOfDay(for: addingDays(1, to: anchor)),
-            Calendar.current.startOfDay(for: addingDays(2, to: anchor)),
-        ]
-        let actualDays = Set(map.keys.map { Calendar.current.startOfDay(for: $0) })
-        #expect(actualDays == expectedDays)
+        #expect(map.count == 31)
+        let lastDay = map.keys.map { Calendar.current.startOfDay(for: $0) }.max()
+        #expect(lastDay == Calendar.current.startOfDay(for: addingDays(30, to: anchor)))
+    }
+
+    @Test("A course longer than the budget is covered as far as the budget reaches")
+    func testStopsAtTheBudget() async throws {
+        let anchor = testDate(2026, 6, 15)
+        let course = TreatmentCourse(name: "Годовой курс", startDate: anchor, endDate: addingDays(365, to: anchor))
+
+        let med = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        course.medications.append(med)
+
+        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 10)
+
+        // One slot a day, so the budget converts one-to-one into days of cover.
+        #expect(map.count == 10)
+        #expect(Set(map.keys.map { Calendar.current.startOfDay(for: $0) }).count == 10)
+    }
+
+    @Test("A day is never covered only in part")
+    func testDoesNotSplitADay() async throws {
+        // Three doses a day against a budget of ten: three whole days fit, the
+        // fourth would need twelve slots. Nine is the right answer — ten would mean
+        // a day where the morning reminder comes and the evening one doesn't.
+        let anchor = testDate(2026, 6, 15)
+        let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: addingDays(30, to: anchor))
+
+        let med = MedicationItem(
+            id: UUID(),
+            name: "Ибупрофен",
+            formSystemImage: "pills.fill",
+            dosage: 1,
+            timesOfDay: [testDate(2000, 1, 1, 9, 0), testDate(2000, 1, 1, 14, 0), testDate(2000, 1, 1, 20, 0)],
+            frequencyDays: 1
+        )
+        course.medications.append(med)
+
+        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 10)
+
+        #expect(map.count == 9)
+        #expect(Set(map.keys.map { Calendar.current.startOfDay(for: $0) }).count == 3)
+    }
+
+    @Test("A first day bigger than the whole budget is still scheduled")
+    func testFirstDayIsNeverDroppedForBeingTooBig() async throws {
+        // Refusing to schedule anything because day one doesn't fit would be worse
+        // than covering it and stopping; scheduleNotifications trims by time.
+        let anchor = testDate(2026, 6, 15)
+        let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: addingDays(10, to: anchor))
+
+        let med = MedicationItem(
+            id: UUID(),
+            name: "Капли",
+            formSystemImage: "drop.fill",
+            dosage: 1,
+            timesOfDay: [
+                testDate(2000, 1, 1, 8, 0), testDate(2000, 1, 1, 11, 0), testDate(2000, 1, 1, 14, 0),
+                testDate(2000, 1, 1, 17, 0), testDate(2000, 1, 1, 20, 0),
+            ],
+            frequencyDays: 1
+        )
+        course.medications.append(med)
+
+        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 3)
+
+        #expect(map.count == 5)
+        #expect(Set(map.keys.map { Calendar.current.startOfDay(for: $0) }) == [Calendar.current.startOfDay(for: anchor)])
+    }
+
+    @Test("Frequency is counted from the course start, not from today")
+    func testEveryThirdDayLandsOnTheCourseGrid() async throws {
+        // The dose days are start + k*3. "Today" is two days into the course, so
+        // the next dose is tomorrow — a walk that counted from today instead would
+        // put it two days out and quietly shift the whole course.
+        let start = testDate(2026, 6, 15)
+        let now = testDate(2026, 6, 17)
+        let course = TreatmentCourse(name: "Через два дня", startDate: start, endDate: addingDays(30, to: start))
+
+        let med = MedicationItem(id: UUID(), name: "Витамин D", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 3)
+        course.medications.append(med)
+
+        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: now, slotBudget: 3)
+
+        let days = map.keys.map { Calendar.current.startOfDay(for: $0) }.sorted()
+        #expect(days == [
+            Calendar.current.startOfDay(for: testDate(2026, 6, 18)),
+            Calendar.current.startOfDay(for: testDate(2026, 6, 21)),
+            Calendar.current.startOfDay(for: testDate(2026, 6, 24)),
+        ])
     }
 }

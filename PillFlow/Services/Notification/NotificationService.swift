@@ -37,9 +37,23 @@ final class NotificationService: NotificationServiceProtocol {
     /// one instead of stacking a second copy at the old time.
     private static let diaryRequestIdentifier = "DIARY_REMINDER"
 
-    /// iOS will not schedule more than 64 local notifications per app; leave
-    /// some headroom.
-    private static let maxScheduled = 60
+    /// How many requests the dose schedule may occupy.
+    ///
+    /// iOS keeps at most 64 pending local notifications per app and silently drops
+    /// the rest, and the dose schedule is not the only thing in that queue: the
+    /// diary reminder takes one slot permanently and a snooze takes one per group.
+    /// The horizon below now stretches until this budget is spent, so the ceiling
+    /// is reached in normal use rather than in theory — the headroom has to be
+    /// real. Not private: it is the default argument of `buildScheduleMap`.
+    static let maxScheduled = 56
+
+    /// Hard stop for the day-by-day walk, so a course with a very rare frequency
+    /// (or a corrupt end date) cannot spin. Reached only when the budget never
+    /// fills up.
+    static let maxHorizonDays = 365
+
+    /// The most recently started rebuild. See `rescheduleAll`.
+    private var rescheduleTask: Task<Void, Never>?
 
     // MARK: - Init
 
@@ -285,61 +299,118 @@ final class NotificationService: NotificationServiceProtocol {
             else { return nil }
             return notif.request.identifier
         }
+
+        guard !toRemove.isEmpty else { return }
+        center.removeDeliveredNotifications(withIdentifiers: toRemove)
+        AppLog.notifications.debug("Removed delivered reminders for a fully logged slot: \(toRemove.count)")
     }
+
+    /// One medication flattened into everything the day walk needs.
+    ///
+    /// Prepared once per rebuild so the walk never touches a SwiftData
+    /// relationship or rescans `logs` for each day it considers. That rescan was
+    /// affordable while the horizon was three days; over weeks it is the
+    /// difference between hundreds of comparisons and hundreds of thousands.
+    private struct MedicationPlan {
+        let courseName: String
+        let medication: MedicationItem
+        let startDay: Date
+        let endDay: Date
+        let frequencyDays: Int
+        let times: [(hour: Int, minute: Int)]
+        /// Slots already logged as taken, keyed the way a trigger date is keyed.
+        let takenSlots: Set<DateComponents>
+    }
+
+    private static let slotUnits: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute]
 
     // MARK: - Schedule Building
 
     /// Pure, side-effect-free computation of what needs to be scheduled, kept
-    /// separate from scheduleNotifications so it can be unit tested without a
-    /// real notification center. Handles two rules: grouping multiple
-    /// medications that share a trigger time into a single push, and skipping
-    /// slots that are already logged as taken. `now`/`calendar` default to
-    /// live values so production behavior is unaffected; tests inject fixed ones.
+    /// separate from scheduleNotifications so its rules can be unit tested without
+    /// a real notification centre. `now`/`calendar` default to live values so
+    /// production behaviour is unaffected; tests inject fixed ones.
+    ///
+    /// Three rules live here. Medications that share a trigger time are grouped
+    /// into a single push. Slots already logged as taken are skipped, so a dose
+    /// logged in advance doesn't still ring. And the horizon runs as far ahead as
+    /// `slotBudget` allows instead of a fixed three days: nothing re-plans the
+    /// schedule while the app is closed, so the old window meant a course going
+    /// quiet on the fourth day the user didn't open the app — the one failure this
+    /// app cannot afford.
     static func buildScheduleMap(
         activeCourses: [TreatmentCourse],
         now: Date = Date(),
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        slotBudget: Int = maxScheduled,
+        horizonLimitInDays: Int = maxHorizonDays
     ) -> [Date: [(courseName: String, medication: MedicationItem)]] {
+
         let today = calendar.startOfDay(for: now)
-        let maxDate = calendar.date(byAdding: .day, value: 2, to: today) ?? today
+
+        let plans: [MedicationPlan] = activeCourses.flatMap { course in
+            course.medications.compactMap { med -> MedicationPlan? in
+                // The dose-day step is frequencyDays. At zero every day would match
+                // and the medication would be scheduled at every slot. Unreachable
+                // from the UI (the picker offers 1/2/3/7/14/30), but data can arrive
+                // from a migration or an import.
+                guard med.frequencyDays > 0 else { return nil }
+
+                let times = med.timesOfDay.map { time -> (hour: Int, minute: Int) in
+                    let parts = calendar.dateComponents([.hour, .minute], from: time)
+                    return (parts.hour ?? 0, parts.minute ?? 0)
+                }
+
+                let taken = Set(
+                    med.logs
+                        .filter(\.isTaken)
+                        .map { calendar.dateComponents(Self.slotUnits, from: $0.scheduledTime) }
+                )
+
+                return MedicationPlan(
+                    courseName: course.name,
+                    medication: med,
+                    startDay: calendar.startOfDay(for: course.startDate),
+                    endDay: calendar.startOfDay(for: course.endDate),
+                    frequencyDays: med.frequencyDays,
+                    times: times,
+                    takenSlots: taken
+                )
+            }
+        }
+
+        guard !plans.isEmpty else { return [:] }
 
         var scheduleMap: [Date: [(courseName: String, medication: MedicationItem)]] = [:]
 
-        for course in activeCourses {
-            let startDay = calendar.startOfDay(for: course.startDate)
-            let endDay = calendar.startOfDay(for: course.endDate)
+        // Driven by the day rather than by each medication's own stepping: a day is
+        // the unit the budget is spent in, and asking "is this a dose day" with one
+        // modulo replaces walking a course forward from a start date months back.
+        for dayOffset in 0..<horizonLimitInDays {
+            guard let day = calendar.date(byAdding: .day, value: dayOffset, to: today) else { break }
 
-            for med in course.medications {
-                // The loop step is frequencyDays. At zero the date never advances and
-                // the while loop hangs the main thread. Zero is unreachable from the UI
-                // (the picker offers 1/2/3/7/14/30), but data can arrive from a
-                // migration or an import.
-                guard med.frequencyDays > 0 else { continue }
+            // Every course is over; nothing further out can match.
+            if plans.allSatisfy({ $0.endDay < day }) { break }
 
-                var currentDate = startDay
-                while currentDate <= endDay {
-                    if currentDate >= today && currentDate <= maxDate {
-                        for time in med.timesOfDay {
-                            let timeComponents = calendar.dateComponents([.hour, .minute], from: time)
-                            if let triggerDate = calendar.date(bySettingHour: timeComponents.hour ?? 0, minute: timeComponents.minute ?? 0, second: 0, of: currentDate), triggerDate > now {
+            var slotsForDay: [Date: [(courseName: String, medication: MedicationItem)]] = [:]
 
-                                // Skip slots already marked as taken, so a dose logged in
-                                // advance doesn't still trigger a reminder.
-                                let alreadyTaken = med.logs.contains { log in
-                                    log.isTaken &&
-                                    calendar.isDate(log.scheduledTime, inSameDayAs: triggerDate) &&
-                                    calendar.component(.hour, from: log.scheduledTime) == calendar.component(.hour, from: triggerDate) &&
-                                    calendar.component(.minute, from: log.scheduledTime) == calendar.component(.minute, from: triggerDate)
-                                }
+            for plan in plans {
+                guard day >= plan.startDay, day <= plan.endDay else { continue }
 
-                                if !alreadyTaken {
-                                    scheduleMap[triggerDate, default: []].append((courseName: course.name, medication: med))
-                                }
-                            }
-                        }
-                    }
-                    if currentDate > maxDate { break }
-                    currentDate = calendar.date(byAdding: .day, value: med.frequencyDays, to: currentDate) ?? endDay.addingTimeInterval(1)
+                let daysSinceStart = calendar.dateComponents([.day], from: plan.startDay, to: day).day ?? 0
+                guard daysSinceStart % plan.frequencyDays == 0 else { continue }
+
+                for time in plan.times {
+                    guard let triggerDate = calendar.date(
+                        bySettingHour: time.hour, minute: time.minute, second: 0, of: day
+                    ), triggerDate > now else { continue }
+
+                    let slot = calendar.dateComponents(Self.slotUnits, from: triggerDate)
+                    guard !plan.takenSlots.contains(slot) else { continue }
+
+                    slotsForDay[triggerDate, default: []].append(
+                        (courseName: plan.courseName, medication: plan.medication)
+                    )
                 }
             }
 
@@ -397,16 +468,21 @@ final class NotificationService: NotificationServiceProtocol {
             AppLog.notifications.warning("Slots beyond the iOS limit were not scheduled: \(sortedEntries.count - requests.count)")
         }
 
-        // Queued behind any pending removal: rescheduleAll clears everything first,
-        // and that clear is asynchronous.
-        let scheduledCount = requests.count
-        afterPendingRemovalCompletes {
-            for request in requests {
-                center.add(request) { error in
-                    if let error {
-                        AppLog.notifications.error("Failed to schedule: \(error.localizedDescription, privacy: .public)")
-                    }
-                }
+        // How far ahead the user is actually covered. Worth having in the log: it
+        // is the number that says whether someone who stops opening the app keeps
+        // getting reminded, and it moves with how many medications they take.
+        if let lastCovered = sortedEntries.prefix(requests.count).last?.key {
+            let days = calendar.dateComponents(
+                [.day], from: calendar.startOfDay(for: Date()), to: lastCovered
+            ).day ?? 0
+            AppLog.notifications.debug("Reminders cover the next \(days) day(s)")
+        }
+
+        for request in requests {
+            do {
+                try await center.add(request)
+            } catch {
+                AppLog.notifications.error("Failed to schedule: \(error.localizedDescription, privacy: .public)")
             }
         }
         AppLog.notifications.debug("Grouped and scheduled notifications: \(requests.count)")
