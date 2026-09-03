@@ -83,44 +83,61 @@ struct BeforeAfterComparisonView: View {
 
     // MARK: Header + mode toggle
 
+    /// Title row first, mode toggle on its own row underneath.
+    ///
+    /// Close and the two mode buttons used to share one trailing column, eight
+    /// points apart — and Close expands its touch target by ten in every
+    /// direction, so the two hit areas overlapped and a tap meant for "Side by
+    /// Side" could shut the screen. Stacking them also left the title about a
+    /// third of the row, which is why it read "Visual Progress C…".
     private var header: some View {
-        HStack(alignment: .top, spacing: 12) {
-            ZStack {
-                Circle().fill(Color.accentPrimary.opacity(0.15)).frame(width: 40, height: 40)
-                Image(systemName: "arrow.left.arrow.right")
-                    .font(.subheadline)
-                    .foregroundColor(.accentPrimary)
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Visual Progress Comparison")
-                    .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
-                    .foregroundColor(.textPrimary)
-                Text("Track your recovery, skin changes & wellness transformation")
-                    .font(.caption2)
-                    .foregroundColor(.textSecondary)
-            }
-
-            Spacer(minLength: 4)
-
-            VStack(alignment: .trailing, spacing: 8) {
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark")
-                        .font(.caption)
-                        .foregroundColor(.textPrimary.opacity(0.7))
-                        .padding(7)
-                        .background(Color.textPrimary.opacity(0.08))
-                        .clipShape(Circle())
+        VStack(spacing: 14) {
+            HStack(alignment: .top, spacing: 12) {
+                ZStack {
+                    Circle().fill(Color.accentPrimary.opacity(0.15)).frame(width: 40, height: 40)
+                    Image(systemName: "arrow.left.arrow.right")
+                        .font(.subheadline)
+                        .foregroundColor(.accentPrimary)
                 }
-                .expandTouchTarget(10)
-                .accessibilityLabel("Close")
-                modeToggle
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Visual Progress Comparison")
+                        .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
+                        .foregroundColor(.textPrimary)
+                    Text("Track your recovery, skin changes & wellness transformation")
+                        .font(.caption2)
+                        .foregroundColor(.textSecondary)
+                }
+                // Grows downward instead of truncating when a translation is longer
+                // than the row — the failure this header was already showing.
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                closeButton
             }
+
+            modeToggle
         }
     }
 
+    private var closeButton: some View {
+        Button { dismiss() } label: {
+            Image(systemName: "xmark")
+                .font(.caption)
+                .foregroundColor(.textPrimary.opacity(0.7))
+                .padding(8)
+                .background(Color.textPrimary.opacity(0.08))
+                .clipShape(Circle())
+        }
+        .expandTouchTarget(10)
+        .accessibilityLabel("Close")
+    }
+
+    /// Full width, so the two halves read as one segmented control and each is a
+    /// comfortable target. It also stops the labels wrapping in the languages
+    /// that need the room — German and Ukrainian.
     private var modeToggle: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 8) {
             // The line break is no longer baked into the string — it would land in
             // the wrong place in another language. lineLimit(2) wraps it instead.
             modeButton("Side by Side", isActive: mode == .sideBySide) { mode = .sideBySide }
@@ -137,8 +154,8 @@ struct BeforeAfterComparisonView: View {
                 .lineLimit(2)
                 .foregroundColor(isActive ? Color.onAccent : .textSecondary)
                 .padding(.horizontal, 10)
-                .padding(.vertical, 8)
-                .frame(minWidth: 56, maxHeight: .infinity)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: .infinity)
                 .background(isActive ? Color.accentPrimary : Color.textPrimary.opacity(0.06))
                 .cornerRadius(10)
         }

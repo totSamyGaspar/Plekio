@@ -46,4 +46,38 @@ protocol DiaryViewModelProtocol: ObservableObject {
 
     func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?)
     func deleteBloodPressureReading(_ reading: BloodPressureReading)
+
+    /// Which two photos the comparison screen should open on, given what the
+    /// user has ticked in the gallery. `nil` when there are not two photos to
+    /// compare at all — the caller decides what to show instead.
+    func comparisonPair(for selection: [UUID]) -> (before: UUID, after: UUID)?
+}
+
+extension DiaryViewModelProtocol {
+
+    /// Two ticked checkpoints are compared oldest first, whatever order they
+    /// were ticked in. Anything else — nothing ticked, one ticked, or ticks left
+    /// over from photos that have since been deleted — falls back to the
+    /// earliest photo against the latest, which is the comparison people mean by
+    /// "show me my progress".
+    ///
+    /// Derived entirely from `photoCheckpoints`, so it is written once here
+    /// rather than in the view model and again in its preview mock.
+    func comparisonPair(for selection: [UUID]) -> (before: UUID, after: UUID)? {
+        let byDate = photoCheckpoints.sorted { $0.entry.checkInDate < $1.entry.checkInDate }
+
+        // Resolved against the checkpoints rather than trusted: a selection can
+        // outlive the photo it points at. That used to leave the button doing
+        // nothing at all, which reads as the app being broken.
+        let ticked = selection.compactMap { id in byDate.first { $0.id == id } }
+        if ticked.count == 2 {
+            let ordered = ticked.sorted { $0.entry.checkInDate < $1.entry.checkInDate }
+            return (ordered[0].id, ordered[1].id)
+        }
+
+        guard let earliest = byDate.first, let latest = byDate.last, byDate.count >= 2 else {
+            return nil
+        }
+        return (earliest.id, latest.id)
+    }
 }

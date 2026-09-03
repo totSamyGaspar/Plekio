@@ -9,6 +9,10 @@
 //  theme (Color.appBackground / Color.appSurface / Color.accentPrimary) instead of the
 //  reference's light card-on-white palette.
 //
+//  The sections themselves live in DiaryCheckIn*.swift alongside this file.
+//  What is left here is the form's own business: which sections there are, in
+//  what order, what each one is bound to, and how the whole thing is saved.
+//
 
 import SwiftUI
 
@@ -16,16 +20,10 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: VM
 
-    @State private var customSymptomText = ""
-    @State private var customMilestoneText = ""
-
     /// Separate flags rather than one enum: each popover anchors to its own
     /// field, which is what puts the arrow under the value being edited.
     @State private var showingDatePicker = false
     @State private var showingTimePicker = false
-
-    private let allSymptomOptions = DiarySymptomOptions.all
-    private let allMilestoneOptions = DiaryMilestoneOptions.all
 
     /// The entry being edited, or nil when creating a new one. Consumed in
     /// `.task` rather than `init`: SwiftUI re-creates the view struct many
@@ -47,14 +45,56 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         dateTimeSection
-                        moodSection
+
+                        DiaryMoodGrid(selection: $viewModel.draft.mood)
+
                         physicalSummarySection
-                        energyDiscomfortCard
-                        sleepWaterCard
-                        symptomsSection
+
+                        DiaryEnergyDiscomfortCard(
+                            energyLevel: $viewModel.draft.energyLevel,
+                            discomfortLevel: $viewModel.draft.discomfortLevel,
+                            energyDescription: viewModel.draft.energyDescription,
+                            discomfortDescription: viewModel.draft.discomfortDescription
+                        )
+
+                        DiarySleepWaterCard(
+                            sleepHours: $viewModel.draft.sleepHours,
+                            sleepQuality: $viewModel.draft.sleepQuality,
+                            waterGlasses: $viewModel.draft.waterGlasses
+                        )
+
+                        DiaryTagSection(
+                            title: "PHYSICAL SYMPTOMS & SENSATIONS",
+                            options: DiarySymptomOptions.all,
+                            displayName: { DiarySymptomOptions.title(for: $0) },
+                            isSelected: { viewModel.isSymptomSelected($0) },
+                            accent: .accentPrimary,
+                            prefix: "+",
+                            inputPlaceholder: "Add other symptom...",
+                            onToggle: { viewModel.toggleSymptom($0) },
+                            onAddCustom: { viewModel.addCustomSymptom($0) }
+                        )
+
                         reflectionSection
-                        photosCard
-                        milestonesSection
+
+                        DiaryPhotosCard(
+                            images: viewModel.selectedImages,
+                            showingSourceMenu: $viewModel.showingPhotoSourceMenu,
+                            onRemove: { viewModel.removePhoto(at: $0) },
+                            onPick: { viewModel.requestImageSelection(source: $0) }
+                        )
+
+                        DiaryTagSection(
+                            title: "TAGS & MILESTONES",
+                            options: DiaryMilestoneOptions.all,
+                            displayName: { DiaryMilestoneOptions.title(for: $0) },
+                            isSelected: { viewModel.isMilestoneSelected($0) },
+                            accent: .milestonePurple,
+                            prefix: "#",
+                            inputPlaceholder: "Add custom milestone tag...",
+                            onToggle: { viewModel.toggleMilestone($0) },
+                            onAddCustom: { viewModel.addCustomMilestone($0) }
+                        )
                     }
                     .padding(.horizontal)
                     .padding(.top, 8)
@@ -100,8 +140,8 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
     private var dateTimeSection: some View {
         HStack(alignment: .center, spacing: 12) {
-            labeledField(title: "CHECK-IN DATE") {
-                valueButton(
+            DiaryLabeledField(title: "CHECK-IN DATE") {
+                DiaryValueButton(
                     text: viewModel.draft.checkInDate.formatted(date: .abbreviated, time: .omitted),
                     label: "CHECK-IN DATE"
                 ) { showingDatePicker = true }
@@ -120,8 +160,8 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                         .appColorScheme()
                 }
             }
-            labeledField(title: "TIME") {
-                valueButton(
+            DiaryLabeledField(title: "TIME") {
+                DiaryValueButton(
                     text: viewModel.draft.checkInDate.formatted(date: .omitted, time: .shortened),
                     label: "TIME"
                 ) { showingTimePicker = true }
@@ -135,98 +175,6 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 }
             }
         }
-    }
-
-    /// The date or time value as plain text, tappable across the whole field.
-    ///
-    /// The compact `DatePicker` paints its own grey capsule and SwiftUI offers
-    /// no way to turn that off. Hiding it under a transparent overlay does not
-    /// work either — it stops receiving touches — so the value is drawn as text
-    /// and the picker moved into a popover this opens.
-    private func valueButton(text: String, label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(text)
-                .font(.subheadline.weight(.semibold))
-                .foregroundColor(.textPrimary)
-                .frame(maxWidth: .infinity, minHeight: 24)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
-        .accessibilityValue(text)
-    }
-
-    private func labeledField<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.caption2.weight(.heavy))
-                .foregroundColor(.textSecondary)
-                .tracking(0.5)
-            content()
-                // Centred, not leading: the compact DatePicker renders as a pill
-                // that hugs its text, so aligning it leading left it floating in
-                // the corner of a much wider box.
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(Color.appSurface)
-                .cornerRadius(12)
-        }
-    }
-
-    // MARK: - Mood
-
-    private var moodSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("OVERALL MOOD TODAY")
-                    .font(.caption.weight(.heavy))
-                    .foregroundColor(.textSecondary)
-                    .tracking(0.5)
-                Spacer()
-                Text("SELECT DOMINANT MOOD")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundColor(.accentPrimary.opacity(0.8))
-            }
-
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                ForEach(DiaryMood.allCases) { mood in
-                    moodCard(mood)
-                }
-            }
-        }
-    }
-
-    private func moodCard(_ mood: DiaryMood) -> some View {
-        let isSelected = viewModel.draft.mood == mood
-        return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                viewModel.draft.mood = mood
-            }
-        } label: {
-            HStack(spacing: 12) {
-                Text(mood.emoji).font(.title2)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(mood.title)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
-                    Text("Score: \(mood.score)/5")
-                        .font(.caption2)
-                        .foregroundColor(.textSecondary)
-                }
-                Spacer()
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity)
-            .background(isSelected ? Color.accentPrimary.opacity(0.15) : Color.appSurface)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isSelected ? Color.accentPrimary : Color.textPrimary.opacity(0.06), lineWidth: isSelected ? 1.5 : 1)
-            )
-            .cornerRadius(14)
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     // MARK: - Physical Summary
@@ -251,263 +199,6 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             .padding(14)
             .background(Color.appSurface)
             .cornerRadius(14)
-        }
-    }
-
-    // MARK: - Energy / Discomfort
-
-    private var energyDiscomfortCard: some View {
-        VStack(spacing: 20) {
-            sliderRow(
-                icon: "bolt.fill",
-                iconColor: .yellow,
-                title: "Energy Level: \(viewModel.draft.energyLevel)/5",
-                trailingLabel: energyLabel,
-                value: Binding(
-                    get: { Double(viewModel.draft.energyLevel) },
-                    set: { viewModel.draft.energyLevel = Int($0.rounded()) }
-                ),
-                range: 1...5,
-                tint: .accentPrimary,
-                minLabel: "Low", midLabel: "Moderate", maxLabel: "Peak"
-            )
-
-            Divider().opacity(0.15)
-
-            sliderRow(
-                icon: "heart.fill",
-                iconColor: .pink,
-                title: "Discomfort/Pain: \(viewModel.draft.discomfortLevel)/10",
-                trailingLabel: discomfortLabel,
-                value: Binding(
-                    get: { Double(viewModel.draft.discomfortLevel) },
-                    set: { viewModel.draft.discomfortLevel = Int($0.rounded()) }
-                ),
-                range: 0...10,
-                tint: .pink,
-                minLabel: "0 (None)", midLabel: "5 (Manageable)", maxLabel: "10 (Severe)"
-            )
-        }
-        .padding(18)
-        .background(Color.appSurface)
-        .cornerRadius(18)
-    }
-
-    private var energyLabel: LocalizedStringKey {
-        switch viewModel.draft.energyLevel {
-        case ..<2: return "Low Energy"
-        case 2...3: return "Moderate Energy"
-        default: return "High Energy"
-        }
-    }
-
-    private var discomfortLabel: LocalizedStringKey {
-        switch viewModel.draft.discomfortLevel {
-        case 0: return "Zero Pain"
-        case 1...3: return "Mild"
-        case 4...6: return "Manageable"
-        default: return "Severe"
-        }
-    }
-
-    private func sliderRow(
-        icon: String, iconColor: Color, title: LocalizedStringKey, trailingLabel: LocalizedStringKey,
-        value: Binding<Double>, range: ClosedRange<Double>, tint: Color,
-        minLabel: LocalizedStringKey, midLabel: LocalizedStringKey, maxLabel: LocalizedStringKey
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                HStack(spacing: 6) {
-                    Image(systemName: icon).foregroundColor(iconColor)
-                    Text(title)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
-                }
-                Spacer()
-                Text(trailingLabel)
-                    .font(.caption)
-                    .foregroundColor(.textSecondary)
-            }
-            Slider(value: value, in: range, step: 1)
-                .tint(tint)
-            HStack {
-                // Three labels share one row ("0 (None) / 5 (Manageable) / 10 (Severe)");
-                // the middle one is noticeably longer in German and Romanian.
-                Text(minLabel).font(.caption2).foregroundColor(.textSecondary)
-                    .lineLimit(2).minimumScaleFactor(0.9)
-                Spacer(minLength: 4)
-                Text(midLabel).font(.caption2).foregroundColor(.textSecondary)
-                    .lineLimit(2).minimumScaleFactor(0.9)
-                Spacer(minLength: 4)
-                Text(maxLabel).font(.caption2).foregroundColor(.textSecondary)
-                    .lineLimit(2).minimumScaleFactor(0.9)
-            }
-        }
-    }
-
-    // MARK: - Sleep / Water
-
-    private var sleepWaterCard: some View {
-        VStack(spacing: 20) {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 6) {
-                    Image(systemName: "moon.stars.fill").foregroundColor(.purple)
-                    Text("Sleep Duration & Quality")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
-                }
-                HStack(spacing: 12) {
-                    HStack(spacing: 6) {
-                        // The field used to accept anything — negative values,
-                        // dozens of hours — and those numbers fed the averages.
-                        TextField("7.5", value: Binding(
-                            get: { viewModel.draft.sleepHours },
-                            set: { viewModel.draft.sleepHours = min(max($0, 0), 24) }
-                        ), format: .number)
-                            .keyboardType(.decimalPad)
-                            .foregroundColor(.textPrimary)
-                            .frame(width: 40)
-                        Text("hours").foregroundColor(.textSecondary).font(.caption)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.appBackground)
-                    .cornerRadius(10)
-
-                    Spacer()
-
-                    HStack(spacing: 6) {
-                        ForEach(SleepQuality.allCases) { quality in
-                            Button {
-                                viewModel.draft.sleepQuality = quality
-                            } label: {
-                                Text(quality.initial)
-                                    .font(.caption.weight(.heavy))
-                                    .frame(width: 30, height: 30)
-                                    .background(viewModel.draft.sleepQuality == quality ? Color.accentPrimary : Color.appBackground)
-                                    .foregroundColor(viewModel.draft.sleepQuality == quality ? Color.onAccent : .textSecondary)
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityAddTraits(
-                                viewModel.draft.sleepQuality == quality ? .isSelected : []
-                            )
-                        }
-                    }
-                }
-            }
-
-            Divider().opacity(0.15)
-
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 6) {
-                    Image(systemName: "drop.fill").foregroundColor(.blue)
-                    Text("Water Hydration")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
-                }
-                HStack {
-                    Button {
-                        if viewModel.draft.waterGlasses > 0 { viewModel.draft.waterGlasses -= 1 }
-                    } label: {
-                        Image(systemName: "minus")
-                            .frame(width: 32, height: 32)
-                            .background(Color.appBackground)
-                            .foregroundColor(.textPrimary)
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .expandTouchTarget(6)
-
-                    Spacer()
-                    VStack(spacing: 2) {
-                        Text("\(viewModel.draft.waterGlasses) glasses")
-                            .font(.subheadline.weight(.bold))
-                            .foregroundColor(.textPrimary)
-                        Text("(~\(viewModel.draft.waterGlasses * 250)ml)")
-                            .font(.caption2)
-                            .foregroundColor(.textSecondary)
-                    }
-                    Spacer()
-
-                    Button {
-                        viewModel.draft.waterGlasses += 1
-                    } label: {
-                        Image(systemName: "plus")
-                            .frame(width: 32, height: 32)
-                            .background(Color.accentPrimary)
-                            .foregroundColor(Color.onAccent)
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .expandTouchTarget(6)
-                }
-                // One adjustable element instead of three stops: VoiceOver
-                // announces "Water Hydration, 6 glasses" and takes swipe up and
-                // down, which is how a stepper is expected to behave.
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Water Hydration")
-                .accessibilityValue("\(viewModel.draft.waterGlasses) glasses")
-                .accessibilityAdjustableAction { direction in
-                    switch direction {
-                    case .increment:
-                        viewModel.draft.waterGlasses += 1
-                    case .decrement:
-                        if viewModel.draft.waterGlasses > 0 { viewModel.draft.waterGlasses -= 1 }
-                    @unknown default:
-                        break
-                    }
-                }
-            }
-        }
-        .padding(18)
-        .background(Color.appSurface)
-        .cornerRadius(18)
-    }
-
-    // MARK: - Symptoms
-
-    private var symptomsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("PHYSICAL SYMPTOMS & SENSATIONS")
-                .font(.caption.weight(.heavy))
-                .foregroundColor(.textSecondary)
-
-            FlowLayout(spacing: 10) {
-                ForEach(allSymptomOptions, id: \.self) { symptom in
-                    tagChip(
-                        text: DiarySymptomOptions.title(for: symptom),
-                        isSelected: viewModel.draft.symptoms.contains(symptom),
-                        accent: .accentPrimary,
-                        prefix: "+"
-                    ) {
-                        viewModel.toggleSymptom(symptom)
-                    }
-                }
-            }
-
-            HStack(spacing: 10) {
-                TextField("Add other symptom...", text: $customSymptomText)
-                    .foregroundColor(.textPrimary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(Color.appSurface)
-                    .cornerRadius(12)
-
-                Button("Add") {
-                    viewModel.addCustomSymptom(customSymptomText)
-                    customSymptomText = ""
-                }
-                .font(.subheadline.weight(.bold))
-                .foregroundColor(Color.onAccent)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .frame(maxHeight: .infinity)
-                .background(Color.accentPrimary)
-                .cornerRadius(12)
-                .contentShape(Rectangle())
-            }
-            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -544,172 +235,6 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             .background(Color.appSurface)
             .cornerRadius(14)
         }
-    }
-
-    // MARK: - Photos
-
-    private var photosCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top) {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "camera.fill")
-                        .foregroundColor(.accentPrimary)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Progress Photos Tracking")
-                            .font(.subheadline.weight(.bold))
-                            .foregroundColor(.textPrimary)
-                        Text("Add photos to track skin changes, body posture, wellness milestones or recovery progress")
-                            .font(.caption2)
-                            .foregroundColor(.textSecondary)
-                    }
-                }
-                Spacer()
-                Text("\(viewModel.selectedImages.count) Attached")
-                    .font(.caption2.weight(.bold))
-                    .foregroundColor(.accentPrimary)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.accentPrimary.opacity(0.12))
-                    .cornerRadius(8)
-            }
-
-            Button {
-                viewModel.showingPhotoSourceMenu = true
-            } label: {
-                VStack(spacing: 8) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.title2)
-                        .foregroundColor(.textTertiary)
-                    Text("Click or drag photos here")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.textSecondary)
-                    Text("Supports mobile camera snapshots & image gallery (JPG, PNG, WebP)")
-                        .font(.caption2)
-                        .foregroundColor(.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 24)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6]))
-                        .foregroundColor(.textPrimary.opacity(0.15))
-                )
-            }
-            .buttonStyle(.plain)
-
-            if !viewModel.selectedImages.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(Array(viewModel.selectedImages.enumerated()), id: \.offset) { index, image in
-                            ZStack(alignment: .topTrailing) {
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 72, height: 72)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                                // The thumbnail itself has no tap action, so the
-                                // 44pt target can grow inward over the photo: the
-                                // glyph stays pinned in the corner where it was and
-                                // there is nothing underneath to hit by mistake.
-                                Button {
-                                    withAnimation { viewModel.removePhoto(at: index) }
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(.title3)
-                                        .foregroundColor(.white)
-                                        .background(Circle().fill(Color.black.opacity(0.6)))
-                                        .frame(width: 44, height: 44, alignment: .topTrailing)
-                                        .contentShape(Rectangle())
-                                }
-                                .accessibilityLabel("Remove photo")
-                                .padding(4)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .padding(18)
-        .background(Color.appSurface)
-        .cornerRadius(18)
-        .confirmationDialog("Add Photo", isPresented: $viewModel.showingPhotoSourceMenu, titleVisibility: .visible) {
-            Button("Take Photo (Camera)") {
-                viewModel.requestImageSelection(source: .camera)
-            }
-            Button("Choose from Library") {
-                viewModel.requestImageSelection(source: .photoLibrary)
-            }
-            Button("Cancel", role: .cancel) {}
-        }
-    }
-
-    // MARK: - Milestones
-
-    private var milestonesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("TAGS & MILESTONES")
-                .font(.caption.weight(.heavy))
-                .foregroundColor(.textSecondary)
-
-            FlowLayout(spacing: 10) {
-                ForEach(allMilestoneOptions, id: \.self) { tag in
-                    tagChip(
-                        text: DiaryMilestoneOptions.title(for: tag),
-                        isSelected: viewModel.draft.milestoneTags.contains(tag),
-                        accent: .milestonePurple,
-                        prefix: "#"
-                    ) {
-                        viewModel.toggleMilestone(tag)
-                    }
-                }
-            }
-
-            HStack(spacing: 10) {
-                TextField("Add custom milestone tag...", text: $customMilestoneText)
-                    .foregroundColor(.textPrimary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(Color.appSurface)
-                    .cornerRadius(12)
-
-                Button("Add") {
-                    viewModel.addCustomMilestone(customMilestoneText)
-                    customMilestoneText = ""
-                }
-                .font(.subheadline.weight(.bold))
-                .foregroundColor(Color.onAccent)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .frame(maxHeight: .infinity)
-                .background(Color.accentPrimary)
-                .cornerRadius(12)
-                .contentShape(Rectangle())
-            }
-            .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    // MARK: - Shared tag chip
-
-    private func tagChip(text: String, isSelected: Bool, accent: Color, prefix: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                Text(isSelected ? "✓" : prefix)
-                Text(text)
-            }
-            .font(.caption.weight(.semibold))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(isSelected ? accent.opacity(0.9) : Color.appSurface)
-            .foregroundColor(isSelected ? Color.onAccent : .textPrimary.opacity(0.8))
-            .overlay(
-                Capsule().stroke(isSelected ? Color.clear : Color.textPrimary.opacity(0.1), lineWidth: 1)
-            )
-            .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Bottom Bar

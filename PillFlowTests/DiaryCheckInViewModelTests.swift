@@ -154,6 +154,66 @@ struct DiaryCheckInViewModelTests {
         #expect(mockDb.updatedDiaryDraft?.isQuickLog == true)
     }
 
+    // MARK: - Draft bounds
+
+    @Test("черновик держит числовые поля в допустимых границах")
+    func testDraftClampsNumericFields() async throws {
+        // The bounds used to live in the controls that edited these fields — the
+        // sleep text field clamped itself, the water stepper guarded only its
+        // minus button, and the plus button had no ceiling at all. Now the draft
+        // holds them whoever writes.
+        var draft = DiaryEntryDraft()
+
+        draft.sleepHours = 99
+        #expect(draft.sleepHours == 24)
+        draft.sleepHours = -3
+        #expect(draft.sleepHours == 0)
+
+        draft.waterGlasses = -1
+        #expect(draft.waterGlasses == 0)
+        draft.waterGlasses = 9_999
+        #expect(draft.waterGlasses == DiaryEntryDraft.waterGlassesRange.upperBound)
+
+        draft.energyLevel = 0
+        #expect(draft.energyLevel == 1)
+        draft.energyLevel = 42
+        #expect(draft.energyLevel == 5)
+
+        draft.discomfortLevel = -5
+        #expect(draft.discomfortLevel == 0)
+        draft.discomfortLevel = 11
+        #expect(draft.discomfortLevel == 10)
+    }
+
+    @Test("значения из хранилища тоже попадают в границы")
+    func testDraftClampsValuesLoadedFromStorage() async throws {
+        // init(from:) is the one write that bypasses didSet — property observers
+        // do not run during initialization — so it clamps its arguments itself.
+        // A value written by an older build or an import comes through here.
+        let entry = DiaryEntry(
+            checkInDate: testDate(2026, 6, 15),
+            moodLabel: "Good",
+            moodScore: 4,
+            physicalSummary: "",
+            energyLevel: 99,
+            discomfortLevel: -4,
+            sleepHours: 48,
+            sleepQuality: "G",
+            waterGlasses: -2,
+            symptoms: [],
+            reflectionNotes: "",
+            milestoneTags: [],
+            photoIds: []
+        )
+
+        let draft = DiaryEntryDraft(from: entry)
+
+        #expect(draft.energyLevel == 5)
+        #expect(draft.discomfortLevel == 0)
+        #expect(draft.sleepHours == 24)
+        #expect(draft.waterGlasses == 0)
+    }
+
     @Test("save() updates the existing entry instead of creating a new one when editing")
     func testSaveUpdatesExistingEntryWhenEditing() async throws {
         let mockDb = MockDatabaseService()

@@ -94,15 +94,39 @@ enum SleepQuality: String, CaseIterable, Identifiable {
 /// MedicationDraft carries AddMedicationView's form state before
 /// DatabaseService persists it.
 struct DiaryEntryDraft: Identifiable, Equatable {
+
+    /// The ranges the numeric fields are held to.
+    ///
+    /// Enforced here rather than in whichever control happens to edit a field.
+    /// The sleep field clamped itself, the water stepper guarded only its minus
+    /// button — its plus button had no ceiling at all — and `init(from:)`, which
+    /// loads an entry back out of storage, checked nothing. A bound that lives
+    /// in one of three writers is a bound that holds two thirds of the time.
+    static let energyLevelRange = 1...5
+    static let discomfortLevelRange = 0...10
+    static let sleepHoursRange = 0.0...24.0
+    static let waterGlassesRange = 0...50
+
     var id = UUID()
     var checkInDate: Date = Date()
     var mood: DiaryMood = .good
     var physicalSummary: String = ""
-    var energyLevel: Int = 4
-    var discomfortLevel: Int = 0
-    var sleepHours: Double = 7.5
+
+    // didSet does not run during initialization, which is why init(from:) below
+    // clamps its arguments as well. Assigning inside didSet does not re-enter it.
+    var energyLevel: Int = 4 {
+        didSet { energyLevel = Self.energyLevelRange.clamping(energyLevel) }
+    }
+    var discomfortLevel: Int = 0 {
+        didSet { discomfortLevel = Self.discomfortLevelRange.clamping(discomfortLevel) }
+    }
+    var sleepHours: Double = 7.5 {
+        didSet { sleepHours = Self.sleepHoursRange.clamping(sleepHours) }
+    }
     var sleepQuality: SleepQuality = .good
-    var waterGlasses: Int = 6
+    var waterGlasses: Int = 6 {
+        didSet { waterGlasses = Self.waterGlassesRange.clamping(waterGlasses) }
+    }
     var symptoms: [String] = []
     var reflectionNotes: String = ""
     var milestoneTags: [String] = []
@@ -124,18 +148,41 @@ struct DiaryEntryDraft: Identifiable, Equatable {
 }
 
 extension DiaryEntryDraft {
-    
+
+    /// The energy scale in words.
+    ///
+    /// "Four out of five is High Energy" is this app's vocabulary, not a layout
+    /// decision, so it is defined with the value rather than in the card that
+    /// happens to draw it.
+    var energyDescription: LocalizedStringResource {
+        switch energyLevel {
+        case ..<2: return "Low Energy"
+        case 2...3: return "Moderate Energy"
+        default: return "High Energy"
+        }
+    }
+
+    /// The discomfort scale in words.
+    var discomfortDescription: LocalizedStringResource {
+        switch discomfortLevel {
+        case 0: return "Zero Pain"
+        case 1...3: return "Mild"
+        case 4...6: return "Manageable"
+        default: return "Severe"
+        }
+    }
+
     init(from entry: DiaryEntry) {
         self.init(
             id: entry.id,
             checkInDate: entry.checkInDate,
             mood: DiaryMood(rawValue: entry.moodLabel) ?? .good,
             physicalSummary: entry.physicalSummary,
-            energyLevel: entry.energyLevel,
-            discomfortLevel: entry.discomfortLevel,
-            sleepHours: entry.sleepHours,
+            energyLevel: Self.energyLevelRange.clamping(entry.energyLevel),
+            discomfortLevel: Self.discomfortLevelRange.clamping(entry.discomfortLevel),
+            sleepHours: Self.sleepHoursRange.clamping(entry.sleepHours),
             sleepQuality: SleepQuality(rawValue: entry.sleepQuality) ?? .good,
-            waterGlasses: entry.waterGlasses,
+            waterGlasses: Self.waterGlassesRange.clamping(entry.waterGlasses),
             symptoms: entry.symptoms,
             reflectionNotes: entry.reflectionNotes,
             milestoneTags: entry.milestoneTags,

@@ -56,12 +56,3 @@ extension BloodPressureReading {
         "\(systolic)/\(diastolic)"
     }
 }
-
-extension ClosedRange where Bound == Int {
-    /// Pulls a value inside the range. Written here rather than at the call site
-    /// so the three ranges above and the clamping that enforces them stay
-    /// together.
-    func clamping(_ value: Int) -> Int {
-        Swift.min(Swift.max(value, lowerBound), upperBound)
-    }
-}
