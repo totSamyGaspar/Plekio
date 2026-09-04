@@ -95,10 +95,10 @@ struct MainTabView: View {
         .task {
             try? await Task.sleep(for: .seconds(RootTransition.presentationDelay))
             consumePendingPush()
-            consumePendingDiaryCheckIn()
+            consumePendingReminder()
         }
         .onChange(of: router.pendingPushMedicationIds) { _, _ in consumePendingPush() }
-        .onChange(of: router.pendingDiaryCheckIn) { _, _ in consumePendingDiaryCheckIn() }
+        .onChange(of: router.pendingReminder) { _, _ in consumePendingReminder() }
         .alert(
             "Couldn't save",
             isPresented: Binding(
@@ -154,9 +154,18 @@ struct MainTabView: View {
         )
     }
 
-    private func consumePendingDiaryCheckIn() {
-        guard router.consumePendingDiaryCheckIn() else { return }
-        router.present(.diaryCheckIn)
+    /// Presented from here rather than from the diary screen: on a cold launch a
+    /// reminder is tapped before that screen is in the hierarchy, which is the
+    /// same reason the dose push is handled here.
+    private func consumePendingReminder() {
+        guard let reminder = router.consumePendingReminder() else { return }
+
+        switch reminder {
+        case .diary:
+            router.present(.diaryCheckIn)
+        case .bloodPressure:
+            router.present(.bloodPressureEntry)
+        }
     }
 
     @ViewBuilder
@@ -170,6 +179,15 @@ struct MainTabView: View {
         case .diaryCheckIn:
             DiaryCheckInView()
                 .appTheme()
+
+        case .bloodPressureEntry:
+            BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
+                PendingBloodPressureReading.save(
+                    measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse,
+                    dbService: DIContainer.shared.resolve(DatabaseServiceProtocol.self)
+                )
+            }
+            .appTheme()
 
         case .takePill(let pills, let onTake, let onSkip):
             TakePillModalView(pills: pills, onTake: {

@@ -18,6 +18,7 @@ import Testing
 import Foundation
 @testable import PillFlow
 
+@MainActor
 @Suite("NotificationService scheduling logic")
 struct NotificationSchedulingTests {
 
