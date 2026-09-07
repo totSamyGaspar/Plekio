@@ -7,14 +7,6 @@
 
 import SwiftUI
 
-/// Transition between root screens: splash → ContentView → onboarding/tab bar.
-///
-/// Shared rather than inlined per view because more than the animation depends
-/// on this duration: SwiftUI silently drops a `fullScreenCover` requested while
-/// the presenting view is still appearing. That is why a notification tapped on
-/// a cold launch used to open the dashboard with no modal — the push arrived
-/// before MainTabView was in the hierarchy, so the modal was requested right in
-/// the middle of the appear animation.
 enum RootTransition {
     static let duration: TimeInterval = 0.5
 
