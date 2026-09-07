@@ -17,6 +17,7 @@ import SwiftData
 @MainActor
 protocol DatabaseServiceProtocol {
     func saveCourse(name: String, startDate: Date, endDate: Date, drafts: [MedicationDraft]) throws
+    func duplicateCourse(_ course: TreatmentCourse, startDate: Date, endDate: Date) throws
     func togglePill(medicationId: UUID, scheduledTime: Date) throws
 
     func fetchPills(for date: Date, preFetchedCourses: [TreatmentCourse]?) -> [PillDose]

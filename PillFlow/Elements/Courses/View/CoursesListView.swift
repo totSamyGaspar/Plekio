@@ -14,6 +14,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
     @State private var selectedSegment = 0
     @State private var showingDeleteAlert = false
     @State private var courseToDelete: TreatmentCourse?
+    @State private var courseToRepeat: TreatmentCourse?
     
     init(viewModel: @autoclosure @escaping () -> VM) {
         self._viewModel = StateObject(wrappedValue: viewModel())
@@ -47,9 +48,23 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                         .listRowSeparator(.hidden)
                     } else {
                         ForEach(currentList) { course in
-                            NavigationLink(value: Route.courseDetail(courseId: course.id)) {
-                                CourseRowView(course: course,
-                                              isHistory: selectedSegment == 1)
+                            Group {
+                                // A finished course has nothing left to edit, so the
+                                // history card is inert: the only thing it offers is
+                                // starting the same treatment over.
+                                if selectedSegment == 1 {
+                                    CourseRowView(
+                                        course: course,
+                                        isHistory: true,
+                                        canRepeat: !viewModel.hasActiveRepeat(of: course)
+                                    ) {
+                                        courseToRepeat = course
+                                    }
+                                } else {
+                                    NavigationLink(value: Route.courseDetail(courseId: course.id)) {
+                                        CourseRowView(course: course, isHistory: false)
+                                    }
+                                }
                             }
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             .listRowBackground(Color.clear)
@@ -75,6 +90,14 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                     Button("Cancel", role: .cancel) {}
                 } message: { course in
                     Text("Are you sure you want to delete '\(course.name)'? This action cannot be undone.")
+                }
+                .sheet(item: $courseToRepeat) { course in
+                    RepeatCourseSheet(course: course) { startDate, endDate in
+                        viewModel.repeatCourse(course, startDate: startDate, endDate: endDate)
+                        // The copy is active by definition, so the user is shown
+                        // where it landed instead of an unchanged History list.
+                        selectedSegment = 0
+                    }
                 }
             }
         }

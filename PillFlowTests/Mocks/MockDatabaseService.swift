@@ -16,6 +16,10 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     var didCallSaveCourse = false
     var savedCourseName: String?
 
+    var duplicatedCourse: TreatmentCourse?
+    var duplicatedStartDate: Date?
+    var duplicatedEndDate: Date?
+
     var fetchedPillsDate: Date?
 
     var toggledPillMedicationId: UUID?
@@ -50,6 +54,12 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     func saveCourse(name: String, startDate: Date, endDate: Date, drafts: [MedicationDraft]) throws {
         didCallSaveCourse = true
         savedCourseName = name
+    }
+
+    func duplicateCourse(_ course: TreatmentCourse, startDate: Date, endDate: Date) throws {
+        duplicatedCourse = course
+        duplicatedStartDate = startDate
+        duplicatedEndDate = endDate
     }
 
     func fetchPills(for date: Date, preFetchedCourses: [TreatmentCourse]? = nil) -> [PillDose] {
