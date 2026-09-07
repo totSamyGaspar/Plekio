@@ -158,6 +158,54 @@ final class DatabaseService: DatabaseServiceProtocol {
         }
     }
 
+    /// Starts a finished course over: a brand-new course with fresh dates and a
+    /// fresh copy of every medication.
+    ///
+    /// The medications get new ids rather than being moved, so the original stays
+    /// in the history with its own dose logs intact — repeating a course must not
+    /// rewrite what actually happened last time. Photos live on disk keyed by the
+    /// medication id (see ImageCache), so each one is copied across to the new id.
+    func duplicateCourse(_ course: TreatmentCourse, startDate: Date, endDate: Date) throws {
+        let newCourse = TreatmentCourse(
+            name: course.name,
+            startDate: startDate,
+            endDate: endDate,
+            // The chain's first course, so repeating a copy of a copy is still
+            // recognised as the same treatment running again.
+            repeatedFromId: course.repeatLineageId
+        )
+        context.insert(newCourse)
+
+        // Same reason as in saveCourse: files are written only once the write
+        // has actually committed.
+        var pendingPhotos: [(UUID, Data)] = []
+
+        for source in course.medications {
+            let copyId = UUID()
+            let med = MedicationItem(
+                id: copyId,
+                name: source.name,
+                formSystemImage: source.formSystemImage,
+                dosage: source.dosage,
+                timesOfDay: source.timesOfDay,
+                frequencyDays: source.frequencyDays,
+                stockCount: source.stockCount,
+                lowStockThreshold: source.lowStockThreshold
+            )
+            newCourse.medications.append(med)
+
+            if let imageData = ImageCache.shared.loadDataFromDisk(for: source.id) {
+                pendingPhotos.append((copyId, imageData))
+            }
+        }
+
+        try commit([.courses])
+
+        for (id, data) in pendingPhotos {
+            ImageCache.shared.saveToDisk(data, for: id)
+        }
+    }
+
     // MARK: - Fetch
 
     func fetchPills(for date: Date, preFetchedCourses: [TreatmentCourse]? = nil) -> [PillDose] {

@@ -14,5 +14,7 @@ protocol CoursesListViewModelProtocol: ObservableObject {
     var historyCourses: [TreatmentCourse] { get }
     
     func fetchCourses()
+    func repeatCourse(_ course: TreatmentCourse, startDate: Date, endDate: Date)
+    func hasActiveRepeat(of course: TreatmentCourse) -> Bool
     func deleteCourse(_ course: TreatmentCourse)
 }
