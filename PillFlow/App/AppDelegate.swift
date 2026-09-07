@@ -17,7 +17,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
 
     private var bufferedPush: (medicationIds: [UUID], time: Date)?
-    private var bufferedDiaryReminder = false
+    private var bufferedReminder: DailyReminder?
 
     private func flushBufferedPush() {
         guard let router else { return }
@@ -27,9 +27,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             router.handlePushNotification(medicationIds: push.medicationIds, time: push.time)
         }
 
-        if bufferedDiaryReminder {
-            bufferedDiaryReminder = false
-            router.handleDiaryReminder()
+        if let reminder = bufferedReminder {
+            bufferedReminder = nil
+            router.handleReminder(reminder)
         }
     }
 
@@ -45,15 +45,16 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         let userInfo = response.notification.request.content.userInfo
 
-        // The diary reminder carries no medicationIds, so it has to be recognised
-        // before the dose branch's guard drops it as malformed.
-        if userInfo["kind"] as? String == "diary" {
+        // The daily reminders carry no medicationIds, so they have to be
+        // recognised before the dose branch's guard drops them as malformed.
+        if let kind = userInfo[DailyReminder.userInfoKey] as? String,
+           let reminder = DailyReminder(rawValue: kind) {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 if let router = self.router {
-                    router.handleDiaryReminder()
+                    router.handleReminder(reminder)
                 } else {
-                    self.bufferedDiaryReminder = true
+                    self.bufferedReminder = reminder
                 }
             }
             completionHandler()

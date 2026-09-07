@@ -12,6 +12,7 @@ import Testing
 import Foundation
 @testable import PillFlow
 
+@MainActor
 @Suite("PillDose")
 struct PillDoseTests {
 

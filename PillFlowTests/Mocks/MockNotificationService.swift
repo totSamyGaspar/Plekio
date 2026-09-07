@@ -11,8 +11,8 @@ final class MockNotificationService: NotificationServiceProtocol {
     var clearedDeliveredIds: [UUID]?
     var clearedDeliveredSlot: Date?
     var clearDeliveredCallCount = 0
-    var scheduledDiaryReminderMinute: Int?
-    var didCancelDiaryReminder = false
+    var scheduledReminders: [DailyReminder: [Int]] = [:]
+    var cancelledReminders: [DailyReminder] = []
     /// What requestPermission() answers. Tests that care flip it.
     var permissionGranted = true
     /// Counts rebuilds. `scheduledCourses` is overwritten by each one, so a test
@@ -42,12 +42,12 @@ final class MockNotificationService: NotificationServiceProtocol {
         didCallRemoveAllPending = true
     }
 
-    func scheduleDiaryReminder(minuteOfDay: Int) async {
-        scheduledDiaryReminderMinute = minuteOfDay
+    func scheduleDailyReminder(_ reminder: DailyReminder, minutesOfDay: [Int]) async {
+        scheduledReminders[reminder] = minutesOfDay
     }
 
-    func cancelDiaryReminder() {
-        didCancelDiaryReminder = true
+    func cancelDailyReminder(_ reminder: DailyReminder) {
+        cancelledReminders.append(reminder)
     }
 
     func clearDelivered(takenMedicationIds: [UUID], scheduledTime: Date) async {

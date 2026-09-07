@@ -12,28 +12,6 @@
 
 import SwiftUI
 
-private enum DiarySubTab: String, CaseIterable, Identifiable {
-    case journalFeed, progressGallery, moodTrends
-
-    var id: String { rawValue }
-
-    var title: LocalizedStringKey {
-        switch self {
-        case .journalFeed: return "Journal Feed"
-        case .progressGallery: return "Progress Gallery"
-        case .moodTrends: return "Mood & Trends"
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .journalFeed: return "doc.text.fill"
-        case .progressGallery: return "photo.stack.fill"
-        case .moodTrends: return "chart.line.uptrend.xyaxis"
-        }
-    }
-}
-
 /// A photo opened full-screen. The wrapper exists so this can present via
 /// `.sheet(item:)` rather than `.sheet(isPresented:)` with a derived Binding
 /// and an `if let` inside — the pattern that already proved unreliable for
@@ -61,6 +39,7 @@ private let comparisonSourceID = "diary.comparison"
 
 struct DiaryView<VM: DiaryViewModelProtocol>: View {
     @StateObject private var viewModel: VM
+    @EnvironmentObject private var router: AppRouter
 
     @State private var showingCheckIn = false
     @State private var showingBloodPressureEntry = false
@@ -138,6 +117,18 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         } message: { _ in
             Text("This diary entry and its photos will be permanently removed.")
         }
+        // A blood-pressure reminder lands on Mood & Trends, where the readings
+        // are, so dismissing the form it opens leaves the new measurement on
+        // screen. `.task` covers a cold launch, where the router has already
+        // parked the request before this screen exists; `.onChange` covers a tap
+        // while the app is running.
+        .task { applyPendingSubTab() }
+        .onChange(of: router.pendingDiarySubTab) { _, _ in applyPendingSubTab() }
+    }
+
+    private func applyPendingSubTab() {
+        guard let tab = router.consumePendingDiarySubTab() else { return }
+        withAnimation { selectedSubTab = tab }
     }
 
     // MARK: - Header
@@ -458,4 +449,5 @@ extension DiaryView where VM == DiaryViewModel {
         DiaryView(viewModel: MockDiaryViewModel())
             .appTheme()
     }
+    .environmentObject(AppRouter())
 }

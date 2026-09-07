@@ -52,11 +52,10 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     }
 
     func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {
-        guard AppErrorPresenter.shared.run({
-            try dbService.saveBloodPressureReading(
-                measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
-            )
-        }) else { return }
+        guard PendingBloodPressureReading.save(
+            measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse,
+            dbService: dbService
+        ) else { return }
         fetchEntries()
     }
 

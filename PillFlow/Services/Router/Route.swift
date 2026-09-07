@@ -19,6 +19,10 @@ enum SheetRoute: Identifiable {
     case newTreatment
     case takePill(pills: [PillDose], onTake: () -> Void, onSkip: () -> Void)
     case diaryCheckIn
+    /// The blood-pressure entry form. Presented from MainTabView rather than
+    /// from the diary screen so a reminder can open it on a cold launch, where
+    /// the diary tab is not in the hierarchy yet.
+    case bloodPressureEntry
 
     // Identifiable is required for .sheet(item:).
     var id: String {
@@ -29,6 +33,8 @@ enum SheetRoute: Identifiable {
             return "takePill-" + pills.map(\.id).joined(separator: "-")
         case .diaryCheckIn:
             return "diaryCheckIn"
+        case .bloodPressureEntry:
+            return "bloodPressureEntry"
         }
     }
 }

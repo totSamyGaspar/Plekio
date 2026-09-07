@@ -29,19 +29,12 @@ final class NotificationService: NotificationServiceProtocol {
 
     private static let categoryIdentifier = "PILL_REMINDER_CATEGORY"
 
-    /// The diary reminder gets its own category: the dose actions (Take, Snooze,
-    /// Skip) make no sense on it, and a shared category would put them there.
-    private static let diaryCategoryIdentifier = "DIARY_REMINDER_CATEGORY"
-
-    /// A fixed identifier, not a UUID: arming the reminder replaces the previous
-    /// one instead of stacking a second copy at the old time.
-    private static let diaryRequestIdentifier = "DIARY_REMINDER"
-
     /// How many requests the dose schedule may occupy.
     ///
     /// iOS keeps at most 64 pending local notifications per app and silently drops
     /// the rest, and the dose schedule is not the only thing in that queue: the
-    /// diary reminder takes one slot permanently and a snooze takes one per group.
+    /// daily reminders hold one slot per time, permanently — up to four between
+    /// them — and a snooze takes one per group.
     /// The horizon below now stretches until this budget is spent, so the ceiling
     /// is reached in normal use rather than in theory — the headroom has to be
     /// real.
@@ -97,14 +90,19 @@ final class NotificationService: NotificationServiceProtocol {
             options: .customDismissAction
         )
 
-        let diaryCategory = UNNotificationCategory(
-            identifier: Self.diaryCategoryIdentifier,
-            actions: [],
-            intentIdentifiers: [],
-            options: .customDismissAction
-        )
+        // One per daily reminder: the dose actions (Take, Snooze, Skip) make no
+        // sense on them, and a shared category would put those actions on every
+        // reminder the app ever adds.
+        let reminderCategories = DailyReminder.allCases.map { reminder in
+            UNNotificationCategory(
+                identifier: reminder.categoryIdentifier,
+                actions: [],
+                intentIdentifiers: [],
+                options: .customDismissAction
+            )
+        }
 
-        center.setNotificationCategories([category, diaryCategory])
+        center.setNotificationCategories(Set([category] + reminderCategories))
     }
 
     // MARK: - Permission
@@ -164,11 +162,11 @@ final class NotificationService: NotificationServiceProtocol {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         await waitForPendingRemoval()
 
-        // The diary reminder is not part of the course schedule but shares the
-        // queue, so a course edit would silently take it down with everything
+        // The daily reminders are not part of the course schedule but share the
+        // queue, so a course edit would silently take them down with everything
         // else. Re-armed here rather than at the call sites of rescheduleAll,
-        // where forgetting it once is enough to lose it.
-        await restoreDiaryReminderIfEnabled()
+        // where forgetting it once is enough to lose them.
+        await restoreDailyRemindersIfEnabled()
     }
 
     /// Waits for everything already queued on the notification centre to be
@@ -182,51 +180,62 @@ final class NotificationService: NotificationServiceProtocol {
         _ = await UNUserNotificationCenter.current().pendingNotificationRequests()
     }
 
-    // MARK: - Diary reminder
+    // MARK: - Daily reminders
 
-    func scheduleDiaryReminder(minuteOfDay: Int) async {
+    func scheduleDailyReminder(_ reminder: DailyReminder, minutesOfDay: [Int]) async {
         let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: [Self.diaryRequestIdentifier])
 
-        let (hour, minute) = DiaryReminderSettings.hourAndMinute(from: minuteOfDay)
-        var components = DateComponents()
-        components.hour = hour
-        components.minute = minute
+        // Every identifier the reminder could hold, not just the ones about to be
+        // used: dropping from three times to two has to take the third request
+        // with it, or it keeps firing at a time the user removed.
+        center.removePendingNotificationRequests(withIdentifiers: reminder.allRequestIdentifiers)
 
-        let content = UNMutableNotificationContent()
-        content.title = String(localized: "📔 Time for your check-in")
-        content.body = String(localized: "Log how you feel today: mood, energy and symptoms")
-        content.sound = .default
-        content.categoryIdentifier = Self.diaryCategoryIdentifier
-        // What tells AppDelegate this is a diary tap: the dose branch keys off
-        // medicationIds, which this one deliberately does not carry.
-        content.userInfo = ["kind": "diary"]
+        let times = Array(minutesOfDay.prefix(reminder.maxTimes))
 
-        // repeats: true — the reminder is not tied to a course and needs no
-        // per-day skipping, so one request covers every day for ever.
-        let request = UNNotificationRequest(
-            identifier: Self.diaryRequestIdentifier,
-            content: content,
-            trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
-        )
+        for (index, minuteOfDay) in times.enumerated() {
+            let (hour, minute) = DailyReminder.hourAndMinute(from: minuteOfDay)
+            var components = DateComponents()
+            components.hour = hour
+            components.minute = minute
 
-        do {
-            try await center.add(request)
-        } catch {
-            AppLog.notifications.error("Diary reminder failed: \(error.localizedDescription, privacy: .public)")
+            let content = UNMutableNotificationContent()
+            content.title = reminder.notificationTitle
+            content.body = reminder.notificationBody
+            content.sound = .default
+            content.categoryIdentifier = reminder.categoryIdentifier
+            // What tells AppDelegate which screen to open. The dose branch keys
+            // off medicationIds, which these deliberately do not carry.
+            content.userInfo = [DailyReminder.userInfoKey: reminder.rawValue]
+
+            // repeats: true — a daily reminder is not tied to a course and needs
+            // no per-day skipping, so one request covers every day for ever. It
+            // is also why each time costs exactly one slot of the 64 iOS allows,
+            // however far ahead the dose schedule reaches.
+            let request = UNNotificationRequest(
+                identifier: reminder.requestIdentifier(at: index),
+                content: content,
+                trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+            )
+
+            do {
+                try await center.add(request)
+            } catch {
+                AppLog.notifications.error("Daily reminder failed: \(error.localizedDescription, privacy: .public)")
+            }
         }
     }
 
     /// Stays synchronous: a removal by identifier has nothing to wait for, and no
     /// caller needs to know when the daemon got round to it.
-    func cancelDiaryReminder() {
+    func cancelDailyReminder(_ reminder: DailyReminder) {
         UNUserNotificationCenter.current()
-            .removePendingNotificationRequests(withIdentifiers: [Self.diaryRequestIdentifier])
+            .removePendingNotificationRequests(withIdentifiers: reminder.allRequestIdentifiers)
     }
 
-    private func restoreDiaryReminderIfEnabled() async {
-        guard DiaryReminderSettings.isEnabled else { return }
-        await scheduleDiaryReminder(minuteOfDay: DiaryReminderSettings.minuteOfDay)
+    private func restoreDailyRemindersIfEnabled() async {
+        for reminder in DailyReminder.allCases where reminder.isEnabled {
+            await scheduleDailyReminder(reminder, minutesOfDay: reminder.minutesOfDay)
+        }
     }
 
     // MARK: - Request building
