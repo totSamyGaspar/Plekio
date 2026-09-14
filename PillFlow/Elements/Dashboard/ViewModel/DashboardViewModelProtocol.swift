@@ -21,5 +21,10 @@ protocol DashboardViewModelProtocol: ObservableObject {
     
     var isEmpty: Bool { get }
     
+    var undoableBulkLog: BulkDoseLog? { get }
+
     func togglePill(id: PillDose.ID)
+    func logDoses(_ doses: [PillDose])
+    func undoBulkLog()
+    func dismissUndo()
 }

@@ -66,6 +66,13 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         fetchEntries()
     }
 
+    func deleteAllBloodPressureReadings() {
+        guard AppErrorPresenter.shared.run({
+            try dbService.deleteAllBloodPressureReadings()
+        }) else { return }
+        fetchEntries()
+    }
+
     func quickLog(mood: DiaryMood) {
         // Update today's entry rather than adding a second one. Without this guard
         // duplicates piled up: todaysEntry and "Edit Entry" only ever saw the first
@@ -165,5 +172,6 @@ final class MockDiaryViewModel: DiaryViewModelProtocol {
     func quickLog(mood: DiaryMood) {}
     func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {}
     func deleteBloodPressureReading(_ reading: BloodPressureReading) {}
+    func deleteAllBloodPressureReadings() {}
 }
 #endif

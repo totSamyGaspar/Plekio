@@ -74,8 +74,14 @@ struct BeforeAfterComparisonView: View {
         }
         // `.task(id:)` restarts itself when the id changes, which replaces an
         // onAppear plus two onChange handlers.
-        .task(id: beforePhotoId) { beforeImage = await ImageCache.shared.image(for: beforePhotoId) }
-        .task(id: afterPhotoId) { afterImage = await ImageCache.shared.image(for: afterPhotoId) }
+        // Screen-width panes, not the camera's resolution: this sheet holds two
+        // photos at once and used to decode both at full size.
+        .task(id: beforePhotoId) {
+            beforeImage = await ImageCache.shared.image(for: beforePhotoId, targetPointSize: 430)
+        }
+        .task(id: afterPhotoId) {
+            afterImage = await ImageCache.shared.image(for: afterPhotoId, targetPointSize: 430)
+        }
         .sheet(item: $pickerTarget) { slot in
             photoPickerSheet(for: slot)
         }
@@ -417,7 +423,7 @@ struct BeforeAfterComparisonView: View {
         let isAfter = item.id == afterPhotoId
 
         return VStack(spacing: 4) {
-            DiaryAsyncPhoto(photoId: item.id)
+            DiaryAsyncPhoto(photoId: item.id, targetPointSize: 76)
                 .frame(width: 76, height: 76)
                 .clipped()
                 .cornerRadius(12)

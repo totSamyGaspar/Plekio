@@ -48,6 +48,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     var bloodPressureReadingsToReturn: [BloodPressureReading] = []
     var savedBloodPressure: (measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?)?
     var deletedBloodPressureReading: BloodPressureReading?
+    var didCallDeleteAllBloodPressureReadings = false
 
     // MARK: - Protocol Implementation
 
@@ -130,6 +131,11 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
     func deleteBloodPressureReading(_ reading: BloodPressureReading) throws {
         deletedBloodPressureReading = reading
+    }
+
+    func deleteAllBloodPressureReadings() throws {
+        didCallDeleteAllBloodPressureReadings = true
+        bloodPressureReadingsToReturn = []
     }
 
     func saveDiaryEntry(draft: DiaryEntryDraft) throws {

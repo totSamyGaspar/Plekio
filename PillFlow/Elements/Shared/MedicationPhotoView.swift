@@ -45,6 +45,6 @@ struct MedicationPhotoView<Placeholder: View>: View {
 
     private func load(force: Bool = false) async {
         guard force || uiImage == nil else { return }
-        uiImage = await ImageCache.shared.image(for: medicationId)
+        uiImage = await ImageCache.shared.image(for: medicationId, targetPointSize: size)
     }
 }

@@ -12,7 +12,13 @@ import Combine
 final class DashboardViewModel: DashboardViewModelProtocol {
     
     @Published var selectedDate: Date = Date() {
-        didSet { fetchData() }
+        didSet {
+            fetchData()
+            // The banner names doses on the day that was on screen when it was
+            // tapped; carrying it over to another day would offer to undo
+            // something the user can no longer see.
+            clearUndoWindow()
+        }
     }
     @Published private var allPills: [PillDose] = []
     @Published var weeklyPercentages: [Double] = Array(repeating: 0.0, count: 7)
@@ -20,9 +26,21 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     @Published var recentAverage: Int = 0
     
     
+    /// The last "Log all", while it can still be undone. Nil at every other time.
+    @Published private(set) var undoableBulkLog: BulkDoseLog?
+
     private let dbService: DatabaseServiceProtocol
     private let notificationService: NotificationServiceProtocol
     private var cancellables = Set<AnyCancellable>()
+
+    /// Closes the undo window on its own. Held so a second "Log all" replaces the
+    /// first countdown instead of racing it.
+    private var undoExpiryTask: Task<Void, Never>?
+
+    /// Long enough to notice the banner, read it and work out what it offers —
+    /// the mistap is realised a beat after it happens, not during it — and still
+    /// short enough that the banner is gone before it becomes furniture.
+    private static let undoWindow: Duration = .seconds(10)
 
     private static let weekdayFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -100,6 +118,99 @@ final class DashboardViewModel: DashboardViewModelProtocol {
                 takenMedicationIds: takenAtSlot,
                 scheduledTime: slot
             )
+        }
+    }
+
+    /// Logs several doses as one action, so "Log all" costs one write pass and one
+    /// notification rebuild rather than one of each per dose.
+    func logDoses(_ doses: [PillDose]) {
+        let pending = doses.filter { !$0.isTaken && !$0.isMissed }
+        guard !pending.isEmpty else { return }
+
+        guard AppErrorPresenter.shared.run({
+            for dose in pending {
+                try dbService.togglePill(medicationId: dose.medicationId, scheduledTime: dose.time)
+            }
+        }) else { return }
+
+        fetchData()
+        refreshNotifications(forSlotsOf: pending)
+        startUndoWindow(with: pending)
+    }
+
+    /// Puts back exactly what the last "Log all" wrote.
+    func undoBulkLog() {
+        guard let log = undoableBulkLog else { return }
+        clearUndoWindow()
+
+        // Only doses that are still marked taken: the user may have unticked one
+        // by hand in the meantime, and toggling that one again would log it
+        // rather than undo it.
+        let toRevert = log.doses.filter { dose in
+            allPills.first { $0.id == dose.id }?.isTaken == true
+        }
+        guard !toRevert.isEmpty else { return }
+
+        guard AppErrorPresenter.shared.run({
+            for dose in toRevert {
+                try dbService.togglePill(medicationId: dose.medicationId, scheduledTime: dose.time)
+            }
+        }) else { return }
+
+        fetchData()
+        // Rebuilt rather than left alone: the reminders for these slots were
+        // dropped when the doses were logged, and the whole point of the undo is
+        // that they come back.
+        Task { [notificationService, dbService] in
+            await notificationService.rescheduleAll(using: dbService)
+        }
+    }
+
+    func dismissUndo() {
+        clearUndoWindow()
+    }
+
+    // MARK: - Undo window
+
+    private func startUndoWindow(with doses: [PillDose]) {
+        undoExpiryTask?.cancel()
+        undoableBulkLog = BulkDoseLog(doses: doses)
+
+        undoExpiryTask = Task { [weak self] in
+            try? await Task.sleep(for: Self.undoWindow)
+            guard !Task.isCancelled else { return }
+            self?.undoableBulkLog = nil
+        }
+    }
+
+    private func clearUndoWindow() {
+        undoExpiryTask?.cancel()
+        undoExpiryTask = nil
+        undoableBulkLog = nil
+    }
+
+    // MARK: - Notifications
+
+    /// Same two steps as a single toggle: re-plan what is still due, then take the
+    /// banners for fully logged slots off the lock screen.
+    private func refreshNotifications(forSlotsOf doses: [PillDose]) {
+        let slots = Set(doses.map(\.time))
+        // Read from the refreshed list, so a slot the user had already half
+        // logged is judged on what is actually taken now.
+        let takenBySlot: [Date: [UUID]] = slots.reduce(into: [:]) { result, slot in
+            result[slot] = allPills
+                .filter { $0.time == slot && $0.isTaken }
+                .map(\.medicationId)
+        }
+
+        Task { [notificationService, dbService] in
+            await notificationService.rescheduleAll(using: dbService)
+            for (slot, medicationIds) in takenBySlot where !medicationIds.isEmpty {
+                await notificationService.clearDelivered(
+                    takenMedicationIds: medicationIds,
+                    scheduledTime: slot
+                )
+            }
         }
     }
 

@@ -29,7 +29,12 @@ final class MockDashboardViewModel: DashboardViewModelProtocol {
     
     init() {}
     
+    @Published private(set) var undoableBulkLog: BulkDoseLog?
+
     func togglePill(id: PillDose.ID) {}
+    func logDoses(_ doses: [PillDose]) {}
+    func undoBulkLog() {}
+    func dismissUndo() {}
 }
 
 #endif
