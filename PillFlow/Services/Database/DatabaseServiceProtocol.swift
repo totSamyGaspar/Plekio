@@ -36,6 +36,7 @@ protocol DatabaseServiceProtocol {
     func saveBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) throws
     func fetchAllBloodPressureReadings() -> [BloodPressureReading]
     func deleteBloodPressureReading(_ reading: BloodPressureReading) throws
+    func deleteAllBloodPressureReadings() throws
 
     // MARK: - Diary
 

@@ -31,9 +31,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                             takenCount: takenCount,
                             totalCount: totalCount
                         ) {
-                            for pill in upNextPills where !pill.isTaken && !pill.isMissed {
-                                viewModel.togglePill(id: pill.id)
-                            }
+                            viewModel.logDoses(upNextPills)
                         }
                         .zIndex(1)
                         .transition(
@@ -65,6 +63,17 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: allTakenStates)
             }
         }
+        .overlay(alignment: .bottom) {
+            if let log = viewModel.undoableBulkLog {
+                UndoLogBanner(count: log.count) {
+                    viewModel.undoBulkLog()
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.undoableBulkLog)
         .toolbar(.hidden, for: .navigationBar)
 
     }

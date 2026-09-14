@@ -139,7 +139,9 @@ struct DiaryProgressGalleryView: View {
                 onInspect(item.id)
             } label: {
                 ZStack(alignment: .topLeading) {
-                    DiaryAsyncPhoto(photoId: item.id)
+                    // Sized by the banner's width, not its height: it stretches
+                    // to the full card and is the longer edge.
+                    DiaryAsyncPhoto(photoId: item.id, targetPointSize: 400)
                         .frame(height: 180)
                         .frame(maxWidth: .infinity)
                         .clipped()

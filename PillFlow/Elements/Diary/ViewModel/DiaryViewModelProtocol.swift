@@ -46,6 +46,7 @@ protocol DiaryViewModelProtocol: ObservableObject {
 
     func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?)
     func deleteBloodPressureReading(_ reading: BloodPressureReading)
+    func deleteAllBloodPressureReadings()
 
     /// Which two photos the comparison screen should open on, given what the
     /// user has ticked in the gallery. `nil` when there are not two photos to

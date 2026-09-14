@@ -108,9 +108,12 @@ struct DiaryEntryRowView: View {
                             .foregroundColor(.textSecondary)
                     }
                     ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack(spacing: 8) {
+                        // Plain HStack: an entry holds a handful of photos, and a
+                        // lazy container inside every row of a lazy feed costs more
+                        // to set up than it ever saves.
+                        HStack(spacing: 8) {
                             ForEach(entry.photoIds, id: \.self) { photoId in
-                                DiaryAsyncPhoto(photoId: photoId)
+                                DiaryAsyncPhoto(photoId: photoId, targetPointSize: 68)
                                     .frame(width: 68, height: 68)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                             }

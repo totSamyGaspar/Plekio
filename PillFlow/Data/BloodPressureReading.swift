@@ -46,7 +46,7 @@ extension BloodPressureReading {
     /// Plausible ranges, used to clamp the input. Wide on purpose: the point is
     /// to stop typos like 1200/80 from poisoning the chart, not to decide which
     /// readings are medically sensible.
-    static let systolicRange = 60...260
+    static let systolicRange = 60...300
     static let diastolicRange = 30...200
     static let pulseRange = 30...220
 

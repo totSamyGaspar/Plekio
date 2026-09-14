@@ -585,6 +585,21 @@ final class DatabaseService: DatabaseServiceProtocol {
         try commit([.diary])
     }
 
+    /// Wipes the whole pressure history in one write.
+    ///
+    /// Deleted one by one rather than through a batch delete: a batch bypasses
+    /// the context, so the rollback in `commit` would have nothing to undo if the
+    /// save failed — and this is the one action here with no way back.
+    func deleteAllBloodPressureReadings() throws {
+        let readings = fetchAllBloodPressureReadings()
+        guard !readings.isEmpty else { return }
+
+        for reading in readings {
+            context.delete(reading)
+        }
+        try commit([.diary])
+    }
+
     func fetchAllDiaryEntries() -> [DiaryEntry] {
         let descriptor = FetchDescriptor<DiaryEntry>(sortBy: [SortDescriptor(\.checkInDate, order: .reverse)])
         return (try? context.fetch(descriptor)) ?? []

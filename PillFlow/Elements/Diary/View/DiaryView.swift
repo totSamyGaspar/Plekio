@@ -73,6 +73,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 VStack(spacing: 24) {
                     headerSection
                     todaySection
+                    bloodPressureSection
                     statsGrid
                     subTabBar
                     content
@@ -309,7 +310,19 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         return line
     }
 
-    // MARK: - Stats grid
+    // MARK: - Blood pressure
+
+    private var bloodPressureSection: some View {
+        BloodPressureCard(
+            readings: viewModel.bloodPressureReadings,
+            onAdd: { showingBloodPressureEntry = true },
+            onDelete: { viewModel.deleteBloodPressureReading($0) },
+            onDeleteAll: { viewModel.deleteAllBloodPressureReadings() }
+        )
+        .padding(.horizontal)
+    }
+
+    // MARK: - 4 Stats grid
 
     private var statsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
@@ -417,10 +430,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             DiaryMoodTrendsView(
                 entries: viewModel.entries,
                 avgEnergyLevel: viewModel.avgEnergyLevel,
-                avgSleepHours: viewModel.avgSleepHours,
-                bloodPressureReadings: viewModel.bloodPressureReadings,
-                onAddBloodPressure: { showingBloodPressureEntry = true },
-                onDeleteBloodPressure: { viewModel.deleteBloodPressureReading($0) }
+                avgSleepHours: viewModel.avgSleepHours
             )
         }
     }
