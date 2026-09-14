@@ -17,15 +17,15 @@ struct DiaryJournalFeedView: View {
     let entries: [DiaryEntry]
     let onEdit: (DiaryEntry) -> Void
     let onDelete: (DiaryEntry) -> Void
-
+    
     @State private var searchText = ""
     @State private var moodFilter: DiaryMood?
     @State private var photosOnlyFilter = false
-
+    
     var body: some View {
         VStack(spacing: 16) {
             searchFilterBar
-
+            
             if filteredEntries.isEmpty {
                 EmptyStateView(
                     icon: "text.book.closed.fill",
@@ -45,18 +45,18 @@ struct DiaryJournalFeedView: View {
         }
         .padding(.horizontal)
     }
-
+    
     private var filteredEntries: [DiaryEntry] {
         entries.filter { entry in
             let matchesSearch = searchText.isEmpty
-                || entry.physicalSummary.localizedCaseInsensitiveContains(searchText)
-                || entry.reflectionNotes.localizedCaseInsensitiveContains(searchText)
+            || entry.physicalSummary.localizedCaseInsensitiveContains(searchText)
+            || entry.reflectionNotes.localizedCaseInsensitiveContains(searchText)
             let matchesMood = moodFilter == nil || entry.moodLabel == moodFilter?.rawValue
             let matchesPhotos = !photosOnlyFilter || !entry.photoIds.isEmpty
             return matchesSearch && matchesMood && matchesPhotos
         }
     }
-
+    
     private var searchFilterBar: some View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
@@ -69,7 +69,7 @@ struct DiaryJournalFeedView: View {
             .padding(.vertical, 10)
             .background(Color.appSurface)
             .cornerRadius(12)
-
+            
             HStack(spacing: 10) {
                 Menu {
                     Button("All Moods") { moodFilter = nil }
@@ -91,7 +91,7 @@ struct DiaryJournalFeedView: View {
                     .background(Color.appSurface)
                     .cornerRadius(10)
                 }
-
+                
                 Button {
                     photosOnlyFilter.toggle()
                 } label: {
@@ -107,7 +107,7 @@ struct DiaryJournalFeedView: View {
                     .cornerRadius(10)
                 }
                 .buttonStyle(.plain)
-
+                
                 Spacer()
             }
         }

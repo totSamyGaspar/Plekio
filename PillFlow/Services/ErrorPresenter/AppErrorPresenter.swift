@@ -40,6 +40,13 @@ final class AppErrorPresenter: ObservableObject {
         }
     }
 
+    /// Surfaces an error for work that cannot be wrapped in `run`: a failure
+    /// AFTER a successful commit, where there is no operation left to fail and
+    /// nothing for the caller to abandon.
+    func report(_ error: Error) {
+        message = Self.describe(error)
+    }
+
     private static func describe(_ error: Error) -> String {
         guard let localized = error as? LocalizedError,
               let description = localized.errorDescription else {

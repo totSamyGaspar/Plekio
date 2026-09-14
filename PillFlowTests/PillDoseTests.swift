@@ -74,4 +74,28 @@ struct PillDoseTests {
 
         #expect(taken.isMissed == false)
     }
+
+    // MARK: - Skipped
+
+    // A skip is a decision, so it must not decay into "missed" an hour later.
+    // While skipping was merely the absence of a log there was nothing to tell
+    // the two apart, and a declined dose eventually showed a MISSED badge.
+
+    @Test("пропущенная намеренно доза не становится просроченной")
+    func testSkippedDoseIsNeverMissed() async throws {
+        var skipped = dose(at: Date().addingTimeInterval(-5 * 3600))
+        skipped.isSkipped = true
+
+        #expect(skipped.isMissed == false)
+        #expect(skipped.isTaken == false)
+        // Still loggable: the user can change their mind.
+        #expect(skipped.isLoggable == true)
+    }
+
+    @Test("та же доза без отметки о пропуске просрочена")
+    func testSameDoseWithoutSkipIsMissed() async throws {
+        let untouched = dose(at: Date().addingTimeInterval(-5 * 3600))
+
+        #expect(untouched.isMissed == true)
+    }
 }

@@ -491,4 +491,217 @@ struct DatabaseServiceTests {
 
         #expect(db.fetchPills(for: testDate(2026, 6, 10)).first?.isTaken == true)
     }
+
+    // MARK: - Stock accounting at the bottom of the bottle
+    //
+    // Stock is clamped at zero, so a dose logged with a nearly empty bottle takes
+    // out less than a full dose. Undo used to credit back the full dosage anyway,
+    // which invented pills: log at zero stock, undo, and the bottle had refilled
+    // itself. DoseLog now records what actually left, and undo returns that.
+
+    /// One medication in a live in-memory store, with the stock and dosage a test
+    /// cares about. The surrounding course is scaffolding.
+    private func medication(stock: Int, dosage: Int, in db: DatabaseService) -> MedicationItem {
+        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let med = MedicationItem(
+            id: UUID(),
+            name: "Аспирин",
+            formSystemImage: "pills.fill",
+            dosage: dosage,
+            timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+            frequencyDays: 1,
+            stockCount: stock,
+            lowStockThreshold: 10
+        )
+        course.medications.append(med)
+        db.context.insert(course)
+        try? db.context.save()
+        return med
+    }
+
+    @Test("отмена отметки при пустом остатке не создаёт таблетки")
+    func testUndoAtZeroStockInventsNothing() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = medication(stock: 0, dosage: 2, in: db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+        #expect(med.stockCount == 0)
+        // Nothing left the bottle, and that is what is written down.
+        #expect(med.logs.first?.dispensedQuantity == 0)
+
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+        #expect(med.stockCount == 0)   // was 2 before the fix
+        #expect(med.logs.first?.dispensedQuantity == nil)
+    }
+
+    @Test("частичный остаток: возвращается ровно столько, сколько списалось")
+    func testUndoReturnsExactlyWhatWasDispensed() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = medication(stock: 1, dosage: 2, in: db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+
+        // One tablet for a two-tablet dose: the bottle only had one.
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+        #expect(med.stockCount == 0)
+        #expect(med.logs.first?.dispensedQuantity == 1)
+
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+        #expect(med.stockCount == 1)   // was 2 before the fix
+    }
+
+    @Test("обычный случай не изменился: списалось и вернулось по полной дозе")
+    func testFullDoseRoundTripIsUnchanged() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = medication(stock: 10, dosage: 2, in: db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+        #expect(med.stockCount == 8)
+        #expect(med.logs.first?.dispensedQuantity == 2)
+
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+        #expect(med.stockCount == 10)
+    }
+
+    @Test("смена дозировки после приёма не меняет возвращаемое количество")
+    func testUndoIgnoresADosageChangedAfterTheFact() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = medication(stock: 10, dosage: 2, in: db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+        #expect(med.stockCount == 8)
+
+        // The user edits the course afterwards: a dose is five tablets now.
+        med.dosage = 5
+        try? db.context.save()
+
+        // Two went out, so two come back — not today's five.
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+        #expect(med.stockCount == 10)
+    }
+
+    @Test("пропуск дозы остаток не трогает")
+    func testSkipLeavesStockAlone() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = medication(stock: 10, dosage: 2, in: db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+
+        try db.skipDoses(medicationIds: [med.id], scheduledTime: slot)
+
+        // Nothing was swallowed, so nothing left the bottle — and the log says so
+        // rather than recording a zero dispense, which would mean "taken, but the
+        // bottle was empty".
+        #expect(med.stockCount == 10)
+        #expect(med.logs.first?.skippedAt != nil)
+        #expect(med.logs.first?.isTaken == false)
+        #expect(med.logs.first?.dispensedQuantity == nil)
+    }
+
+    @Test("передумал после пропуска: доза списывается как обычно")
+    func testTakingAfterASkipDeductsStock() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = medication(stock: 10, dosage: 2, in: db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+
+        try db.skipDoses(medicationIds: [med.id], scheduledTime: slot)
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+
+        #expect(med.logs.count == 1)   // the skip's log is reused, not duplicated
+        #expect(med.logs.first?.isTaken == true)
+        #expect(med.logs.first?.skippedAt == nil)
+        #expect(med.stockCount == 8)
+    }
+
+    // MARK: - Bulk logging
+
+    @Test("markDosesTaken пишет весь слот и не трогает уже принятую дозу")
+    func testMarkDosesTakenIsIdempotentPerDose() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+
+        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let times = [testDate(2000, 1, 1, 9, 0)]
+        let first = MedicationItem(id: UUID(), name: "Аспирин", formSystemImage: "pills.fill", dosage: 2, timesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
+        let second = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "capsule.fill", dosage: 1, timesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
+        course.medications.append(contentsOf: [first, second])
+        db.context.insert(course)
+        try? db.context.save()
+
+        let slot = testDate(2026, 6, 10, 9, 0)
+
+        // The first one is logged by hand before the group write.
+        try db.togglePill(medicationId: first.id, scheduledTime: slot)
+        #expect(first.stockCount == 28)
+
+        try db.markDosesTaken(medicationIds: [first.id, second.id], scheduledTime: slot)
+
+        // The already-logged one is untouched — not toggled off, not deducted twice.
+        #expect(first.logs.count == 1)
+        #expect(first.logs.first?.isTaken == true)
+        #expect(first.stockCount == 28)
+
+        #expect(second.logs.count == 1)
+        #expect(second.logs.first?.isTaken == true)
+        #expect(second.stockCount == 9)
+    }
+
+    @Test("markDosesTaken по уже закрытому слоту ничего не пишет")
+    func testMarkDosesTakenOnAClosedSlotIsANoOp() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = medication(stock: 10, dosage: 2, in: db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+
+        try db.markDosesTaken(medicationIds: [med.id], scheduledTime: slot)
+        #expect(med.stockCount == 8)
+
+        try db.markDosesTaken(medicationIds: [med.id], scheduledTime: slot)
+
+        // A second press of "Take Now" must not deduct again, and must not create
+        // a second log for the same occurrence.
+        #expect(med.logs.count == 1)
+        #expect(med.stockCount == 8)
+    }
+
+    @Test("markDosesTaken поверх пропуска снимает пропуск и списывает остаток")
+    func testMarkDosesTakenClearsASkip() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = medication(stock: 10, dosage: 2, in: db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+
+        try db.skipDoses(medicationIds: [med.id], scheduledTime: slot)
+        try db.markDosesTaken(medicationIds: [med.id], scheduledTime: slot)
+
+        #expect(med.logs.count == 1)
+        #expect(med.logs.first?.isTaken == true)
+        #expect(med.logs.first?.skippedAt == nil)
+        #expect(med.stockCount == 8)
+    }
+
+    @Test("unmarkDosesTaken возвращает списанное и не логирует непринятое")
+    func testUnmarkDosesTakenOnlyReversesWhatWasLogged() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+
+        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let times = [testDate(2000, 1, 1, 9, 0)]
+        let logged = MedicationItem(id: UUID(), name: "Аспирин", formSystemImage: "pills.fill", dosage: 2, timesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
+        let untouched = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "capsule.fill", dosage: 1, timesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
+        course.medications.append(contentsOf: [logged, untouched])
+        db.context.insert(course)
+        try? db.context.save()
+
+        let slot = testDate(2026, 6, 10, 9, 0)
+        try db.markDosesTaken(medicationIds: [logged.id], scheduledTime: slot)
+        #expect(logged.stockCount == 28)
+
+        try db.unmarkDosesTaken(medicationIds: [logged.id, untouched.id], scheduledTime: slot)
+
+        #expect(logged.logs.first?.isTaken == false)
+        #expect(logged.logs.first?.dispensedQuantity == nil)
+        #expect(logged.stockCount == 30)
+
+        // The one that was never logged gains nothing: an undo can only un-log.
+        #expect(untouched.logs.isEmpty)
+        #expect(untouched.stockCount == 10)
+    }
 }

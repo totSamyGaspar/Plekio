@@ -15,6 +15,30 @@ struct MedicationCardView: View {
     
     let appSurface = Color.appSurface
     
+    /// Taken or skipped: either way the user has answered for this dose, and the
+    /// row recedes. Only a taken one gets the strikethrough — a skip is a decision
+    /// about the dose, not a record of having swallowed it.
+    private var isSettled: Bool { pill.isTaken || pill.isSkipped }
+    
+    private var isLowStock: Bool {
+        guard let stock = pill.stockCount else { return false }
+        return stock <= pill.lowStockThreshold
+    }
+    
+    /// Dosage and remaining stock as one run of text.
+    ///
+    private var dosageAndStock: Text {
+        let dosage = Text("\(pill.dosage) pcs")
+            .foregroundStyle(Color.textPrimary.opacity(0.7))
+        
+        guard let stock = pill.stockCount else { return dosage }
+        
+        return dosage
+        + Text(verbatim: "  ·  ").foregroundStyle(Color.textPrimary.opacity(0.3))
+        + Text("Stock: \(stock) remaining")
+            .foregroundStyle(isLowStock ? Color.warningAmber : Color.textPrimary.opacity(0.7))
+    }
+    
     var body: some View {
         HStack(spacing: 16) {
             // MARK: - Icon / Image
@@ -28,7 +52,7 @@ struct MedicationCardView: View {
                 }
             }
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.textPrimary.opacity(0.1), lineWidth: 1))
-            .opacity(pill.isTaken ? 0.6 : 1.0)
+            .opacity(isSettled ? 0.6 : 1.0)
             
             // MARK: - Info Text
             
@@ -36,7 +60,7 @@ struct MedicationCardView: View {
                 HStack {
                     Text(pill.name)
                         .font(.headline.weight(.bold))
-                        .foregroundColor(pill.isTaken ? .textSecondary : .textPrimary)
+                        .foregroundColor(isSettled ? .textSecondary : .textPrimary)
                         .strikethrough(pill.isTaken)
                         .lineLimit(2)
                     
@@ -49,16 +73,11 @@ struct MedicationCardView: View {
                         .cornerRadius(8)
                 }
                 
-                Text("\(pill.dosage) pcs")
-                    .font(.caption)
-                    .foregroundColor(.textPrimary.opacity(0.7))
-                
-                if let stock = pill.stockCount, stock <= pill.lowStockThreshold {
-                    HStack(spacing: 4) {
-                        Text("Stock: \(stock) remaining")
-                            .font(.caption2)
-                            .foregroundColor(.warningAmber)
-                        
+                HStack(spacing: 6) {
+                    dosageAndStock
+                        .font(.caption)
+                    
+                    if isLowStock {
                         Text("LOW")
                             .scaledFont(size: 11, relativeTo: .caption2, weight: .heavy)
                             .foregroundColor(.warningAmber)
@@ -67,6 +86,7 @@ struct MedicationCardView: View {
                             .background(Color.warningAmber.opacity(0.2))
                             .cornerRadius(4)
                             .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.warningAmber, lineWidth: 1))
+                            .layoutPriority(1)
                     }
                 }
             }
@@ -81,7 +101,7 @@ struct MedicationCardView: View {
         .background(appSurface)
         .cornerRadius(20)
         .onTapGesture {
-            if pill.isLoggable && !pill.isTaken && !pill.isMissed { onTapCard() }
+            if pill.isLoggable && !isSettled && !pill.isMissed { onTapCard() }
         }
     }
     
@@ -99,6 +119,28 @@ struct MedicationCardView: View {
             .expandTouchTarget(8)
             .disabled(!pill.isLoggable)
             .accessibilityLabel("Undo logging \(pill.name)")
+        } else if pill.isSkipped {
+            HStack(spacing: 8) {
+                Text("SKIPPED")
+                    .font(.caption2.weight(.heavy))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.textSecondary.opacity(0.12))
+                    .foregroundColor(.textSecondary)
+                    .cornerRadius(6)
+                
+                // Still offered, because a skip is a decision and not a locked
+                // door: changing your mind logs the dose and clears the skip.
+                Button(action: onToggle) {
+                    Image(systemName: "checkmark.circle")
+                        .font(.title)
+                        .foregroundColor(.textTertiary)
+                }
+                .buttonStyle(.plain)
+                .expandTouchTarget(8)
+                .disabled(!pill.isLoggable)
+                .accessibilityLabel("Log \(pill.name)")
+            }
         } else if pill.isLoggable {
             HStack(spacing: 8) {
                 if pill.isMissed {
@@ -169,6 +211,23 @@ struct MedicationCardView: View {
                     lowStockThreshold: 10
                 ),
                 onToggle: { print("Toggle tapped") },
+                onTapCard: { print("Card tapped") }
+            )
+            
+            MedicationCardView(
+                pill: PillDose(
+                    medicationId: UUID(),
+                    name: "Folic Acid",
+                    dosage: 1,
+                    formSystemImage: "pills.fill",
+                    time: Date().addingTimeInterval(-3600),
+                    period: .morning,
+                    isTaken: false,
+                    isSkipped: true,
+                    stockCount: 25,
+                    lowStockThreshold: 10
+                ),
+                onToggle: { print("Un-skip tapped") },
                 onTapCard: { print("Card tapped") }
             )
             

@@ -4,9 +4,9 @@
 //
 //  What a storage write touched, and the one channel it is announced on.
 //
-//  There used to be a single nameless `.databaseDidUpdate` meaning "something
-//  changed", which every screen had to treat as "everything changed": saving a
-//  diary entry made the dashboard, the course list and the statistics re-fetch
+//  Named areas rather than one "something changed" signal, which every screen has
+//  to treat as "everything changed": saving a diary entry would make the
+//  dashboard, the course list and the statistics re-fetch
 //  and recompute from scratch. The first patch for that was a second name,
 //  `.diaryDidUpdate`, posted alongside the broad one — which fixed the diary and
 //  left the asymmetry in place. A name per area does not scale; a payload does.

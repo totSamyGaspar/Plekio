@@ -33,6 +33,7 @@ final class MockDashboardViewModel: DashboardViewModelProtocol {
 
     func togglePill(id: PillDose.ID) {}
     func logDoses(_ doses: [PillDose]) {}
+    func skipDoses(_ doses: [PillDose]) {}
     func undoBulkLog() {}
     func dismissUndo() {}
 }

@@ -11,16 +11,16 @@ struct WeeklyAdherenceView: View {
     let percentages: [Double]
     let days: [String]
     let recentAverage: Int
-
-    /// Ratio/label pairs. The view used to run ForEach(0..<7) and index into
-    /// both arrays: a length mismatch — and `weeklyDays` starts empty — crashed
-    /// during rendering.
+    
+    /// Ratio/label pairs, zipped once here. `ForEach(0..<7)` indexing into two
+    /// arrays crashes during rendering on any length mismatch — and `weeklyDays`
+    /// starts empty.
     private var bars: [(offset: Int, element: (Double, String))] {
         Array(zip(percentages, days).enumerated())
     }
-
+    
     let appSurface = Color.appSurface
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             VStack(alignment: .leading, spacing: 4) {
@@ -49,13 +49,13 @@ struct WeeklyAdherenceView: View {
                             }
                         }
                         .frame(height: 80)
-
+                        
                         Text(label)
                             .font(.caption2.weight(.bold))
                             .foregroundColor(.textSecondary)
                     }
-                    // The bars are Shapes, which VoiceOver does not see at all, so
-                    // the column used to read as a bare weekday with no number.
+                    // The bars are Shapes, which VoiceOver does not see at all:
+                    // without this the column reads as a weekday with no number.
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(label)
                     .accessibilityValue(Text(percent, format: .percent.precision(.fractionLength(0))))

@@ -71,8 +71,8 @@ final class MediaPickerService: NSObject, MediaPickerServiceProtocol {
 
         // Presenting on a controller that is already presenting is a no-op UIKit
         // only logs about: no delegate call ever arrives, so the pick hangs and
-        // takes the continuation slot with it. Wait for the dismissal instead —
-        // this is why the photo button used to do nothing at all.
+        // takes the continuation slot with it — which the user sees as the photo
+        // button doing nothing at all. Wait for the dismissal instead.
         if topVC.presentedViewController != nil {
             guard attempt < Self.presentationRetryLimit else {
                 AppLog.media.error("Photo picker could not be presented: another screen is still on top")
@@ -147,9 +147,9 @@ extension MediaPickerService: PHPickerViewControllerDelegate {
         }
         
         result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] object, error in
-            // This callback arrives on a private queue. `continuation` is only ever
-            // touched on the main thread — it used to be resumed straight from here,
-            // racing with the next pickImage call.
+            // This callback arrives on a private queue, and `continuation` is only
+            // ever touched on the main thread: resumed straight from here it races
+            // the next pickImage call.
             DispatchQueue.main.async {
                 if let image = object as? UIImage {
                     self?.finish(with: .success(image))

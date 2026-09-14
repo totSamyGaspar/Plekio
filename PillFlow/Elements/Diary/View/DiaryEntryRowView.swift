@@ -11,16 +11,15 @@ struct DiaryEntryRowView: View {
     let entry: DiaryEntry
     var onEdit: () -> Void
     var onDelete: () -> Void
-
+    
     private var mood: DiaryMood? { DiaryMood(rawValue: entry.moodLabel) }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top) {
                 HStack(spacing: 8) {
                     Text(mood?.emoji ?? "📝")
-                    // .textCase, not .uppercased(): case is a display concern, and
-                    // per-character uppercasing misbehaves in some languages.
+
                     Text("\(entry.moodTitle) (\(entry.moodScore)/5)")
                         .font(.caption.weight(.heavy))
                         .textCase(.uppercase)
@@ -30,18 +29,18 @@ struct DiaryEntryRowView: View {
                 .padding(.vertical, 5)
                 .background(Color.accentPrimary.opacity(0.12))
                 .cornerRadius(10)
-
+                
                 Spacer()
-
+                
                 Text("at \(entry.checkInDate.formatted(date: .omitted, time: .shortened))")
                     .font(.caption)
                     .foregroundColor(.textSecondary)
             }
-
+            
             Text(entry.checkInDate.formatted(.dateTime.weekday(.wide).month(.wide).day().year()))
                 .scaledFont(size: 19, relativeTo: .headline, weight: .bold, design: .serif)
                 .foregroundColor(.textPrimary)
-
+            
             // A quick-logged entry (home screen's one-tap mood chips) never
             // showed the energy/sleep/water fields to the user at all — their
             // values on the model are just DiaryEntryDraft's static defaults,
@@ -66,7 +65,7 @@ struct DiaryEntryRowView: View {
                     }
                 }
             }
-
+            
             if !entry.physicalSummary.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("PHYSICAL STATE & SENSATIONS")
@@ -77,14 +76,14 @@ struct DiaryEntryRowView: View {
                         .foregroundColor(.textPrimary.opacity(0.9))
                 }
             }
-
+            
             if !entry.reflectionNotes.isEmpty {
                 Text(entry.reflectionNotes)
                     .font(.subheadline)
                     .foregroundColor(.textPrimary.opacity(0.7))
                     .lineLimit(4)
             }
-
+            
             if !entry.symptoms.isEmpty || !entry.milestoneTags.isEmpty {
                 FlowLayout(spacing: 6) {
                     ForEach(entry.symptoms, id: \.self) { symptom in
@@ -95,7 +94,7 @@ struct DiaryEntryRowView: View {
                     }
                 }
             }
-
+            
             if !entry.photoIds.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
@@ -121,7 +120,7 @@ struct DiaryEntryRowView: View {
                     }
                 }
             }
-
+            
             HStack(spacing: 16) {
                 Button(action: onEdit) {
                     Label("Edit", systemImage: "pencil")
@@ -143,7 +142,7 @@ struct DiaryEntryRowView: View {
         .background(Color.appSurface)
         .cornerRadius(24)
     }
-
+    
     private func statChip(icon: String, iconColor: Color, text: LocalizedStringKey) -> some View {
         HStack(spacing: 4) {
             Image(systemName: icon).foregroundColor(iconColor)
@@ -155,7 +154,7 @@ struct DiaryEntryRowView: View {
         .background(Color.appBackground)
         .cornerRadius(8)
     }
-
+    
     private func smallTag(text: String, color: Color) -> some View {
         Text(text)
             .font(.caption2.weight(.semibold))

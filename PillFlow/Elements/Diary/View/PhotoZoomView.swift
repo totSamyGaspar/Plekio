@@ -13,11 +13,11 @@ struct PhotoZoomView: View {
     let photoId: UUID
     @Environment(\.dismiss) private var dismiss
     @State private var image: UIImage?
-
+    
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-
+            
             if let image {
                 Image(uiImage: image)
                     .resizable()
@@ -25,7 +25,7 @@ struct PhotoZoomView: View {
             } else {
                 ProgressView().tint(.white)
             }
-
+            
             VStack {
                 HStack {
                     Spacer()

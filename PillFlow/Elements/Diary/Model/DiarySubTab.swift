@@ -16,17 +16,17 @@ enum DiarySubTab: String, CaseIterable, Identifiable {
 
     var title: LocalizedStringKey {
         switch self {
-        case .journalFeed: return "Journal Feed"
+        case .journalFeed:     return "Journal Feed"
         case .progressGallery: return "Progress Gallery"
-        case .moodTrends: return "Mood & Trends"
+        case .moodTrends:      return "Mood & Trends"
         }
     }
 
     var icon: String {
         switch self {
-        case .journalFeed: return "doc.text.fill"
+        case .journalFeed:     return "doc.text.fill"
         case .progressGallery: return "photo.stack.fill"
-        case .moodTrends: return "chart.line.uptrend.xyaxis"
+        case .moodTrends:      return "chart.line.uptrend.xyaxis"
         }
     }
 }

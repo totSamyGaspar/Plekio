@@ -17,7 +17,7 @@ import SwiftUI
 struct DiaryLabeledField<Content: View>: View {
     let title: LocalizedStringKey
     @ViewBuilder var content: Content
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
@@ -25,9 +25,9 @@ struct DiaryLabeledField<Content: View>: View {
                 .foregroundColor(.textSecondary)
                 .tracking(0.5)
             content
-                // Centred, not leading: the compact DatePicker renders as a pill
-                // that hugs its text, so aligning it leading left it floating in
-                // the corner of a much wider box.
+            // Centred, not leading: the compact DatePicker renders as a pill
+            // that hugs its text, so aligning it leading left it floating in
+            // the corner of a much wider box.
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
@@ -47,7 +47,7 @@ struct DiaryValueButton: View {
     let text: String
     let label: LocalizedStringKey
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             Text(text)
@@ -76,7 +76,7 @@ struct DiarySliderRow: View {
     let minLabel: LocalizedStringKey
     let midLabel: LocalizedStringKey
     let maxLabel: LocalizedStringKey
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -116,7 +116,7 @@ struct DiaryTagChip: View {
     let accent: Color
     let prefix: String
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
@@ -145,9 +145,9 @@ struct DiaryTagChip: View {
 struct DiaryTagInputRow: View {
     let placeholder: LocalizedStringKey
     let onAdd: (String) -> Void
-
+    
     @State private var text = ""
-
+    
     var body: some View {
         HStack(spacing: 10) {
             TextField(placeholder, text: $text)
@@ -156,7 +156,7 @@ struct DiaryTagInputRow: View {
                 .padding(.vertical, 10)
                 .background(Color.appSurface)
                 .cornerRadius(12)
-
+            
             Button("Add") {
                 onAdd(text)
                 text = ""

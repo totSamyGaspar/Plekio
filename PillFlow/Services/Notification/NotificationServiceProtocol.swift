@@ -41,13 +41,14 @@ protocol NotificationServiceProtocol {
     /// Removes an already DELIVERED reminder for one slot from the lock screen.
     /// `removeAllPending` does not reach these — it only cancels notifications that
     /// are scheduled but have not fired yet. Needed after logging an overdue dose,
-    /// or the banner for a dose the user just recorded keeps hanging there.
-    func clearDelivered(takenMedicationIds: [UUID], scheduledTime: Date) async
+    /// or skipping one, or the banner for a dose the user just answered for keeps
+    /// hanging there.
+    func clearDelivered(settledMedicationIds: [UUID], scheduledTime: Date) async
 
     /// Full rebuild of the schedule: drop everything pending, then re-plan from
     /// the unfinished courses. A requirement rather than only an extension so the
     /// real service can serialize overlapping rebuilds — see NotificationService.
-    func rescheduleAll(using dbService: DatabaseServiceProtocol) async
+    func rescheduleAll(using dbService: any CourseStoring) async
 }
 
 extension NotificationServiceProtocol {
@@ -57,7 +58,7 @@ extension NotificationServiceProtocol {
     /// This, and the three lines around it, were copied verbatim into five call
     /// sites (PillFlowApp, DashboardViewModel, NewTreatmentViewModel and twice in
     /// CourseDetailViewModel), so changing the rule meant finding all five.
-    func activeCourses(from dbService: DatabaseServiceProtocol) -> [TreatmentCourse] {
+    func activeCourses(from dbService: any CourseStoring) -> [TreatmentCourse] {
         let startOfToday = Calendar.current.startOfDay(for: Date())
         return dbService.fetchAllCourses().filter {
             Calendar.current.startOfDay(for: $0.endDate) >= startOfToday
@@ -67,7 +68,7 @@ extension NotificationServiceProtocol {
     /// Plain rebuild, for test doubles and any future implementation that has no
     /// queue of its own to protect. NotificationService overrides this to chain
     /// overlapping calls instead of letting them interleave.
-    func rescheduleAll(using dbService: DatabaseServiceProtocol) async {
+    func rescheduleAll(using dbService: any CourseStoring) async {
         await removeAllPending()
         await scheduleNotifications(activeCourses: activeCourses(from: dbService))
     }

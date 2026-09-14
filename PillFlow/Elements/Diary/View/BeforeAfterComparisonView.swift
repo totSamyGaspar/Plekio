@@ -5,8 +5,7 @@
 //  Created by Edward Gasparian on 24.08.2026.
 //
 //  Before/after comparison: two modes (split slider and side by side),
-//  checkpoint pickers, and a strip of every available photo. A 400+ line
-//  screen that used to live at the end of DiaryView.swift.
+//  checkpoint pickers, and a strip of every available photo.
 //
 
 import SwiftUI
@@ -17,56 +16,60 @@ struct BeforeAfterComparisonView: View {
     /// Every photo available to compare against, across all diary entries
     /// (not just the current gallery category filter).
     let checkpoints: [DiaryPhotoCheckpoint]
-
+    
     @State private var beforePhotoId: UUID
     @State private var afterPhotoId: UUID
-
+    
     @Environment(\.dismiss) private var dismiss
     @State private var beforeImage: UIImage?
     @State private var afterImage: UIImage?
     @State private var sliderPosition: CGFloat = 0.5
     @State private var mode: ComparisonMode = .splitSlider
     @State private var pickerTarget: ComparisonSlot?
-
+    
     private enum ComparisonMode { case sideBySide, splitSlider }
-
+    
     private enum ComparisonSlot: Identifiable {
         case before, after
         var id: Self { self }
     }
-
-    private static let dateLabelStyle = Date.FormatStyle(date: .abbreviated, time: .omitted)
-
+    
     init(checkpoints: [DiaryPhotoCheckpoint], beforePhotoId: UUID, afterPhotoId: UUID) {
         self.checkpoints = checkpoints
         self._beforePhotoId = State(initialValue: beforePhotoId)
         self._afterPhotoId = State(initialValue: afterPhotoId)
     }
-
+    
     private var beforeCheckpoint: DiaryPhotoCheckpoint? { checkpoints.first { $0.id == beforePhotoId } }
     private var afterCheckpoint: DiaryPhotoCheckpoint? { checkpoints.first { $0.id == afterPhotoId } }
-
+    
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
-
+            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 18) {
                     header
-
-                    photoSelectorRow(label: "BEFORE PHOTO (A):", tint: .accentPrimary, checkpoint: beforeCheckpoint) {
+                    
+                    ComparisonSlotRow(label: "BEFORE PHOTO (A):", tint: .accentPrimary, checkpoint: beforeCheckpoint) {
                         pickerTarget = .before
                     }
-                    photoSelectorRow(label: "AFTER PHOTO (B):", tint: .warmAccent, checkpoint: afterCheckpoint) {
+                    ComparisonSlotRow(label: "AFTER PHOTO (B):", tint: .warmAccent, checkpoint: afterCheckpoint) {
                         pickerTarget = .after
                     }
-
+                    
                     switch mode {
                     case .splitSlider: splitSliderView
                     case .sideBySide: sideBySideView
                     }
-
-                    availablePhotosSection
+                    
+                    ComparisonPhotoStrip(
+                        checkpoints: checkpoints,
+                        beforePhotoId: beforePhotoId,
+                        afterPhotoId: afterPhotoId,
+                        onOpenBeforePicker: { pickerTarget = .before },
+                        onSelectAfter: { afterPhotoId = $0 }
+                    )
                 }
                 .padding(.horizontal)
                 .padding(.vertical)
@@ -75,7 +78,7 @@ struct BeforeAfterComparisonView: View {
         // `.task(id:)` restarts itself when the id changes, which replaces an
         // onAppear plus two onChange handlers.
         // Screen-width panes, not the camera's resolution: this sheet holds two
-        // photos at once and used to decode both at full size.
+        // photos at once, and decoding both at full size costs tens of megabytes.
         .task(id: beforePhotoId) {
             beforeImage = await ImageCache.shared.image(for: beforePhotoId, targetPointSize: 430)
         }
@@ -86,15 +89,15 @@ struct BeforeAfterComparisonView: View {
             photoPickerSheet(for: slot)
         }
     }
-
+    
     // MARK: Header + mode toggle
-
+    
     /// Title row first, mode toggle on its own row underneath.
     ///
-    /// Close and the two mode buttons used to share one trailing column, eight
-    /// points apart — and Close expands its touch target by ten in every
-    /// direction, so the two hit areas overlapped and a tap meant for "Side by
-    /// Side" could shut the screen. Stacking them also left the title about a
+    /// Kept on separate rows: Close expands its touch target by ten points in
+    /// every direction, so sharing a trailing column with the mode buttons puts
+    /// its hit area over theirs and a tap meant for "Side by Side" shuts the
+    /// screen. Stacking them also leaves the title about a
     /// third of the row, which is why it read "Visual Progress C…".
     private var header: some View {
         VStack(spacing: 14) {
@@ -105,7 +108,7 @@ struct BeforeAfterComparisonView: View {
                         .font(.subheadline)
                         .foregroundColor(.accentPrimary)
                 }
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Visual Progress Comparison")
                         .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
@@ -118,14 +121,14 @@ struct BeforeAfterComparisonView: View {
                 // than the row — the failure this header was already showing.
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+                
                 closeButton
             }
-
+            
             modeToggle
         }
     }
-
+    
     private var closeButton: some View {
         Button { dismiss() } label: {
             Image(systemName: "xmark")
@@ -138,20 +141,20 @@ struct BeforeAfterComparisonView: View {
         .expandTouchTarget(10)
         .accessibilityLabel("Close")
     }
-
+    
     /// Full width, so the two halves read as one segmented control and each is a
     /// comfortable target. It also stops the labels wrapping in the languages
     /// that need the room — German and Ukrainian.
     private var modeToggle: some View {
         HStack(spacing: 8) {
-            // The line break is no longer baked into the string — it would land in
-            // the wrong place in another language. lineLimit(2) wraps it instead.
+            // No line break baked into the string: it would land in the wrong
+            // place in another language. lineLimit(2) wraps it instead.
             modeButton("Side by Side", isActive: mode == .sideBySide) { mode = .sideBySide }
             modeButton("Split Slider", isActive: mode == .splitSlider) { mode = .splitSlider }
         }
         .fixedSize(horizontal: false, vertical: true)
     }
-
+    
     private func modeButton(_ title: LocalizedStringKey, isActive: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
@@ -168,57 +171,48 @@ struct BeforeAfterComparisonView: View {
         .buttonStyle(.plain)
         .accessibilityAddTraits(isActive ? .isSelected : [])
     }
-
+    
     // MARK: Photo selector rows + picker sheet
-
-    private func photoSelectorRow(label: LocalizedStringKey, tint: Color, checkpoint: DiaryPhotoCheckpoint?, action: @escaping () -> Void) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Text(label)
-                .font(.caption2.weight(.heavy))
-                .foregroundColor(tint)
-                .frame(width: 96, alignment: .leading)
-
-            Button(action: action) {
-                HStack {
-                    Text(captionText(for: checkpoint))
-                        .font(.caption)
-                        .foregroundColor(.textPrimary.opacity(0.85))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                    Spacer(minLength: 6)
-                    Image(systemName: "chevron.down")
-                        .font(.caption2)
-                        .foregroundColor(.textTertiary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(Color.appSurface)
-                .cornerRadius(10)
-            }
-            .buttonStyle(.plain)
+    
+    /// Which photo the given slot currently holds.
+    private func selectedId(for slot: ComparisonSlot) -> UUID {
+        switch slot {
+        case .before: beforePhotoId
+        case .after: afterPhotoId
         }
     }
-
-    private func captionText(for checkpoint: DiaryPhotoCheckpoint?) -> String {
-        guard let checkpoint else { return "Select a photo" }
-        let dateText = checkpoint.entry.checkInDate.formatted(Self.dateLabelStyle)
-        let notes = checkpoint.entry.displayCaption
-        return notes.isEmpty ? dateText : "\(dateText) • \(notes)"
+    
+    private func select(_ id: UUID, for slot: ComparisonSlot) {
+        switch slot {
+        case .before: beforePhotoId = id
+        case .after: afterPhotoId = id
+        }
+        pickerTarget = nil
     }
-
+    
+    private func pickerTitle(for slot: ComparisonSlot) -> LocalizedStringKey {
+        switch slot {
+        case .before: "Select Before Photo"
+        case .after: "Select After Photo"
+        }
+    }
+    
     private func photoPickerSheet(for slot: ComparisonSlot) -> some View {
-        NavigationStack {
+        // Anything that picks between two values by slot is a `switch` in a
+        // helper above, never a ternary written inline here: a nested ternary
+        // comparing two UUIDs inside a List row builder is one expression the
+        // type checker gives up on. So the row below
+        // stays a plain expression.
+        let chosenId = selectedId(for: slot)
+        
+        return NavigationStack {
             List(checkpoints) { item in
-                let isSelected = slot == .before ? item.id == beforePhotoId : item.id == afterPhotoId
+                let isSelected = item.id == chosenId
                 Button {
-                    switch slot {
-                    case .before: beforePhotoId = item.id
-                    case .after: afterPhotoId = item.id
-                    }
-                    pickerTarget = nil
+                    select(item.id, for: slot)
                 } label: {
                     HStack {
-                        Text(captionText(for: item))
+                        Text(DiaryPhotoCheckpoint.caption(for: item))
                             .font(.subheadline)
                             .foregroundColor(.textPrimary)
                             .multilineTextAlignment(.leading)
@@ -232,7 +226,7 @@ struct BeforeAfterComparisonView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(Color.appBackground)
-            .navigationTitle(slot == .before ? "Select Before Photo" : "Select After Photo")
+            .navigationTitle(pickerTitle(for: slot))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -243,9 +237,9 @@ struct BeforeAfterComparisonView: View {
         .appTheme()
         .presentationDetents([.medium, .large])
     }
-
+    
     // MARK: Split slider mode
-
+    
     private var splitSliderView: some View {
         VStack(spacing: 12) {
             GeometryReader { geo in
@@ -269,12 +263,12 @@ struct BeforeAfterComparisonView: View {
                                 Rectangle().frame(width: geo.size.width * sliderPosition)
                             }
                     }
-
+                    
                     Rectangle()
                         .fill(Color.white)
                         .frame(width: 2)
                         .position(x: geo.size.width * sliderPosition, y: geo.size.height / 2)
-
+                    
                     Circle()
                         .fill(Color.white)
                         .frame(width: 32, height: 32)
@@ -289,7 +283,7 @@ struct BeforeAfterComparisonView: View {
                                 sliderPosition = min(max(value.location.x / geo.size.width, 0), 1)
                             }
                         )
-
+                    
                     VStack {
                         HStack {
                             tag("BEFORE (\(shortDate(beforeCheckpoint)))", tint: .accentPrimary)
@@ -303,7 +297,7 @@ struct BeforeAfterComparisonView: View {
             }
             .frame(height: 380)
             .cornerRadius(20)
-
+            
             HStack(spacing: 12) {
                 Text("Before")
                     .font(.caption.weight(.semibold))
@@ -316,7 +310,7 @@ struct BeforeAfterComparisonView: View {
             }
         }
     }
-
+    
     private func tag(_ text: LocalizedStringKey, tint: Color) -> some View {
         Text(text)
             .font(.caption2.weight(.heavy))
@@ -326,25 +320,25 @@ struct BeforeAfterComparisonView: View {
             .background(tint)
             .clipShape(Capsule())
     }
-
+    
     private func shortDate(_ checkpoint: DiaryPhotoCheckpoint?) -> String {
         guard let checkpoint else { return "--" }
-        return checkpoint.entry.checkInDate.formatted(Self.dateLabelStyle)
+        return checkpoint.entry.checkInDate.formatted(DiaryPhotoCheckpoint.comparisonDateStyle)
     }
-
+    
     // MARK: Side by side mode
-
+    
     private var sideBySideView: some View {
         VStack(spacing: 16) {
             stateCard(title: "STATE A (EARLIER BASELINE)", tint: .accentPrimary, checkpoint: beforeCheckpoint, image: beforeImage)
             stateCard(title: "STATE B (RECENT / PROGRESS)", tint: .warmAccent, checkpoint: afterCheckpoint, image: afterImage)
         }
     }
-
+    
     private func stateCard(title: LocalizedStringKey, tint: Color, checkpoint: DiaryPhotoCheckpoint?, image: UIImage?) -> some View {
         let boldLine = checkpoint?.entry.milestoneTags.first ?? checkpoint?.entry.physicalSummary ?? ""
         let quote = checkpoint?.entry.displayCaption ?? ""
-
+        
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text(title)
@@ -359,7 +353,7 @@ struct BeforeAfterComparisonView: View {
                     .font(.caption)
                     .foregroundColor(.textSecondary)
             }
-
+            
             Group {
                 if let image {
                     Image(uiImage: image)
@@ -373,7 +367,7 @@ struct BeforeAfterComparisonView: View {
             .frame(maxWidth: .infinity)
             .clipped()
             .cornerRadius(14)
-
+            
             if !boldLine.isEmpty {
                 Text(boldLine)
                     .font(.caption.weight(.semibold))
@@ -394,77 +388,5 @@ struct BeforeAfterComparisonView: View {
         .padding(14)
         .background(Color.appSurface)
         .cornerRadius(18)
-    }
-
-    // MARK: Available photos strip
-
-    private var availablePhotosSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("AVAILABLE PROGRESS PHOTOS (\(checkpoints.count))")
-                .font(.caption2.weight(.heavy))
-                .foregroundColor(.textSecondary)
-                .tracking(0.5)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                // Lazy: this strip lists every photo across the whole diary,
-                // not just the current gallery filter — with a long history
-                // a plain HStack would decode every thumbnail up front.
-                LazyHStack(spacing: 10) {
-                    ForEach(checkpoints) { item in
-                        comparisonThumbnail(item)
-                    }
-                }
-            }
-        }
-    }
-
-    private func comparisonThumbnail(_ item: DiaryPhotoCheckpoint) -> some View {
-        let isBefore = item.id == beforePhotoId
-        let isAfter = item.id == afterPhotoId
-
-        return VStack(spacing: 4) {
-            DiaryAsyncPhoto(photoId: item.id, targetPointSize: 76)
-                .frame(width: 76, height: 76)
-                .clipped()
-                .cornerRadius(12)
-                .overlay(alignment: .topLeading) {
-                    if isBefore { slotBadge("A", tint: .accentPrimary) }
-                }
-                .overlay(alignment: .topTrailing) {
-                    if isAfter { slotBadge("B", tint: .warmAccent) }
-                }
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke((isBefore || isAfter) ? Color.accentPrimary.opacity(0.8) : Color.clear, lineWidth: 2)
-                )
-
-            Text(item.entry.checkInDate.formatted(Self.dateLabelStyle))
-                .font(.caption2)
-                .foregroundColor(.textSecondary)
-        }
-        .onTapGesture {
-            // Every tap does something: tapping the current "before" photo
-            // opens its own picker (so it's never a dead tap), tapping any
-            // other un-selected photo quick-assigns it as "after" (recent/
-            // progress). Tapping the current "after" photo is a no-op — it's
-            // already selected.
-            if isBefore {
-                pickerTarget = .before
-            } else if !isAfter {
-                afterPhotoId = item.id
-            }
-        }
-    }
-
-    @ScaledMetric(relativeTo: .caption2) private var slotBadgeSize: CGFloat = 18
-
-    private func slotBadge(_ letter: String, tint: Color) -> some View {
-        Text(letter)
-            .font(.caption2.weight(.heavy))
-            .foregroundColor(Color.onAccent)
-            .frame(width: slotBadgeSize, height: slotBadgeSize)
-            .background(tint)
-            .clipShape(Circle())
-            .padding(4)
     }
 }

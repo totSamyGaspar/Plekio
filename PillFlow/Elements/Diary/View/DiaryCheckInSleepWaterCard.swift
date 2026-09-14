@@ -10,7 +10,7 @@ struct DiarySleepWaterCard: View {
     @Binding var sleepHours: Double
     @Binding var sleepQuality: SleepQuality
     @Binding var waterGlasses: Int
-
+    
     var body: some View {
         VStack(spacing: 20) {
             sleep
@@ -21,9 +21,9 @@ struct DiarySleepWaterCard: View {
         .background(Color.appSurface)
         .cornerRadius(18)
     }
-
+    
     // MARK: - Sleep
-
+    
     private var sleep: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
@@ -46,9 +46,9 @@ struct DiarySleepWaterCard: View {
                 .padding(.vertical, 8)
                 .background(Color.appBackground)
                 .cornerRadius(10)
-
+                
                 Spacer()
-
+                
                 HStack(spacing: 6) {
                     ForEach(SleepQuality.allCases) { quality in
                         Button {
@@ -68,9 +68,9 @@ struct DiarySleepWaterCard: View {
             }
         }
     }
-
+    
     // MARK: - Water
-
+    
     private var water: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
@@ -91,7 +91,7 @@ struct DiarySleepWaterCard: View {
                 }
                 .buttonStyle(.plain)
                 .expandTouchTarget(6)
-
+                
                 Spacer()
                 VStack(spacing: 2) {
                     Text("\(waterGlasses) glasses")
@@ -102,7 +102,7 @@ struct DiarySleepWaterCard: View {
                         .foregroundColor(.textSecondary)
                 }
                 Spacer()
-
+                
                 Button {
                     waterGlasses += 1
                 } label: {

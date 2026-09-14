@@ -38,7 +38,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                         // already had this constraint; here it was missing.
                         DatePicker("End", selection: $viewModel.endDate,
                                    in: viewModel.startDate..., displayedComponents: .date)
-                            .foregroundColor(.textPrimary)
+                        .foregroundColor(.textPrimary)
                     }
                     .listRowBackground(Color.appSurface)
                     

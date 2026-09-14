@@ -15,10 +15,10 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     @Published var endDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
     @Published var medications: [MedicationDraft] = []
     
-    private let dbService: DatabaseServiceProtocol
+    private let dbService: any CourseStoring
     private let notificationService: NotificationServiceProtocol
     
-    init(dbService: DatabaseServiceProtocol, notificationService: NotificationServiceProtocol) {
+    init(dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
         self.dbService = dbService
         self.notificationService = notificationService
     }

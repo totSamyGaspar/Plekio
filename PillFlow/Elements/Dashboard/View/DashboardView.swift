@@ -10,20 +10,20 @@ import SwiftUI
 struct DashboardView<VM: DashboardViewModelProtocol>: View {
     @StateObject private var viewModel: VM
     @EnvironmentObject private var router: AppRouter
-
+    
     init(viewModel: @autoclosure @escaping () -> VM) {
         self._viewModel = StateObject(wrappedValue: viewModel())
     }
-
+    
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             Color.appBackground.ignoresSafeArea()
             let allTakenStates = (viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills).map { $0.isTaken }
-
+            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     headerSection
-
+                    
                     if let upNextPills {
                         UpNextHeroCard(
                             pills: upNextPills,
@@ -49,9 +49,9 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                         // it — so they fall back to a plain line.
                         dateSummaryLine
                     }
-
+                    
                     calendarSection.padding(.top, 8)
-
+                    
                     if viewModel.isEmpty {
                         EmptyStateView(icon: "pills", title: "Nothing for today", verticalPadding: 60)
                     } else {
@@ -75,11 +75,11 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.undoableBulkLog)
         .toolbar(.hidden, for: .navigationBar)
-
+        
     }
-
+    
     // MARK: - Sections
-
+    
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("PillFlow")
@@ -92,14 +92,14 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         .padding(.horizontal, 20)
         .padding(.top, 10)
     }
-
+    
     private var allPills: [PillDose] {
         viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills
     }
-
+    
     private var totalCount: Int { allPills.count }
     private var takenCount: Int { allPills.filter { $0.isTaken }.count }
-
+    
     /// The pills of the next unlogged slot — and, by being nil or not, what
     /// decides whether the hero card is on screen at all.
     ///
@@ -109,23 +109,23 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     private var upNextPills: [PillDose]? {
         guard Calendar.current.isDateInToday(viewModel.selectedDate) else { return nil }
         guard let earliest = allPills
-            .filter({ !$0.isTaken && !$0.isMissed })
+            .filter({ !$0.isTaken && !$0.isSkipped && !$0.isMissed })
             .min(by: { $0.time < $1.time })?.time
         else { return nil }
         return allPills.filter {
             Calendar.current.isDate($0.time, equalTo: earliest, toGranularity: .minute)
         }
     }
-
+    
     /// Shown in the hero card's place. The date and the tally describe the
-    /// SELECTED day, not today — they used to disagree as soon as the user moved
-    /// off today, and that must not come back.
+    /// SELECTED day, not today: read from `Date()` they disagree the moment the
+    /// user moves off today.
     private var dateSummaryLine: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(viewModel.selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
                 .font(.title3.weight(.bold))
                 .foregroundColor(.textPrimary)
-
+            
             Text("\(takenCount) of \(totalCount) doses logged")
                 .font(.subheadline)
                 .foregroundColor(.accentPrimary)
@@ -135,7 +135,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         // here would read as a second thing to act on.
         .padding(.horizontal, 20)
     }
-
+    
     private var calendarSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
@@ -152,7 +152,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             .padding(.horizontal)
         }
     }
-
+    
     private var timelineSection: some View {
         LazyVStack(spacing: 20) {
             WeeklyAdherenceView(
@@ -161,7 +161,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 recentAverage: viewModel.recentAverage
             )
             .padding(.top, 10)
-
+            
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Daily Dosage Timeline")
@@ -175,13 +175,13 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             }
             .padding(.horizontal)
             .padding(.top, 16)
-
+            
             periodSection(pills: viewModel.morningPills, title: DayPeriod.morning.title)
             periodSection(pills: viewModel.noonPills, title: DayPeriod.noon.title)
             periodSection(pills: viewModel.eveningPills, title: DayPeriod.evening.title)
         }
     }
-
+    
     @ViewBuilder
     private func periodSection(pills: [PillDose], title: LocalizedStringResource) -> some View {
         if !pills.isEmpty {
@@ -189,29 +189,31 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 title: title,
                 pills: pills,
                 onTogglePill: { id in viewModel.togglePill(id: id) },
-                onPillTap: { pill in
-                    let sameTimePills = pills.filter { $0.time == pill.time }
-                    router.presentFullScreen(
-                        .takePill(
-                            pills: sameTimePills,
-                            onTake: {
-                                for p in sameTimePills { viewModel.togglePill(id: p.id) }
-                            },
-                            onSkip: {
-                                let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-                                Task {
-                                    for p in sameTimePills {
-                                        await notifService.cancelNotifications(for: p.medicationId)
-                                    }
-                                }
-                            }
-                        )
-                    )
-                }
+                onPillTap: { pill in presentTakeSheet(for: [pill]) },
+                onTakeAll: { pending in presentTakeSheet(for: pending) }
             )
         }
     }
-
+    
+    /// One sheet for both entry points. Tapping a card confirms that dose alone;
+    /// "take all" in the section header confirms everything still open there. The
+    /// sheet already adapts its own labels to the count ("Skip" vs "Skip All").
+    private func presentTakeSheet(for doses: [PillDose]) {
+        guard !doses.isEmpty else { return }
+        
+        router.presentFullScreen(
+            .takePill(
+                pills: doses,
+                onTake: {
+                    // Logs only what is still pending. Toggling the group un-logged
+                    // any dose the user had already ticked off beforehand.
+                    viewModel.logDoses(doses)
+                },
+                onSkip: { viewModel.skipDoses(doses) }
+            )
+        )
+    }
+    
 }
 
 extension DashboardView where VM == DashboardViewModel {

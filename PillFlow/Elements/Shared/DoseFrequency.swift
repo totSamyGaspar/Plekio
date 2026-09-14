@@ -4,9 +4,8 @@
 //
 //  Dose intervals in a single list.
 //
-//  The labels used to live in two places: the Picker items in
-//  AddMedicationView and a switch over the day count in MedicationRowView —
-//  two sources of truth for the same set of values.
+//  One source of truth for the labels: the Picker that offers them and the row
+//  that renders one read the same list.
 //
 
 import Foundation
@@ -18,9 +17,9 @@ enum DoseFrequency: Int, CaseIterable, Identifiable {
     case weekly = 7
     case biweekly = 14
     case monthly = 30
-
+    
     var id: Int { rawValue }
-
+    
     var title: LocalizedStringResource {
         switch self {
         case .daily:          return "Every day"
@@ -31,7 +30,7 @@ enum DoseFrequency: Int, CaseIterable, Identifiable {
         case .monthly:        return "Once a month"
         }
     }
-
+    
     /// Label for an arbitrary interval: the data may not come from this list
     /// (migration, import).
     static func title(forDays days: Int) -> LocalizedStringResource {

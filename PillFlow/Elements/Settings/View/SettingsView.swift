@@ -12,11 +12,11 @@ struct SettingsView: View {
     /// screen that reacts to the theme reads the same key, so a store in
     /// between would only add a second place for it to go stale.
     @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .dark
-
+    
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
-
+            
             VStack(alignment: .leading, spacing: 0) {
                 // Drawn rather than left to the navigation bar: the other three
                 // tabs draw their own titles, and a system large title here was
@@ -30,7 +30,7 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
-
+                
                 List {
                     Section(header: Text("Appearance").foregroundColor(.textSecondary)) {
                         VStack(alignment: .leading, spacing: 10) {
@@ -39,7 +39,7 @@ struct SettingsView: View {
                                     .foregroundColor(.textPrimary)
                                 Spacer()
                             }
-
+                            
                             Picker("Theme", selection: $theme) {
                                 ForEach(AppTheme.allCases) { option in
                                     Text(option.title).tag(option)
@@ -51,16 +51,15 @@ struct SettingsView: View {
                         .padding(.vertical, 6)
                     }
                     .listRowBackground(Color.appSurface)
-
+                    
                     Section(header: Text("Reminders").foregroundColor(.textSecondary)) {
-                        // Each reminder owns its own rows, its own storage keys and
-                        // its own arming — see DailyReminderRows.
+
                         ForEach(DailyReminder.allCases) { reminder in
                             DailyReminderRows(reminder)
                         }
                     }
                     .listRowBackground(Color.appSurface)
-
+                    
                     Section(header: Text("About").foregroundColor(.textSecondary)) {
                         HStack {
                             Text("Version")
@@ -69,7 +68,7 @@ struct SettingsView: View {
                             Text("1.0.0")
                                 .foregroundColor(.textSecondary)
                         }
-                    
+                        
                         HStack {
                             Text("Developer")
                                 .foregroundColor(.textPrimary)
@@ -79,7 +78,7 @@ struct SettingsView: View {
                         }
                     }
                     .listRowBackground(Color.appSurface) // Card background for settings rows
-
+                    
                     Section {
                         Button(action: {
                             // No action yet

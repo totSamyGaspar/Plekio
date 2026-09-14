@@ -9,14 +9,14 @@ import SwiftUI
 
 struct MainTabView: View {
     @EnvironmentObject var router: AppRouter
-
+    
     /// The one write-failure alert for the whole app, instead of the same
     /// `.alert` repeated across seven screens.
     @ObservedObject private var errorPresenter = AppErrorPresenter.shared
-
+    
     static func configureTabBarAppearance() {
         let appearance = UITabBarAppearance()
-
+        
         if UIAccessibility.isReduceTransparencyEnabled {
             // Reduce Transparency asks for a solid bar, not a thinner blur.
             // Read once here: an appearance applies to bars as they are created,
@@ -30,16 +30,16 @@ struct MainTabView: View {
             appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
             appearance.backgroundColor = .appTabBarWash
         }
-
+        
         appearance.stackedLayoutAppearance.selected.iconColor = .appAccent
         appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.appAccent]
         appearance.stackedLayoutAppearance.normal.iconColor = UIColor.systemGray
         appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.systemGray]
-
+        
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
-
+    
     var body: some View {
         TabView(selection: $router.selectedTab) {
             NavigationStack {
@@ -47,7 +47,7 @@ struct MainTabView: View {
             }
             .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
             .tag(0)
-
+            
             NavigationStack(path: $router.coursesPath) {
                 CoursesListView()
                     .navigationDestination(for: Route.self) { route in
@@ -59,13 +59,13 @@ struct MainTabView: View {
             }
             .tabItem { Label("Courses", systemImage: "list.clipboard.fill") }
             .tag(1)
-
+            
             NavigationStack {
                 DiaryView()
             }
             .tabItem { Label("Diary", systemImage: "text.book.closed.fill") }
             .tag(2)
-
+            
             NavigationStack {
                 SettingsView()
             }
@@ -112,25 +112,25 @@ struct MainTabView: View {
             Text(text)
         }
     }
-
+    
     // MARK: - Push
-
+    
     private func consumePendingPush() {
         guard let (medicationIds, scheduledTime) = router.consumePendingPush() else { return }
-
+        
         let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
         let notificationService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-
+        
         // Doses come from the schedule by slot time, not from the dashboard view
-        // model: the modal used to depend on whether the dashboard was rendered and
-        // on which date it was showing.
+        // model, so the modal does not depend on whether that screen is rendered or
+        // on which date it happens to be showing.
         let pills = PendingDose.unlogged(
             medicationIds: medicationIds,
             scheduledTime: scheduledTime,
             in: dbService
         )
         guard !pills.isEmpty else { return }
-
+        
         router.presentFullScreen(
             .takePill(
                 pills: pills,
@@ -145,21 +145,23 @@ struct MainTabView: View {
                 },
                 onSkip: {
                     Task {
-                        for pill in pills {
-                            await notificationService.cancelNotifications(for: pill.medicationId)
-                        }
+                        await PendingDose.markSkipped(
+                            pills,
+                            dbService: dbService,
+                            notificationService: notificationService
+                        )
                     }
                 }
             )
         )
     }
-
+    
     /// Presented from here rather than from the diary screen: on a cold launch a
     /// reminder is tapped before that screen is in the hierarchy, which is the
     /// same reason the dose push is handled here.
     private func consumePendingReminder() {
         guard let reminder = router.consumePendingReminder() else { return }
-
+        
         switch reminder {
         case .diary:
             router.present(.diaryCheckIn)
@@ -167,19 +169,19 @@ struct MainTabView: View {
             router.present(.bloodPressureEntry)
         }
     }
-
+    
     @ViewBuilder
     private func sheetContent(for sheet: SheetRoute) -> some View {
         switch sheet {
-
+            
         case .newTreatment:
             NewTreatmentView()
                 .appTheme()
-
+            
         case .diaryCheckIn:
             DiaryCheckInView()
                 .appTheme()
-
+            
         case .bloodPressureEntry:
             BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
                 PendingBloodPressureReading.save(
@@ -188,7 +190,7 @@ struct MainTabView: View {
                 )
             }
             .appTheme()
-
+            
         case .takePill(let pills, let onTake, let onSkip):
             TakePillModalView(pills: pills, onTake: {
                 onTake()

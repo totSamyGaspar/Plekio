@@ -10,10 +10,10 @@ import SwiftData
 
 @Model
 final class MedicationItem {
-// There is deliberately no image property: photos live on disk (see ImageCache)
-// keyed by `id`, so a fetch for the schedule, statistics or notifications never
-// has to load image data it isn't going to render.
-@Attribute(.unique) var id: UUID
+    // There is deliberately no image property: photos live on disk (see ImageCache)
+    // keyed by `id`, so a fetch for the schedule, statistics or notifications never
+    // has to load image data it isn't going to render.
+    @Attribute(.unique) var id: UUID
     var name: String
     var formSystemImage: String
     var dosage: Int
@@ -22,10 +22,10 @@ final class MedicationItem {
     var course: TreatmentCourse?
     var stockCount: Int
     var lowStockThreshold: Int
-
+    
     @Relationship(deleteRule: .cascade, inverse: \DoseLog.medication)
     var logs: [DoseLog]
-
+    
     init(
         id: UUID,
         name: String,

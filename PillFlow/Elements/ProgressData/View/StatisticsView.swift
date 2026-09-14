@@ -147,10 +147,10 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 .foregroundColor(.accentPrimary)
                 .tracking(1.5)
                 .padding(.top, 24)
-
+            
             HStack(alignment: .center, spacing: 16) {
                 CircularProgressView(progress: viewModel.progress)
-                .frame(height: 100)
+                    .frame(height: 100)
                 
                 VStack(spacing: 10) {
                     Text(verbatim: "🔥")
@@ -184,7 +184,7 @@ final class MockStatisticsViewModel: StatisticsViewModelProtocol {
     var progress: Double { 0.93 }
     @Published var streakDays: Int = 1
     @Published var lowStockItems: [MedicationItem] = []
-
+    
     init() {}
     func loadStats() {}
     func refill(medication: MedicationItem, amount: Int) {}

@@ -8,8 +8,8 @@
 import SwiftUI
 import Combine
 
-// Preview-only. These mocks used to sit in the main target without an
-// #if DEBUG guard and shipped in the release binary.
+// Preview-only, and behind #if DEBUG: unguarded, a mock in the main target
+// ships in the release binary.
 #if DEBUG
 final class MockOnboardingViewModel: OnboardingViewModelProtocol {
     @Published var currentPage = 2

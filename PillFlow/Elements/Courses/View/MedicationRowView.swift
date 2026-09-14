@@ -10,12 +10,12 @@ import Combine
 
 struct MedicationRowView: View {
     let med: MedicationItem
-
+    
     var body: some View {
         HStack(spacing: 12) {
-
+            
             // MARK: - Medication Icon or Photo
-
+            
             MedicationPhotoView(medicationId: med.id, size: 40, cornerRadius: 8) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)

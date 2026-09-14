@@ -9,16 +9,16 @@ import SwiftUI
 
 struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
     @Environment(\.dismiss) private var dismiss
-
+    
     @StateObject private var viewModel: VM
-
+    
     /// The medication being edited (nil means adding a new one). Consumed in
     /// `.task` rather than `init`: SwiftUI re-creates the view struct many times.
     private let medicationToEdit: MedicationItem?
     private var isEditing: Bool { medicationToEdit != nil }
-
+    
     var onSave: (MedicationDraft) -> Void
-
+    
     init(viewModel: @autoclosure @escaping () -> VM,
          editingMedication: MedicationItem? = nil,
          onSave: @escaping (MedicationDraft) -> Void) {
@@ -26,19 +26,19 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
         self.medicationToEdit = editingMedication
         self.onSave = onSave
     }
-
+    
     let forms = [
         ("pills.fill", "Pill"),
         ("capsule.fill", "Capsule"),
         ("drop.fill", "Drops"),
         ("syringe.fill", "Injection")
     ]
-
+    
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.appBackground.ignoresSafeArea()
-
+                
                 Form {
                     // MARK: - Photo Section
                     Section(
@@ -53,7 +53,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                                 } label: {
                                     ImagePreviewView(image: viewModel.selectedImage)
                                 }
-
+                                
                                 HStack(spacing: 20) {
                                     Button {
                                         viewModel.showingPhotoSourceMenu = true
@@ -61,7 +61,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                                         Text(viewModel.selectedImage == nil ? "Add" : "Change")
                                             .foregroundColor(.accentPrimary)
                                     }
-
+                                    
                                     if viewModel.selectedImage != nil {
                                         Button(role: .destructive) {
                                             withAnimation {
@@ -79,12 +79,12 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets())
                     }
-
+                    
                     // MARK: - Basic Details
                     Section(header: Text("Medication").foregroundColor(.textSecondary)) {
                         TextField("Name (e.g., Ibuprofen)", text: $viewModel.draft.name)
                             .foregroundColor(.textPrimary)
-
+                        
                         Picker("Form", selection: $viewModel.draft.formSystemImage) {
                             ForEach(forms, id: \.0) { form in
                                 Image(systemName: form.0)
@@ -95,7 +95,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                         .padding(.vertical, 8)
                     }
                     .listRowBackground(Color.appSurface)
-
+                    
                     // MARK: - Inventory Tracking
                     Section(header: Text("Inventory Tracking").foregroundColor(.textSecondary)) {
                         HStack {
@@ -107,13 +107,13 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                                 get: { viewModel.draft.stockCount },
                                 set: { viewModel.draft.stockCount = min(max($0, 0), 9999) }
                             ), format: .number)
-                                .keyboardType(.numberPad)
-                                .multilineTextAlignment(.trailing)
-                                .foregroundColor(.accentPrimary)
-                                .font(.headline)
-                                .padding(.trailing)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .foregroundColor(.accentPrimary)
+                            .font(.headline)
+                            .padding(.trailing)
                         }
-
+                        
                         HStack {
                             Text("Remind when remaining")
                                 .foregroundColor(.textPrimary)
@@ -122,15 +122,15 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                                 get: { viewModel.draft.lowStockThreshold },
                                 set: { viewModel.draft.lowStockThreshold = min(max($0, 0), 9999) }
                             ), format: .number)
-                                .keyboardType(.numberPad)
-                                .multilineTextAlignment(.trailing)
-                                .foregroundColor(.yellow)
-                                .font(.headline)
-                                .padding(.trailing)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .foregroundColor(.yellow)
+                            .font(.headline)
+                            .padding(.trailing)
                         }
                     }
                     .listRowBackground(Color.appSurface)
-
+                    
                     // MARK: - Frequency and Dosage
                     Section(header: Text("Intake Frequency").foregroundColor(.textSecondary)) {
                         Picker("Interval", selection: $viewModel.draft.frequencyDays) {
@@ -143,13 +143,13 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                         .foregroundColor(.textPrimary)
                     }
                     .listRowBackground(Color.appSurface)
-
+                    
                     Section(header: Text("Dosage").foregroundColor(.textSecondary)) {
                         Stepper("Quantity: \(viewModel.draft.dosage)", value: $viewModel.draft.dosage, in: 1...10)
                             .foregroundColor(.textPrimary)
                     }
                     .listRowBackground(Color.appSurface)
-
+                    
                     // MARK: - Intake Time
                     Section(header: Text("Intake Time").foregroundColor(.textSecondary)) {
                         // ForEach over 0..<count needs a CONSTANT range, but this
@@ -160,8 +160,8 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                             DatePicker("Dose \(index + 1)", selection: Binding(
                                 get: {
                                     viewModel.draft.timesOfDay.indices.contains(index)
-                                        ? viewModel.draft.timesOfDay[index]
-                                        : Date()
+                                    ? viewModel.draft.timesOfDay[index]
+                                    : Date()
                                 },
                                 set: {
                                     guard viewModel.draft.timesOfDay.indices.contains(index) else { return }
@@ -176,7 +176,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                             guard viewModel.draft.timesOfDay.count > offsets.count else { return }
                             viewModel.draft.timesOfDay.remove(atOffsets: offsets)
                         }
-
+                        
                         Button(action: {
                             let lastTime = viewModel.draft.timesOfDay.last ?? Date()
                             let newTime = Calendar.current.date(byAdding: .hour, value: 4, to: lastTime) ?? Date()
@@ -226,7 +226,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
 
 struct ImagePreviewView: View {
     var image: UIImage?
-
+    
     var body: some View {
         ZStack {
             Circle()
@@ -236,7 +236,7 @@ struct ImagePreviewView: View {
                     Circle()
                         .stroke(Color.accentPrimary.opacity(0.5), lineWidth: 2)
                 )
-
+            
             if let image = image {
                 Image(uiImage: image)
                     .resizable()
@@ -259,14 +259,14 @@ struct ImagePreviewView: View {
 
 // MARK: - Extensions for Init
 extension AddMedicationView where VM == AddMedicationViewModel {
-
+    
     init(onSave: @escaping (MedicationDraft) -> Void) {
         self.init(
             viewModel: DIContainer.shared.resolve(AddMedicationViewModel.self),
             onSave: onSave
         )
     }
-
+    
     /// Opens the form on an existing medication. Filling the draft and loading the
     /// photo is done by `startEditing(_:)` from `.task`.
     init(editingMedication: MedicationItem, onSave: @escaping (MedicationDraft) -> Void) {

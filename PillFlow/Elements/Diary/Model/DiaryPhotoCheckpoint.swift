@@ -7,8 +7,8 @@
 //  One progress photo together with the entry it came from: the gallery
 //  treats every photo as a checkpoint, not every diary entry.
 //
-//  The category used to be derived by a private method inside DiaryView.
-//  Deriving it here keeps the gallery and the comparison screen in agreement.
+//  The category is derived here rather than in a view, so the gallery and the
+//  comparison screen cannot disagree about it.
 //
 
 import SwiftUI
@@ -23,8 +23,8 @@ struct DiaryPhotoCheckpoint: Identifiable {
         self.id = photoId
         self.entry = entry
         // The localized milestone title, not its storage key. Uppercasing and
-        // underscores used to be baked into the string; they belong to display
-        // (.textCase), because baked in they mangled translations.
+        // underscores belong to display (.textCase): baked into the string they
+        // mangle translations.
         self.category = DiaryMilestoneOptions.categoryTitle(for: entry.milestoneTags.first)
     }
 }

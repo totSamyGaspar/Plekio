@@ -14,13 +14,13 @@ struct DiaryMoodTrendsView: View {
     let entries: [DiaryEntry]
     let avgEnergyLevel: Double
     let avgSleepHours: Double
-
+    
     /// Most recent entries, oldest first, so the chart reads left-to-right
     /// chronologically.
     private var moodChartEntries: [DiaryEntry] {
         Array(entries.prefix(7)).sorted { $0.checkInDate < $1.checkInDate }
     }
-
+    
     var body: some View {
         VStack(spacing: 16) {
             moodProgressionCard
@@ -28,7 +28,7 @@ struct DiaryMoodTrendsView: View {
         }
         .padding(.horizontal)
     }
-
+    
     private var moodProgressionCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
@@ -39,7 +39,7 @@ struct DiaryMoodTrendsView: View {
                     .font(.caption)
                     .foregroundColor(.textSecondary)
             }
-
+            
             if moodChartEntries.isEmpty {
                 Text("Log a few check-ins to see your mood trend here.")
                     .font(.caption)
@@ -53,10 +53,11 @@ struct DiaryMoodTrendsView: View {
                     }
                 }
             }
-
-            // A second chip, "Adherence Positively Correlated", used to sit here.
-            // No correlation was ever computed — it appeared whenever average mood
-            // was >= 3.5, presenting an invention as a finding. moodBaselineLabel
+            
+            // Deliberately one chip. A second, "Adherence Positively Correlated",
+            // does not belong here unless something actually computes a correlation
+            // — shown on `average mood >= 3.5` it presents an invention as a
+            // finding. moodBaselineLabel
             // stays: it really is derived from the entries.
             Text(moodBaselineLabel)
                 .font(.caption2.weight(.semibold))
@@ -71,16 +72,16 @@ struct DiaryMoodTrendsView: View {
         .background(Color.appSurface)
         .cornerRadius(20)
     }
-
+    
     /// Fixed bar width (matches WeeklyAdherenceView's per-bar sizing) — kept
     /// constant regardless of entry count so a chart with only 1-2 entries
     /// doesn't stretch its bars into wide, flattened domes.
     private let moodBarWidth: CGFloat = 40
-
+    
     private func moodBar(_ entry: DiaryEntry) -> some View {
         let mood = DiaryMood(rawValue: entry.moodLabel)
         let heightFraction = CGFloat(entry.moodScore) / 5.0
-
+        
         return VStack(spacing: 8) {
             ZStack(alignment: .bottom) {
                 TopRoundedBar()
@@ -98,7 +99,7 @@ struct DiaryMoodTrendsView: View {
                     }
             }
             .frame(width: moodBarWidth, height: 80)
-
+            
             Text(entry.checkInDate.formatted(.dateTime.weekday(.abbreviated)))
                 .font(.caption2.weight(.bold))
                 .foregroundColor(.textSecondary)
@@ -108,7 +109,7 @@ struct DiaryMoodTrendsView: View {
         .accessibilityLabel(entry.checkInDate.formatted(.dateTime.weekday(.wide)))
         .accessibilityValue(Text(mood?.title ?? DiaryMood.neutral.title))
     }
-
+    
     private var moodBaselineLabel: LocalizedStringKey {
         guard moodChartEntries.count >= 2 else { return "Baseline: Not Enough Data" }
         let half = moodChartEntries.count / 2
@@ -121,7 +122,7 @@ struct DiaryMoodTrendsView: View {
         if delta < -0.4 { return "Baseline: Declining" }
         return "Baseline: Stable Mood"
     }
-
+    
     private var physicalEnergyCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
@@ -132,7 +133,7 @@ struct DiaryMoodTrendsView: View {
                     .font(.caption)
                     .foregroundColor(.textSecondary)
             }
-
+            
             metricBar(
                 icon: "moon.fill", iconColor: .purple,
                 title: "Average Sleep Quality",
@@ -140,7 +141,7 @@ struct DiaryMoodTrendsView: View {
                 progress: min(avgSleepHours / 9.0, 1.0),
                 tint: .purple
             )
-
+            
             metricBar(
                 icon: "bolt.fill", iconColor: .warmAccent,
                 title: "Daytime Energy Baseline",
@@ -153,7 +154,7 @@ struct DiaryMoodTrendsView: View {
         .background(Color.appSurface)
         .cornerRadius(20)
     }
-
+    
     private func metricBar(icon: String, iconColor: Color, title: LocalizedStringKey, valueText: LocalizedStringKey, progress: Double, tint: Color) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {

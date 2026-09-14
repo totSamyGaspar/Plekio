@@ -12,28 +12,28 @@ import Charts
 /// Classifying a reading is a medical call that depends on age, medication and
 /// how the measurement was taken, and a badge in a tracker would read as one.
 ///
-/// The card used to list the five most recent readings inline, which pushed the
-/// rest of the tab further down with every measurement. The list now lives in a
-/// sheet, so the card stays a fixed height whatever the history holds.
+/// The history lives in a sheet rather than inline, so the card stays a fixed
+/// height whatever it holds — listed here, every new measurement pushes the rest
+/// of the tab further down.
 struct BloodPressureCard: View {
     let readings: [BloodPressureReading]
     var onAdd: () -> Void
     var onDelete: (BloodPressureReading) -> Void
     var onDeleteAll: () -> Void
-
+    
     @State private var isHistoryShown = false
-
+    
     /// Oldest first, so the chart reads left to right.
     private var chartReadings: [BloodPressureReading] {
         Array(readings.prefix(14)).sorted { $0.measuredAt < $1.measuredAt }
     }
-
+    
     /// Not `readings.first`: the caller's sort order is its own business, and the
     /// headline number is wrong the moment that assumption stops holding.
     private var latestReading: BloodPressureReading? {
         readings.max { $0.measuredAt < $1.measuredAt }
     }
-
+    
     /// The y-axis covers the readings, not zero.
     ///
     /// A blood-pressure axis anchored at 0 spends half its height on values a
@@ -51,11 +51,11 @@ struct BloodPressureCard: View {
         // to a point and the line would have nowhere to sit.
         return lower < upper ? lower...upper : lower...(lower + 40)
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             header
-
+            
             if chartReadings.isEmpty {
                 Text("Log a reading to see your pressure trend here.")
                     .font(.caption)
@@ -66,7 +66,7 @@ struct BloodPressureCard: View {
                 chartPanel
                 latestTile
             }
-
+            
             actions
         }
         .padding(18)
@@ -80,9 +80,9 @@ struct BloodPressureCard: View {
             )
         }
     }
-
+    
     // MARK: - Header
-
+    
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Blood Pressure")
@@ -93,9 +93,9 @@ struct BloodPressureCard: View {
                 .foregroundColor(.textSecondary)
         }
     }
-
+    
     // MARK: - Chart
-
+    
     /// Chart and legend sit together on the darker app background, the same inset
     /// panel the rest of the app uses inside a surface card. It gives the plot an
     /// edge to sit against instead of floating in the middle of the card.
@@ -109,7 +109,7 @@ struct BloodPressureCard: View {
         .background(Color.appBackground)
         .cornerRadius(16)
     }
-
+    
     private var chart: some View {
         // The labels handed to .value are localizable too, so they reuse keys the
         // catalog already carries rather than adding untranslated stubs for
@@ -131,7 +131,7 @@ struct BloodPressureCard: View {
                 )
             )
             .interpolationMethod(.monotone)
-
+            
             LineMark(
                 x: .value("Measured at", reading.measuredAt),
                 y: .value("mmHg", reading.systolic),
@@ -144,7 +144,7 @@ struct BloodPressureCard: View {
             .interpolationMethod(.monotone)
             .symbol(.circle)
             .symbolSize(46)
-
+            
             LineMark(
                 x: .value("Measured at", reading.measuredAt),
                 y: .value("mmHg", reading.diastolic),
@@ -180,7 +180,7 @@ struct BloodPressureCard: View {
         // same numbers in a form VoiceOver can read one by one.
         .accessibilityHidden(true)
     }
-
+    
     private var legend: some View {
         HStack(spacing: 16) {
             legendItem(color: .accentPrimary, title: "Systolic")
@@ -189,7 +189,7 @@ struct BloodPressureCard: View {
         }
         .accessibilityHidden(true)
     }
-
+    
     private func legendItem(color: Color, title: LocalizedStringKey) -> some View {
         HStack(spacing: 6) {
             Circle().fill(color).frame(width: 8, height: 8)
@@ -198,9 +198,9 @@ struct BloodPressureCard: View {
                 .foregroundColor(.textSecondary)
         }
     }
-
+    
     // MARK: - Latest reading
-
+    
     @ViewBuilder
     private var latestTile: some View {
         if let reading = latestReading {
@@ -214,9 +214,9 @@ struct BloodPressureCard: View {
                         .font(.title3.weight(.bold))
                         .foregroundColor(.textPrimary)
                 }
-
+                
                 Spacer(minLength: 0)
-
+                
                 VStack(alignment: .trailing, spacing: 3) {
                     if let pulse = reading.pulse {
                         HStack(spacing: 4) {
@@ -240,9 +240,9 @@ struct BloodPressureCard: View {
             .accessibilityElement(children: .combine)
         }
     }
-
+    
     // MARK: - Actions
-
+    
     /// History on the left, the primary action on the right: on a phone held in
     /// the right hand the trailing edge is the easiest place to reach, and adding
     /// a reading is what this card is opened for.
@@ -274,7 +274,7 @@ struct BloodPressureCard: View {
             .disabled(readings.isEmpty)
             .opacity(readings.isEmpty ? 0.4 : 1)
             .accessibilityLabel("Measurement history")
-
+            
             Button(action: onAdd) {
                 Label("Add reading", systemImage: "plus")
                     .labelStyle(.centered)

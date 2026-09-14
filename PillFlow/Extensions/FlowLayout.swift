@@ -17,9 +17,9 @@ struct FlowLayout: Layout {
     /// The measured size of each chip.
     ///
     /// SwiftUI calls `sizeThatFits` and `placeSubviews` several times per layout
-    /// pass, and each used to re-ask every subview for its size — text measurement,
-    /// once per tag, per call. In a scrolling feed of entries that is thousands of
-    /// measurements for chips whose size never changed. Measured once here instead,
+    /// pass. Asking every subview for its size in each of them is a text
+    /// measurement per tag per call — in a scrolling feed of entries, thousands of
+    /// them for chips whose size never changes. Measured once here instead,
     /// and again only when the subviews themselves change.
     struct SizeCache {
         var sizes: [CGSize]

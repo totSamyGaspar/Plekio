@@ -14,7 +14,7 @@ final class TreatmentCourse {
     var name: String
     var startDate: Date
     var endDate: Date
-
+    
     /// The course this one was created from by "Repeat", if any — the id of the
     /// FIRST course in the chain, not of the immediate parent, so every copy of
     /// the same treatment shares one value.
@@ -24,7 +24,7 @@ final class TreatmentCourse {
     /// user renames one of them. Optional, so an existing store migrates to it
     /// without a version plan.
     var repeatedFromId: UUID?
-
+    
     @Relationship(deleteRule: .cascade, inverse: \MedicationItem.course)
     var medications: [MedicationItem]
     
@@ -36,7 +36,7 @@ final class TreatmentCourse {
         self.repeatedFromId = repeatedFromId
         self.medications = []
     }
-
+    
     /// Identifies the chain this course belongs to: the original itself, or the
     /// course every copy of it was made from.
     var repeatLineageId: UUID { repeatedFromId ?? id }
