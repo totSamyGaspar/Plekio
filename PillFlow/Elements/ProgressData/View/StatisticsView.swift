@@ -26,10 +26,16 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
     var body: some View {
         VStack(spacing: 22) {
             VStack(alignment: .leading, spacing: 16) {
+                // One line in every language. English is eighteen characters;
+                // Ukrainian, German and Kazakh are twenty-four, which is a third
+                // wider and wraps. Shrinking only kicks in where it has to, so the
+                // shorter languages keep the full size.
                 Text("Adherence & Alerts")
                     .scaledFont(size: 24, relativeTo: .title2, weight: .heavy, design: .serif)
                     .foregroundColor(.textPrimary)
                     .tracking(1.5)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                     .padding(.horizontal)
                 
                 if viewModel.lowStockItems.isEmpty {

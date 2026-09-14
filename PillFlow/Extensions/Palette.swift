@@ -183,6 +183,23 @@ extension Color {
         dark: rgb(0.922, 0.451, 0.439)
     )
 
+    /// Washes laid over a whole dose card to say what happened to it.
+    ///
+    /// Baked at their final strength per theme rather than applied as an opacity:
+    /// the same alpha that reads as a tint over a white card is invisible over a
+    /// near-black one.
+    static let missedWash = adaptive(
+        light: UIColor(red: 0.753, green: 0.224, blue: 0.169, alpha: 0.07),
+        dark: UIColor(red: 0.922, green: 0.451, blue: 0.439, alpha: 0.13)
+    )
+
+    /// Neutral rather than coloured: a skip is a decision, not a problem, and it
+    /// should not read with the same urgency as a missed dose.
+    static let skippedWash = adaptive(
+        light: UIColor(white: 0.35, alpha: 0.07),
+        dark: UIColor(white: 1, alpha: 0.10)
+    )
+
     // MARK: Effects
 
     /// Drop shadow under a modal. A shadow tuned for a dark background reads as

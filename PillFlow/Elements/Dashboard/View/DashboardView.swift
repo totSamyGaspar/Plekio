@@ -43,10 +43,6 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                             )
                         )
                     } else {
-                        // The hero carries the date and the tally, but it is only
-                        // there while today still has an unlogged dose. Everything
-                        // logged, or another day picked, and they would vanish with
-                        // it — so they fall back to a plain line.
                         dateSummaryLine
                     }
                     
@@ -65,7 +61,11 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         }
         .overlay(alignment: .bottom) {
             if let log = viewModel.undoableBulkLog {
-                UndoLogBanner(count: log.count) {
+                UndoLogBanner(
+                    count: log.count,
+                    startedAt: log.loggedAt,
+                    duration: BulkDoseLog.window
+                ) {
                     viewModel.undoBulkLog()
                 }
                 .padding(.horizontal)
@@ -189,15 +189,15 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 title: title,
                 pills: pills,
                 onTogglePill: { id in viewModel.togglePill(id: id) },
-                onPillTap: { pill in presentTakeSheet(for: [pill]) },
-                onTakeAll: { pending in presentTakeSheet(for: pending) }
+                onPillTap: { pill in
+                    presentTakeSheet(
+                        for: pills.filter { $0.time == pill.time && !$0.isTaken && !$0.isSkipped }
+                    )
+                }
             )
         }
     }
-    
-    /// One sheet for both entry points. Tapping a card confirms that dose alone;
-    /// "take all" in the section header confirms everything still open there. The
-    /// sheet already adapts its own labels to the count ("Skip" vs "Skip All").
+
     private func presentTakeSheet(for doses: [PillDose]) {
         guard !doses.isEmpty else { return }
         

@@ -218,7 +218,7 @@ struct DashboardViewModelTests {
         // And the slot reads as fully taken afterwards, rather than having swapped
         // which of the two is logged.
         #expect(vm.morningPills.count == 2)
-        #expect(vm.morningPills.allSatisfy(\.isTaken))
+        #expect(vm.morningPills.allSatisfy { $0.isTaken })
 
         // The undo banner offers back only the dose this action actually wrote.
         #expect(vm.undoableBulkLog?.doses.map(\.medicationId) == [pendingId])

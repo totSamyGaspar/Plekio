@@ -16,5 +16,21 @@ import Foundation
 struct BulkDoseLog: Equatable {
     let doses: [PillDose]
 
+    /// When the window opened. The banner counts down from here rather than from
+    /// the moment it happens to appear, so a banner rebuilt mid-window — a scroll,
+    /// a return from the background — resumes where the timer actually is instead
+    /// of restarting a full bar that then vanishes early.
+    let loggedAt: Date = Date()
+
     var count: Int { doses.count }
+
+    /// How long the undo stays available.
+    ///
+    /// Long enough to notice the banner, read it and work out what it offers — the
+    /// mistap is realised a beat after it happens, not during it — and still short
+    /// enough that the banner is gone before it becomes furniture.
+    ///
+    /// Lives here because two things have to agree on it: the view model, which
+    /// closes the window, and the banner, which draws it running out.
+    static let window: TimeInterval = 10
 }

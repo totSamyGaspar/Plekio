@@ -20,6 +20,20 @@ struct MedicationCardView: View {
     /// about the dose, not a record of having swallowed it.
     private var isSettled: Bool { pill.isTaken || pill.isSkipped }
     
+    /// The wash laid over the card, and the word written on it.
+    ///
+    /// Both states used to be a text pill next to the checkmark. The pill carried
+    /// its own background and padding, so it took around eighty of the two hundred
+    /// odd points the text column has — enough that the stock line wrapped and
+    /// hyphenated around it. Here the card's own colour says which state it is and
+    /// the word only has to name it, so it needs no background of its own and
+    /// costs a fraction of the width.
+    private var state: (wash: Color, label: LocalizedStringKey, tint: Color)? {
+        if pill.isMissed { return (.missedWash, "MISSED", .warningAccent) }
+        if pill.isSkipped { return (.skippedWash, "SKIPPED", .textSecondary) }
+        return nil
+    }
+
     private var isLowStock: Bool {
         guard let stock = pill.stockCount else { return false }
         return stock <= pill.lowStockThreshold
@@ -98,13 +112,45 @@ struct MedicationCardView: View {
             statusIndicator
         }
         .padding()
-        .background(appSurface)
-        .cornerRadius(20)
+        .background {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(appSurface)
+        }
+        .overlay { stateCloth }
         .onTapGesture {
             if pill.isLoggable && !isSettled && !pill.isMissed { onTapCard() }
         }
     }
     
+    /// A translucent sheet laid over the finished card — photo, text, checkmark and
+    /// all — with the state printed on it.
+    ///
+    /// An overlay rather than a background, so it covers the photo instead of
+    /// sitting behind it, and so the word is out of the layout entirely. As a pill
+    /// beside the checkmark it took around eighty of the two hundred odd points the
+    /// text column has, wrapped to "ПРОПУ-ЩЕНО", and pushed the stock line into
+    /// hyphenating around it. Printed on the sheet it cannot move anything at all.
+    @ViewBuilder
+    private var stateCloth: some View {
+        if let state {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(state.wash)
+                .overlay(alignment: .topTrailing) {
+                    Text(state.label)
+                        .font(.caption2.weight(.heavy))
+                        .foregroundColor(state.tint)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                }
+                // The sheet lies over the checkmark too, and must not swallow its
+                // tap: logging a missed dose, or changing your mind about a skip,
+                // both happen through the button underneath.
+                .allowsHitTesting(false)
+        }
+    }
+
     // MARK: - Status Indicator
     
     @ViewBuilder
@@ -120,52 +166,30 @@ struct MedicationCardView: View {
             .disabled(!pill.isLoggable)
             .accessibilityLabel("Undo logging \(pill.name)")
         } else if pill.isSkipped {
-            HStack(spacing: 8) {
-                Text("SKIPPED")
-                    .font(.caption2.weight(.heavy))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.textSecondary.opacity(0.12))
-                    .foregroundColor(.textSecondary)
-                    .cornerRadius(6)
-                
-                // Still offered, because a skip is a decision and not a locked
-                // door: changing your mind logs the dose and clears the skip.
-                Button(action: onToggle) {
-                    Image(systemName: "checkmark.circle")
-                        .font(.title)
-                        .foregroundColor(.textTertiary)
-                }
-                .buttonStyle(.plain)
-                .expandTouchTarget(8)
-                .disabled(!pill.isLoggable)
-                .accessibilityLabel("Log \(pill.name)")
+            // Still offered, because a skip is a decision and not a locked door:
+            // changing your mind logs the dose and clears the skip.
+            Button(action: onToggle) {
+                Image(systemName: "checkmark.circle")
+                    .font(.title)
+                    .foregroundColor(.textTertiary)
             }
+            .buttonStyle(.plain)
+            .expandTouchTarget(8)
+            .disabled(!pill.isLoggable)
+            .accessibilityLabel("Log \(pill.name)")
         } else if pill.isLoggable {
-            HStack(spacing: 8) {
-                if pill.isMissed {
-                    Text("MISSED")
-                        .font(.caption2.weight(.heavy))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.warningAccent.opacity(0.12))
-                        .foregroundColor(.warningAccent)
-                        .cornerRadius(6)
-                }
-                
-                Button(action: onToggle) {
-                    Image(systemName: "checkmark.circle")
-                        .font(.title)
-                        .foregroundColor(pill.isMissed ? .warningAccent : .textTertiary)
-                }
-                .buttonStyle(.plain)
-                .expandTouchTarget(8)
-                .accessibilityLabel(
-                    pill.isMissed
-                    ? "Log the missed dose of \(pill.name)"
-                    : "Log \(pill.name)"
-                )
+            Button(action: onToggle) {
+                Image(systemName: "checkmark.circle")
+                    .font(.title)
+                    .foregroundColor(pill.isMissed ? .warningAccent : .textTertiary)
             }
+            .buttonStyle(.plain)
+            .expandTouchTarget(8)
+            .accessibilityLabel(
+                pill.isMissed
+                ? "Log the missed dose of \(pill.name)"
+                : "Log \(pill.name)"
+            )
         } else {
             
             Image(systemName: "checkmark.circle")

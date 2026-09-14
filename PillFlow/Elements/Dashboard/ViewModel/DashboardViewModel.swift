@@ -37,11 +37,6 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     /// first countdown instead of racing it.
     private var undoExpiryTask: Task<Void, Never>?
     
-    /// Long enough to notice the banner, read it and work out what it offers —
-    /// the mistap is realised a beat after it happens, not during it — and still
-    /// short enough that the banner is gone before it becomes furniture.
-    private static let undoWindow: Duration = .seconds(10)
-    
     private static let weekdayFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.setLocalizedDateFormatFromTemplate("EEE")
@@ -211,7 +206,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         undoableBulkLog = BulkDoseLog(doses: doses)
         
         undoExpiryTask = Task { [weak self] in
-            try? await Task.sleep(for: Self.undoWindow)
+            try? await Task.sleep(for: .seconds(BulkDoseLog.window))
             guard !Task.isCancelled else { return }
             self?.undoableBulkLog = nil
         }
