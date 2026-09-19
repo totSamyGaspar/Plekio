@@ -19,13 +19,6 @@ struct ProfileEditView: View {
 
     @State private var isChoosingSource = false
 
-    /// Where the date picker opens when no birthday has been entered yet.
-    /// Computed rather than stored: a stored property's initialiser runs at the
-    /// call site, outside this view's isolation.
-    private static var defaultBirthDate: Date {
-        Calendar.current.date(byAdding: .year, value: -30, to: Date()) ?? Date()
-    }
-
     var body: some View {
         NavigationStack {
             ZStack {
@@ -94,13 +87,13 @@ struct ProfileEditView: View {
                 .foregroundColor(.textPrimary)
                 .textContentType(.name)
 
-            Toggle("Date of birth", isOn: hasBirthDate)
+            Toggle("Date of birth", isOn: $profile.isBirthDateSet)
                 .foregroundColor(.textPrimary)
 
             if profile.birthDate != nil {
                 DatePicker(
                     "Date of birth",
-                    selection: birthDate,
+                    selection: $profile.birthDateOrDefault,
                     in: ...Date(),
                     displayedComponents: .date
                 )
@@ -130,22 +123,6 @@ struct ProfileEditView: View {
                 .lineLimit(1...4)
         }
         .padding(.vertical, 4)
-    }
-
-    // MARK: - The optional birthday, as two bindings
-
-    private var hasBirthDate: Binding<Bool> {
-        Binding(
-            get: { profile.birthDate != nil },
-            set: { profile.birthDate = $0 ? (profile.birthDate ?? Self.defaultBirthDate) : nil }
-        )
-    }
-
-    private var birthDate: Binding<Date> {
-        Binding(
-            get: { profile.birthDate ?? Self.defaultBirthDate },
-            set: { profile.birthDate = $0 }
-        )
     }
 
     // MARK: - Avatar

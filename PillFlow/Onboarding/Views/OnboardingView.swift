@@ -10,7 +10,11 @@ import SwiftUI
 struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
 
     @StateObject private var viewModel: VM
-    
+
+    /// The profile step is view state, not view-model state: it is one step
+    /// added after the pages, and the carousel knows nothing about it.
+    @State private var isCollectingProfile = false
+
     init(viewModel: @autoclosure @escaping () -> VM) {
         self._viewModel = StateObject(wrappedValue: viewModel())
     }
@@ -18,21 +22,32 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
-            
-            VStack {
-                TabView(selection: $viewModel.currentPage) {
-                    ForEach(0..<viewModel.pages.count, id: \.self) { index in
-                        OnboardingPageView(page: viewModel.pages[index])
-                            .tag(index)
-                    }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .indexViewStyle(.page(backgroundDisplayMode: .always))
-                
-                Spacer()
-                
-                bottomButton
+
+            if isCollectingProfile {
+                OnboardingProfileStep(onFinish: viewModel.completeOnboarding)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            } else {
+                carousel
+                    .transition(.move(edge: .leading).combined(with: .opacity))
             }
+        }
+        .animation(.easeInOut(duration: 0.35), value: isCollectingProfile)
+    }
+
+    private var carousel: some View {
+        VStack {
+            TabView(selection: $viewModel.currentPage) {
+                ForEach(0..<viewModel.pages.count, id: \.self) { index in
+                    OnboardingPageView(page: viewModel.pages[index])
+                        .tag(index)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .always))
+            .indexViewStyle(.page(backgroundDisplayMode: .always))
+
+            Spacer()
+
+            bottomButton
         }
     }
     
@@ -41,12 +56,8 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
     @ViewBuilder
     private var bottomButton: some View {
         if viewModel.isLastPage {
-            Button(action: {
-                withAnimation {
-                    viewModel.completeOnboarding()
-                }
-            }) {
-                Text("Start")
+            Button(action: { isCollectingProfile = true }) {
+                Text("Continue")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
