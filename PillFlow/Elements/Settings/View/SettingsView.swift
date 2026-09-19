@@ -32,6 +32,8 @@ struct SettingsView: View {
                     .padding(.top, 10)
                 
                 List {
+                    ProfileSection()
+
                     Section(header: Text("Appearance").foregroundColor(.textSecondary)) {
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
