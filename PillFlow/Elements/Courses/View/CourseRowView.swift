@@ -133,16 +133,57 @@ struct CourseRowView: View {
                 .padding(.top, 4)
             
             HStack {
-                Text("Medications: \(viewModel.medicationsCount)")
-                    .font(.caption.weight(.medium))
-                    .foregroundColor(.textSecondary)
-                
+                // In history the prescriptions are listed in full below, and a
+                // count above them says nothing you cannot see.
+                if !isHistory {
+                    Text("Medications: \(viewModel.medicationsCount)")
+                        .font(.caption.weight(.medium))
+                        .foregroundColor(.textSecondary)
+                }
+
                 Spacer()
-                
+
                 if isHistory {
                     Text("Course completed")
                         .font(.caption.weight(.bold))
                         .foregroundColor(.accentPrimary)
+                }
+            }
+
+            if isHistory, !viewModel.medications.isEmpty {
+                medications
+            }
+        }
+    }
+
+    /// What was actually prescribed. A finished course cannot be opened, so
+    /// without this the history keeps a name and two dates and loses the part
+    /// worth keeping.
+    private var medications: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Divider()
+                .overlay(Color.textPrimary.opacity(0.08))
+
+            ForEach(viewModel.medications) { medication in
+                HStack(spacing: 10) {
+                    Image(systemName: medication.systemImage)
+                        .font(.caption)
+                        .foregroundColor(.accentPrimary.opacity(0.8))
+                        .frame(width: 18)
+
+                    Text(medication.name)
+                        .font(.subheadline)
+                        .foregroundColor(.textPrimary.opacity(0.85))
+                        .lineLimit(1)
+
+                    Spacer(minLength: 8)
+
+                    // The same key the course detail screen uses, so the two
+                    // screens cannot word the same quantity differently.
+                    Text("\(medication.dosage) pcs")
+                        .font(.caption.weight(.medium))
+                        .foregroundColor(.textSecondary)
+                        .monospacedDigit()
                 }
             }
         }

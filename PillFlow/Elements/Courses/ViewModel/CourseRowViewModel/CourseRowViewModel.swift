@@ -8,9 +8,23 @@
 import Foundation
 
 struct CourseRowViewModel {
+
+    /// One prescription, as a finished course lists it.
+    struct Medication: Identifiable {
+        let id: UUID
+        let name: String
+        let dosage: Int
+        let systemImage: String
+    }
+
     let title: String
-    
-    let medicationsCount: Int
+
+    /// Sorted by name rather than left in the order the relationship hands
+    /// them over: SwiftData does not define an order for a to-many, so an
+    /// unsorted list can come back shuffled between launches.
+    let medications: [Medication]
+
+    var medicationsCount: Int { medications.count }
     
     let dateRangeText: String
     let totalDays: Int
@@ -19,7 +33,11 @@ struct CourseRowViewModel {
     
     init(course: TreatmentCourse) {
         self.title = course.name
-        self.medicationsCount = course.medications.count
+        self.medications = course.medications
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+            .map {
+                Medication(id: $0.id, name: $0.name, dosage: $0.dosage, systemImage: $0.formSystemImage)
+            }
         
         let rangeStart = course.startDate
         let rangeEnd = max(rangeStart, course.endDate)

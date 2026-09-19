@@ -48,7 +48,7 @@ struct PillDose: Identifiable, Equatable {
     /// Late and unaccounted for. A skipped dose is accounted for — the user
     /// answered — so it never becomes "missed" no matter how long ago it was.
     var isMissed: Bool {
-        return !isTaken && !isSkipped && Date() > time.addingTimeInterval(3600)
+        return !isTaken && !isSkipped && Date() > time.addingTimeInterval(DoseSchedule.missedGrace)
     }
     
     var isLoggable: Bool {

@@ -62,6 +62,16 @@ struct SettingsView: View {
                     }
                     .listRowBackground(Color.appSurface)
                     
+                    Section(header: Text("Export").foregroundColor(.textSecondary)) {
+                        NavigationLink {
+                            ReportExportView()
+                        } label: {
+                            Label("Create document", systemImage: "doc.text")
+                                .foregroundColor(.textPrimary)
+                        }
+                    }
+                    .listRowBackground(Color.appSurface)
+
                     StorageUsageSection()
 
                     Section(header: Text("About").foregroundColor(.textSecondary)) {

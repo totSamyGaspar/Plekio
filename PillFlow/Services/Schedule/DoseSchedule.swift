@@ -34,6 +34,11 @@ enum DoseSchedule {
     /// The fields that identify one occurrence: a day, plus a time of day.
     static let slotUnits: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute]
 
+    /// How long after its time a dose can still be answered before it counts as
+    /// missed. Shared so the dashboard and an exported report never disagree
+    /// about whether the same dose was missed.
+    static let missedGrace: TimeInterval = 3600
+
     /// The canonical key for an occurrence.
     ///
     /// Two dates describing the same dose on the same day give the same key,
