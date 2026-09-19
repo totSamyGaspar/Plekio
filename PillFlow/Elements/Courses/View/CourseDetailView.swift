@@ -100,7 +100,7 @@ extension CourseDetailView where VM == CourseDetailViewModel {
 
 struct CourseDetailDestination: View {
     let courseId: UUID
-
+    
     var body: some View {
         if let course = DIContainer.shared.resolve(DatabaseServiceProtocol.self).fetchCourse(id: courseId) {
             CourseDetailView(course: course)

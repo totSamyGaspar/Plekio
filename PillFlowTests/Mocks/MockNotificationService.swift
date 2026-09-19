@@ -50,9 +50,9 @@ final class MockNotificationService: NotificationServiceProtocol {
         cancelledReminders.append(reminder)
     }
 
-    func clearDelivered(takenMedicationIds: [UUID], scheduledTime: Date) async {
+    func clearDelivered(settledMedicationIds: [UUID], scheduledTime: Date) async {
         clearDeliveredCallCount += 1
-        clearedDeliveredIds = takenMedicationIds
+        clearedDeliveredIds = settledMedicationIds
         clearedDeliveredSlot = scheduledTime
     }
 }

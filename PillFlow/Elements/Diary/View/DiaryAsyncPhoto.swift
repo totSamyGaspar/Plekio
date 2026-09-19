@@ -19,15 +19,15 @@ import SwiftUI
 
 struct DiaryAsyncPhoto: View {
     let photoId: UUID
-
+    
     /// The longest edge this photo is drawn at, in points, so it can be decoded at
     /// that size instead of at the camera's. Required rather than defaulted: a
     /// forgotten default is exactly how a 68pt thumbnail ends up decoding a 4000px
     /// photo, which is the bug this parameter exists to prevent.
     let targetPointSize: CGFloat
-
+    
     @State private var image: UIImage?
-
+    
     var body: some View {
         Group {
             if let image {

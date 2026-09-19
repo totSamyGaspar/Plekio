@@ -17,29 +17,29 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
     
     private let mediaPickerService: MediaPickerServiceProtocol
     private var hasLoadedEditedMedication = false
-
+    
     init(mediaPickerService: MediaPickerServiceProtocol) {
         self.mediaPickerService = mediaPickerService
     }
-
+    
     // MARK: - Editing
-
+    
     func startEditing(_ medication: MedicationItem) async {
         // .task can fire more than once — a second pass would wipe the user's edits.
         guard !hasLoadedEditedMedication else { return }
         hasLoadedEditedMedication = true
-
+        
         draft = MedicationDraft(from: medication)
-
-        // The photo used to be read from disk synchronously inside the view's init:
-        // on the main thread, and again on every re-creation of the view struct.
+        
+        // Read here rather than in the view's init, where it would be a synchronous
+        // disk read on the main thread, repeated on every re-creation of the struct.
         let medicationId = medication.id
         let loaded = await Task.detached(priority: .userInitiated) { () -> (Data, UIImage)? in
             guard let data = ImageCache.shared.loadDataFromDisk(for: medicationId),
                   let image = UIImage(data: data) else { return nil }
             return (data, image)
         }.value
-
+        
         guard let loaded else { return }
         selectedImage = loaded.1
         // The bytes go into the draft too, so the form has them if the user replaces
@@ -59,12 +59,12 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
                 let compressedData = await Task.detached(priority: .userInitiated) {
                     return image.jpegData(compressionQuality: 0.7) ?? image.pngData()
                 }.value
-
+                
                 guard let compressedData else {
                     AppLog.media.error("Picked image could not be encoded; photo not attached")
                     return
                 }
-
+                
                 self.selectedImage = image
                 self.draft.medicationImageData = compressedData
                 self.draft.photoModified = true

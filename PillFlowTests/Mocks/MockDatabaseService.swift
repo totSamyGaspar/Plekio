@@ -22,8 +22,15 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
     var fetchedPillsDate: Date?
 
+    var markedTakenSlots: [(medicationIds: [UUID], scheduledTime: Date)] = []
+    var unmarkedTakenSlots: [(medicationIds: [UUID], scheduledTime: Date)] = []
+    var skippedSlots: [(medicationIds: [UUID], scheduledTime: Date)] = []
+
     var toggledPillMedicationId: UUID?
     var toggledPillScheduledTime: Date?
+    /// Every toggle in order. The single-value spies above keep the last call, which
+    /// cannot show that a bulk log left an already-taken dose alone.
+    var toggleCalls: [(medicationId: UUID, scheduledTime: Date)] = []
 
     var deletedCourse: TreatmentCourse?
     var deletedMedication: MedicationItem?
@@ -74,6 +81,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     func togglePill(medicationId: UUID, scheduledTime: Date) throws {
         toggledPillMedicationId = medicationId
         toggledPillScheduledTime = scheduledTime
+        toggleCalls.append((medicationId, scheduledTime))
 
         // Mirror the real service: the next fetchPills must return the slot with its
         // new isTaken. Without this there is no way to test view-model logic that
@@ -82,6 +90,42 @@ final class MockDatabaseService: DatabaseServiceProtocol {
         where pillsToReturn[index].medicationId == medicationId
             && pillsToReturn[index].time == scheduledTime {
             pillsToReturn[index].isTaken.toggle()
+        }
+    }
+
+    func markDosesTaken(medicationIds: [UUID], scheduledTime: Date) throws {
+        markedTakenSlots.append((medicationIds, scheduledTime))
+
+        for index in pillsToReturn.indices
+        where medicationIds.contains(pillsToReturn[index].medicationId)
+            && pillsToReturn[index].time == scheduledTime
+            && !pillsToReturn[index].isTaken {
+            pillsToReturn[index].isTaken = true
+            pillsToReturn[index].isSkipped = false
+        }
+    }
+
+    func unmarkDosesTaken(medicationIds: [UUID], scheduledTime: Date) throws {
+        unmarkedTakenSlots.append((medicationIds, scheduledTime))
+
+        for index in pillsToReturn.indices
+        where medicationIds.contains(pillsToReturn[index].medicationId)
+            && pillsToReturn[index].time == scheduledTime
+            && pillsToReturn[index].isTaken {
+            pillsToReturn[index].isTaken = false
+        }
+    }
+
+    func skipDoses(medicationIds: [UUID], scheduledTime: Date) throws {
+        skippedSlots.append((medicationIds, scheduledTime))
+
+        // Mirror the real service, so a view model that re-reads after the write
+        // sees the skip — same reason togglePill flips isTaken here.
+        for index in pillsToReturn.indices
+        where medicationIds.contains(pillsToReturn[index].medicationId)
+            && pillsToReturn[index].time == scheduledTime
+            && !pillsToReturn[index].isTaken {
+            pillsToReturn[index].isSkipped = true
         }
     }
 

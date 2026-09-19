@@ -11,28 +11,28 @@
 import SwiftUI
 
 struct DailyReminderRows: View {
-
+    
     private let reminder: DailyReminder
-
+    
     // The component reads and writes the reminder's own keys rather than being
     // handed bindings: the keys belong to the reminder, and threading them
     // through the Settings screen would only be a second place to get them wrong.
     @AppStorage private var isEnabled: Bool
     @AppStorage private var minutesRaw: String
-
+    
     init(_ reminder: DailyReminder) {
         self.reminder = reminder
         self._isEnabled = AppStorage(wrappedValue: false, reminder.enabledKey)
         self._minutesRaw = AppStorage(wrappedValue: "", reminder.timesKey)
     }
-
+    
     /// Falls back to the reminder's own defaults while nothing has been written,
     /// so the picker never opens on midnight.
     private var minutes: [Int] {
         let parsed = DailyReminder.minutes(fromRaw: minutesRaw, limit: reminder.maxTimes)
         return parsed.isEmpty ? reminder.defaultMinutesOfDay : parsed
     }
-
+    
     var body: some View {
         Toggle(isOn: $isEnabled) {
             Label {
@@ -47,7 +47,7 @@ struct DailyReminderRows: View {
         // hang them on, and the switch is the one row that is always present.
         .onChange(of: isEnabled) { _, _ in apply() }
         .onChange(of: minutesRaw) { _, _ in apply() }
-
+        
         // Only once the reminder is on: a time picker for something switched off
         // is a control with nothing to control.
         if isEnabled {
@@ -67,7 +67,7 @@ struct DailyReminderRows: View {
                 updated.remove(atOffsets: offsets)
                 write(updated)
             }
-
+            
             if minutes.count < reminder.maxTimes {
                 Button(action: addTime) {
                     Label("Add time", systemImage: "plus.circle.fill")
@@ -76,17 +76,17 @@ struct DailyReminderRows: View {
             }
         }
     }
-
+    
     // MARK: - Arming
-
+    
     private func apply() {
         let service = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-
+        
         guard isEnabled else {
             service.cancelDailyReminder(reminder)
             return
         }
-
+        
         let times = minutes
         Task {
             // Asked here rather than at launch: switching a reminder on is the
@@ -96,9 +96,9 @@ struct DailyReminderRows: View {
             await service.scheduleDailyReminder(reminder, minutesOfDay: times)
         }
     }
-
+    
     // MARK: - Editing
-
+    
     /// The picker speaks Date; the setting stores minutes since midnight, since a
     /// date would drag a day along with it for a time that repeats every day.
     private func time(at index: Int) -> Binding<Date> {
@@ -119,7 +119,7 @@ struct DailyReminderRows: View {
             }
         )
     }
-
+    
     /// Four hours after the last one, the same step the medication form offers —
     /// close enough to be a sensible next measurement, far enough not to collide
     /// with the time above it.
@@ -127,7 +127,7 @@ struct DailyReminderRows: View {
         let last = minutes.last ?? reminder.defaultMinutesOfDay.first ?? 0
         write(minutes + [(last + 4 * 60) % (24 * 60)])
     }
-
+    
     private func write(_ updated: [Int]) {
         minutesRaw = DailyReminder.raw(from: updated)
     }

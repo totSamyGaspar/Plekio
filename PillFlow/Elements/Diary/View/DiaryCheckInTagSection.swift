@@ -21,13 +21,13 @@ struct DiaryTagSection: View {
     let inputPlaceholder: LocalizedStringKey
     let onToggle: (String) -> Void
     let onAddCustom: (String) -> Void
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
                 .font(.caption.weight(.heavy))
                 .foregroundColor(.textSecondary)
-
+            
             FlowLayout(spacing: 10) {
                 ForEach(options, id: \.self) { option in
                     DiaryTagChip(
@@ -40,7 +40,7 @@ struct DiaryTagSection: View {
                     }
                 }
             }
-
+            
             DiaryTagInputRow(placeholder: inputPlaceholder, onAdd: onAddCustom)
         }
     }

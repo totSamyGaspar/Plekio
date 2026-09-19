@@ -14,16 +14,16 @@ import SwiftUI
 struct RepeatCourseSheet: View {
     let course: TreatmentCourse
     let onConfirm: (_ startDate: Date, _ endDate: Date) -> Void
-
+    
     @Environment(\.dismiss) private var dismiss
-
+    
     @State private var startDate: Date
     @State private var endDate: Date
-
+    
     init(course: TreatmentCourse, onConfirm: @escaping (Date, Date) -> Void) {
         self.course = course
         self.onConfirm = onConfirm
-
+        
         // The previous run's length is the best guess for the new one: the user
         // usually repeats the same treatment, just later.
         let calendar = Calendar.current
@@ -33,18 +33,18 @@ struct RepeatCourseSheet: View {
             from: calendar.startOfDay(for: course.startDate),
             to: calendar.startOfDay(for: course.endDate)
         ).day ?? 0
-
+        
         _startDate = State(initialValue: today)
         _endDate = State(
             initialValue: calendar.date(byAdding: .day, value: max(0, previousLength), to: today) ?? today
         )
     }
-
+    
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.appBackground.ignoresSafeArea()
-
+                
                 Form {
                     Section {
                         VStack(alignment: .leading, spacing: 6) {
@@ -58,13 +58,13 @@ struct RepeatCourseSheet: View {
                         .padding(.vertical, 4)
                     }
                     .listRowBackground(Color.appSurface)
-
+                    
                     Section {
                         DatePicker("Start", selection: $startDate, displayedComponents: .date)
                             .foregroundColor(.textPrimary)
                         DatePicker("End", selection: $endDate,
                                    in: startDate..., displayedComponents: .date)
-                            .foregroundColor(.textPrimary)
+                        .foregroundColor(.textPrimary)
                     } header: {
                         Text("New dates")
                             .foregroundColor(.textSecondary)

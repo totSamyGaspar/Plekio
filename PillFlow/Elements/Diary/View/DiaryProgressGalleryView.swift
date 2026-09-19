@@ -18,23 +18,23 @@ struct DiaryProgressGalleryView: View {
     @Binding var selection: [UUID]
     let onInspect: (UUID) -> Void
     let onLaunchComparison: () -> Void
-
+    
     @State private var categoryFilter: String?
-
+    
     private var availableCategories: [String] {
         Array(Set(checkpoints.map(\.category))).sorted()
     }
-
+    
     private var filteredPhotoCheckpoints: [DiaryPhotoCheckpoint] {
         guard let categoryFilter else { return checkpoints }
         return checkpoints.filter { $0.category == categoryFilter }
     }
-
+    
     var body: some View {
         VStack(spacing: 16) {
             categoryFilterBar
             compareHeroCard
-
+            
             if filteredPhotoCheckpoints.isEmpty {
                 EmptyStateView(
                     icon: "photo.stack.fill",
@@ -55,7 +55,7 @@ struct DiaryProgressGalleryView: View {
         }
         .padding(.horizontal)
     }
-
+    
     private var categoryFilterBar: some View {
         HStack {
             Text("Category:")
@@ -82,7 +82,7 @@ struct DiaryProgressGalleryView: View {
             Spacer()
         }
     }
-
+    
     private var compareHeroCard: some View {
         HStack(alignment: .top, spacing: 16) {
             ZStack {
@@ -95,12 +95,12 @@ struct DiaryProgressGalleryView: View {
                     .foregroundColor(.textPrimary)
                 Text(
                     selection.isEmpty
-                        ? "Select any two checkpoints to view a side-by-side comparison."
-                        : "\(selection.count)/2 checkpoints selected."
+                    ? "Select any two checkpoints to view a side-by-side comparison."
+                    : "\(selection.count)/2 checkpoints selected."
                 )
                 .font(.caption)
                 .foregroundColor(.textSecondary)
-
+                
                 Button {
                     onLaunchComparison()
                 } label: {
@@ -130,10 +130,10 @@ struct DiaryProgressGalleryView: View {
         .cornerRadius(20)
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.accentPrimary.opacity(0.2), lineWidth: 1))
     }
-
+    
     private func photoCheckpointCard(index: Int, item: DiaryPhotoCheckpoint) -> some View {
         let isSelected = selection.contains(item.id)
-
+        
         return VStack(alignment: .leading, spacing: 0) {
             Button {
                 onInspect(item.id)
@@ -145,7 +145,7 @@ struct DiaryProgressGalleryView: View {
                         .frame(height: 180)
                         .frame(maxWidth: .infinity)
                         .clipped()
-
+                    
                     Text(item.category)
                         .font(.caption2.weight(.heavy))
                         .textCase(.uppercase)
@@ -169,7 +169,7 @@ struct DiaryProgressGalleryView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-
+            
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Label(item.entry.checkInDate.formatted(date: .numeric, time: .omitted), systemImage: "calendar")
@@ -184,7 +184,7 @@ struct DiaryProgressGalleryView: View {
                         .background(Color.accentPrimary.opacity(0.12))
                         .clipShape(Capsule())
                 }
-
+                
                 let caption = item.entry.displayCaption
                 if !caption.isEmpty {
                     Text(caption)
@@ -192,7 +192,7 @@ struct DiaryProgressGalleryView: View {
                         .foregroundColor(.textSecondary)
                         .lineLimit(2)
                 }
-
+                
                 HStack {
                     Button {
                         onInspect(item.id)
@@ -204,9 +204,9 @@ struct DiaryProgressGalleryView: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-
+                    
                     Spacer(minLength: 12)
-
+                    
                     // A dedicated, plain-styled Button whose whole pill (not just
                     // the text glyphs) is the tap target — .contentShape keeps the
                     // hit-testing region pinned exactly to the visible pill so a
@@ -245,7 +245,7 @@ struct DiaryProgressGalleryView: View {
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(isSelected ? Color.accentPrimary : Color.clear, lineWidth: 3))
         .shadow(color: isSelected ? Color.accentPrimary.opacity(0.25) : .clear, radius: 10)
     }
-
+    
     private func toggleComparisonSelection(_ id: UUID) {
         if let idx = selection.firstIndex(of: id) {
             selection.remove(at: idx)

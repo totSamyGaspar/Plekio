@@ -26,10 +26,16 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
     var body: some View {
         VStack(spacing: 22) {
             VStack(alignment: .leading, spacing: 16) {
+                // One line in every language. English is eighteen characters;
+                // Ukrainian, German and Kazakh are twenty-four, which is a third
+                // wider and wraps. Shrinking only kicks in where it has to, so the
+                // shorter languages keep the full size.
                 Text("Adherence & Alerts")
                     .scaledFont(size: 24, relativeTo: .title2, weight: .heavy, design: .serif)
                     .foregroundColor(.textPrimary)
                     .tracking(1.5)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                     .padding(.horizontal)
                 
                 if viewModel.lowStockItems.isEmpty {
@@ -147,10 +153,10 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 .foregroundColor(.accentPrimary)
                 .tracking(1.5)
                 .padding(.top, 24)
-
+            
             HStack(alignment: .center, spacing: 16) {
                 CircularProgressView(progress: viewModel.progress)
-                .frame(height: 100)
+                    .frame(height: 100)
                 
                 VStack(spacing: 10) {
                     Text(verbatim: "🔥")
@@ -184,7 +190,7 @@ final class MockStatisticsViewModel: StatisticsViewModelProtocol {
     var progress: Double { 0.93 }
     @Published var streakDays: Int = 1
     @Published var lowStockItems: [MedicationItem] = []
-
+    
     init() {}
     func loadStats() {}
     func refill(medication: MedicationItem, amount: Int) {}

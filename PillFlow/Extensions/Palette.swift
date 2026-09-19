@@ -1,94 +1,16 @@
 //
-//  Theme.swift
+//  Palette.swift
 //  PillFlow
-//
-//  Created by Edward Gasparian on 11.06.2026.
 //
 
 import SwiftUI
 import UIKit
 
-// MARK: - Theme selection
-
-/// The appearance the user picked in Settings.
-///
-/// Stored as a raw string in `UserDefaults` so `@AppStorage` can read it from
-/// any view without an observable object in between: every screen that needs
-/// the scheme reads the same key and re-renders on its own when it changes.
-enum AppTheme: String, CaseIterable, Identifiable {
-    /// Follows the iOS setting, which is what HIG asks an app to do by default.
-    /// Listed first: `allCases` is what the picker in Settings renders.
-    case system
-    case light
-    case dark
-
-    /// One name for the defaults key, so a typo cannot split the setting in two.
-    static let storageKey = "appTheme"
-
-    var id: String { rawValue }
-
-    /// `nil` hands the choice back to the system — `preferredColorScheme(nil)`
-    /// stops overriding rather than picking a side.
-    var colorScheme: ColorScheme? {
-        // Explicit returns rather than a switch expression: mixing `nil` with
-        // implicit member syntax leans on optional promotion that the shorthand
-        // form does not always infer.
-        switch self {
-        case .system: return nil
-        case .light: return .light
-        case .dark: return .dark
-        }
-    }
-
-    var title: LocalizedStringKey {
-        switch self {
-        case .system: "System"
-        case .light: "Light"
-        case .dark: "Dark"
-        }
-    }
-
-    var iconName: String {
-        switch self {
-        case .system: "circle.lefthalf.filled"
-        case .light: "sun.max.fill"
-        case .dark: "moon.stars.fill"
-        }
-    }
-}
-
-// MARK: - Applying the theme
-
-/// Forces the chosen scheme on a view tree. Needed on every root and on every
-/// sheet: a modal is its own presentation, so it does not inherit
-/// `preferredColorScheme` from the screen that presented it.
-struct AppThemeModifier: ViewModifier {
-    @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .dark
-
-    func body(content: Content) -> some View {
-        content.preferredColorScheme(theme.colorScheme)
-    }
-}
-
-/// Same choice pushed down as an environment value rather than a window
-/// preference — for UIKit-backed controls (pickers, text editors) that read
-/// `\.colorScheme` directly instead of following the window.
-struct AppColorSchemeModifier: ViewModifier {
-    @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .dark
-
-    /// On `.system` there is nothing to override, so the scheme already in the
-    /// environment is passed straight back through.
-    @Environment(\.colorScheme) private var inheritedScheme
-
-    func body(content: Content) -> some View {
-        content.environment(\.colorScheme, theme.colorScheme ?? inheritedScheme)
-    }
-}
-
-extension View {
-    func appTheme() -> some View { modifier(AppThemeModifier()) }
-    func appColorScheme() -> some View { modifier(AppColorSchemeModifier()) }
-}
+//  Every colour the app uses, and the one place a light and a dark value are
+//  paired.
+//
+//  Nothing here decides anything — it is the vocabulary the rest of the app
+//  paints with. Which of the two values is served is AppTheme's business.
 
 // MARK: - Palette
 
@@ -119,7 +41,15 @@ private func rgb(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> UIColor {
     UIColor(red: red, green: green, blue: blue, alpha: 1)
 }
 
-private let darkTraits = UITraitCollection(userInterfaceStyle: .dark)
+extension UITraitCollection {
+
+    /// For resolving a system colour to the value it takes in the dark theme.
+    ///
+    /// Namespaced rather than a private file-level constant: the UIKit twins in
+    /// AppAppearance need it too, and `private` in Swift means "this file", which
+    /// is exactly what splitting Theme.swift ran into.
+    static let darkAppearance = UITraitCollection(userInterfaceStyle: .dark)
+}
 
 extension Color {
 
@@ -198,9 +128,8 @@ extension Color {
 
     // MARK: Accent
 
-    /// The primary accent. It used to be referenced under two names —
-    /// `Color.neonMint` and plain `Color.mint` — mixed together, sometimes on
-    /// adjacent lines, so changing the accent in one place no longer worked.
+    /// The primary accent, under one name. Referenced under two — a custom one and
+    /// SwiftUI's own `Color.mint` — changing the accent stops working.
     /// `accentPrimary` is now the only name for it.
     ///
     /// The light theme darkens it: system mint on white sits far below the
@@ -213,10 +142,10 @@ extension Color {
     /// Companion to the accent for gradients (progress ring).
     static let accentSecondary = adaptive(
         light: rgb(0.180, 0.561, 0.518),
-        dark: UIColor.systemTeal.resolvedColor(with: darkTraits)
+        dark: UIColor.systemTeal.resolvedColor(with: .darkAppearance)
     )
 
-    /// Accent for diary milestone tags. The literal was duplicated in three files.
+    /// Accent for diary milestone tags, named rather than repeated at each use.
     static let milestonePurple = adaptive(
         light: rgb(0.420, 0.247, 0.627),
         dark: rgb(0.7, 0.4, 0.9)
@@ -228,7 +157,7 @@ extension Color {
     /// light theme drops it to a dark amber.
     static let warningAmber = adaptive(
         light: rgb(0.541, 0.380, 0.0),
-        dark: UIColor.systemYellow.resolvedColor(with: darkTraits)
+        dark: UIColor.systemYellow.resolvedColor(with: .darkAppearance)
     )
 
     /// The "after"/energy counterpart to the accent. System orange keeps its
@@ -236,7 +165,7 @@ extension Color {
     /// the light theme uses a deeper burnt orange.
     static let warmAccent = adaptive(
         light: rgb(0.761, 0.380, 0.039),
-        dark: UIColor.systemOrange.resolvedColor(with: darkTraits)
+        dark: UIColor.systemOrange.resolvedColor(with: .darkAppearance)
     )
 
     /// Background and accent for the low-stock warning.
@@ -252,6 +181,23 @@ extension Color {
     static let warningAccent = adaptive(
         light: rgb(0.753, 0.224, 0.169),
         dark: rgb(0.922, 0.451, 0.439)
+    )
+
+    /// Washes laid over a whole dose card to say what happened to it.
+    ///
+    /// Baked at their final strength per theme rather than applied as an opacity:
+    /// the same alpha that reads as a tint over a white card is invisible over a
+    /// near-black one.
+    static let missedWash = adaptive(
+        light: UIColor(red: 0.753, green: 0.224, blue: 0.169, alpha: 0.07),
+        dark: UIColor(red: 0.922, green: 0.451, blue: 0.439, alpha: 0.13)
+    )
+
+    /// Neutral rather than coloured: a skip is a decision, not a problem, and it
+    /// should not read with the same urgency as a missed dose.
+    static let skippedWash = adaptive(
+        light: UIColor(white: 0.35, alpha: 0.07),
+        dark: UIColor(white: 1, alpha: 0.10)
     )
 
     // MARK: Effects
@@ -280,21 +226,21 @@ extension Color {
     /// Morning: sage moving into olive.
     static let heroMorningStart = adaptive(
         light: rgb(0.455, 0.522, 0.247),
-        dark: UIColor.systemMint.resolvedColor(with: darkTraits)
+        dark: UIColor.systemMint.resolvedColor(with: .darkAppearance)
     )
     static let heroMorningEnd = adaptive(
         light: rgb(0.325, 0.420, 0.224),
-        dark: UIColor.systemTeal.resolvedColor(with: darkTraits)
+        dark: UIColor.systemTeal.resolvedColor(with: .darkAppearance)
     )
 
     /// Midday: amber moving into terracotta.
     static let heroNoonStart = adaptive(
         light: rgb(0.690, 0.478, 0.133),
-        dark: UIColor.systemOrange.resolvedColor(with: darkTraits)
+        dark: UIColor.systemOrange.resolvedColor(with: .darkAppearance)
     )
     static let heroNoonEnd = adaptive(
         light: rgb(0.561, 0.318, 0.090),
-        dark: UIColor.systemYellow.resolvedColor(with: darkTraits)
+        dark: UIColor.systemYellow.resolvedColor(with: .darkAppearance)
     )
 
     /// Evening: plum moving into poppy. The sweep passes through a plum-rose
@@ -302,55 +248,10 @@ extension Color {
     /// text — a brighter one would drop the label below the contrast floor.
     static let heroEveningStart = adaptive(
         light: rgb(0.431, 0.353, 0.651),
-        dark: UIColor.systemPurple.resolvedColor(with: darkTraits)
+        dark: UIColor.systemPurple.resolvedColor(with: .darkAppearance)
     )
     static let heroEveningEnd = adaptive(
         light: rgb(0.780, 0.267, 0.180),
-        dark: UIColor.systemIndigo.resolvedColor(with: darkTraits)
+        dark: UIColor.systemIndigo.resolvedColor(with: .darkAppearance)
     )
-}
-
-// MARK: - UIKit-level appearance
-
-/// Appearance that SwiftUI has no modifier for.
-enum AppAppearance {
-
-    /// A slider's `.tint` colors its filled track only — the round thumb stays
-    /// white in both themes and SwiftUI exposes no way to change it, so it goes
-    /// through UIKit's appearance proxy. Applies to every slider in the app,
-    /// including the before/after split handle.
-    static func configureSliders() {
-        UISlider.appearance().thumbTintColor = .appAccent
-    }
-}
-
-// MARK: - UIKit twins
-
-/// The tab bar is configured through `UITabBarAppearance`, which takes UIColor
-/// and resolves it against its own trait collection. A `UIColor(Color)` bridge
-/// would be flattened at configuration time — in `App.init`, before any window
-/// exists — so these are built as dynamic UIColors from the start.
-extension UIColor {
-
-    static let appAccent = UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor.systemMint.resolvedColor(with: darkTraits)
-            : UIColor(red: 0.122, green: 0.478, blue: 0.396, alpha: 1)
-    }
-
-    /// The surface color with no transparency, for the tab bar when Reduce
-    /// Transparency rules the blur out.
-    static let appSurfaceOpaque = UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 0.11, green: 0.13, blue: 0.19, alpha: 1)
-            : UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-    }
-
-    /// Wash over the tab bar blur: darkens the bar in the dark theme, lifts it
-    /// off the cream background in the light one.
-    static let appTabBarWash = UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor.black.withAlphaComponent(0.4)
-            : UIColor.white.withAlphaComponent(0.55)
-    }
 }

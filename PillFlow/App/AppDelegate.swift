@@ -15,36 +15,36 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     weak var router: AppRouter? {
         didSet { flushBufferedPush() }
     }
-
+    
     private var bufferedPush: (medicationIds: [UUID], time: Date)?
     private var bufferedReminder: DailyReminder?
-
+    
     private func flushBufferedPush() {
         guard let router else { return }
-
+        
         if let push = bufferedPush {
             bufferedPush = nil
             router.handlePushNotification(medicationIds: push.medicationIds, time: push.time)
         }
-
+        
         if let reminder = bufferedReminder {
             bufferedReminder = nil
             router.handleReminder(reminder)
         }
     }
-
+    
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         return true
     }
-
+    
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-
+        
         let userInfo = response.notification.request.content.userInfo
-
+        
         // The daily reminders carry no medicationIds, so they have to be
         // recognised before the dose branch's guard drops them as malformed.
         if let kind = userInfo[DailyReminder.userInfoKey] as? String,
@@ -60,43 +60,51 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             completionHandler()
             return
         }
-
-        guard let medIdStrings = userInfo["medicationIds"] as? [String],
-              let timeInterval = userInfo["time"] as? TimeInterval else {
+        
+        // Read through ReminderPayload rather than by key: these three literals
+        // were written at one end and read at the other, so a typo produced a
+        // reminder that looked right and named no medication.
+        let medIdStrings = ReminderPayload.medicationIds(in: userInfo)
+        guard !medIdStrings.isEmpty,
+              let timeInterval = ReminderPayload.slotTime(in: userInfo) else {
             completionHandler()
             return
         }
-
+        
         let medIds = medIdStrings.compactMap { UUID(uuidString: $0) }
-        let names = userInfo["medicationNames"] as? [String] ?? []
+        let names = ReminderPayload.medicationNames(in: userInfo)
         let scheduledTime = Date(timeIntervalSince1970: timeInterval)
         let action = response.actionIdentifier
-
+        
         Task { @MainActor [weak self] in
             // Called only once the work is done, not before it starts. iOS may
             // suspend the app as soon as this returns, and logging a dose now ends
             // in a full reschedule — announcing "handled" first meant that
             // reschedule could be cut off halfway.
             defer { completionHandler() }
-
+            
             switch action {
-            // The button already answers the question, so it logs the dose instead of
-            // opening a modal asking it again — it only switches to today's tab.
+                // The button already answers the question, so it logs the dose instead of
+                // opening a modal asking it again — it only switches to today's tab.
             case NotificationAction.take:
                 guard let self else { return }
                 await self.logDoses(medicationIds: medIds, scheduledTime: scheduledTime)
                 self.router?.selectedTab = 0
-
+                
             case NotificationAction.snooze:
                 let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
                 await notifService.scheduleSnooze(for: medIdStrings, names: names)
-
-            // A skip is the absence of a log, not a state of its own. iOS removes the
-            // notification itself once any action is chosen.
+                
+                // Recorded, not ignored. A skip is not the absence of a log: without a
+                // row nothing tells it apart from a dose the user never answered, and
+                // the next rebuild puts
+                // the reminder back. iOS removes the banner itself once any action is
+                // chosen.
             case NotificationAction.skip:
-                break
-
-            // A plain tap on the notification body: open the app and show the modal.
+                guard let self else { return }
+                await self.skipDoses(medicationIds: medIds, scheduledTime: scheduledTime)
+                
+                // A plain tap on the notification body: open the app and show the modal.
             default:
                 guard let self else { return }
                 if let router = self.router {
@@ -107,7 +115,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             }
         }
     }
-
+    
     /// Logs the doses of the slot that aren't logged yet.
     ///
     /// Idempotent by way of `PendingDose.unlogged`: `togglePill` is a toggle, so
@@ -115,8 +123,24 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     private func logDoses(medicationIds: [UUID], scheduledTime: Date) async {
         let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
         let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-
+        
         await PendingDose.markTaken(
+            PendingDose.unlogged(medicationIds: medicationIds, scheduledTime: scheduledTime, in: dbService),
+            dbService: dbService,
+            notificationService: notifService
+        )
+    }
+    
+    /// Records a skip for the doses of the slot that are still unanswered.
+    ///
+    /// Idempotent through the same filter as logging: `unlogged` drops anything
+    /// already taken, and `recordSkip` drops anything already skipped, so a second
+    /// press of the button changes nothing.
+    private func skipDoses(medicationIds: [UUID], scheduledTime: Date) async {
+        let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
+        let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
+        
+        await PendingDose.markSkipped(
             PendingDose.unlogged(medicationIds: medicationIds, scheduledTime: scheduledTime, in: dbService),
             dbService: dbService,
             notificationService: notifService

@@ -21,7 +21,9 @@ import UIKit
 /// Thread safety is by construction: `NSCache` synchronizes itself and every
 /// other field is an immutable `let`, so there is no shared mutable state.
 nonisolated final class ImageCache: @unchecked Sendable {
-    static let shared = ImageCache()
+    // Spelled with the concrete type, not `Self`: a stored property initializer
+    // cannot reference the covariant Self type.
+    static let shared = ImageCache(directory: ImageCache.defaultDirectory())
     private let cache = NSCache<NSString, UIImage>()
 
     /// Ids whose file is not on disk.
@@ -52,25 +54,30 @@ nonisolated final class ImageCache: @unchecked Sendable {
     /// so this stays off the main actor; one ladder step of slack costs nothing.
     private static let assumedScreenScale: CGFloat = 3
 
-    private init() {
+    /// Photos are stored on disk (in Application Support) rather than as a
+    /// SwiftData blob on MedicationItem. Keeping them out of the model avoids
+    /// pulling image data on every fetch of MedicationItem, even where the image
+    /// isn't shown (schedule checks, stats, etc.) — files are loaded from disk
+    /// only where a UIImage is actually needed for rendering.
+    private static func defaultDirectory() -> URL {
+        let fileManager = FileManager.default
+        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? fileManager.temporaryDirectory
+        return appSupport.appendingPathComponent("MedicationImages", isDirectory: true)
+    }
+
+    /// Rooted at a directory of the caller's choosing. Production uses `shared`;
+    /// tests point an instance at a temporary folder, the same way
+    /// `DatabaseService(inMemoryForTesting:)` avoids the real database.
+    init(directory: URL) {
         cache.countLimit = 100
         // countLimit alone bounds the number of images, not their size: 100
         // full-size photos is several gigabytes. The cost below is the decoded
         // byte count, so this is a real ceiling.
         cache.totalCostLimit = 48 * 1024 * 1024
 
-        // Photos are stored on disk (in Application Support) rather than as a
-        // SwiftData blob on MedicationItem. Keeping them out of the model avoids
-        // pulling image data on every fetch of MedicationItem, even where the
-        // image isn't shown (schedule checks, stats, etc.) — files are loaded
-        // from disk only where a UIImage is actually needed for rendering.
-        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? fileManager.temporaryDirectory
-        let dir = appSupport.appendingPathComponent("MedicationImages", isDirectory: true)
-        if !fileManager.fileExists(atPath: dir.path) {
-            try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
-        }
-        self.directoryURL = dir
+        self.directoryURL = directory
+        _ = createDirectoryIfMissing()
     }
 
     private func fileURL(for id: UUID) -> URL {
@@ -138,8 +145,24 @@ nonisolated final class ImageCache: @unchecked Sendable {
 
     /// Saves already-compressed photo data (JPEG) to a file named by the
     /// medication's id.
+    ///
+    /// The returned flag is not decoration: a record can commit while its photo
+    /// does not reach the disk, and callers have to be able to say so. See
+    /// `DatabaseService.persistPhotos`.
     @discardableResult
     func saveToDisk(_ data: Data, for id: UUID) -> Bool {
+        if write(data, for: id) { return true }
+
+        // The directory is created once at startup and the result discarded, so if
+        // that ever failed — a first launch while the device was still locked, a
+        // folder removed underneath the app — every save afterwards failed too,
+        // silently and forever. Recreating it turns that from permanent into a
+        // single retry.
+        guard createDirectoryIfMissing() else { return false }
+        return write(data, for: id)
+    }
+
+    private func write(_ data: Data, for id: UUID) -> Bool {
         do {
             try data.write(to: fileURL(for: id), options: .atomic)
             // The file changed — every decoded size of it in memory is now stale.
@@ -147,6 +170,28 @@ nonisolated final class ImageCache: @unchecked Sendable {
             return true
         } catch {
             AppLog.media.error("Failed to save photo to disk: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+    }
+
+    /// Creates the photo directory if it is not there.
+    ///
+    /// Returns true only when something actually changed, so a caller knows a
+    /// retry is worth making: an already-present directory means the write failed
+    /// for some other reason and will fail again the same way.
+    @discardableResult
+    private func createDirectoryIfMissing() -> Bool {
+        var isDirectory: ObjCBool = false
+        if fileManager.fileExists(atPath: directoryURL.path, isDirectory: &isDirectory),
+           isDirectory.boolValue {
+            return false
+        }
+
+        do {
+            try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+            return true
+        } catch {
+            AppLog.media.error("Photo directory unavailable: \(error.localizedDescription, privacy: .public)")
             return false
         }
     }
@@ -166,9 +211,9 @@ nonisolated final class ImageCache: @unchecked Sendable {
     /// The single entry point for loading a photo: memory cache first, then a read
     /// and decode off the main thread on a miss.
     ///
-    /// This used to be a callback that fired synchronously on a cache hit, so a
-    /// @State assignment could land during view construction. The async version
-    /// behaves the same either way.
+    /// Async even on a cache hit. A callback that fires synchronously there lands
+    /// a @State assignment during view construction; this behaves the same either
+    /// way.
     ///
     /// - Parameter targetPointSize: the longest edge the image will be drawn at,
     ///   in points. The photo is decoded to the nearest size at or above that

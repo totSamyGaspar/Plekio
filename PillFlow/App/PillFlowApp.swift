@@ -38,7 +38,7 @@ struct PillFlowApp: App {
     private func refreshAllNotifications() {
         let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
         let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-
+        
         Task { await notifService.rescheduleAll(using: dbService) }
     }
 }

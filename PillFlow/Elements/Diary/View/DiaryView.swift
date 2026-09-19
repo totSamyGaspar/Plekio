@@ -40,41 +40,52 @@ private let comparisonSourceID = "diary.comparison"
 struct DiaryView<VM: DiaryViewModelProtocol>: View {
     @StateObject private var viewModel: VM
     @EnvironmentObject private var router: AppRouter
-
+    
     @State private var showingCheckIn = false
     @State private var showingBloodPressureEntry = false
     @State private var entryBeingEdited: DiaryEntry?
     @State private var showingDeleteAlert = false
     @State private var entryToDelete: DiaryEntry?
-
+    
     @State private var selectedSubTab: DiarySubTab = .journalFeed
     @State private var comparisonSelection: [UUID] = []
     @State private var comparisonPayload: DiaryComparisonPayload?
     @State private var inspectingPhoto: DiaryPhotoInspection?
-
+    
     @Namespace private var comparisonTransition
-
-    private let quickMoods: [(label: LocalizedStringResource, emoji: String, mood: DiaryMood)] = [
-        ("Great", "☀️", .great),
-        ("Good", "🙂", .good),
-        ("Okay", "😊", .neutral),
-        ("Tired", "😴", .exhausted),
-    ]
-
+    
     init(viewModel: @autoclosure @escaping () -> VM) {
         self._viewModel = StateObject(wrappedValue: viewModel())
     }
-
+    
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
-
+            
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
-                    headerSection
-                    todaySection
+                    DiaryHeaderView(
+                        transitionSourceID: comparisonSourceID,
+                        transitionNamespace: comparisonTransition,
+                        onCompare: { openComparison() },
+                        onAddEntry: { showingCheckIn = true }
+                    )
+                    
+                    DiaryTodayCard(
+                        entry: viewModel.todaysEntry,
+                        quickMoods: DiaryTodayCard.QuickMood.standard,
+                        onQuickLog: { viewModel.quickLog(mood: $0) },
+                        onEdit: { entryBeingEdited = $0 }
+                    )
+                    
                     bloodPressureSection
-                    statsGrid
+                    
+                    DiaryStatsGrid(
+                        avgMoodScore: viewModel.avgMoodScore,
+                        avgEnergyLevel: viewModel.avgEnergyLevel,
+                        totalPhotosLogged: viewModel.totalPhotosLogged,
+                        avgSleepHours: viewModel.avgSleepHours
+                    )
                     subTabBar
                     content
                 }
@@ -118,200 +129,17 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         } message: { _ in
             Text("This diary entry and its photos will be permanently removed.")
         }
-        // A blood-pressure reminder lands on Mood & Trends, where the readings
-        // are, so dismissing the form it opens leaves the new measurement on
-        // screen. `.task` covers a cold launch, where the router has already
-        // parked the request before this screen exists; `.onChange` covers a tap
-        // while the app is running.
         .task { applyPendingSubTab() }
         .onChange(of: router.pendingDiarySubTab) { _, _ in applyPendingSubTab() }
     }
-
+    
     private func applyPendingSubTab() {
         guard let tab = router.consumePendingDiarySubTab() else { return }
         withAnimation { selectedSubTab = tab }
     }
-
-    // MARK: - Header
-
-    private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("Daily Health & Mood Diary")
-                    .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
-                    .foregroundColor(.textPrimary)
-                    .accessibilityAddTraits(.isHeader)
-                Spacer()
-                Text("· \(Date().formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
-                    .font(.caption)
-                    .foregroundColor(.textSecondary)
-            }
-
-            
-
-            Text("Track how your body responds to your regimen, log symptoms, record daily energy levels, and compare progress photos over time.")
-                .font(.subheadline)
-                .foregroundColor(.textSecondary)
-
-            HStack(spacing: 12) {
-                Button {
-                    openComparison()
-                } label: {
-                    Label("Compare Progress", systemImage: "arrow.triangle.2.circlepath")
-                        .labelStyle(.centered)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary.opacity(0.8))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.appSurface)
-                        .cornerRadius(14)
-                }
-                .buttonStyle(.plain)
-                .matchedTransitionSource(id: comparisonSourceID, in: comparisonTransition)
-
-                Button {
-                    showingCheckIn = true
-                } label: {
-                    Label("Add New Entry", systemImage: "plus")
-                        .labelStyle(.centered)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundColor(Color.onAccent)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.accentPrimary)
-                        .cornerRadius(14)
-                }
-                .buttonStyle(.plain)
-            }
-            .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(.horizontal)
-    }
-
-    // MARK: - Today's check-in card
-
-    private var todaySection: some View {
-        Group {
-            if let entry = viewModel.todaysEntry {
-                loggedTodayCard(entry)
-            } else {
-                pendingTodayCard
-            }
-        }
-        .padding(.horizontal)
-    }
-
-    private var pendingTodayCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 6) {
-                Image(systemName: "sparkles").foregroundColor(.yellow)
-                Text("TODAY'S WELLNESS CHECK-IN IS PENDING")
-                    .font(.caption.weight(.heavy))
-                    .foregroundColor(.textPrimary.opacity(0.7))
-            }
-            Text("How are you feeling right now? Tap a mood to log quickly or fill in detailed notes & photos.")
-                .font(.subheadline)
-                .foregroundColor(.textSecondary)
-
-            HStack(spacing: 10) {
-                ForEach(quickMoods, id: \.mood) { item in
-                    Button {
-                        withAnimation { viewModel.quickLog(mood: item.mood) }
-                    } label: {
-                        VStack(spacing: 4) {
-                            Text(verbatim: item.emoji)
-                            Text(item.label)
-                                .font(.caption.weight(.semibold))
-                        }
-                        .foregroundColor(.textPrimary.opacity(0.8))
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.appBackground)
-                        .cornerRadius(14)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(18)
-        .background(Color.appSurface)
-        .cornerRadius(20)
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.accentPrimary.opacity(0.2), lineWidth: 1))
-    }
-
-    private func loggedTodayCard(_ entry: DiaryEntry) -> some View {
-        let mood = DiaryMood(rawValue: entry.moodLabel)
-        let quote = entry.displayCaption
-
-        return VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("TODAY'S CHECK-IN LOGGED")
-                    .font(.caption2.weight(.heavy))
-                    .foregroundColor(.accentPrimary)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.accentPrimary.opacity(0.12))
-                    .clipShape(Capsule())
-                Spacer()
-                Text("at \(entry.checkInDate.formatted(date: .omitted, time: .shortened))")
-                    .font(.caption)
-                    .foregroundColor(.textSecondary)
-            }
-
-            HStack(alignment: .top, spacing: 12) {
-                ZStack {
-                    Circle().fill(Color.accentPrimary.opacity(0.15)).frame(width: 40, height: 40)
-                    Text(mood?.emoji ?? "📝").font(.title3)
-                }
-                VStack(alignment: .leading, spacing: 6) {
-                    todaySummaryLine(entry)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
-                    if !quote.isEmpty {
-                        Text("“\(quote)”")
-                            .font(.subheadline)
-                            .italic()
-                            .foregroundColor(.textSecondary)
-                            .lineLimit(2)
-                    }
-                }
-            }
-
-            HStack {
-                Spacer()
-                Button {
-                    entryBeingEdited = entry
-                } label: {
-                    Label("Edit Entry", systemImage: "pencil")
-                        .font(.caption.weight(.bold))
-                        .foregroundColor(.textPrimary.opacity(0.8))
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .overlay(Capsule().stroke(Color.textPrimary.opacity(0.15), lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(18)
-        .background(Color.appSurface)
-        .cornerRadius(20)
-    }
-
-    private func todaySummaryLine(_ entry: DiaryEntry) -> Text {
-        var line = Text("Mood: \(entry.moodTitle)") + Text(verbatim: " • ")
-        line = line + (entry.isQuickLog ? Text("Quick log") : Text("Energy: \(entry.energyLevel)/5"))
-
-        if !entry.photoIds.isEmpty {
-            line = line + Text(verbatim: " • ") + Text("\(entry.photoIds.count) photos attached")
-        }
-        return line
-    }
-
+    
     // MARK: - Blood pressure
-
+    
     private var bloodPressureSection: some View {
         BloodPressureCard(
             readings: viewModel.bloodPressureReadings,
@@ -321,42 +149,9 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         )
         .padding(.horizontal)
     }
-
-    // MARK: - 4 Stats grid
-
-    private var statsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-            statCard(title: "7-DAY AVG MOOD", value: "\(viewModel.avgMoodScore, format: .number.precision(.fractionLength(1))) /5", icon: "sun.max.fill", iconColor: .yellow)
-            statCard(title: "7-DAY AVG ENERGY", value: "\(viewModel.avgEnergyLevel, format: .number.precision(.fractionLength(1))) /5", icon: "bolt.fill", iconColor: .accentPrimary)
-            statCard(title: "PROGRESS PHOTOS · ALL TIME", value: "\(viewModel.totalPhotosLogged) logged", icon: "camera.fill", iconColor: .textPrimary.opacity(0.6))
-            statCard(title: "7-DAY SLEEP AVERAGE", value: "\(viewModel.avgSleepHours, format: .number.precision(.fractionLength(1))) hrs", icon: "moon.fill", iconColor: .purple)
-        }
-        .padding(.horizontal)
-    }
-
-    private func statCard(title: LocalizedStringKey, value: LocalizedStringKey, icon: String, iconColor: Color) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(title)
-                    .font(.caption2.weight(.heavy))
-                    .foregroundColor(.textSecondary)
-                Text(value)
-                    .font(.title3.weight(.bold))
-                    .foregroundColor(.textPrimary)
-            }
-            Spacer()
-            Image(systemName: icon)
-                .foregroundColor(iconColor)
-        }
-        .padding(16)
-        .accessibilityElement(children: .combine)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color.appSurface)
-        .cornerRadius(16)
-    }
-
+    
     // MARK: - Sub-tab bar
-
+    
     private var subTabBar: some View {
         HStack(spacing: 6) {
             ForEach(DiarySubTab.allCases) { tab in
@@ -365,8 +160,6 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: tab.icon).font(.caption)
-                        // Three tabs split the width evenly, and "Progress Gallery"
-                        // is "Fortschrittsgalerie" in German.
                         Text(tab.title)
                             .font(.caption.weight(.bold))
                             .lineLimit(2)
@@ -394,7 +187,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         .cornerRadius(14)
         .padding(.horizontal)
     }
-
+    
     private func subTabCount(_ tab: DiarySubTab) -> Int? {
         switch tab {
         case .journalFeed: return viewModel.entries.count
@@ -402,9 +195,9 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         case .moodTrends: return nil
         }
     }
-
+    
     // MARK: - Content
-
+    
     @ViewBuilder
     private var content: some View {
         switch selectedSubTab {
@@ -417,7 +210,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                     showingDeleteAlert = true
                 }
             )
-
+            
         case .progressGallery:
             DiaryProgressGalleryView(
                 checkpoints: viewModel.photoCheckpoints,
@@ -425,7 +218,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 onInspect: { inspectingPhoto = DiaryPhotoInspection(id: $0) },
                 onLaunchComparison: openComparison
             )
-
+            
         case .moodTrends:
             DiaryMoodTrendsView(
                 entries: viewModel.entries,
@@ -434,9 +227,9 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             )
         }
     }
-
+    
     // MARK: - Comparison
-
+    
     /// Opens the before/after comparison, from the header and from a gallery
     /// card alike.
     private func openComparison() {

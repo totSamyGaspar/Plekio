@@ -12,7 +12,7 @@ struct DiaryPhotosCard: View {
     @Binding var showingSourceMenu: Bool
     let onRemove: (Int) -> Void
     let onPick: (MediaSource) -> Void
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             heading
@@ -28,7 +28,7 @@ struct DiaryPhotosCard: View {
             Button("Cancel", role: .cancel) {}
         }
     }
-
+    
     private var heading: some View {
         HStack(alignment: .top) {
             HStack(alignment: .top, spacing: 10) {
@@ -53,7 +53,7 @@ struct DiaryPhotosCard: View {
                 .cornerRadius(8)
         }
     }
-
+    
     private var dropArea: some View {
         Button {
             showingSourceMenu = true
@@ -80,7 +80,7 @@ struct DiaryPhotosCard: View {
         }
         .buttonStyle(.plain)
     }
-
+    
     private var thumbnails: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
@@ -92,10 +92,6 @@ struct DiaryPhotosCard: View {
                             .frame(width: 72, height: 72)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                        // The thumbnail itself has no tap action, so the 44pt
-                        // target can grow inward over the photo: the glyph stays
-                        // pinned in the corner where it was and there is nothing
-                        // underneath to hit by mistake.
                         Button {
                             withAnimation { onRemove(index) }
                         } label: {

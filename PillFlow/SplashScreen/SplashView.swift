@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SplashView: View {
     /// Nothing loads behind the splash — it is pure branding, so it stays up
-    /// exactly as long as the logo fade-in takes, not the 2.5s it used to.
+    /// exactly as long as the logo fade-in takes and not a moment longer.
     private static let displayDuration: TimeInterval = 1.2
 
     @State private var isActive = false

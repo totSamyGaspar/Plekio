@@ -33,7 +33,7 @@ final class DiaryEntry {
     // averages over them and per-entry UI must exclude quick logs, or the
     // fabricated numbers read as something the user actually reported.
     var isQuickLog: Bool
-
+    
     init(
         id: UUID = UUID(),
         checkInDate: Date,
@@ -74,7 +74,7 @@ extension DiaryEntry {
         guard let mood = DiaryMood(rawValue: moodLabel) else { return moodLabel }
         return String(localized: mood.title)
     }
-
+    
     var displayCaption: String {
         physicalSummary.isEmpty ? reflectionNotes : physicalSummary
     }

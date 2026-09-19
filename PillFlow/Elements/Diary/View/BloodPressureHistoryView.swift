@@ -14,16 +14,16 @@ struct BloodPressureHistoryView: View {
     let readings: [BloodPressureReading]
     var onDelete: (BloodPressureReading) -> Void
     var onDeleteAll: () -> Void
-
+    
     @Environment(\.dismiss) private var dismiss
-
+    
     @State private var isClearConfirmationShown = false
-
+    
     private struct DaySection: Identifiable {
         let id: Date
         let readings: [BloodPressureReading]
     }
-
+    
     /// Newest day first, and newest reading first within the day — the order the
     /// list is read in when someone is looking for "what was it this morning".
     private var sections: [DaySection] {
@@ -34,12 +34,12 @@ struct BloodPressureHistoryView: View {
             }
             .sorted { $0.id > $1.id }
     }
-
+    
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.appBackground.ignoresSafeArea()
-
+                
                 if readings.isEmpty {
                     EmptyStateView(
                         icon: "heart.text.square",
@@ -86,7 +86,7 @@ struct BloodPressureHistoryView: View {
                     .opacity(readings.isEmpty ? 0.4 : 1)
                     .accessibilityLabel("Clear history")
                 }
-
+                
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Close") { dismiss() }
                         .foregroundColor(.accentPrimary)
@@ -113,7 +113,7 @@ struct BloodPressureHistoryView: View {
             .appTheme()
         }
     }
-
+    
     /// Built from day components rather than from the elapsed time: a reading
     /// taken at 00:30 is still "today", which a relative style measuring hours
     /// would call "23 hours ago".
@@ -123,7 +123,7 @@ struct BloodPressureHistoryView: View {
         formatter.unitsStyle = .full
         return formatter
     }()
-
+    
     /// "Today" and "Yesterday" instead of a date the reader has to decode — the
     /// two days most readings belong to. Localised by Foundation, so it needs no
     /// strings of its own.
@@ -131,17 +131,17 @@ struct BloodPressureHistoryView: View {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let dayDelta = calendar.dateComponents([.day], from: day, to: today).day
-
+        
         guard let dayDelta, dayDelta == 0 || dayDelta == 1 else {
             return day.formatted(date: .abbreviated, time: .omitted)
         }
-
+        
         let named = Self.relativeDayFormatter.localizedString(from: DateComponents(day: -dayDelta))
         // Foundation returns it lower-cased ("today"); a section header starts a
         // sentence. Only the first character, so "вчора" doesn't become "Вчора Ж".
         return named.prefix(1).localizedUppercase + named.dropFirst()
     }
-
+    
     private func row(_ reading: BloodPressureReading) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
@@ -152,9 +152,9 @@ struct BloodPressureHistoryView: View {
                     .font(.caption2)
                     .foregroundColor(.textSecondary)
             }
-
+            
             Spacer(minLength: 8)
-
+            
             if let pulse = reading.pulse {
                 HStack(spacing: 4) {
                     Image(systemName: "heart.fill")

@@ -13,7 +13,7 @@ struct DiaryEnergyDiscomfortCard: View {
     /// draft, see DiaryEntryDraft.energyDescription.
     let energyDescription: LocalizedStringResource
     let discomfortDescription: LocalizedStringResource
-
+    
     var body: some View {
         VStack(spacing: 20) {
             DiarySliderRow(
@@ -29,9 +29,9 @@ struct DiaryEnergyDiscomfortCard: View {
                 tint: .accentPrimary,
                 minLabel: "Low", midLabel: "Moderate", maxLabel: "Peak"
             )
-
+            
             Divider().opacity(0.15)
-
+            
             DiarySliderRow(
                 icon: "heart.fill",
                 iconColor: .pink,

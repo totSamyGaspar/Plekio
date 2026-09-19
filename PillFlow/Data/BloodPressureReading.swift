@@ -16,16 +16,11 @@ import SwiftData
 final class BloodPressureReading {
     @Attribute(.unique) var id: UUID
 
-    /// When the measurement was taken, not when it was typed in.
     var measuredAt: Date
-
     var systolic: Int
     var diastolic: Int
-
-    /// Optional: some monitors do not report a pulse, and some people do not
-    /// bother recording it.
     var pulse: Int?
-
+    
     init(
         id: UUID = UUID(),
         measuredAt: Date,
@@ -42,7 +37,7 @@ final class BloodPressureReading {
 }
 
 extension BloodPressureReading {
-
+    
     /// Plausible ranges, used to clamp the input. Wide on purpose: the point is
     /// to stop typos like 1200/80 from poisoning the chart, not to decide which
     /// readings are medically sensible.
@@ -50,8 +45,6 @@ extension BloodPressureReading {
     static let diastolicRange = 30...200
     static let pulseRange = 30...220
 
-    /// "128/82" — the notation is the same in every language the app ships in,
-    /// so it is built here rather than as a translated format string.
     var formattedPressure: String {
         "\(systolic)/\(diastolic)"
     }

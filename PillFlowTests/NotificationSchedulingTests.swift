@@ -2,10 +2,10 @@
 //  NotificationSchedulingTests.swift
 //  PillFlowTests
 //
-//  Tests for NotificationService.buildScheduleMap, the pure function extracted
-//  from scheduleNotifications so its scheduling rules can be tested without a
-//  real UNUserNotificationCenter: grouping medications that share a trigger
-//  time into one push, and skipping doses already marked as taken.
+//  Tests for ReminderPlanner.buildScheduleMap, the pure function that decides
+//  what the notification queue should contain, so its rules can be tested
+//  without a real UNUserNotificationCenter: grouping medications that share a
+//  trigger time into one push, and skipping slots the user has answered for.
 //
 //  Note: the horizon is no longer a fixed number of days — it runs until the
 //  notification budget is spent. Tests that are not about the horizon keep their
@@ -31,7 +31,7 @@ struct NotificationSchedulingTests {
         let medB = MedicationItem(id: UUID(), name: "Витамин Д", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(contentsOf: [medA, medB])
 
-        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
 
         #expect(map.count == 1)
         let entries = map.values.first
@@ -50,7 +50,7 @@ struct NotificationSchedulingTests {
         med.logs.append(log)
         course.medications.append(med)
 
-        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
 
         #expect(map.isEmpty)
     }
@@ -64,7 +64,7 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
         course.medications.append(med)
 
-        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
 
         #expect(map.count == 1)
     }
@@ -87,7 +87,7 @@ struct NotificationSchedulingTests {
         )
         course.medications.append(med)
 
-        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: now)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: now)
 
         #expect(map.count == 1)
     }
@@ -105,7 +105,7 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(id: UUID(), name: "Витамин C", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(med)
 
-        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
 
         #expect(map.count == 31)
         let lastDay = map.keys.map { Calendar.current.startOfDay(for: $0) }.max()
@@ -120,7 +120,7 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(med)
 
-        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 10)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 10)
 
         // One slot a day, so the budget converts one-to-one into days of cover.
         #expect(map.count == 10)
@@ -145,7 +145,7 @@ struct NotificationSchedulingTests {
         )
         course.medications.append(med)
 
-        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 10)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 10)
 
         #expect(map.count == 9)
         #expect(Set(map.keys.map { Calendar.current.startOfDay(for: $0) }).count == 3)
@@ -171,7 +171,7 @@ struct NotificationSchedulingTests {
         )
         course.medications.append(med)
 
-        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 3)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 3)
 
         #expect(map.count == 5)
         #expect(Set(map.keys.map { Calendar.current.startOfDay(for: $0) }) == [Calendar.current.startOfDay(for: anchor)])
@@ -189,7 +189,7 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(id: UUID(), name: "Витамин D", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 3)
         course.medications.append(med)
 
-        let map = NotificationService.buildScheduleMap(activeCourses: [course], now: now, slotBudget: 3)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: now, slotBudget: 3)
 
         let days = map.keys.map { Calendar.current.startOfDay(for: $0) }.sorted()
         #expect(days == [
@@ -197,5 +197,50 @@ struct NotificationSchedulingTests {
             Calendar.current.startOfDay(for: testDate(2026, 6, 21)),
             Calendar.current.startOfDay(for: testDate(2026, 6, 24)),
         ])
+    }
+
+    // MARK: - Skipped doses
+
+    @Test("намеренно пропущенная доза не попадает в расписание")
+    func testSkipsDeliberatelySkippedDose() async throws {
+        let anchor = testDate(2026, 6, 15)
+        let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: anchor)
+
+        let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), isTaken: false)
+        log.skippedAt = anchor
+        med.logs.append(log)
+        course.medications.append(med)
+
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
+
+        #expect(map.isEmpty)
+    }
+
+    // THE regression. Skipping used to call cancelNotifications(for:), which
+    // stripped every pending request naming that medication — so declining one
+    // evening dose silently cancelled the rest of the course. Now the skip is a
+    // row in the database and the rebuild reads it, so only its own slot drops
+    // out and every other day comes back.
+    @Test("пропуск одной дозы не уносит остальные дни курса")
+    func testSkippingOneOccurrenceLeavesTheRestOfTheCourse() async throws {
+        let anchor = testDate(2026, 6, 15)
+        let course = TreatmentCourse(
+            name: "Курс",
+            startDate: anchor,
+            endDate: testDate(2026, 6, 17)
+        )
+
+        let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let skipped = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), isTaken: false)
+        skipped.skippedAt = anchor
+        med.logs.append(skipped)
+        course.medications.append(med)
+
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
+
+        // The 15th is gone; the 16th and the 17th are not.
+        let scheduledDays = Set(map.keys.map { Calendar.current.component(.day, from: $0) })
+        #expect(scheduledDays == [16, 17])
     }
 }

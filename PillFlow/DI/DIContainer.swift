@@ -100,14 +100,14 @@ final class DIContainer {
     // Generic resolve helpers that unwrap the optional Swinject returns.
     func resolve<T>(_ type: T.Type) -> T {
         guard let resolved = container.resolve(type) else {
-            fatalError("🚨 DI Error: Failed to resolve dependency for \(type). Check the registration in DIContainer.")
+            fatalError("DI Error: Failed to resolve dependency for \(type). Check the registration in DIContainer.")
         }
         return resolved
     }
 
     func resolve<T, Arg>(_ type: T.Type, argument: Arg) -> T {
         guard let resolved = container.resolve(type, argument: argument) else {
-            fatalError("🚨 DI Error: Failed to resolve dependency for \(type) with argument.")
+            fatalError("DI Error: Failed to resolve dependency for \(type) with argument.")
         }
         return resolved
     }

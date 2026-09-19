@@ -1550,24 +1550,6 @@
     "%lld doses logged" : {
       "comment" : "A banner confirming how many doses were just logged by Log All.",
       "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld dose logged"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld doses logged"
-                }
-              }
-            }
-          }
-        },
         "de" : {
           "variations" : {
             "plural" : {
@@ -1586,19 +1568,37 @@
             }
           }
         },
-        "es" : {
+        "en" : {
           "variations" : {
             "plural" : {
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld dosis registrada"
+                  "value" : "%lld dose logged"
                 }
               },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld doses logged"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
               "many" : {
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld dosis registradas"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld dosis registrada"
                 }
               },
               "other" : {
@@ -1613,16 +1613,16 @@
         "fr" : {
           "variations" : {
             "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld dose enregistrée"
-                }
-              },
               "many" : {
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld doses enregistrées"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld dose enregistrée"
                 }
               },
               "other" : {
@@ -1637,16 +1637,16 @@
         "it" : {
           "variations" : {
             "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld dose registrata"
-                }
-              },
               "many" : {
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld dosi registrate"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld dose registrata"
                 }
               },
               "other" : {
@@ -1691,16 +1691,16 @@
         "ro" : {
           "variations" : {
             "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld doză înregistrată"
-                }
-              },
               "few" : {
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld doze înregistrate"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld doză înregistrată"
                 }
               },
               "other" : {
@@ -1715,12 +1715,6 @@
         "ru" : {
           "variations" : {
             "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld доза отмечена"
-                }
-              },
               "few" : {
                 "stringUnit" : {
                   "state" : "translated",
@@ -1731,6 +1725,12 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld доз отмечено"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld доза отмечена"
                 }
               },
               "other" : {
@@ -1745,12 +1745,6 @@
         "uk" : {
           "variations" : {
             "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld дозу відмічено"
-                }
-              },
               "few" : {
                 "stringUnit" : {
                   "state" : "translated",
@@ -1761,6 +1755,12 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld доз відмічено"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld дозу відмічено"
                 }
               },
               "other" : {
@@ -7520,6 +7520,64 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не вдалося зберегти"
+          }
+        }
+      }
+    },
+    "Couldn't save a photo. Everything else was saved — the device may be out of storage." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Foto konnte nicht gespeichert werden. Alles andere wurde gespeichert – möglicherweise ist der Speicher voll."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo guardar la foto. Todo lo demás se guardó: puede que no quede espacio en el dispositivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d'enregistrer la photo. Tout le reste a été enregistré — l'appareil manque peut-être d'espace."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile salvare la foto. Tutto il resto è stato salvato: forse lo spazio sul dispositivo è esaurito."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写真を保存できませんでした。ほかはすべて保存されています。端末の空き容量が不足している可能性があります。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Фотоны сақтау мүмкін болмады. Қалғаны сақталды — құрылғыда орын бітуі мүмкін."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotografia nu a putut fi salvată. Restul a fost salvat — este posibil ca dispozitivul să nu mai aibă spațiu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось сохранить фото. Остальное сохранено — возможно, на устройстве закончилось место."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося зберегти фото. Решту збережено — можливо, на пристрої закінчилось місце."
           }
         }
       }
@@ -18517,6 +18575,10 @@
         }
       }
     },
+    "Select a photo" : {
+      "comment" : "A placeholder for a photo picker.",
+      "isCommentAutoGenerated" : true
+    },
     "Select After Photo" : {
       "comment" : "A title for a screen that lets the user select an after photo.",
       "isCommentAutoGenerated" : true,
@@ -19185,6 +19247,65 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Пропустити всі"
+          }
+        }
+      }
+    },
+    "SKIPPED" : {
+      "comment" : "A label for a dose the user deliberately declined, as opposed to MISSED, which is one they simply did not take.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ÜBERSPRUNGEN"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "DESCARTADA"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IGNORÉE"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IGNORATA"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキップ"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "БАС ТАРТЫЛДЫ"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IGNORATĂ"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ОТКЛОНЕНО"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ВІДХИЛЕНО"
           }
         }
       }

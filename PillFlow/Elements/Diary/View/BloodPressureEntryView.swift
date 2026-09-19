@@ -8,19 +8,19 @@ import SwiftUI
 /// Form for one blood-pressure reading.
 struct BloodPressureEntryView: View {
     @Environment(\.dismiss) private var dismiss
-
+    
     var onSave: (_ measuredAt: Date, _ systolic: Int, _ diastolic: Int, _ pulse: Int?) -> Void
-
+    
     @State private var measuredAt = Date()
     @State private var systolicText = ""
     @State private var diastolicText = ""
     @State private var pulseText = ""
     @State private var isCalendarShown = false
-
+    
     private var systolic: Int? { Int(systolicText) }
     private var diastolic: Int? { Int(diastolicText) }
     private var pulse: Int? { Int(pulseText) }
-
+    
     /// Saving is blocked rather than silently corrected. The database clamps too,
     /// but a reading quietly turned from 999 into 300 would look like the app
     /// misread the monitor.
@@ -31,21 +31,21 @@ struct BloodPressureEntryView: View {
         if let pulse, !BloodPressureReading.pulseRange.contains(pulse) { return false }
         return true
     }
-
+    
     /// A measurement cannot have happened later than now, and the reading is
     /// typed in right after it is taken — so "now" is both the default and the
     /// upper bound of every picker here.
     private var latestSelectableDate: Date { Date() }
-
+    
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.appBackground.ignoresSafeArea()
-
+                
                 Form {
                     Section {
                         dateRow
-
+                        
                         if isCalendarShown {
                             DatePicker(
                                 "Measured at",
@@ -59,7 +59,7 @@ struct BloodPressureEntryView: View {
                         }
                     }
                     .listRowBackground(Color.appSurface)
-
+                    
                     Section {
                         numberRow(
                             "Systolic",
@@ -112,9 +112,9 @@ struct BloodPressureEntryView: View {
             .appTheme()
         }
     }
-
+    
     // MARK: - Date
-
+    
     /// The year is deliberately absent: a reading is entered the same day it is
     /// taken, and the compact DatePicker's own label always carries the year.
     /// Hence a plain button showing day and month, with the calendar underneath.
@@ -122,9 +122,9 @@ struct BloodPressureEntryView: View {
         HStack(spacing: 12) {
             Text("Measured at")
                 .foregroundColor(.textPrimary)
-
+            
             Spacer(minLength: 0)
-
+            
             Button {
                 withAnimation(.snappy) { isCalendarShown.toggle() }
             } label: {
@@ -141,7 +141,7 @@ struct BloodPressureEntryView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Measurement date")
             .accessibilityValue(measuredAt.formatted(date: .long, time: .omitted))
-
+            
             DatePicker(
                 "Measured at",
                 selection: $measuredAt,
@@ -151,9 +151,9 @@ struct BloodPressureEntryView: View {
             .labelsHidden()
         }
     }
-
+    
     // MARK: - Number input
-
+    
     /// Empty is not an error: an untouched field has nothing to complain about
     /// yet, and colouring it red the moment the form opens is just noise.
     private func isOutOfRange(_ text: String, _ range: ClosedRange<Int>) -> Bool {
@@ -161,7 +161,7 @@ struct BloodPressureEntryView: View {
         guard let value = Int(text) else { return true }
         return !range.contains(value)
     }
-
+    
     private func numberRow(
         _ title: LocalizedStringKey,
         text: Binding<String>,
@@ -170,7 +170,7 @@ struct BloodPressureEntryView: View {
         range: ClosedRange<Int>
     ) -> some View {
         let isInvalid = isOutOfRange(text.wrappedValue, range)
-
+        
         return HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -181,22 +181,22 @@ struct BloodPressureEntryView: View {
                     .font(.caption2)
                     .foregroundColor(isInvalid ? .warningAccent : .textTertiary)
             }
-
+            
             Spacer(minLength: 8)
-
+            
             TextField("", text: text, prompt: Text(verbatim: placeholder))
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.trailing)
                 .foregroundColor(isInvalid ? .warningAccent : .textPrimary)
                 .frame(maxWidth: 80)
-                // Digits only, and never more than the widest bound needs: a
-                // number pad still accepts a paste, and a 6-digit value would
-                // only ever be rejected on save.
+            // Digits only, and never more than the widest bound needs: a
+            // number pad still accepts a paste, and a 6-digit value would
+            // only ever be rejected on save.
                 .onChange(of: text.wrappedValue) { _, newValue in
                     let cleaned = String(newValue.filter(\.isNumber).prefix(3))
                     if cleaned != newValue { text.wrappedValue = cleaned }
                 }
-
+            
             Text(unit)
                 .font(.caption)
                 .foregroundColor(.textSecondary)

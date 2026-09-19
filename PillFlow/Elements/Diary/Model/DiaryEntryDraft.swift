@@ -15,9 +15,9 @@ enum DiaryMood: String, CaseIterable, Identifiable {
     case stressed = "Stressed"
     case exhausted = "Exhausted"
     case inPain = "In Pain"
-
+    
     var id: String { rawValue }
-
+    
     /// Display label for the mood. `rawValue` is the stored key
     /// (`DiaryEntry.moodLabel`) and has to stay an unchanging English string —
     /// translating it would orphan every entry already saved.
@@ -32,30 +32,30 @@ enum DiaryMood: String, CaseIterable, Identifiable {
         case .inPain:    return "In Pain"
         }
     }
-
+    
     var emoji: String {
         switch self {
-        case .great: return "⭐"
-        case .good: return "😊"
-        case .neutral: return "😐"
-        case .downLow: return "😔"
-        case .stressed: return "⚡"
+        case .great:     return "⭐"
+        case .good:      return "😊"
+        case .neutral:   return "😐"
+        case .downLow:   return "😔"
+        case .stressed:  return "⚡"
         case .exhausted: return "😴"
-        case .inPain: return "🩹"
+        case .inPain:    return "🩹"
         }
     }
-
+    
     /// Mirrors the reference design's per-mood score — not a straight 1...7
     /// ramp; Stressed, Exhausted and Down/Low all score 2/5.
     var score: Int {
         switch self {
-        case .great: return 5
-        case .good: return 4
-        case .neutral: return 3
-        case .downLow: return 2
-        case .stressed: return 2
+        case .great:     return 5
+        case .good:      return 4
+        case .neutral:   return 3
+        case .downLow:   return 2
+        case .stressed:  return 2
         case .exhausted: return 2
-        case .inPain: return 1
+        case .inPain:    return 1
         }
     }
 }
@@ -65,9 +65,9 @@ enum SleepQuality: String, CaseIterable, Identifiable {
     case fair = "F"
     case good = "G"
     case excellent = "E"
-
+    
     var id: String { rawValue }
-
+    
     /// Single-letter label for the compact buttons. `rawValue` won't do here:
     /// P/F/G/E are storage keys and mean nothing in other languages.
     var initial: LocalizedStringResource {
@@ -78,7 +78,7 @@ enum SleepQuality: String, CaseIterable, Identifiable {
         case .excellent: return "E"
         }
     }
-
+    
     /// As with DiaryMood, `rawValue` is the storage key and this is the UI label.
     var title: LocalizedStringResource {
         switch self {
@@ -94,7 +94,7 @@ enum SleepQuality: String, CaseIterable, Identifiable {
 /// MedicationDraft carries AddMedicationView's form state before
 /// DatabaseService persists it.
 struct DiaryEntryDraft: Identifiable, Equatable {
-
+    
     /// The ranges the numeric fields are held to.
     ///
     /// Enforced here rather than in whichever control happens to edit a field.
@@ -106,12 +106,12 @@ struct DiaryEntryDraft: Identifiable, Equatable {
     static let discomfortLevelRange = 0...10
     static let sleepHoursRange = 0.0...24.0
     static let waterGlassesRange = 0...50
-
+    
     var id = UUID()
     var checkInDate: Date = Date()
     var mood: DiaryMood = .good
     var physicalSummary: String = ""
-
+    
     // didSet does not run during initialization, which is why init(from:) below
     // clamps its arguments as well. Assigning inside didSet does not re-enter it.
     var energyLevel: Int = 4 {
@@ -148,7 +148,7 @@ struct DiaryEntryDraft: Identifiable, Equatable {
 }
 
 extension DiaryEntryDraft {
-
+    
     /// The energy scale in words.
     ///
     /// "Four out of five is High Energy" is this app's vocabulary, not a layout
@@ -161,17 +161,17 @@ extension DiaryEntryDraft {
         default: return "High Energy"
         }
     }
-
+    
     /// The discomfort scale in words.
     var discomfortDescription: LocalizedStringResource {
         switch discomfortLevel {
-        case 0: return "Zero Pain"
+        case 0:     return "Zero Pain"
         case 1...3: return "Mild"
         case 4...6: return "Manageable"
-        default: return "Severe"
+        default:    return "Severe"
         }
     }
-
+    
     init(from entry: DiaryEntry) {
         self.init(
             id: entry.id,
@@ -199,7 +199,7 @@ enum DiarySymptomOptions {
         "Joint Stiffness", "Dizziness", "Restlessness", "Digestive Discomfort",
         "Insomnia", "Dry Mouth", "Elevated Heartbeat",
     ]
-
+    
     private static let titles: [String: LocalizedStringResource] = [
         "Headache": "Headache",
         "Fatigue": "Fatigue",
@@ -214,7 +214,7 @@ enum DiarySymptomOptions {
         "Dry Mouth": "Dry Mouth",
         "Elevated Heartbeat": "Elevated Heartbeat",
     ]
-
+    
     static func title(for key: String) -> String {
         guard let resource = titles[key] else { return key }
         return String(localized: resource)
@@ -227,7 +227,7 @@ enum DiaryMilestoneOptions {
         "Low Stress Day", "Hydration Goal Met", "Medication Adjusted",
         "Doctor Consultation", "Restorative Sleep",
     ]
-
+    
     private static let titles: [String: LocalizedStringResource] = [
         "Day 14 Milestone": "Day 14 Milestone",
         "Consistent Routine": "Consistent Routine",
@@ -239,7 +239,7 @@ enum DiaryMilestoneOptions {
         "Doctor Consultation": "Doctor Consultation",
         "Restorative Sleep": "Restorative Sleep",
     ]
-
+    
     static func title(for key: String) -> String {
         guard let resource = titles[key] else { return key }
         return String(localized: resource)

@@ -8,7 +8,7 @@ import SwiftUI
 /// The "overall mood today" grid. Takes the selection and nothing else.
 struct DiaryMoodGrid: View {
     @Binding var selection: DiaryMood
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -21,7 +21,7 @@ struct DiaryMoodGrid: View {
                     .font(.caption2.weight(.semibold))
                     .foregroundColor(.accentPrimary.opacity(0.8))
             }
-
+            
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                 ForEach(DiaryMood.allCases) { mood in
                     card(for: mood)
@@ -29,7 +29,7 @@ struct DiaryMoodGrid: View {
             }
         }
     }
-
+    
     private func card(for mood: DiaryMood) -> some View {
         let isSelected = selection == mood
         return Button {

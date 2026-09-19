@@ -16,7 +16,7 @@ struct CourseRowViewModel {
     let totalDays: Int
     let currentDayNumber: Int
     let daysProgress: Double
-
+    
     init(course: TreatmentCourse) {
         self.title = course.name
         self.medicationsCount = course.medications.count
@@ -24,16 +24,16 @@ struct CourseRowViewModel {
         let rangeStart = course.startDate
         let rangeEnd = max(rangeStart, course.endDate)
         self.dateRangeText = rangeStart == rangeEnd
-            ? rangeStart.formatted(date: .abbreviated, time: .omitted)
-            : (rangeStart ..< rangeEnd).formatted(date: .abbreviated, time: .omitted)
-
+        ? rangeStart.formatted(date: .abbreviated, time: .omitted)
+        : (rangeStart ..< rangeEnd).formatted(date: .abbreviated, time: .omitted)
+        
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: course.startDate)
         let end = calendar.startOfDay(for: course.endDate)
         let total =
-            (calendar.dateComponents([.day], from: start, to: end).day ?? 0) + 1
+        (calendar.dateComponents([.day], from: start, to: end).day ?? 0) + 1
         self.totalDays = total
-
+        
         let today = calendar.startOfDay(for: Date())
         if today < start {
             self.currentDayNumber = 0
@@ -46,8 +46,8 @@ struct CourseRowViewModel {
             let daysPassed = (components.day ?? 0) + 1
             self.currentDayNumber = min(daysPassed, total)
         }
-
+        
         self.daysProgress =
-            total > 0 ? Double(self.currentDayNumber) / Double(total) : 0
+        total > 0 ? Double(self.currentDayNumber) / Double(total) : 0
     }
 }

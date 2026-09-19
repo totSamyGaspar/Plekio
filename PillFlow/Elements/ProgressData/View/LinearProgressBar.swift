@@ -16,7 +16,7 @@ struct LinearProgressBar: View {
                 Capsule()
                     .fill(Color.textPrimary.opacity(0.1))
                     .frame(height: 8)
-
+                
                 Capsule()
                     .fill(Color.accentPrimary)
                     .frame(width: geo.size.width * CGFloat(min(progress, 1.0)), height: 8)
