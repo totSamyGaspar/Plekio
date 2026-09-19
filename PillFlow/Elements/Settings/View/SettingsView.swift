@@ -60,6 +60,8 @@ struct SettingsView: View {
                     }
                     .listRowBackground(Color.appSurface)
                     
+                    StorageUsageSection()
+
                     Section(header: Text("About").foregroundColor(.textSecondary)) {
                         HStack {
                             Text("Version")
