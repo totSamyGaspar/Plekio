@@ -95,6 +95,13 @@ final class DIContainer {
                 mediaPickerService: r.resolve(MediaPickerServiceProtocol.self)!
             )
         }.inObjectScope(.transient)
+
+        // Takes the database through the three protocols an export actually
+        // reads, rather than the whole of DatabaseServiceProtocol: nothing here
+        // writes, and the narrower type says so.
+        container.register(ReportExportViewModel.self) { r in
+            ReportExportViewModel(database: r.resolve(DatabaseServiceProtocol.self)!)
+        }.inObjectScope(.transient)
     }
 
     // Generic resolve helpers that unwrap the optional Swinject returns.

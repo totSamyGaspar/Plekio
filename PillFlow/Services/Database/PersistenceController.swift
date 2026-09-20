@@ -22,6 +22,10 @@ final class PersistenceController {
     let container: ModelContainer
     let context: ModelContext
 
+    /// Where the store file sits, for measuring it. In-memory runs still name a
+    /// path; nothing is written there, so the measurement comes out zero.
+    var storeURL: URL? { container.configurations.first?.url }
+
     /// Set when the on-disk store could not be opened and the app fell back to an
     /// in-memory container. Nothing survives a restart in that mode, so the UI has
     /// to tell the user.

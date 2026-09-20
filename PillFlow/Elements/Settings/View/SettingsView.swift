@@ -32,6 +32,8 @@ struct SettingsView: View {
                     .padding(.top, 10)
                 
                 List {
+                    ProfileSection()
+
                     Section(header: Text("Appearance").foregroundColor(.textSecondary)) {
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
@@ -60,6 +62,18 @@ struct SettingsView: View {
                     }
                     .listRowBackground(Color.appSurface)
                     
+                    Section(header: Text("Export").foregroundColor(.textSecondary)) {
+                        NavigationLink {
+                            ReportExportView()
+                        } label: {
+                            Label("Create document", systemImage: "doc.text")
+                                .foregroundColor(.textPrimary)
+                        }
+                    }
+                    .listRowBackground(Color.appSurface)
+
+                    StorageUsageSection()
+
                     Section(header: Text("About").foregroundColor(.textSecondary)) {
                         HStack {
                             Text("Version")

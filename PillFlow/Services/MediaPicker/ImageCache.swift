@@ -8,6 +8,7 @@
 import ImageIO
 import OSLog
 import UIKit
+import UniformTypeIdentifiers
 
 /// Photo storage: an in-memory NSCache in front of files on disk.
 ///
@@ -49,6 +50,15 @@ nonisolated final class ImageCache: @unchecked Sendable {
     /// full-size frames. Requests are snapped to a step instead, so the same photo
     /// is decoded at most once per size it is actually drawn at.
     private static let pixelLadder: [CGFloat] = [240, 640, 1400]
+
+    /// The longest edge a photo keeps on disk.
+    ///
+    /// The largest size anything ever draws is the top of the ladder above; a
+    /// camera frame is 4032px and up. Storing that is storing eight times the
+    /// pixels the app can show — around 2MB a photo instead of 400KB. The gap
+    /// over 1400 leaves the zoom screen room to enlarge.
+    private static let maxStoredPixelSize: CGFloat = 2048
+    private static let storedQuality: CGFloat = 0.7
 
     /// The worst-case screen scale. Read as a constant rather than from the screen
     /// so this stays off the main actor; one ladder step of slack costs nothing.
@@ -151,7 +161,8 @@ nonisolated final class ImageCache: @unchecked Sendable {
     /// `DatabaseService.persistPhotos`.
     @discardableResult
     func saveToDisk(_ data: Data, for id: UUID) -> Bool {
-        if write(data, for: id) { return true }
+        let bytes = downscaled(data) ?? data
+        if write(bytes, for: id) { return true }
 
         // The directory is created once at startup and the result discarded, so if
         // that ever failed — a first launch while the device was still locked, a
@@ -159,7 +170,37 @@ nonisolated final class ImageCache: @unchecked Sendable {
         // silently and forever. Recreating it turns that from permanent into a
         // single retry.
         guard createDirectoryIfMissing() else { return false }
-        return write(data, for: id)
+        return write(bytes, for: id)
+    }
+
+    /// Re-encodes an oversized photo down to `maxStoredPixelSize`.
+    ///
+    /// Nil when it is already small enough, or cannot be read — the caller then
+    /// writes the original bytes rather than losing the photo over a resize.
+    /// Always JPEG: a PNG here would be a photo saved at several times the size.
+    private func downscaled(_ data: Data) -> Data? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = properties[kCGImagePropertyPixelWidth] as? CGFloat,
+              let height = properties[kCGImagePropertyPixelHeight] as? CGFloat,
+              max(width, height) > Self.maxStoredPixelSize,
+              let resized = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+                  kCGImageSourceCreateThumbnailFromImageAlways: true,
+                  kCGImageSourceCreateThumbnailWithTransform: true,
+                  kCGImageSourceThumbnailMaxPixelSize: Self.maxStoredPixelSize
+              ] as CFDictionary)
+        else { return nil }
+
+        let encoded = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(
+            encoded, UTType.jpeg.identifier as CFString, 1, nil
+        ) else { return nil }
+
+        CGImageDestinationAddImage(destination, resized, [
+            kCGImageDestinationLossyCompressionQuality: Self.storedQuality
+        ] as CFDictionary)
+
+        return CGImageDestinationFinalize(destination) ? encoded as Data : nil
     }
 
     private func write(_ data: Data, for id: UUID) -> Bool {
@@ -194,6 +235,20 @@ nonisolated final class ImageCache: @unchecked Sendable {
             AppLog.media.error("Photo directory unavailable: \(error.localizedDescription, privacy: .public)")
             return false
         }
+    }
+
+    /// Bytes the stored photos occupy. Walks the directory — call off the main
+    /// actor.
+    func diskUsageBytes() -> Int64 {
+        let files = (try? fileManager.contentsOfDirectory(
+            at: directoryURL, includingPropertiesForKeys: [.fileSizeKey]
+        )) ?? []
+
+        return files.reduce(0) { $0 + Self.fileSize(at: $1) }
+    }
+
+    static func fileSize(at url: URL) -> Int64 {
+        Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
     }
 
     func loadDataFromDisk(for id: UUID) -> Data? {
