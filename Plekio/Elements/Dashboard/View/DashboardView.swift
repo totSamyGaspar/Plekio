@@ -10,6 +10,10 @@ import SwiftUI
 struct DashboardView<VM: DashboardViewModelProtocol>: View {
     @StateObject private var viewModel: VM
     @EnvironmentObject private var router: AppRouter
+
+    /// Tied to the title's text style so the mark grows with the wordmark
+    /// instead of shrinking away from it at large Dynamic Type sizes.
+    @ScaledMetric(relativeTo: .largeTitle) private var logoSize: CGFloat = 34
     
     init(viewModel: @autoclosure @escaping () -> VM) {
         self._viewModel = StateObject(wrappedValue: viewModel())
@@ -79,9 +83,11 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     }
     
     // MARK: - Sections
-    
+
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: 10) {
+            AppLogo(size: logoSize)
+
             Text(AppBrand.name)
                 .scaledFont(size: 36, relativeTo: .largeTitle, weight: .heavy, design: .serif)
                 .italic()

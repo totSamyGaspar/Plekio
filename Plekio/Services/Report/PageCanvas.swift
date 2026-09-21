@@ -137,6 +137,37 @@ final class PageCanvas {
         space(gap)
     }
 
+    /// An image with a line of text beside it, the shorter of the two centred
+    /// on the taller. `image` and `write` each take a line of their own, which
+    /// is right for a block and wrong for a mark standing next to its wordmark.
+    func imageRow(
+        _ image: UIImage,
+        height: CGFloat,
+        text: NSAttributedString,
+        spacing: CGFloat = 10,
+        gap: CGFloat = 0
+    ) {
+        let textSize = text.size()
+        let rowHeight = max(height, ceil(textSize.height))
+        reserve(rowHeight)
+
+        let width = height * (image.size.width / max(image.size.height, 1))
+        image.draw(in: CGRect(
+            x: style.margin,
+            y: cursor + (rowHeight - height) / 2,
+            width: width,
+            height: height
+        ))
+
+        text.draw(at: CGPoint(
+            x: style.margin + width + spacing,
+            y: cursor + (rowHeight - textSize.height) / 2
+        ))
+
+        cursor += rowHeight
+        space(gap)
+    }
+
     // MARK: - CoreText
 
     /// CoreText measures from the bottom left and UIKit hands us a context

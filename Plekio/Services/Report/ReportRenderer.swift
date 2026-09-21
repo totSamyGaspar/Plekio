@@ -15,10 +15,10 @@ struct ReportBranding {
     let appName: String
 
     /// Nil until an image set named `Logo` exists in the asset catalog. The
-    /// header then falls back to the wordmark, set in the same serif face as
-    /// every screen title in the app.
+    /// header sets the mark beside the wordmark, so a build without the image
+    /// set loses the mark and keeps the name rather than losing both.
     static var app: ReportBranding {
-        ReportBranding(logo: UIImage(named: "Logo"), appName: AppBrand.name)
+        ReportBranding(logo: UIImage(named: AppBrand.logoAssetName), appName: AppBrand.name)
     }
 }
 
@@ -99,16 +99,29 @@ struct ReportRenderer {
 
     // MARK: - Header
 
+    /// `withTintColor` is meant for a template image on its way into a view;
+    /// asked for one inside a PDF context it painted the whole frame solid
+    /// instead of the mark. So the colour is composited here: draw the
+    /// artwork, then fill only the pixels it left opaque.
+    private func tinted(_ image: UIImage, _ color: UIColor) -> UIImage {
+        UIGraphicsImageRenderer(size: image.size).image { context in
+            image.draw(at: .zero)
+            color.setFill()
+            context.fill(CGRect(origin: .zero, size: image.size), blendMode: .sourceIn)
+        }
+    }
+
     private func header(on canvas: PageCanvas, data: ReportData) {
+        let wordmark = canvas.text(
+            branding.appName,
+            font: ReportStyle.serif(18, .bold),
+            color: style.accent
+        )
+
         if let logo = branding.logo {
-            canvas.image(logo, height: 30, gap: 10)
+            canvas.imageRow(tinted(logo, style.accent), height: 22, text: wordmark, gap: 10)
         } else {
-            canvas.write(
-                branding.appName,
-                font: ReportStyle.serif(18, .bold),
-                color: style.accent,
-                gap: 10
-            )
+            canvas.write(wordmark, gap: 10)
         }
 
         canvas.write(String(localized: "Health report"), font: style.title, gap: 4)

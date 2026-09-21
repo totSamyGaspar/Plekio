@@ -16,7 +16,6 @@ struct SplashView: View {
     @State private var logoOpacity = 0.0
     
     @State private var isPulsing = false
-    @State private var isFloating = false
     
     var body: some View {
         if isActive {
@@ -38,48 +37,13 @@ struct SplashView: View {
                     Spacer()
                     
                     // MARK: - Animated logo
-                    ZStack {
-                        Image(systemName: "heart.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 110, height: 110)
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [Color(red: 1.0, green: 0.4, blue: 0.5), Color(red: 0.7, green: 0.1, blue: 0.2)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .shadow(color: Color(red: 1.0, green: 0.3, blue: 0.4).opacity(isPulsing ? 0.6 : 0.2),
-                                    radius: isPulsing ? 20 : 10,
-                                    x: 0,
-                                    y: isPulsing ? 10 : 5)
-                            .scaleEffect(isPulsing ? 1.05 : 0.95)
-                        
-                        Image(systemName: "clock.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 38, height: 38)
-                            .foregroundColor(Color.onAccent)
-                            .background(Circle().fill(Color.textPrimary.opacity(0.1)).frame(width: 26, height: 26))
-                            .offset(x: -20, y: -20)
-                        
-                        Image(systemName: "pills.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 45, height: 45)
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [.accentPrimary, .teal],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .shadow(color: Color.accentPrimary.opacity(0.8), radius: isFloating ? 15 : 5, x: 0, y: 0)
-                            .offset(x: 22, y: isFloating ? 10 : 20)
-                            .rotationEffect(.degrees(isFloating ? -10 : -20))
-                    }
-                    .opacity(logoOpacity)
+                    AppLogo(size: 116)
+                        .shadow(
+                            color: .accentPrimary.opacity(isPulsing ? 0.55 : 0.2),
+                            radius: isPulsing ? 26 : 12
+                        )
+                        .scaleEffect(isPulsing ? 1.04 : 0.96)
+                        .opacity(logoOpacity)
                     
                     VStack(spacing: 8) {
                         Text(AppBrand.name)
@@ -110,10 +74,6 @@ struct SplashView: View {
 
                 withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
                     self.isPulsing = true
-                }
-
-                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                    self.isFloating = true
                 }
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + Self.displayDuration) {
