@@ -161,18 +161,18 @@ enum DailyReminder: String, CaseIterable, Identifiable, Sendable {
     var notificationTitle: String {
         switch self {
         case .diary:
-            return String(localized: "📔 Time for your check-in")
+            return NotificationText.localized("📔 Time for your check-in")
         case .bloodPressure:
-            return String(localized: "🩺 Time to measure your blood pressure")
+            return NotificationText.localized("🩺 Time to measure your blood pressure")
         }
     }
 
     var notificationBody: String {
         switch self {
         case .diary:
-            return String(localized: "Log how you feel today: mood, energy and symptoms")
+            return NotificationText.localized("Log how you feel today: mood, energy and symptoms")
         case .bloodPressure:
-            return String(localized: "Take a reading and log it in your diary")
+            return NotificationText.localized("Take a reading and log it in your diary")
         }
     }
 

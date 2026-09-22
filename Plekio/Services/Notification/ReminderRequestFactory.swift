@@ -30,11 +30,14 @@ enum ReminderRequestFactory {
         trigger: UNNotificationTrigger
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "💊 Time to take your meds")
+        content.title = NotificationText.localized("💊 Time to take your meds")
         // Foundation builds the list: the separator and the conjunction before the
-        // last item differ from language to language.
+        // last item differ from language to language. This one part is settled
+        // here rather than at delivery — the API takes arguments, not formatters
+        // — so a language changed after scheduling leaves the conjunction behind.
+        // A word, against a title and a body that follow.
         let names = medicationNames.formatted(.list(type: .and))
-        content.body = String(localized: "Time to take: \(names)")
+        content.body = NotificationText.localized("Time to take: %@", [names])
         content.sound = .default
         content.categoryIdentifier = doseCategoryIdentifier
         content.userInfo = ReminderPayload.userInfo(
@@ -127,6 +130,10 @@ enum ReminderRequestFactory {
     ///
     /// The dose actions make no sense on a diary prompt, and one shared category
     /// would put Take/Snooze/Skip on every reminder the app ever adds.
+    ///
+    /// These titles stay on `String(localized:)`, unlike the notification text.
+    /// Categories are registered again on every launch, and iOS relaunches an
+    /// app when the language changes, so they can never be left behind.
     static func categories() -> Set<UNNotificationCategory> {
         let doseCategory = UNNotificationCategory(
             identifier: doseCategoryIdentifier,

@@ -7,80 +7,71 @@
 
 import SwiftUI
 
+/// A slide: a piece of the real interface over a glow, and the two lines that
+/// explain it.
+///
+/// The miniature replaced an icon in a circle on purpose. An icon describes
+/// the product; a fragment of the product shows it, and someone deciding
+/// whether to keep the app has seen it before the first tap.
 struct OnboardingPageView: View {
+
     let page: OnboardingPage
-    
-    @State private var isFloating = false
-    @State private var isPulsing = false
-    
+
+    @State private var isGlowing = false
+
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
-            
-            // MARK: - Magic Icon Container
+        VStack(spacing: 24) {
+            Spacer(minLength: 0)
+
             ZStack {
                 Circle()
                     .fill(
                         RadialGradient(
-                            gradient: Gradient(colors: [page.imageColor.opacity(0.4), Color.clear]),
+                            colors: [page.glow.opacity(0.22), .clear],
                             center: .center,
-                            startRadius: 10,
-                            endRadius: 140
+                            startRadius: 0,
+                            endRadius: 165
                         )
                     )
-                    .frame(width: 280, height: 280)
-                    .scaleEffect(isPulsing ? 1.2 : 0.8)
-                    .opacity(isPulsing ? 0.8 : 0.3)
-                
-                Circle()
-                    .fill(Color.appSurface)
-                    .frame(width: 200, height: 200)
-                    .overlay(
-                        Circle().stroke(page.imageColor.opacity(0.4), lineWidth: 2)
-                    )
-                    .shadow(color: page.imageColor.opacity(isPulsing ? 0.4 : 0.1), radius: isPulsing ? 30 : 10, x: 0, y: isPulsing ? 15 : 5)
-                
-                Image(systemName: page.imageSystemName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 100, height: 100)
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [page.imageColor, page.imageColor.opacity(0.5)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .shadow(color: page.imageColor.opacity(0.8), radius: isFloating ? 20 : 5, x: 0, y: isFloating ? 10 : 0)
-                    .offset(y: isFloating ? -12 : 8)
+                    .frame(width: 330, height: 330)
+                    .scaleEffect(isGlowing ? 1.06 : 0.94)
+
+                preview
             }
-            .padding(.vertical, 20)
-            
-            // MARK: - Text
-            VStack(spacing: 16) {
+
+            Spacer(minLength: 0)
+
+            VStack(spacing: 12) {
                 Text(page.title)
-                    .font(.system(.title2, design: .serif).weight(.bold))
+                    .scaledFont(size: 28, relativeTo: .title, weight: .bold, design: .serif)
                     .foregroundColor(.textPrimary)
-                    .multilineTextAlignment(.center)
-                
+
                 Text(page.description)
                     .font(.body)
-                    .foregroundColor(.textPrimary.opacity(0.7))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .lineSpacing(4)
+                    .foregroundColor(.textSecondary)
+                    .lineSpacing(3)
             }
-            
-            Spacer()
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 34)
         }
+        // The miniature carries no information the two lines below it do not,
+        // so VoiceOver reads the slide as one thing and skips the decoration.
+        .accessibilityElement(children: .combine)
         .onAppear {
-            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                isPulsing = true
+            withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+                isGlowing = true
             }
-            
-            withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) {
-                isFloating = true
-            }
+        }
+    }
+
+    @ViewBuilder
+    private var preview: some View {
+        switch page.preview {
+        case .course: CoursePreview()
+        case .day: DayPreview()
+        case .reminder: ReminderPreview()
+        case .diary: DiaryPreview()
+        case .report: ReportPreview()
         }
     }
 }
@@ -88,11 +79,6 @@ struct OnboardingPageView: View {
 #Preview {
     ZStack {
         Color.appBackground.ignoresSafeArea()
-        OnboardingPageView(page: OnboardingPage(
-            imageSystemName: "bell.badge.fill",
-            imageColor: .warmAccent,
-            title: "Smart reminders",
-            description: "Get timely notifications and log your medication right from the lock screen."
-        ))
+        OnboardingPageView(page: OnboardingViewModel().pages[2])
     }
 }

@@ -37,17 +37,7 @@ struct OnboardingProfileStep: View {
 
     private var header: some View {
         VStack(spacing: 16) {
-            Image(systemName: "person.text.rectangle.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 64, height: 64)
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.accentPrimary, .accentPrimary.opacity(0.5)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+            AppLogo(size: 62)
 
             Text("Who is this for?")
                 .font(.system(.title2, design: .serif).weight(.bold))
@@ -100,15 +90,11 @@ struct OnboardingProfileStep: View {
     private var buttons: some View {
         VStack(spacing: 12) {
             Button(action: onFinish) {
-                Text("Start")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentPrimary)
-                    .cornerRadius(16)
-                    .shadow(color: Color.accentPrimary.opacity(0.3), radius: 10, x: 0, y: 5)
+                // Its own key, not the date picker's "Start": one word for
+                // a noun and a verb gave Ukrainian "Початок" on a button.
+                Text("Get started")
             }
+            .buttonStyle(OnboardingButtonStyle())
 
             Button {
                 // Skip means skip: a half-typed name should not be what the

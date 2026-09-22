@@ -12,14 +12,15 @@ import Combine
 // ships in the release binary.
 #if DEBUG
 final class MockOnboardingViewModel: OnboardingViewModelProtocol {
-    @Published var currentPage = 2
-    
-    let pages: [OnboardingPage] = [
-        OnboardingPage(imageSystemName: "questionmark", imageColor: .gray, title: "Mock", description: "Mock data")
-    ]
-    
-    var isLastPage: Bool = true
-    
+
+    @Published var currentPage = 0
+
+    // The real pages: a preview of the carousel is worth nothing if the slides
+    // in it are not the ones that ship.
+    let pages = OnboardingViewModel().pages
+
+    var isLastPage: Bool { currentPage == pages.count - 1 }
+
     func completeOnboarding() {}
 }
 

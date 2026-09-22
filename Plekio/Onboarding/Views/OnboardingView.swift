@@ -18,7 +18,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
     init(viewModel: @autoclosure @escaping () -> VM) {
         self._viewModel = StateObject(wrappedValue: viewModel())
     }
-    
+
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
@@ -35,45 +35,58 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
     }
 
     private var carousel: some View {
-        VStack {
+        VStack(spacing: 0) {
             TabView(selection: $viewModel.currentPage) {
-                ForEach(0..<viewModel.pages.count, id: \.self) { index in
-                    OnboardingPageView(page: viewModel.pages[index])
-                        .tag(index)
+                ForEach(Array(viewModel.pages.enumerated()), id: \.element.id) { index, page in
+                    OnboardingPageView(page: page).tag(index)
                 }
             }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
+            .tabViewStyle(.page(indexDisplayMode: .never))
 
-            Spacer()
+            dots.padding(.vertical, 26)
 
-            bottomButton
-        }
-    }
-    
-    // MARK: - UI Components
-    
-    @ViewBuilder
-    private var bottomButton: some View {
-        if viewModel.isLastPage {
-            Button(action: { isCollectingProfile = true }) {
-                Text("Continue")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentPrimary)
-                    .cornerRadius(16)
-                    .shadow(color: Color.accentPrimary.opacity(0.3), radius: 10, x: 0, y: 5)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 40)
-            .transition(.opacity.combined(with: .move(edge: .bottom)))
-        } else {
-            Color.clear
-                .frame(height: 50)
+            actions
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)
+        }
+    }
+
+    // MARK: - UI Components
+
+    /// Drawn rather than taken from `TabView`. Its own dots cannot show the
+    /// current page as a longer capsule, and they sit inside the paging area,
+    /// where the slide's text needs the room.
+    private var dots: some View {
+        HStack(spacing: 8) {
+            ForEach(viewModel.pages.indices, id: \.self) { index in
+                Capsule()
+                    .fill(index == viewModel.currentPage ? Color.accentPrimary : Color.textPrimary.opacity(0.15))
+                    .frame(width: index == viewModel.currentPage ? 22 : 7, height: 7)
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: viewModel.currentPage)
+        .accessibilityHidden(true)
+    }
+
+    /// Both actions are on every slide. An onboarding you cannot leave annoys
+    /// more than it helps, and Skip lands on the profile step rather than
+    /// outside: the two fields there are the only thing the app actually needs.
+    private var actions: some View {
+        VStack(spacing: 14) {
+            Button {
+                if viewModel.isLastPage {
+                    isCollectingProfile = true
+                } else {
+                    withAnimation { viewModel.currentPage += 1 }
+                }
+            } label: {
+                Text("Continue")
+            }
+            .buttonStyle(OnboardingButtonStyle())
+
+            Button("Skip") { isCollectingProfile = true }
+                .font(.subheadline)
+                .foregroundColor(.textSecondary)
         }
     }
 }

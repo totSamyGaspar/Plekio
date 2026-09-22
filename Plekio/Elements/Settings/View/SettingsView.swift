@@ -11,7 +11,7 @@ struct SettingsView: View {
     /// Read straight from defaults rather than through a view model: every
     /// screen that reacts to the theme reads the same key, so a store in
     /// between would only add a second place for it to go stale.
-    @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .dark
+    @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .system
     
     var body: some View {
         ZStack {

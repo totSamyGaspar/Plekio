@@ -66,7 +66,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
 /// sheet: a modal is its own presentation, so it does not inherit
 /// `preferredColorScheme` from the screen that presented it.
 struct AppThemeModifier: ViewModifier {
-    @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .dark
+    @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .system
 
     func body(content: Content) -> some View {
         content.preferredColorScheme(theme.colorScheme)
@@ -77,7 +77,7 @@ struct AppThemeModifier: ViewModifier {
 /// preference — for UIKit-backed controls (pickers, text editors) that read
 /// `\.colorScheme` directly instead of following the window.
 struct AppColorSchemeModifier: ViewModifier {
-    @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .dark
+    @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .system
 
     /// On `.system` there is nothing to override, so the scheme already in the
     /// environment is passed straight back through.
