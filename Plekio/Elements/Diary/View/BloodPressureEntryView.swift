@@ -29,7 +29,15 @@ struct BloodPressureEntryView: View {
         guard BloodPressureReading.systolicRange.contains(systolic),
               BloodPressureReading.diastolicRange.contains(diastolic) else { return false }
         if let pulse, !BloodPressureReading.pulseRange.contains(pulse) { return false }
-        return true
+        return BloodPressureReading.isOrdered(systolic: systolic, diastolic: diastolic)
+    }
+
+    /// Both numbers in range and still not a reading. Kept apart from `canSave`
+    /// because the form has to say so, not just go quiet: a Save button that
+    /// dims with every field filled in looks broken.
+    private var isInverted: Bool {
+        guard let systolic, let diastolic else { return false }
+        return !BloodPressureReading.isOrdered(systolic: systolic, diastolic: diastolic)
     }
     
     /// A measurement cannot have happened later than now, and the reading is
@@ -66,14 +74,16 @@ struct BloodPressureEntryView: View {
                             text: $systolicText,
                             unit: "mmHg",
                             placeholder: "120",
-                            range: BloodPressureReading.systolicRange
+                            range: BloodPressureReading.systolicRange,
+                            isFlagged: isInverted
                         )
                         numberRow(
                             "Diastolic",
                             text: $diastolicText,
                             unit: "mmHg",
                             placeholder: "80",
-                            range: BloodPressureReading.diastolicRange
+                            range: BloodPressureReading.diastolicRange,
+                            isFlagged: isInverted
                         )
                         // Optional: not every monitor reports a pulse.
                         numberRow(
@@ -84,8 +94,15 @@ struct BloodPressureEntryView: View {
                             range: BloodPressureReading.pulseRange
                         )
                     } footer: {
-                        Text("A value outside its range can't be saved. Pulse is optional — leave it empty if your monitor doesn't show one.")
-                            .foregroundColor(.textSecondary)
+                        // The specific complaint replaces the general hint
+                        // exactly when there is one, rather than stacking under it.
+                        if isInverted {
+                            Text("Systolic must be higher than diastolic.")
+                                .foregroundColor(.warningAccent)
+                        } else {
+                            Text("A value outside its range can't be saved. Pulse is optional — leave it empty if your monitor doesn't show one.")
+                                .foregroundColor(.textSecondary)
+                        }
                     }
                     .listRowBackground(Color.appSurface)
                 }
@@ -167,9 +184,10 @@ struct BloodPressureEntryView: View {
         text: Binding<String>,
         unit: LocalizedStringKey,
         placeholder: String,
-        range: ClosedRange<Int>
+        range: ClosedRange<Int>,
+        isFlagged: Bool = false
     ) -> some View {
-        let isInvalid = isOutOfRange(text.wrappedValue, range)
+        let isInvalid = isFlagged || isOutOfRange(text.wrappedValue, range)
         
         return HStack {
             VStack(alignment: .leading, spacing: 2) {

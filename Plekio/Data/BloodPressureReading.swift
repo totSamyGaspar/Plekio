@@ -6,12 +6,6 @@
 import Foundation
 import SwiftData
 
-/// One blood-pressure measurement.
-///
-/// Deliberately its own record rather than fields on `DiaryEntry`: pressure is
-/// commonly measured morning and evening, while a check-in happens once a day.
-/// Hanging it off the entry would have made the second measurement overwrite the
-/// first — and a doctor reading the history needs both, with their times.
 @Model
 final class BloodPressureReading {
     @Attribute(.unique) var id: UUID
@@ -37,13 +31,13 @@ final class BloodPressureReading {
 }
 
 extension BloodPressureReading {
-    
-    /// Plausible ranges, used to clamp the input. Wide on purpose: the point is
-    /// to stop typos like 1200/80 from poisoning the chart, not to decide which
-    /// readings are medically sensible.
     static let systolicRange = 60...300
     static let diastolicRange = 30...200
     static let pulseRange = 30...220
+
+    static func isOrdered(systolic: Int, diastolic: Int) -> Bool {
+        systolic > diastolic
+    }
 
     var formattedPressure: String {
         "\(systolic)/\(diastolic)"
