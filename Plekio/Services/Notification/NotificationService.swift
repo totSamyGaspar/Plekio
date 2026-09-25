@@ -38,12 +38,17 @@ final class NotificationService: NotificationServiceProtocol {
     /// rebuilt.
     private let settings: SettingsStore
 
+    /// "Now" for the planner: which slots are still ahead, and how far the
+    /// queue reaches.
+    private let time: any TimeSource
+
     /// The last operation queued through `serialized`. See there.
     private var queueTail: Task<Void, Never>?
 
     // MARK: - Init
 
-    init(center: any NotificationCenterClient, settings: SettingsStore) {
+    init(center: any NotificationCenterClient, settings: SettingsStore, time: any TimeSource = SystemTime()) {
+        self.time = time
         self.center = center
         self.settings = settings
 
@@ -60,8 +65,8 @@ final class NotificationService: NotificationServiceProtocol {
     /// a default argument is evaluated at the CALL SITE, outside this type's
     /// main-actor isolation, so naming a main-actor-isolated initialiser there
     /// does not compile. Here the call is plainly inside it.
-    convenience init(settings: SettingsStore) {
-        self.init(center: SystemNotificationCenterClient(), settings: settings)
+    convenience init(settings: SettingsStore, time: any TimeSource) {
+        self.init(center: SystemNotificationCenterClient(), settings: settings, time: time)
     }
 
     // MARK: - Permission
@@ -97,7 +102,7 @@ final class NotificationService: NotificationServiceProtocol {
         await serialized { [weak self] in
             guard let self else { return }
             await self.removeAllPending()
-            await self.scheduleNotifications(activeCourses: self.activeCourses(from: dbService))
+            await self.scheduleNotifications(activeCourses: self.activeCourses(from: dbService, on: self.time.now))
         }
     }
 
@@ -140,7 +145,7 @@ final class NotificationService: NotificationServiceProtocol {
     func scheduleNotifications(activeCourses: [TreatmentCourse]) async {
         let calendar = Calendar.current
         let scheduleMap = ReminderPlanner.buildScheduleMap(
-            activeCourses: activeCourses, now: Date(), calendar: calendar
+            activeCourses: activeCourses, now: time.now, calendar: calendar
         )
 
         // Sorted by trigger date so that, if the count exceeds iOS's limit, it is
@@ -173,7 +178,7 @@ final class NotificationService: NotificationServiceProtocol {
         // getting reminded, and it moves with how many medications they take.
         if let lastCovered = sortedEntries.prefix(requests.count).last?.key {
             let days = calendar.dateComponents(
-                [.day], from: calendar.startOfDay(for: Date()), to: lastCovered
+                [.day], from: calendar.startOfDay(for: time.now), to: lastCovered
             ).day ?? 0
             AppLog.notifications.debug("Reminders cover the next \(days) day(s)")
         }

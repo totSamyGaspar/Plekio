@@ -34,6 +34,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     /// Every write about a dose, together with its reminder side effects.
     private let doseLogging: DoseLoggingUseCaseProtocol
     private let errors: any ErrorReporting
+    private let time: any TimeSource
     private var cancellables = Set<AnyCancellable>()
     
     /// Closes the undo window on its own. Held so a second "Log all" replaces the
@@ -48,10 +49,17 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     
     // MARK: - Init
     
-    init(dbService: any DoseStoring, doseLogging: DoseLoggingUseCaseProtocol, errors: any ErrorReporting) {
+    init(
+        dbService: any DoseStoring,
+        doseLogging: DoseLoggingUseCaseProtocol,
+        errors: any ErrorReporting,
+        time: any TimeSource = SystemTime()
+    ) {
         self.dbService = dbService
         self.doseLogging = doseLogging
         self.errors = errors
+        self.time = time
+        self.selectedDate = time.now
         fetchData()
         
         // Doses as well as courses: this screen is where a dose is logged.
@@ -77,7 +85,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     
     var weekDates: [Date] {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        let today = calendar.startOfDay(for: time.now)
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
     }
     
@@ -172,7 +180,8 @@ final class DashboardViewModel: DashboardViewModelProtocol {
 
     private func calculateWeeklyStats() {
         let calendar = Calendar.current
-        let dates = (0..<7).reversed().map { calendar.date(byAdding: .day, value: -$0, to: Date()) ?? Date() }
+        let now = time.now
+        let dates = (0..<7).reversed().map { calendar.date(byAdding: .day, value: -$0, to: now) ?? now }
         // The whole week in one read — see DoseStoring.fetchPills(onDays:).
         let pillsByDay = dbService.fetchPills(onDays: dates)
         var percentages: [Double] = []

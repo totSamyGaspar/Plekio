@@ -21,6 +21,7 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
     /// The dose schedule — for adherence and the streak.
     private let doses: any DoseStoring
     private let errors: any ErrorReporting
+    private let time: any TimeSource
     private var cancellables = Set<AnyCancellable>()
 
     private static let streakLookbackDays = 30
@@ -32,7 +33,8 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
         return Double(takenCount) / Double(totalCount)
     }
 
-    init(courses: any CourseRepository, doses: any DoseStoring, errors: any ErrorReporting) {
+    init(courses: any CourseRepository, doses: any DoseStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
+        self.time = time
         self.courses = courses
         self.doses = doses
         self.errors = errors
@@ -52,7 +54,8 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
 
     func loadStats() {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        let now = time.now
+        let today = calendar.startOfDay(for: now)
 
         // Today and the lookback window in one read.
         let days = (0...Self.streakLookbackDays).compactMap {
@@ -67,7 +70,7 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
         // Unfinished courses only: there is no point reminding the user to restock
         // a medication for a course that has already ended.
         self.lowStockItems = courses.allCourses()
-            .filter { $0.isActive() }
+            .filter { $0.isActive(on: now, calendar: calendar) }
             .flatMap(\.medications)
             .filter(\.isLowOnStock)
 

@@ -23,6 +23,9 @@ final class DatabaseService {
 
     let persistence: PersistenceController
 
+    /// When a dose was logged or skipped — see TimeSource.
+    let time: any TimeSource
+
     var container: ModelContainer { persistence.container }
     var context: ModelContext { persistence.context }
 
@@ -35,14 +38,16 @@ final class DatabaseService {
 
     /// The on-disk store. Built once, by the composition root
     /// (`AppDependencies.live()`); there is no `shared` to reach for.
-    init(photos: any PhotoStoring, errors: any ErrorReporting) {
+    init(photos: any PhotoStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
         persistence = PersistenceController(photos: photos, errors: errors)
+        self.time = time
     }
 
     /// Test-only entry point: an independent in-memory container on the same
     /// schema, exercising the real logic without touching the on-disk store.
-    init(inMemoryForTesting: Bool, photos: any PhotoStoring, errors: any ErrorReporting) {
+    init(inMemoryForTesting: Bool, photos: any PhotoStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
         persistence = PersistenceController(inMemory: inMemoryForTesting, photos: photos, errors: errors)
+        self.time = time
     }
 
     /// The shape existing tests use. Photos still go to the shared cache and

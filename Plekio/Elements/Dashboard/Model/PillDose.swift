@@ -48,10 +48,21 @@ struct PillDose: Identifiable, Equatable {
     /// Late and unaccounted for. A skipped dose is accounted for — the user
     /// answered — so it never becomes "missed" no matter how long ago it was.
     var isMissed: Bool {
-        return !isTaken && !isSkipped && Date() > time.addingTimeInterval(DoseSchedule.missedGrace)
+        isMissed(at: Date())
+    }
+
+    /// Late and unaccounted for, as of `now`. The rule itself — the property
+    /// above is the view's "as of this render".
+    func isMissed(at now: Date) -> Bool {
+        !isTaken && !isSkipped && now > time.addingTimeInterval(DoseSchedule.missedGrace)
     }
     
     var isLoggable: Bool {
-        time <= Date() || Calendar.current.isDateInToday(time)
+        isLoggable(at: Date())
+    }
+
+    /// Past, or later today — a future day cannot be logged in advance.
+    func isLoggable(at now: Date, calendar: Calendar = .current) -> Bool {
+        time <= now || calendar.isDate(time, inSameDayAs: now)
     }
 }

@@ -31,14 +31,17 @@ final class ReportExportViewModel: ObservableObject {
     private let database: any CourseStoring & DiaryStoring & BloodPressureStoring
     private let images: any ImageLoading
     private let errors: any ErrorReporting
+    private let time: any TimeSource
 
     init(
         database: any CourseStoring & DiaryStoring & BloodPressureStoring,
         images: any ImageLoading,
         errors: any ErrorReporting,
         calendar: Calendar = .current,
-        today: Date = Date()
+        time: any TimeSource = SystemTime()
     ) {
+        let today = time.now
+        self.time = time
         self.database = database
         self.images = images
         self.errors = errors
@@ -89,7 +92,7 @@ final class ReportExportViewModel: ObservableObject {
         isWorking = true
         defer { isWorking = false }
 
-        let data = ReportBuilder(database: database).build(selection)
+        let data = ReportBuilder(database: database, now: { [time] in time.now }).build(selection)
         let photos = selection.includesPhotos ? await photos(in: data) : [:]
         let rendered = ReportRenderer().render(data, photos: photos)
 

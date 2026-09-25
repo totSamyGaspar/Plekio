@@ -58,8 +58,8 @@ extension NotificationServiceProtocol {
     /// This, and the three lines around it, were copied verbatim into five call
     /// sites (PlekioApp, DashboardViewModel, NewTreatmentViewModel and twice in
     /// CourseDetailViewModel), so changing the rule meant finding all five.
-    func activeCourses(from dbService: any CourseStoring) -> [TreatmentCourse] {
-        dbService.fetchAllCourses().filter { $0.isActive() }
+    func activeCourses(from dbService: any CourseStoring, on day: Date = Date()) -> [TreatmentCourse] {
+        dbService.fetchAllCourses().filter { $0.isActive(on: day) }
     }
 
     /// Plain rebuild, for test doubles and any future implementation that has no

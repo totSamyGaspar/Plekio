@@ -115,7 +115,7 @@ extension DatabaseService: DoseStoring {
         guard !ids.isEmpty else { return }
 
         let calendar = Calendar.current
-        let takenAt = Date()
+        let takenAt = time.now
         var changed = false
 
         for medicationId in ids {
@@ -176,7 +176,7 @@ extension DatabaseService: DoseStoring {
         guard !ids.isEmpty else { return }
 
         let calendar = Calendar.current
-        let skippedAt = Date()
+        let skippedAt = time.now
 
         // Fetched one at a time rather than with one `ids.contains` query: a slot
         // holds a handful of medications, and the point of this method is a single
@@ -207,7 +207,7 @@ extension DatabaseService: DoseStoring {
         } else {
             let quantity = Self.dispensed(med.dosage, from: med.stockCount)
             // Always applies: `reverting` failed, so the dose is not taken.
-            guard let taken = current.taking(at: Date(), dispensed: quantity) else { return }
+            guard let taken = current.taking(at: time.now, dispensed: quantity) else { return }
             med.stockCount -= quantity
             write(taken, to: existing, of: med, at: scheduledTime)
         }

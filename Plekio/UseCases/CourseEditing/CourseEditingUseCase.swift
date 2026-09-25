@@ -13,8 +13,10 @@ final class CourseEditingUseCase: CourseEditingUseCaseProtocol {
 
     private let courses: any CourseRepository
     private let notificationService: NotificationServiceProtocol
+    private let time: any TimeSource
 
-    init(courses: any CourseRepository, notificationService: NotificationServiceProtocol) {
+    init(courses: any CourseRepository, notificationService: NotificationServiceProtocol, time: any TimeSource = SystemTime()) {
+        self.time = time
         self.courses = courses
         self.notificationService = notificationService
     }
@@ -49,7 +51,8 @@ final class CourseEditingUseCase: CourseEditingUseCaseProtocol {
     func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date) throws -> Bool {
         // Checked against storage, not against whatever list a screen last
         // fetched: the rule has to hold whoever calls this.
-        let active = courses.allCourses().filter { $0.isActive() }
+        let now = time.now
+        let active = courses.allCourses().filter { $0.isActive(on: now) }
         guard !course.hasActiveRepeat(among: active) else { return false }
 
         try courses.duplicateCourse(id: course.id, startDate: startDate, endDate: endDate)

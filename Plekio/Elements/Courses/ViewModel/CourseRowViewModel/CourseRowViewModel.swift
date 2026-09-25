@@ -31,7 +31,8 @@ struct CourseRowViewModel {
     let currentDayNumber: Int
     let daysProgress: Double
     
-    init(course: CourseSnapshot) {
+    /// `today` is "now" for the progress bar — a parameter so a test can pin it.
+    init(course: CourseSnapshot, today now: Date = Date()) {
         self.title = course.name
         self.medications = course.medications
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
@@ -52,7 +53,7 @@ struct CourseRowViewModel {
         (calendar.dateComponents([.day], from: start, to: end).day ?? 0) + 1
         self.totalDays = total
         
-        let today = calendar.startOfDay(for: Date())
+        let today = calendar.startOfDay(for: now)
         if today < start {
             self.currentDayNumber = 0
         } else {

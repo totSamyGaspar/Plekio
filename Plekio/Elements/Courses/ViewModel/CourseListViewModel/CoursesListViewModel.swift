@@ -16,10 +16,17 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     private let courses: any CourseRepository
     private let courseEditing: CourseEditingUseCaseProtocol
     private let errors: any ErrorReporting
+    private let time: any TimeSource
     private var cancellables = Set<AnyCancellable>()
     
     /// `courses` for reading the list; every write goes through `courseEditing`.
-    init(courses: any CourseRepository, courseEditing: CourseEditingUseCaseProtocol, errors: any ErrorReporting) {
+    init(
+        courses: any CourseRepository,
+        courseEditing: CourseEditingUseCaseProtocol,
+        errors: any ErrorReporting,
+        time: any TimeSource = SystemTime()
+    ) {
+        self.time = time
         self.courses = courses
         self.courseEditing = courseEditing
         self.errors = errors
@@ -46,8 +53,9 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     func fetchCourses() {
         let allCourses = courses.allCourses()
 
-        self.activeCourses = allCourses.filter { $0.isActive() }
-        self.historyCourses = allCourses.filter { !$0.isActive() }
+        let now = time.now
+        self.activeCourses = allCourses.filter { $0.isActive(on: now) }
+        self.historyCourses = allCourses.filter { !$0.isActive(on: now) }
             .sorted { $0.endDate > $1.endDate }
     }
 

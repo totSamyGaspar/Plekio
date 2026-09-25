@@ -22,9 +22,11 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     
     private let diary: any DiaryRepository
     private let errors: any ErrorReporting
+    private let time: any TimeSource
     private var cancellables = Set<AnyCancellable>()
     
-    init(diary: any DiaryRepository, errors: any ErrorReporting) {
+    init(diary: any DiaryRepository, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
+        self.time = time
         self.diary = diary
         self.errors = errors
         fetchEntries()
@@ -110,7 +112,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     /// Entries from the last 7 days (today inclusive); falls back to all
     /// entries when nothing was logged in that window.
     private var recentEntries: [DiaryEntrySnapshot] {
-        let startOfToday = Calendar.current.startOfDay(for: Date())
+        let startOfToday = Calendar.current.startOfDay(for: time.now)
         let cutoff = Calendar.current.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
         let recent = entries.filter { $0.checkInDate >= cutoff }
         return recent.isEmpty ? entries : recent
@@ -152,7 +154,8 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     }
     
     var todaysEntry: DiaryEntrySnapshot? {
-        entries.first { Calendar.current.isDateInToday($0.checkInDate) }
+        let now = time.now
+        return entries.first { Calendar.current.isDate($0.checkInDate, inSameDayAs: now) }
     }
 }
 

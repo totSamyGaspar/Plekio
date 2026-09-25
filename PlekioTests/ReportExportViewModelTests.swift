@@ -15,6 +15,7 @@ import SwiftData
 @Suite("ReportExportViewModel")
 struct ReportExportViewModelTests {
 
+    @discardableResult
     private func seed(_ db: DatabaseService) -> TreatmentCourse {
         let course = TreatmentCourse(
             name: "Курс",

@@ -64,6 +64,10 @@ final class AppDependencies {
     /// writes for as long as this object lives, which is as long as the app.
     let reminderSync: ReminderSyncCoordinator
 
+    /// "Now" for every rule that depends on it — see TimeSource. One instance,
+    /// so the whole app agrees on the time.
+    let time: any TimeSource
+
     init(
         database: any DatabaseServiceProtocol,
         notifications: any NotificationServiceProtocol,
@@ -71,8 +75,10 @@ final class AppDependencies {
         photoCache: ImageCache,
         settings: SettingsStore,
         errorPresenter: AppErrorPresenter,
-        storeURL: URL? = nil
+        storeURL: URL? = nil,
+        time: any TimeSource = SystemTime()
     ) {
+        self.time = time
         self.database = database
         self.notifications = notifications
         self.mediaPicker = mediaPicker
@@ -84,7 +90,7 @@ final class AppDependencies {
         doseLogging = DoseLoggingUseCase(dbService: database, notificationService: notifications)
         courseRepository = SwiftDataCourseRepository(store: database)
         diaryRepository = SwiftDataDiaryRepository(store: database)
-        courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications)
+        courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)
         reminderSync = ReminderSyncCoordinator(notificationService: notifications, dbService: database)
     }
 
@@ -93,19 +99,21 @@ final class AppDependencies {
         // Created first: the store reports into it if it has to fall back to
         // memory, which happens while it is being built.
         let errorPresenter = AppErrorPresenter()
+        let time = SystemTime()
         // The one place the app's photo cache is chosen.
         let photoCache = ImageCache.shared
-        let database = DatabaseService(photos: photoCache, errors: errorPresenter)
+        let database = DatabaseService(photos: photoCache, errors: errorPresenter, time: time)
         let settings = SettingsStore(defaults: .standard)
 
         return AppDependencies(
             database: database,
-            notifications: NotificationService(settings: settings),
+            notifications: NotificationService(settings: settings, time: time),
             mediaPicker: MediaPickerService(),
             photoCache: photoCache,
             settings: settings,
             errorPresenter: errorPresenter,
-            storeURL: database.persistence.storeURL
+            storeURL: database.persistence.storeURL,
+            time: time
         )
     }
 
@@ -118,7 +126,7 @@ final class AppDependencies {
         let settings = SettingsStore(defaults: UserDefaults(suiteName: "PlekioPreviews") ?? .standard)
         return AppDependencies(
             database: DatabaseService(inMemoryForTesting: true, photos: ImageCache.shared, errors: errorPresenter),
-            notifications: NotificationService(settings: settings),
+            notifications: NotificationService(settings: settings, time: SystemTime()),
             mediaPicker: MediaPickerService(),
             photoCache: ImageCache.shared,
             settings: settings,
