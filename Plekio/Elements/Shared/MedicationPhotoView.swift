@@ -11,6 +11,7 @@
 import SwiftUI
 
 struct MedicationPhotoView<Placeholder: View>: View {
+    @Environment(\.imageLoader) private var imageLoader
     let medicationId: UUID
     let size: CGFloat
     let cornerRadius: CGFloat
@@ -43,6 +44,6 @@ struct MedicationPhotoView<Placeholder: View>: View {
     
     private func load(force: Bool = false) async {
         guard force || uiImage == nil else { return }
-        uiImage = await ImageCache.shared.image(for: medicationId, targetPointSize: size)
+        uiImage = await imageLoader.image(for: medicationId, targetPointSize: size)
     }
 }

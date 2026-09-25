@@ -26,6 +26,8 @@ struct PlekioApp: App {
                 .environmentObject(router)
                 // The composition root, for every screen below — see AppDependencies.
                 .environment(appDelegate.dependencies)
+                // Photo views read the loader from here rather than from ImageCache.shared.
+                .environment(\.imageLoader, appDelegate.dependencies.photoCache)
                 .onAppear {
                     appDelegate.router = router
                 }

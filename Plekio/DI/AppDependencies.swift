@@ -31,6 +31,11 @@ final class AppDependencies {
     let notifications: any NotificationServiceProtocol
     let mediaPicker: any MediaPickerServiceProtocol
 
+    /// Photo files and decoded photos — one cache, shared by the database (as
+    /// PhotoStoring), view models, and views (as ImageLoading, through the
+    /// environment). Concrete: Settings measures its size on disk.
+    let photoCache: ImageCache
+
     /// Owned here, not reached as a singleton. View models and the storage layer
     /// get it as `any ErrorReporting`; only MainTabView, which shows the alert,
     /// needs the concrete type.
@@ -52,12 +57,14 @@ final class AppDependencies {
         database: any DatabaseServiceProtocol,
         notifications: any NotificationServiceProtocol,
         mediaPicker: any MediaPickerServiceProtocol,
+        photoCache: ImageCache,
         errorPresenter: AppErrorPresenter,
         storeURL: URL? = nil
     ) {
         self.database = database
         self.notifications = notifications
         self.mediaPicker = mediaPicker
+        self.photoCache = photoCache
         self.errorPresenter = errorPresenter
         self.storeURL = storeURL
 
@@ -71,12 +78,15 @@ final class AppDependencies {
         // Created first: the store reports into it if it has to fall back to
         // memory, which happens while it is being built.
         let errorPresenter = AppErrorPresenter()
-        let database = DatabaseService(photos: ImageCache.shared, errors: errorPresenter)
+        // The one place the app's photo cache is chosen.
+        let photoCache = ImageCache.shared
+        let database = DatabaseService(photos: photoCache, errors: errorPresenter)
 
         return AppDependencies(
             database: database,
             notifications: NotificationService(),
             mediaPicker: MediaPickerService(),
+            photoCache: photoCache,
             errorPresenter: errorPresenter,
             storeURL: database.persistence.storeURL
         )
@@ -91,6 +101,7 @@ final class AppDependencies {
             database: DatabaseService(inMemoryForTesting: true, photos: ImageCache.shared, errors: errorPresenter),
             notifications: NotificationService(),
             mediaPicker: MediaPickerService(),
+            photoCache: ImageCache.shared,
             errorPresenter: errorPresenter
         )
     }()

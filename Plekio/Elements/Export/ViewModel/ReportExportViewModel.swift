@@ -29,15 +29,18 @@ final class ReportExportViewModel: ObservableObject {
     @Published private(set) var document: URL?
 
     private let database: any CourseStoring & DiaryStoring & BloodPressureStoring
+    private let images: any ImageLoading
     private let errors: any ErrorReporting
 
     init(
         database: any CourseStoring & DiaryStoring & BloodPressureStoring,
+        images: any ImageLoading,
         errors: any ErrorReporting,
         calendar: Calendar = .current,
         today: Date = Date()
     ) {
         self.database = database
+        self.images = images
         self.errors = errors
 
         // A month back by default: long enough to be worth sending, short
@@ -103,7 +106,7 @@ final class ReportExportViewModel: ObservableObject {
         var photos: [UUID: UIImage] = [:]
 
         for id in Set(data.diary.flatMap(\.photoIds)) {
-            photos[id] = await ImageCache.shared.image(for: id, targetPointSize: 220)
+            photos[id] = await images.image(for: id, targetPointSize: 220)
         }
         return photos
     }

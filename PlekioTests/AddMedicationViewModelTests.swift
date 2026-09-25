@@ -21,7 +21,7 @@ struct AddMedicationViewModelTests {
     @Test("Initial state — an empty draft with no photo")
     func testInitialState() async throws {
         let mockMedia = MockMediaPickerService()
-        let vm = AddMedicationViewModel(mediaPickerService: mockMedia)
+        let vm = AddMedicationViewModel(mediaPickerService: mockMedia, photos: FakePhotoStore())
 
         #expect(vm.selectedImage == nil)
         #expect(vm.draft.medicationImageData == nil)
@@ -32,7 +32,7 @@ struct AddMedicationViewModelTests {
     @Test("removeImage clears both selectedImage and draft.medicationImageData")
     func testRemoveImageClearsBothImageAndDraft() async throws {
         let mockMedia = MockMediaPickerService()
-        let vm = AddMedicationViewModel(mediaPickerService: mockMedia)
+        let vm = AddMedicationViewModel(mediaPickerService: mockMedia, photos: FakePhotoStore())
 
         // A photo already selected: the user just came back from the picker, or this
         // is the edit screen, where init(editingMedication:) preloaded the bytes.

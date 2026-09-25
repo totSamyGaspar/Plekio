@@ -22,7 +22,8 @@ struct StorageUsageSection: View {
         .listRowBackground(Color.appSurface)
         .task {
             let storeURL = dependencies.storeURL
-            usage = await Task.detached { StorageUsage.measure(storeURL: storeURL) }.value
+            let photoCache = dependencies.photoCache
+            usage = await Task.detached { StorageUsage.measure(storeURL: storeURL, photoCache: photoCache) }.value
         }
     }
 

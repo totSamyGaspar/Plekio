@@ -24,7 +24,7 @@ nonisolated enum AvatarStore {
     static func save(
         _ image: UIImage,
         replacing previous: UUID?,
-        in cache: ImageCache = .shared
+        in cache: any PhotoStoring
     ) -> UUID? {
         // pngData is the fallback: jpegData returns nil for an image with no
         // CGImage behind it. ImageCache caps the stored size on the way in.
@@ -39,7 +39,7 @@ nonisolated enum AvatarStore {
         return id
     }
 
-    static func remove(_ id: UUID?, in cache: ImageCache = .shared) {
+    static func remove(_ id: UUID?, in cache: any PhotoStoring) {
         guard let id else { return }
         cache.deleteFromDisk(for: id)
     }

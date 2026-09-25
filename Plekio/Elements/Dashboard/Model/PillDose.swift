@@ -39,7 +39,7 @@ struct PillDose: Identifiable, Equatable {
     /// keeps its existing argument order.
     var isSkipped: Bool = false
     // No image data here by design: the view loads the photo lazily via
-    // ImageCache.shared.image(for:), keyed on medicationId,
+    // the environment's imageLoader, keyed on medicationId,
     // instead of copying the photo blob into every PillDose instance.
     
     var stockCount: Int? = nil

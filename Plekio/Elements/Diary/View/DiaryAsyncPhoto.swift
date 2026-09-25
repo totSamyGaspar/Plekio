@@ -18,6 +18,7 @@
 import SwiftUI
 
 struct DiaryAsyncPhoto: View {
+    @Environment(\.imageLoader) private var imageLoader
     let photoId: UUID
     
     /// The longest edge this photo is drawn at, in points, so it can be decoded at
@@ -39,7 +40,7 @@ struct DiaryAsyncPhoto: View {
             }
         }
         .task(id: photoId) {
-            image = await ImageCache.shared.image(for: photoId, targetPointSize: targetPointSize)
+            image = await imageLoader.image(for: photoId, targetPointSize: targetPointSize)
         }
     }
 }

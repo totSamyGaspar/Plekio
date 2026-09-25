@@ -47,7 +47,7 @@ extension AppDependencies {
     }
 
     func makeAddMedicationViewModel() -> AddMedicationViewModel {
-        AddMedicationViewModel(mediaPickerService: mediaPicker)
+        AddMedicationViewModel(mediaPickerService: mediaPicker, photos: photoCache)
     }
 
     // MARK: - Diary
@@ -57,12 +57,12 @@ extension AppDependencies {
     }
 
     func makeDiaryCheckInViewModel() -> DiaryCheckInViewModel {
-        DiaryCheckInViewModel(dbService: database, mediaPickerService: mediaPicker, errors: errorPresenter)
+        DiaryCheckInViewModel(dbService: database, mediaPickerService: mediaPicker, photos: photoCache, errors: errorPresenter)
     }
 
     // MARK: - Settings
 
     func makeReportExportViewModel() -> ReportExportViewModel {
-        ReportExportViewModel(database: database, errors: errorPresenter)
+        ReportExportViewModel(database: database, images: photoCache, errors: errorPresenter)
     }
 }

@@ -134,11 +134,12 @@ struct ProfileEditView: View {
                 let picker = dependencies.mediaPicker
                 let image = try await picker.pickImage(source: source)
                 let previous = profile.avatarId
+                let photos = dependencies.photoCache
 
                 // Encoding and the two file operations all happen off the main
                 // actor; only the resulting id comes back to the form.
                 let saved = await Task.detached(priority: .userInitiated) {
-                    AvatarStore.save(image, replacing: previous)
+                    AvatarStore.save(image, replacing: previous, in: photos)
                 }.value
 
                 guard let saved else {
@@ -154,7 +155,8 @@ struct ProfileEditView: View {
 
     private func removeAvatar() {
         let previous = profile.avatarId
+        let photos = dependencies.photoCache
         profile.avatarId = nil
-        Task.detached(priority: .utility) { AvatarStore.remove(previous) }
+        Task.detached(priority: .utility) { AvatarStore.remove(previous, in: photos) }
     }
 }

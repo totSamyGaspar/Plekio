@@ -16,10 +16,12 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
     @Published var showingPhotoSourceMenu = false
     
     private let mediaPickerService: MediaPickerServiceProtocol
+    private let photos: any PhotoStoring
     private var hasLoadedEditedMedication = false
     
-    init(mediaPickerService: MediaPickerServiceProtocol) {
+    init(mediaPickerService: MediaPickerServiceProtocol, photos: any PhotoStoring) {
         self.mediaPickerService = mediaPickerService
+        self.photos = photos
     }
     
     // MARK: - Editing
@@ -35,7 +37,7 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
         // disk read on the main thread, repeated on every re-creation of the struct.
         let medicationId = medication.id
         let loaded = await Task.detached(priority: .userInitiated) { () -> (Data, UIImage)? in
-            guard let data = ImageCache.shared.loadDataFromDisk(for: medicationId),
+            guard let data = self.photos.loadDataFromDisk(for: medicationId),
                   let image = UIImage(data: data) else { return nil }
             return (data, image)
         }.value

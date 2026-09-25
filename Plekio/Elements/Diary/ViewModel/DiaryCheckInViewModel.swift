@@ -21,11 +21,13 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     
     private let dbService: any DiaryStoring
     private let mediaPickerService: MediaPickerServiceProtocol
+    private let photos: any PhotoStoring
     private let errors: any ErrorReporting
     
-    init(dbService: any DiaryStoring, mediaPickerService: MediaPickerServiceProtocol, errors: any ErrorReporting) {
+    init(dbService: any DiaryStoring, mediaPickerService: MediaPickerServiceProtocol, photos: any PhotoStoring, errors: any ErrorReporting) {
         self.dbService = dbService
         self.mediaPickerService = mediaPickerService
+        self.photos = photos
         self.errors = errors
     }
     
@@ -119,7 +121,7 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
         // original id array, so photo order is preserved.
         let loaded = await Task.detached(priority: .userInitiated) { () -> [(Data, UIImage)] in
             ids.compactMap { id in
-                guard let data = ImageCache.shared.loadDataFromDisk(for: id),
+                guard let data = self.photos.loadDataFromDisk(for: id),
                       let image = UIImage(data: data) else { return nil }
                 return (data, image)
             }

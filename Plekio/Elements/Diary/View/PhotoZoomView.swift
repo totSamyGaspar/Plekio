@@ -12,6 +12,7 @@ import SwiftUI
 struct PhotoZoomView: View {
     let photoId: UUID
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.imageLoader) private var imageLoader
     @State private var image: UIImage?
     
     var body: some View {
@@ -44,7 +45,7 @@ struct PhotoZoomView: View {
             .padding()
         }
         .task {
-            image = await ImageCache.shared.image(for: photoId)
+            image = await imageLoader.image(for: photoId, targetPointSize: nil)
         }
     }
 }

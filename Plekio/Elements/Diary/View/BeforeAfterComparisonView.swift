@@ -21,6 +21,7 @@ struct BeforeAfterComparisonView: View {
     @State private var afterPhotoId: UUID
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.imageLoader) private var imageLoader
     @State private var beforeImage: UIImage?
     @State private var afterImage: UIImage?
     @State private var sliderPosition: CGFloat = 0.5
@@ -80,10 +81,10 @@ struct BeforeAfterComparisonView: View {
         // Screen-width panes, not the camera's resolution: this sheet holds two
         // photos at once, and decoding both at full size costs tens of megabytes.
         .task(id: beforePhotoId) {
-            beforeImage = await ImageCache.shared.image(for: beforePhotoId, targetPointSize: 430)
+            beforeImage = await imageLoader.image(for: beforePhotoId, targetPointSize: 430)
         }
         .task(id: afterPhotoId) {
-            afterImage = await ImageCache.shared.image(for: afterPhotoId, targetPointSize: 430)
+            afterImage = await imageLoader.image(for: afterPhotoId, targetPointSize: 430)
         }
         .sheet(item: $pickerTarget) { slot in
             photoPickerSheet(for: slot)

@@ -18,9 +18,9 @@ nonisolated struct StorageUsage: Equatable {
     var totalBytes: Int64 { photoBytes + databaseBytes }
 
     /// Reads the filesystem. Call off the main actor.
-    static func measure(storeURL: URL?) -> StorageUsage {
+    static func measure(storeURL: URL?, photoCache: ImageCache) -> StorageUsage {
         StorageUsage(
-            photoBytes: ImageCache.shared.diskUsageBytes(),
+            photoBytes: photoCache.diskUsageBytes(),
             databaseBytes: storeURL.map(storeBytes(at:)) ?? 0
         )
     }
