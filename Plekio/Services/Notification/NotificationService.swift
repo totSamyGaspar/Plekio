@@ -27,15 +27,15 @@ enum NotificationAction {
 ///
 /// Explicit `@MainActor`, though the module already builds with
 /// SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor: this type reads SwiftData models
-/// and keeps `rescheduleTask`, and neither should silently lose its isolation if
+/// and keeps `queueTail`, and neither should silently lose its isolation if
 /// that build setting ever changes.
 @MainActor
 final class NotificationService: NotificationServiceProtocol {
 
     private let center: any NotificationCenterClient
 
-    /// The most recently started rebuild. See `rescheduleAll`.
-    private var rescheduleTask: Task<Void, Never>?
+    /// The last operation queued through `serialized`. See there.
+    private var queueTail: Task<Void, Never>?
 
     // MARK: - Init
 
@@ -89,18 +89,32 @@ final class NotificationService: NotificationServiceProtocol {
     /// between A's clear and A's adds, both sets then survive, and the user gets
     /// every reminder twice.
     func rescheduleAll(using dbService: any CourseStoring) async {
-        // Read and reassigned with no await in between, so on the main actor this
-        // is atomic: whoever comes next chains onto this task, not onto the one it
-        // replaced.
-        let previous = rescheduleTask
-        let task = Task { [weak self] in
-            _ = await previous?.value
+        await serialized { [weak self] in
             guard let self else { return }
-
             await self.removeAllPending()
             await self.scheduleNotifications(activeCourses: self.activeCourses(from: dbService))
         }
-        rescheduleTask = task
+    }
+
+    /// Runs `work` after everything queued before it has finished.
+    ///
+    /// Rebuilds and cancellations both read the queue and then write it, and
+    /// since ReminderSyncCoordinator rebuilds on every course write they now meet
+    /// routinely: deleting a medication starts a cancellation from the screen and
+    /// a rebuild from the coordinator. Interleaved, the cancellation re-adds its
+    /// regrouped requests after the rebuild's clear, and the user is reminded
+    /// twice. Queued, whichever runs second sees what the first left behind.
+    ///
+    /// Read and reassigned with no await in between, so on the main actor this is
+    /// atomic: the next caller chains onto this task, not onto the one it
+    /// replaced.
+    private func serialized(_ work: @escaping () async -> Void) async {
+        let previous = queueTail
+        let task = Task {
+            _ = await previous?.value
+            await work()
+        }
+        queueTail = task
         await task.value
     }
 
@@ -183,6 +197,12 @@ final class NotificationService: NotificationServiceProtocol {
     /// rebuilt groups, so a regrouped reminder is never removed straight after
     /// being added.
     func cancelNotifications(for medicationId: UUID) async {
+        await serialized { [weak self] in
+            await self?.performCancellation(for: medicationId)
+        }
+    }
+
+    private func performCancellation(for medicationId: UUID) async {
         let plan = ReminderPlanner.cancellationPlan(
             forMedication: medicationId,
             pending: await center.pendingReminders(),

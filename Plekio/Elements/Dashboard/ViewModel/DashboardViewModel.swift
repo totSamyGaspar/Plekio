@@ -29,8 +29,10 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     /// The last "Log all", while it can still be undone. Nil at every other time.
     @Published private(set) var undoableBulkLog: BulkDoseLog?
     
+    /// Reads only: what is due on a day, and the courses behind it.
     private let dbService: any CourseStoring & DoseStoring
-    private let notificationService: NotificationServiceProtocol
+    /// Every write about a dose, together with its reminder side effects.
+    private let doseLogging: DoseLoggingUseCaseProtocol
     private var cancellables = Set<AnyCancellable>()
     
     /// Closes the undo window on its own. Held so a second "Log all" replaces the
@@ -45,9 +47,9 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     
     // MARK: - Init
     
-    init(dbService: any CourseStoring & DoseStoring, notificationService: NotificationServiceProtocol) {
+    init(dbService: any CourseStoring & DoseStoring, doseLogging: DoseLoggingUseCaseProtocol) {
         self.dbService = dbService
-        self.notificationService = notificationService
+        self.doseLogging = doseLogging
         fetchData()
         
         // Doses as well as courses: this screen is where a dose is logged.
@@ -59,6 +61,15 @@ final class DashboardViewModel: DashboardViewModelProtocol {
             .store(in: &cancellables)
     }
     
+    /// Builds the default use case from the two services. Kept so tests and
+    /// previews can keep constructing the screen from mocks of those two.
+    convenience init(dbService: any CourseStoring & DoseStoring, notificationService: NotificationServiceProtocol) {
+        self.init(
+            dbService: dbService,
+            doseLogging: DoseLoggingUseCase(dbService: dbService, notificationService: notificationService)
+        )
+    }
+
     // MARK: - Computed Properties
     
     var weekDates: [Date] {
@@ -88,117 +99,55 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     }
     
     // MARK: - Actions
-    
+    //
+    // Each of these says what the user did and hands it to the use case. The
+    // write, the reminder rebuild and the lock-screen cleanup are its business;
+    // what is left here is the screen: refresh it, and run the undo banner.
+
     func togglePill(id: PillDose.ID) {
-        guard let pill = allPills.first(where: { $0.id == id }) else { return }
-        let wasTaken = pill.isTaken
-        
-        guard AppErrorPresenter.shared.run({
-            try dbService.togglePill(medicationId: pill.medicationId, scheduledTime: pill.time)
-        }) else { return }
-        
-        // The UI is refreshed straight away; the notification work is ordered
-        // behind the rebuild inside one task rather than racing it.
-        fetchData()
-        
-        let takenAtSlot = wasTaken ? [] : allPills
-            .filter { $0.time == pill.time && $0.isTaken }
-            .map(\.medicationId)
-        let slot = pill.time
-        
-        Task { [notificationService, dbService] in
-            await notificationService.rescheduleAll(using: dbService)
-            guard !takenAtSlot.isEmpty else { return }
-            await notificationService.clearDelivered(
-                settledMedicationIds: takenAtSlot,
-                scheduledTime: slot
-            )
-        }
-    }
-    
-    /// Logs several doses as one action, so "Log all" costs one write pass and one
-    /// notification rebuild rather than one of each per dose.
-    func logDoses(_ doses: [PillDose]) {
-        // Only "already taken" is filtered out. Being late is not a reason to
-        // refuse the write: the caller decides what to offer (the hero card passes
-        // only doses that are still due), and a confirmation that crosses the
-        // missed threshold while the sheet is open must still be logged.
-        let pending = doses.filter { !$0.isTaken }
-        guard !pending.isEmpty else { return }
-        
-        // One write per slot, not per dose. Each togglePill was its own commit,
-        // its own cache reset and its own change notification — and a toggle on a
-        // list of doses in unknown states is the wrong verb besides.
-        guard AppErrorPresenter.shared.run({
-            for (slot, doses) in Dictionary(grouping: pending, by: \.time) {
-                try dbService.markDosesTaken(
-                    medicationIds: doses.map(\.medicationId),
-                    scheduledTime: slot
-                )
-            }
-        }) else { return }
-        
-        fetchData()
-        refreshNotifications(forSlotsOf: pending)
-        startUndoWindow(with: pending)
-    }
-    
-    /// The sheet's "Skip" / "Skip All".
-    ///
-    /// Written down rather than merely un-notified: the statistics can now tell a
-    /// declined dose from a forgotten one, and the rebuild below leaves the rest
-    /// of the course alone.
-    func skipDoses(_ doses: [PillDose]) {
-        guard let bySlot = PendingDose.recordSkip(doses, dbService: dbService),
-              !bySlot.isEmpty
+        guard let pill = allPills.first(where: { $0.id == id }),
+              AppErrorPresenter.shared.attempt({ try doseLogging.toggle(pill) }) != nil
         else { return }
-        
+
         fetchData()
-        
-        Task { [dbService, notificationService] in
-            await PendingDose.refreshAfterSkip(
-                slots: Array(bySlot.keys),
-                dbService: dbService,
-                notificationService: notificationService
-            )
-        }
     }
-    
+
+    /// "Log all": one write per slot, one reminder rebuild, and an undo banner
+    /// offering back exactly what was written.
+    func logDoses(_ doses: [PillDose]) {
+        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markTaken(doses) }),
+              outcome.didWrite
+        else { return }
+
+        fetchData()
+        startUndoWindow(with: outcome.written)
+    }
+
+    /// The sheet's "Skip" / "Skip All".
+    func skipDoses(_ doses: [PillDose]) {
+        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markSkipped(doses) }),
+              outcome.didWrite
+        else { return }
+
+        fetchData()
+    }
+
     /// Puts back exactly what the last "Log all" wrote.
     func undoBulkLog() {
         guard let log = undoableBulkLog else { return }
         clearUndoWindow()
-        
-        // Only doses that are still marked taken: the user may have unticked one
-        // by hand in the meantime, and toggling that one again would log it
-        // rather than undo it.
-        let toRevert = log.doses.filter { dose in
-            allPills.first { $0.id == dose.id }?.isTaken == true
-        }
-        guard !toRevert.isEmpty else { return }
-        
-        guard AppErrorPresenter.shared.run({
-            for (slot, doses) in Dictionary(grouping: toRevert, by: \.time) {
-                try dbService.unmarkDosesTaken(
-                    medicationIds: doses.map(\.medicationId),
-                    scheduledTime: slot
-                )
-            }
-        }) else { return }
-        
+
+        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.revertTaken(log.doses) }),
+              outcome.didWrite
+        else { return }
+
         fetchData()
-        // Rebuilt rather than left alone: the reminders for these slots were
-        // dropped when the doses were logged, and the whole point of the undo is
-        // that they come back.
-        Task { [notificationService, dbService] in
-            await notificationService.rescheduleAll(using: dbService)
-        }
     }
-    
+
     func dismissUndo() {
         clearUndoWindow()
     }
-    
+
     // MARK: - Undo window
     
     private func startUndoWindow(with doses: [PillDose]) {
@@ -218,31 +167,8 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         undoableBulkLog = nil
     }
     
-    // MARK: - Notifications
-    
-    /// Same two steps as a single toggle: re-plan what is still due, then take the
-    /// banners for fully logged slots off the lock screen.
-    private func refreshNotifications(forSlotsOf doses: [PillDose]) {
-        let slots = Set(doses.map(\.time))
-        // Read from the refreshed list, so a slot the user had already half
-        // logged is judged on what is actually taken now.
-        let takenBySlot: [Date: [UUID]] = slots.reduce(into: [:]) { result, slot in
-            result[slot] = allPills
-                .filter { $0.time == slot && $0.isTaken }
-                .map(\.medicationId)
-        }
-        
-        Task { [notificationService, dbService] in
-            await notificationService.rescheduleAll(using: dbService)
-            for (slot, medicationIds) in takenBySlot where !medicationIds.isEmpty {
-                await notificationService.clearDelivered(
-                    settledMedicationIds: medicationIds,
-                    scheduledTime: slot
-                )
-            }
-        }
-    }
-    
+    // MARK: - Weekly statistics
+
     private func calculateWeeklyStats(with allCourses: [TreatmentCourse]) {
         let calendar = Calendar.current
         var percentages: [Double] = []

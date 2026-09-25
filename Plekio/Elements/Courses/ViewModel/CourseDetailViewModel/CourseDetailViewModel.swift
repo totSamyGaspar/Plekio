@@ -17,79 +17,55 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
     @Published var startDate: Date
     @Published var endDate: Date
     
-    private let dbService: any CourseStoring
-    private let notificationService: NotificationServiceProtocol
-    
-    init(course: TreatmentCourse, dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
+    private let courseEditing: CourseEditingUseCaseProtocol
+
+    init(course: TreatmentCourse, courseEditing: CourseEditingUseCaseProtocol) {
         self.course = course
-        self.dbService = dbService
-        self.notificationService = notificationService
-        
+        self.courseEditing = courseEditing
+
         self.courseName = course.name
         self.startDate = course.startDate
         self.endDate = course.endDate
-        
+
         self.medications = course.medications.sorted(by: { $0.name < $1.name })
     }
-    
-    func saveCourseChanges() {
-        guard course.name != courseName
-                || course.startDate != startDate
-                || course.endDate != endDate
-        else { return }
-        
-        guard AppErrorPresenter.shared.run({
-            try dbService.updateCourseDetails(course: course, name: courseName, startDate: startDate, endDate: endDate)
-        }) else { return }
-        
-        reschedule()
+
+    /// Builds the default use case from the two services, so tests can keep
+    /// constructing the screen from mocks of those.
+    convenience init(course: TreatmentCourse, dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
+        self.init(
+            course: course,
+            courseEditing: CourseEditingUseCase(dbService: dbService, notificationService: notificationService)
+        )
     }
-    
+
+    // MARK: - Actions
+    //
+    // The screen's part only: hand the edit over, then refresh the list. Whether
+    // a write is needed, the reminders and the lock screen are the use case's.
+
+    func saveCourseChanges() {
+        AppErrorPresenter.shared.run {
+            _ = try courseEditing.updateDetails(of: course, name: courseName, startDate: startDate, endDate: endDate)
+        }
+    }
+
     func addNewMedication(_ draft: MedicationDraft) {
-        guard AppErrorPresenter.shared.run({
-            try dbService.addMedication(draft: draft, to: course)
-        }) else { return }
-        
-        reschedule()
+        guard AppErrorPresenter.shared.run({ try courseEditing.addMedication(draft, to: course) }) else { return }
         refreshMedications()
     }
-    
+
     func deleteMedication(at offsets: IndexSet) {
         let toDelete = offsets.map { medications[$0] }
-        
-        guard AppErrorPresenter.shared.run({
-            for med in toDelete {
-                try dbService.deleteMedication(med)
-            }
-        }) else { return }
-        
-        let deletedIds = toDelete.map(\.id)
-        Task { [notificationService] in
-            for id in deletedIds {
-                await notificationService.cancelNotifications(for: id)
-            }
-        }
+        guard AppErrorPresenter.shared.run({ try courseEditing.deleteMedications(toDelete) }) else { return }
         medications.remove(atOffsets: offsets)
     }
-    
+
     func updateMedication(medication: MedicationItem, with draft: MedicationDraft) {
-        guard AppErrorPresenter.shared.run({
-            try dbService.updateMedication(medication, with: draft)
-        }) else { return }
-        
-        reschedule()
+        guard AppErrorPresenter.shared.run({ try courseEditing.updateMedication(medication, with: draft) }) else { return }
         refreshMedications()
     }
-    
-    /// Rebuilding the schedule is asynchronous, and nothing on this screen waits
-    /// for it — NotificationService chains overlapping rebuilds itself, so firing
-    /// and forgetting is safe here.
-    private func reschedule() {
-        Task { [notificationService, dbService] in
-            await notificationService.rescheduleAll(using: dbService)
-        }
-    }
-    
+
     private func refreshMedications() {
         medications = course.medications.sorted { $0.name < $1.name }
     }

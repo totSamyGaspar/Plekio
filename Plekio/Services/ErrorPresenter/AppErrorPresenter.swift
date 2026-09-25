@@ -40,6 +40,18 @@ final class AppErrorPresenter: ObservableObject {
         }
     }
 
+    /// `run` for work that returns something: the value on success, nil after
+    /// the error has been shown.
+    @discardableResult
+    func attempt<T>(_ work: () throws -> T) -> T? {
+        do {
+            return try work()
+        } catch {
+            message = Self.describe(error)
+            return nil
+        }
+    }
+
     /// Surfaces an error for work that cannot be wrapped in `run`: a failure
     /// AFTER a successful commit, where there is no operation left to fail and
     /// nothing for the caller to abandon.

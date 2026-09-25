@@ -16,7 +16,9 @@ struct PlekioApp: App {
     @StateObject private var router = AppRouter()
     
     init() {
-        _ = DIContainer.shared
+        // Created up front, not on first use: it has to be listening before the
+        // first course is written.
+        _ = DIContainer.shared.resolve(ReminderSyncCoordinator.self)
         MainTabView.configureTabBarAppearance()
         AppAppearance.configureSliders()
     }
@@ -35,10 +37,9 @@ struct PlekioApp: App {
                 }
         }
     }
+    /// Nothing was written, but time has passed: the queue only covers a window
+    /// ahead of "now", so it is topped up whenever the user comes back.
     private func refreshAllNotifications() {
-        let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
-        let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-        
-        Task { await notifService.rescheduleAll(using: dbService) }
+        DIContainer.shared.resolve(ReminderSyncCoordinator.self).sync()
     }
 }

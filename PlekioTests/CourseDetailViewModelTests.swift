@@ -42,8 +42,8 @@ struct CourseDetailViewModelTests {
 
     // MARK: - addNewMedication
 
-    @Test("addNewMedication saves the medication to the DB and reschedules pushes via the protocol")
-    func testAddNewMedicationTriggersSaveAndReschedule() async throws {
+    @Test("addNewMedication пишет в базу и сам напоминания не пересобирает")
+    func testAddNewMedicationWritesAndLeavesTheRebuildToTheCoordinator() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
@@ -57,9 +57,9 @@ struct CourseDetailViewModelTests {
 
         #expect(mockDB.addedMedicationDraft?.name == "Витамин D")
         #expect(mockDB.addedToCourse === course)
-        #expect(await waitUntil { mockNotifications.scheduleCallCount == 1 })
-        #expect(mockNotifications.didCallRemoveAllPending == true)
-        #expect(mockNotifications.scheduledCourses != nil)
+        // The rebuild follows the `.courses` write through ReminderSyncCoordinator;
+        // a second one from here would be a duplicate.
+        #expect(mockNotifications.scheduleCallCount == 0)
     }
 
     // MARK: - deleteMedication

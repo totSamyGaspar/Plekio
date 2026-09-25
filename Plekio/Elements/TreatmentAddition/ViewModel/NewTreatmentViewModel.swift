@@ -15,12 +15,12 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     @Published var endDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
     @Published var medications: [MedicationDraft] = []
     
-    private let dbService: any CourseStoring
-    private let notificationService: NotificationServiceProtocol
-    
-    init(dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
-        self.dbService = dbService
-        self.notificationService = notificationService
+    private let courseEditing: CourseEditingUseCaseProtocol
+
+    /// No notification service: the reminders follow the new course on their
+    /// own — see ReminderSyncCoordinator.
+    init(courseEditing: CourseEditingUseCaseProtocol) {
+        self.courseEditing = courseEditing
     }
     
     var isSaveEnabled: Bool {
@@ -35,12 +35,9 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     @discardableResult
     func saveCourse() -> Bool {
         guard AppErrorPresenter.shared.run({
-            try dbService.saveCourse(name: courseName, startDate: startDate, endDate: endDate, drafts: medications)
+            try courseEditing.createCourse(name: courseName, startDate: startDate, endDate: endDate, medications: medications)
         }) else { return false }
 
-        Task { [notificationService, dbService] in
-            await notificationService.rescheduleAll(using: dbService)
-        }
         return true
     }
 }

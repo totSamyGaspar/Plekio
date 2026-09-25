@@ -14,12 +14,13 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     @Published var historyCourses: [TreatmentCourse] = []
     
     private let dbService: any CourseStoring
-    private let notificationService: NotificationServiceProtocol
+    private let courseEditing: CourseEditingUseCaseProtocol
     private var cancellables = Set<AnyCancellable>()
     
-    init(dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
+    /// `dbService` for reading the list; every write goes through `courseEditing`.
+    init(dbService: any CourseStoring, courseEditing: CourseEditingUseCaseProtocol) {
         self.dbService = dbService
-        self.notificationService = notificationService
+        self.courseEditing = courseEditing
         fetchCourses()
         
         // Doses are included deliberately: logging one moves stock, and the rows
@@ -31,50 +32,42 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
             .store(in: &cancellables)
     }
     
+    convenience init(dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
+        self.init(
+            dbService: dbService,
+            courseEditing: CourseEditingUseCase(dbService: dbService, notificationService: notificationService)
+        )
+    }
+
     func fetchCourses() {
         let allCourses = dbService.fetchAllCourses()
-        let startOfToday = Calendar.current.startOfDay(for: Date())
-        
-        self.activeCourses = allCourses.filter { Calendar.current.startOfDay(for: $0.endDate) >= startOfToday }
-        
-        self.historyCourses = allCourses.filter { Calendar.current.startOfDay(for: $0.endDate) < startOfToday }
+
+        self.activeCourses = allCourses.filter { $0.isActive() }
+        self.historyCourses = allCourses.filter { !$0.isActive() }
             .sorted { $0.endDate > $1.endDate }
     }
-    
+
     /// Repeats a finished course: a copy of it with the dates the user picked,
     /// which lands in `activeCourses` as soon as the re-fetch runs. The original
-    /// stays in the history untouched.
+    /// stays in the history untouched. The use case refuses a treatment that is
+    /// already running again.
     func repeatCourse(_ course: TreatmentCourse, startDate: Date, endDate: Date) {
+        guard let didRepeat = AppErrorPresenter.shared.attempt({
+            try courseEditing.repeatCourse(course, startDate: startDate, endDate: endDate)
+        }), didRepeat else { return }
 
-        guard !hasActiveRepeat(of: course) else { return }
-        
-        guard AppErrorPresenter.shared.run({
-            try dbService.duplicateCourse(course, startDate: startDate, endDate: endDate)
-        }) else { return }
-        
-        Task { [notificationService, dbService] in
-            await notificationService.rescheduleAll(using: dbService)
-        }
         fetchCourses()
     }
-    
-    /// Whether this treatment is already running again — the course itself or any
-    /// copy of it is among the active ones.
+
+    /// For the button: whether "Repeat" should be offered at all. Checked on the
+    /// list already on screen, so a row costs no fetch; the use case checks again
+    /// against storage when the button is pressed.
     func hasActiveRepeat(of course: TreatmentCourse) -> Bool {
-        let lineage = course.repeatLineageId
-        return activeCourses.contains { $0.repeatLineageId == lineage }
+        course.hasActiveRepeat(among: activeCourses)
     }
-    
+
     func deleteCourse(_ course: TreatmentCourse) {
-        let medicationIds = course.medications.map(\.id)
-        
-        guard AppErrorPresenter.shared.run({ try dbService.deleteCourse(course) }) else { return }
-        
-        Task { [notificationService] in
-            for id in medicationIds {
-                await notificationService.cancelNotifications(for: id)
-            }
-        }
+        guard AppErrorPresenter.shared.run({ try courseEditing.deleteCourse(course) }) else { return }
         fetchCourses()
     }
 }

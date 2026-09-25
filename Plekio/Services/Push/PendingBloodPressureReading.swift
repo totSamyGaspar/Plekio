@@ -4,7 +4,7 @@
 //
 //  Shared "save a blood-pressure reading" logic: the diary screen's own button
 //  and the form a reminder opens must write the same way and report failure the
-//  same way. Same reason PendingDose exists for a dose.
+//  same way. Same reason DoseLoggingUseCase exists for a dose.
 //
 
 import Foundation

@@ -59,10 +59,7 @@ extension NotificationServiceProtocol {
     /// sites (PlekioApp, DashboardViewModel, NewTreatmentViewModel and twice in
     /// CourseDetailViewModel), so changing the rule meant finding all five.
     func activeCourses(from dbService: any CourseStoring) -> [TreatmentCourse] {
-        let startOfToday = Calendar.current.startOfDay(for: Date())
-        return dbService.fetchAllCourses().filter {
-            Calendar.current.startOfDay(for: $0.endDate) >= startOfToday
-        }
+        dbService.fetchAllCourses().filter { $0.isActive() }
     }
 
     /// Plain rebuild, for test doubles and any future implementation that has no

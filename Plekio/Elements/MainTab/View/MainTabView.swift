@@ -117,45 +117,30 @@ struct MainTabView: View {
     
     private func consumePendingPush() {
         guard let (medicationIds, scheduledTime) = router.consumePendingPush() else { return }
-        
-        let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
-        let notificationService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-        
+
+        let doseLogging = DIContainer.shared.resolve(DoseLoggingUseCaseProtocol.self)
+
         // Doses come from the schedule by slot time, not from the dashboard view
         // model, so the modal does not depend on whether that screen is rendered or
         // on which date it happens to be showing.
-        let pills = PendingDose.unlogged(
-            medicationIds: medicationIds,
-            scheduledTime: scheduledTime,
-            in: dbService
-        )
+        let pills = doseLogging.openDoses(medicationIds: medicationIds, at: scheduledTime)
         guard !pills.isEmpty else { return }
-        
+
+        // No Task here: the write is synchronous, and the reminder rebuild runs
+        // behind it on its own — nothing on screen waits for it.
         router.presentFullScreen(
             .takePill(
                 pills: pills,
                 onTake: {
-                    Task {
-                        await PendingDose.markTaken(
-                            pills,
-                            dbService: dbService,
-                            notificationService: notificationService
-                        )
-                    }
+                    _ = AppErrorPresenter.shared.attempt { try doseLogging.markTaken(pills) }
                 },
                 onSkip: {
-                    Task {
-                        await PendingDose.markSkipped(
-                            pills,
-                            dbService: dbService,
-                            notificationService: notificationService
-                        )
-                    }
+                    _ = AppErrorPresenter.shared.attempt { try doseLogging.markSkipped(pills) }
                 }
             )
         )
     }
-    
+
     /// Presented from here rather than from the diary screen: on a cold launch a
     /// reminder is tapped before that screen is in the hierarchy, which is the
     /// same reason the dose push is handled here.

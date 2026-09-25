@@ -2,10 +2,9 @@
 //  NewTreatmentViewModelTests.swift
 //  PlekioTests
 //
-//  Tests for the new-course creation screen. saveCourse is another spot
-//  (alongside CourseDetailViewModel and DashboardViewModel) where rescheduling
-//  goes through NotificationServiceProtocol and only considers courses that
-//  haven't expired.
+//  Tests for the new-course creation screen. The screen only writes; the
+//  reminder rebuild that follows a save is ReminderSyncCoordinator's, and is
+//  tested there.
 //
 
 import Testing
@@ -16,34 +15,23 @@ import Foundation
 @Suite("NewTreatmentViewModel Tests")
 struct NewTreatmentViewModelTests {
 
-    @Test("saveCourse saves the course and reschedules pushes only for active courses")
-    func testSaveCourseDelegatesAndReschedules() async throws {
+    @Test("saveCourse сохраняет курс через базу")
+    func testSaveCourseDelegatesToTheDatabase() async throws {
         let mockDB = MockDatabaseService()
-        let mockNotifications = MockNotificationService()
 
-        let activeCourse = TreatmentCourse(name: "Активный", startDate: Date(), endDate: Date().addingTimeInterval(86400 * 5))
-        let expiredCourse = TreatmentCourse(name: "Просроченный", startDate: Date().addingTimeInterval(-86400 * 10), endDate: Date().addingTimeInterval(-86400))
-        mockDB.coursesToReturn = [activeCourse, expiredCourse]
-
-        let vm = NewTreatmentViewModel(dbService: mockDB, notificationService: mockNotifications)
+        let vm = NewTreatmentViewModel(courseEditing: CourseEditingUseCase(dbService: mockDB, notificationService: MockNotificationService()))
         vm.courseName = "Витамины"
         vm.addMedication(MedicationDraft(name: "Витамин D"))
 
-        vm.saveCourse()
-
+        #expect(vm.saveCourse() == true)
         #expect(mockDB.didCallSaveCourse == true)
         #expect(mockDB.savedCourseName == "Витамины")
-        #expect(await waitUntil { mockNotifications.scheduleCallCount == 1 })
-        #expect(mockNotifications.didCallRemoveAllPending == true)
-        #expect(mockNotifications.scheduledCourses?.count == 1)
-        #expect(mockNotifications.scheduledCourses?.first === activeCourse)
     }
 
     @Test("isSaveEnabled requires a non-empty course name and at least one medication")
     func testIsSaveEnabledValidation() async throws {
         let mockDB = MockDatabaseService()
-        let mockNotifications = MockNotificationService()
-        let vm = NewTreatmentViewModel(dbService: mockDB, notificationService: mockNotifications)
+        let vm = NewTreatmentViewModel(courseEditing: CourseEditingUseCase(dbService: mockDB, notificationService: MockNotificationService()))
 
         #expect(vm.isSaveEnabled == false)
 

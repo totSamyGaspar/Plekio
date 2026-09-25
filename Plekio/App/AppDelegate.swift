@@ -116,34 +116,26 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
     }
     
-    /// Logs the doses of the slot that aren't logged yet.
+    /// "Take Now" on the notification: logs what of the slot is still open.
     ///
-    /// Idempotent by way of `PendingDose.unlogged`: `togglePill` is a toggle, so
-    /// without that filter a second "Take Now" would clear the mark it just set.
+    /// Idempotent: `openDoses` drops anything already taken, so a second press
+    /// changes nothing. Waits for the reminder rebuild before returning, because
+    /// iOS may suspend the app once the response is reported handled.
     private func logDoses(medicationIds: [UUID], scheduledTime: Date) async {
-        let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
-        let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-        
-        await PendingDose.markTaken(
-            PendingDose.unlogged(medicationIds: medicationIds, scheduledTime: scheduledTime, in: dbService),
-            dbService: dbService,
-            notificationService: notifService
-        )
+        let doseLogging = DIContainer.shared.resolve(DoseLoggingUseCaseProtocol.self)
+        let open = doseLogging.openDoses(medicationIds: medicationIds, at: scheduledTime)
+
+        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markTaken(open) }) else { return }
+        await outcome.waitForReminders()
     }
-    
-    /// Records a skip for the doses of the slot that are still unanswered.
-    ///
-    /// Idempotent through the same filter as logging: `unlogged` drops anything
-    /// already taken, and `recordSkip` drops anything already skipped, so a second
-    /// press of the button changes nothing.
+
+    /// "Skip" on the notification. Idempotent the same way: `openDoses` drops
+    /// what is taken, `markSkipped` what is already skipped.
     private func skipDoses(medicationIds: [UUID], scheduledTime: Date) async {
-        let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
-        let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-        
-        await PendingDose.markSkipped(
-            PendingDose.unlogged(medicationIds: medicationIds, scheduledTime: scheduledTime, in: dbService),
-            dbService: dbService,
-            notificationService: notifService
-        )
+        let doseLogging = DIContainer.shared.resolve(DoseLoggingUseCaseProtocol.self)
+        let open = doseLogging.openDoses(medicationIds: medicationIds, at: scheduledTime)
+
+        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markSkipped(open) }) else { return }
+        await outcome.waitForReminders()
     }
 }

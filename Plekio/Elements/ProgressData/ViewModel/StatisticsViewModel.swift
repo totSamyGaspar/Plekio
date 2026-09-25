@@ -48,10 +48,7 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
         
         // Unfinished courses only: there is no point reminding the user to restock
         // a medication for a course that has already ended.
-        let startOfToday = Calendar.current.startOfDay(for: Date())
-        let activeCourses = allCourses.filter {
-            Calendar.current.startOfDay(for: $0.endDate) >= startOfToday
-        }
+        let activeCourses = allCourses.filter { $0.isActive() }
         self.lowStockItems = activeCourses
             .flatMap(\.medications)
             .filter { $0.stockCount <= $0.lowStockThreshold }

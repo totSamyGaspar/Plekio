@@ -39,6 +39,34 @@ final class DIContainer {
             MediaPickerService()
         }.inObjectScope(.container)
 
+        // Listens for course writes and rebuilds the reminder queue. One for the
+        // whole app, held by the container so its subscription stays alive.
+        container.register(ReminderSyncCoordinator.self) { r in
+            ReminderSyncCoordinator(
+                notificationService: r.resolve(NotificationServiceProtocol.self)!,
+                dbService: r.resolve(DatabaseServiceProtocol.self)!
+            )
+        }.inObjectScope(.container)
+
+        // MARK: - Use cases
+
+        // Stateless, so one instance is enough. The screen, the notification
+        // buttons and the push-opened sheet all log a dose through it.
+        container.register(DoseLoggingUseCaseProtocol.self) { r in
+            DoseLoggingUseCase(
+                dbService: r.resolve(DatabaseServiceProtocol.self)!,
+                notificationService: r.resolve(NotificationServiceProtocol.self)!
+            )
+        }.inObjectScope(.container)
+
+        // Every course edit, from any screen. Stateless.
+        container.register(CourseEditingUseCaseProtocol.self) { r in
+            CourseEditingUseCase(
+                dbService: r.resolve(DatabaseServiceProtocol.self)!,
+                notificationService: r.resolve(NotificationServiceProtocol.self)!
+            )
+        }.inObjectScope(.container)
+
         // MARK: - View models
 
         // .transient scope = a fresh instance is created every time (clean screen state).
@@ -46,34 +74,30 @@ final class DIContainer {
             OnboardingViewModel()
         }.inObjectScope(.transient)
 
-        // Dashboard needs notifService too: marking a dose as taken has to
-        // reschedule pending notifications so a stale reminder doesn't linger.
+        // The dashboard reads through the database and writes through the use
+        // case, which owns the reminder side effects of a logged dose.
         container.register(DashboardViewModel.self) { r in
             DashboardViewModel(
                 dbService: r.resolve(DatabaseServiceProtocol.self)!,
-                notificationService: r.resolve(NotificationServiceProtocol.self)!
+                doseLogging: r.resolve(DoseLoggingUseCaseProtocol.self)!
             )
         }.inObjectScope(.transient)
 
         container.register(NewTreatmentViewModel.self) { r in
-            NewTreatmentViewModel(
-                dbService: r.resolve(DatabaseServiceProtocol.self)!,
-                notificationService: r.resolve(NotificationServiceProtocol.self)!
-            )
+            NewTreatmentViewModel(courseEditing: r.resolve(CourseEditingUseCaseProtocol.self)!)
         }.inObjectScope(.transient)
 
         container.register(CoursesListViewModel.self) { r in
             CoursesListViewModel(
                 dbService: r.resolve(DatabaseServiceProtocol.self)!,
-                notificationService: r.resolve(NotificationServiceProtocol.self)!
+                courseEditing: r.resolve(CourseEditingUseCaseProtocol.self)!
             )
         }.inObjectScope(.transient)
 
         container.register(CourseDetailViewModel.self) { (r, course: TreatmentCourse) in
             CourseDetailViewModel(
                 course: course,
-                dbService: r.resolve(DatabaseServiceProtocol.self)!,
-                notificationService: r.resolve(NotificationServiceProtocol.self)!
+                courseEditing: r.resolve(CourseEditingUseCaseProtocol.self)!
             )
         }.inObjectScope(.transient)
 
