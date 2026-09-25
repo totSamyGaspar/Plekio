@@ -61,6 +61,16 @@ nonisolated enum DoseSchedule {
         calendar.date(bySettingHour: hour, minute: minute, second: 0, of: day)
     }
 
+    /// The times and frequency in force on `day` (start of day): the earliest
+    /// revision still valid then, else the medication's current schedule.
+    static func schedule(of medication: MedicationItem, on day: Date) -> (timesOfDay: [Date], frequencyDays: Int) {
+        let revision = medication.scheduleRevisions
+            .filter { $0.validUntil > day }
+            .min { $0.validUntil < $1.validUntil }
+        return revision.map { ($0.timesOfDay, $0.frequencyDays) }
+            ?? (medication.timesOfDay, medication.frequencyDays)
+    }
+
     /// Every slot a medication has on `day`, given its course.
     static func slots(
         for medication: MedicationItem,
@@ -69,16 +79,18 @@ nonisolated enum DoseSchedule {
         on day: Date,
         calendar: Calendar
     ) -> [Slot] {
+        let schedule = schedule(of: medication, on: day)
+
         guard isActive(courseStartDay: courseStartDay, courseEndDay: courseEndDay, day: day),
               isDoseDay(
-                frequencyDays: medication.frequencyDays,
+                frequencyDays: schedule.frequencyDays,
                 courseStartDay: courseStartDay,
                 day: day,
                 calendar: calendar
               )
         else { return [] }
 
-        return timesOfDay(medication.timesOfDay, calendar: calendar).compactMap { time in
+        return timesOfDay(schedule.timesOfDay, calendar: calendar).compactMap { time in
             slotDate(hour: time.hour, minute: time.minute, on: day, calendar: calendar)
                 .map { Slot(hour: time.hour, minute: time.minute, date: $0) }
         }

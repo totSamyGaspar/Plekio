@@ -119,7 +119,7 @@ struct DoseSheetActionsTests {
         )
         mockDB.pillsToReturn = [pill]
 
-        let (actions, undo) = makeActions(mockDB, mockNotifications)
+        let (actions, _) = makeActions(mockDB, mockNotifications)
 
         actions.skip([pill])
 
@@ -156,7 +156,7 @@ struct DoseSheetActionsTests {
         )
         mockDB.pillsToReturn = [alreadyTaken, stillOpen]
 
-        let (actions, undo) = makeActions(mockDB, mockNotifications)
+        let (actions, _) = makeActions(mockDB, mockNotifications)
 
         actions.skip([alreadyTaken, stillOpen])
 
@@ -184,7 +184,7 @@ struct DoseSheetActionsTests {
         pill.status = .skipped(at: Date())
         mockDB.pillsToReturn = [pill]
 
-        let (actions, undo) = makeActions(mockDB, mockNotifications)
+        let (actions, _) = makeActions(mockDB, mockNotifications)
 
         actions.skip([pill])
 

@@ -110,9 +110,11 @@ struct DatabaseServiceTests {
         #expect(med.stockCount == 30)
     }
 
-    @Test("сдвиг времени приёма переносит уже поставленные отметки")
+    @Test("сдвиг времени приёма переносит сегодняшние отметки")
     func testChangingScheduleMovesExistingLogs() async throws {
-        let db = DatabaseService(inMemoryForTesting: true)
+        // "Today" is the day of the log: today's logs follow the dose to its new time.
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12, 0)))
         let med = makeCourseWithMed(db)
         let day = testDate(2026, 6, 10)
 
@@ -128,6 +130,62 @@ struct DatabaseServiceTests {
         #expect(pills.count == 1)
         #expect(pills.first?.isTaken == true)
         #expect(Calendar.current.component(.hour, from: try #require(pills.first).time) == 11)
+    }
+
+    @Test("изменение расписания не переписывает прошлые дни")
+    func testChangingScheduleKeepsThePast() async throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12, 0)))
+        let med = makeCourseWithMed(db)
+        let yesterday = testDate(2026, 6, 9)
+        try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 9, 9, 0))
+
+        var draft = MedicationDraft(from: MedicationSnapshot(med))
+        draft.timesOfDay = [testDate(2000, 1, 1, 11, 0), testDate(2000, 1, 1, 21, 0)]
+        try db.updateMedication(med, with: draft)
+
+        // Yesterday: still one dose at 9:00, still taken.
+        let past = db.fetchPills(for: yesterday)
+        #expect(past.count == 1)
+        #expect(past.first?.isTaken == true)
+        #expect(Calendar.current.component(.hour, from: try #require(past.first).time) == 9)
+
+        // From today on: the new schedule.
+        let today = db.fetchPills(for: testDate(2026, 6, 10))
+        #expect(today.map { Calendar.current.component(.hour, from: $0.time) } == [11, 21])
+        #expect(med.scheduleRevisions.count == 1)
+    }
+
+    @Test("правка расписания дважды за день не плодит ревизий и держит исходное прошлое")
+    func testEditingTwiceTodayKeepsOneRevision() async throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12, 0)))
+        let med = makeCourseWithMed(db)
+
+        var draft = MedicationDraft(from: MedicationSnapshot(med))
+        draft.timesOfDay = [testDate(2000, 1, 1, 11, 0)]
+        try db.updateMedication(med, with: draft)
+        draft.timesOfDay = [testDate(2000, 1, 1, 13, 0)]
+        try db.updateMedication(med, with: draft)
+
+        #expect(med.scheduleRevisions.count == 1)
+        let past = db.fetchPills(for: testDate(2026, 6, 9))
+        #expect(past.map { Calendar.current.component(.hour, from: $0.time) } == [9])
+    }
+
+    @Test("смена частоты не меняет прошлую статистику")
+    func testChangingFrequencyKeepsPastDoseDays() async throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12, 0)))
+        let med = makeCourseWithMed(db)
+
+        var draft = MedicationDraft(from: MedicationSnapshot(med))
+        draft.frequencyDays = 2
+        try db.updateMedication(med, with: draft)
+
+        // Every past day keeps its dose (course starts June 1, daily before the change).
+        let pastDays = (1...9).map { testDate(2026, 6, $0) }
+        #expect(pastDays.allSatisfy { db.fetchPills(for: $0).count == 1 })
     }
 
     // MARK: - refillStock

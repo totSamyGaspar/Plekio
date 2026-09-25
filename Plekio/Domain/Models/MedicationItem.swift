@@ -28,6 +28,10 @@ nonisolated final class MedicationItem {
     @Relationship(deleteRule: .cascade, inverse: \DoseLog.medication)
     var logs: [DoseLog]
 
+    /// Earlier schedules, so a change doesn't rewrite past days.
+    @Relationship(deleteRule: .cascade, inverse: \ScheduleRevision.medication)
+    var scheduleRevisions: [ScheduleRevision]
+
     // MARK: - Init
 
     init(
@@ -47,6 +51,7 @@ nonisolated final class MedicationItem {
         self.timesOfDay = timesOfDay
         self.frequencyDays = frequencyDays
         self.logs = []
+        self.scheduleRevisions = []
         self.stockCount = stockCount
         self.lowStockThreshold = lowStockThreshold
     }

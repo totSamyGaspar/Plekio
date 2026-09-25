@@ -100,8 +100,9 @@ extension DatabaseService: CourseStoring {
     // MARK: - Update Medication
 
     func updateMedication(_ medication: MedicationItem, with draft: MedicationDraft) throws {
-        // Captured first: logs are keyed by hour+minute and must be remapped.
+        // Captured first: the old schedule is kept for past days, and today's logs remapped.
         let previousTimes = medication.timesOfDay
+        let previousFrequency = medication.frequencyDays
 
         medication.name = draft.name
         medication.formSystemImage = draft.formSystemImage
@@ -111,6 +112,7 @@ extension DatabaseService: CourseStoring {
         medication.frequencyDays = draft.frequencyDays
         medication.timesOfDay = draft.timesOfDay
 
+        recordRevision(of: medication, times: previousTimes, frequencyDays: previousFrequency)
         remapLogs(of: medication, from: previousTimes, to: draft.timesOfDay)
 
         // Touch disk only after commit and only if the photo was modified: an
@@ -130,10 +132,32 @@ extension DatabaseService: CourseStoring {
         }
     }
 
-    /// Moves dose logs onto the new times by position, since logs are matched by
-    /// hour+minute; logs of removed slots stay as history.
+    /// Keeps the schedule that applied before today, so past days, statistics and
+    /// the report aren't recomputed on the new one. Nothing to keep if the course
+    /// hasn't started or the schedule didn't change.
+    private func recordRevision(of medication: MedicationItem, times oldTimes: [Date], frequencyDays oldFrequency: Int) {
+        let calendar = time.calendar
+        let today = calendar.startOfDay(for: time.now)
+
+        func minutes(_ times: [Date]) -> [Int] {
+            times.map { calendar.component(.hour, from: $0) * 60 + calendar.component(.minute, from: $0) }
+        }
+        guard minutes(oldTimes) != minutes(medication.timesOfDay) || oldFrequency != medication.frequencyDays else { return }
+
+        guard let course = medication.course, calendar.startOfDay(for: course.startDate) < today else { return }
+        // Edited again today: the revision already holds what applied before today.
+        guard !medication.scheduleRevisions.contains(where: { $0.validUntil == today }) else { return }
+
+        let revision = ScheduleRevision(validUntil: today, timesOfDay: oldTimes, frequencyDays: oldFrequency)
+        revision.medication = medication
+        medication.scheduleRevisions.append(revision)
+    }
+
+    /// Moves today's and later logs onto the new times by position; past logs keep
+    /// their times (the old schedule still applies to past days).
     private func remapLogs(of medication: MedicationItem, from oldTimes: [Date], to newTimes: [Date]) {
         let calendar = time.calendar
+        let today = calendar.startOfDay(for: time.now)
 
         // Minutes from midnight: an Int, since arrays of tuples have no `!=`.
         func slot(_ date: Date) -> Int {
@@ -152,7 +176,7 @@ extension DatabaseService: CourseStoring {
             let newSlot = newSlots[index]
             guard oldSlot != newSlot else { continue }
 
-            for log in medication.logs where slot(log.scheduledTime) == oldSlot {
+            for log in medication.logs where log.scheduledTime >= today && slot(log.scheduledTime) == oldSlot {
                 if let moved = calendar.date(
                     bySettingHour: newSlot / 60,
                     minute: newSlot % 60,

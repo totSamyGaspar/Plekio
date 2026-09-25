@@ -31,7 +31,7 @@ struct PlekioSchemaTests {
     func currentSchemaHasEveryModel() {
         let names = Set(PlekioSchema.current().entities.map(\.name))
 
-        #expect(names == ["TreatmentCourse", "MedicationItem", "DoseLog", "DiaryEntry", "BloodPressureReading"])
+        #expect(names == ["TreatmentCourse", "MedicationItem", "DoseLog", "ScheduleRevision", "DiaryEntry", "BloodPressureReading"])
     }
 
     // MARK: - Store on disk

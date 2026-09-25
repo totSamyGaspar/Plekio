@@ -37,6 +37,7 @@ nonisolated enum SchemaV1: VersionedSchema {
             TreatmentCourse.self,
             MedicationItem.self,
             DoseLog.self,
+            ScheduleRevision.self,
             DiaryEntry.self,
             BloodPressureReading.self,
         ]
