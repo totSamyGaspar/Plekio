@@ -20,13 +20,11 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     private var editingEntry: DiaryEntrySnapshot?
     
     private let diary: any DiaryRepository
-    private let mediaPickerService: MediaPickerServiceProtocol
     private let photos: any PhotoStoring
     private let errors: any ErrorReporting
     
-    init(diary: any DiaryRepository, mediaPickerService: MediaPickerServiceProtocol, photos: any PhotoStoring, errors: any ErrorReporting) {
+    init(diary: any DiaryRepository, photos: any PhotoStoring, errors: any ErrorReporting) {
         self.diary = diary
-        self.mediaPickerService = mediaPickerService
         self.photos = photos
         self.errors = errors
     }
@@ -34,13 +32,11 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     /// Over the SwiftData store — the shape tests use.
     convenience init(
         dbService: any DiaryStoring & BloodPressureStoring,
-        mediaPickerService: MediaPickerServiceProtocol,
         photos: any PhotoStoring,
         errors: any ErrorReporting
     ) {
         self.init(
             diary: SwiftDataDiaryRepository(store: dbService),
-            mediaPickerService: mediaPickerService,
             photos: photos,
             errors: errors
         )
@@ -80,31 +76,24 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     
     // MARK: - Photos
     
-    func requestImageSelection(source: MediaSource) {
-        Task {
-            do {
-                let image = try await mediaPickerService.pickImage(source: source)
-                
-                // Compress off the main actor, same approach as AddMedicationViewModel.
-                // pngData is the fallback: jpegData returns nil for an image with no
-                // CGImage behind it, and the photo would then be dropped silently.
-                let compressedData = await Task.detached(priority: .userInitiated) {
-                    image.jpegData(compressionQuality: 0.6) ?? image.pngData()
-                }.value
-                
-                guard let compressedData else {
-                    AppLog.media.error("Picked image could not be encoded; diary photo not attached")
-                    return
-                }
-                selectedImages.append(image)
-                draft.photos.append(compressedData)
-                draft.photosModified = true
-            } catch {
-                AppLog.media.error("Diary photo selection failed: \(error.localizedDescription, privacy: .public)")
-            }
+    /// Takes the photo the view's picker returned — see PhotoSourceDialog.
+    func attachPhoto(_ image: UIImage) async {
+        // Compress off the main actor, same approach as AddMedicationViewModel.
+        // pngData is the fallback: jpegData returns nil for an image with no
+        // CGImage behind it, and the photo would then be dropped silently.
+        let compressedData = await Task.detached(priority: .userInitiated) {
+            image.jpegData(compressionQuality: 0.6) ?? image.pngData()
+        }.value
+
+        guard let compressedData else {
+            AppLog.media.error("Picked image could not be encoded; diary photo not attached")
+            return
         }
+        selectedImages.append(image)
+        draft.photos.append(compressedData)
+        draft.photosModified = true
     }
-    
+
     func removePhoto(at index: Int) {
         guard selectedImages.indices.contains(index), draft.photos.indices.contains(index) else { return }
         selectedImages.remove(at: index)
@@ -132,7 +121,7 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
         guard !ids.isEmpty else { return }
         
         // Read and decode off the main actor, same approach as
-        // AddMedicationViewModel.requestImageSelection. compactMap walks the
+        // AddMedicationViewModel.attachPhoto. compactMap walks the
         // original id array, so photo order is preserved.
         let loaded = await Task.detached(priority: .userInitiated) { () -> [(Data, UIImage)] in
             ids.compactMap { id in
@@ -196,7 +185,7 @@ final class MockDiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
         list.append(trimmed)
     }
     
-    func requestImageSelection(source: MediaSource) {}
+    func attachPhoto(_ image: UIImage) async {}
     func removePhoto(at index: Int) {}
     func startEditing(_ entry: DiaryEntrySnapshot) async { draft = DiaryEntryDraft(from: entry) }
     @discardableResult

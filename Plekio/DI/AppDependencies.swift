@@ -29,7 +29,6 @@ final class AppDependencies {
 
     let database: any DatabaseServiceProtocol
     let notifications: any NotificationServiceProtocol
-    let mediaPicker: any MediaPickerServiceProtocol
 
     /// Photo files and decoded photos — one cache, shared by the database (as
     /// PhotoStoring), view models, and views (as ImageLoading, through the
@@ -86,7 +85,6 @@ final class AppDependencies {
     init(
         database: any DatabaseServiceProtocol,
         notifications: any NotificationServiceProtocol,
-        mediaPicker: any MediaPickerServiceProtocol,
         photoCache: ImageCache,
         settings: SettingsStore,
         errorPresenter: AppErrorPresenter,
@@ -96,7 +94,6 @@ final class AppDependencies {
         self.time = time
         self.database = database
         self.notifications = notifications
-        self.mediaPicker = mediaPicker
         self.photoCache = photoCache
         self.settings = settings
         self.errorPresenter = errorPresenter
@@ -132,7 +129,6 @@ final class AppDependencies {
         return AppDependencies(
             database: database,
             notifications: NotificationService(settings: settings, time: time),
-            mediaPicker: MediaPickerService(),
             photoCache: photoCache,
             settings: settings,
             errorPresenter: errorPresenter,
@@ -151,7 +147,6 @@ final class AppDependencies {
         return AppDependencies(
             database: DatabaseService(inMemoryForTesting: true, photos: ImageCache.shared, errors: errorPresenter),
             notifications: NotificationService(settings: settings, time: SystemTime()),
-            mediaPicker: MediaPickerService(),
             photoCache: ImageCache.shared,
             settings: settings,
             errorPresenter: errorPresenter

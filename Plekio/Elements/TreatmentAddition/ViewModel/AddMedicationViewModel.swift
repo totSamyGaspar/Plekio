@@ -15,12 +15,10 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
     @Published var selectedImage: UIImage?
     @Published var showingPhotoSourceMenu = false
     
-    private let mediaPickerService: MediaPickerServiceProtocol
     private let photos: any PhotoStoring
     private var hasLoadedEditedMedication = false
     
-    init(mediaPickerService: MediaPickerServiceProtocol, photos: any PhotoStoring) {
-        self.mediaPickerService = mediaPickerService
+    init(photos: any PhotoStoring) {
         self.photos = photos
     }
     
@@ -49,33 +47,28 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
         draft.medicationImageData = loaded.0
     }
     
-    func requestImageSelection(source: MediaSource) {
-        Task {
-            do {
-                let image = try await mediaPickerService.pickImage(source: source)
-                
-                // Compress off the main actor so the UI thread isn't blocked.
-                // pngData is the fallback: jpegData returns nil for an image with no
-                // CGImage behind it, and the preview then showed a photo that was
-                // never written to disk — a placeholder everywhere else in the app.
-                let compressedData = await Task.detached(priority: .userInitiated) {
-                    return image.jpegData(compressionQuality: 0.7) ?? image.pngData()
-                }.value
-                
-                guard let compressedData else {
-                    AppLog.media.error("Picked image could not be encoded; photo not attached")
-                    return
-                }
-                
-                self.selectedImage = image
-                self.draft.medicationImageData = compressedData
-                self.draft.photoModified = true
-            } catch {
-                AppLog.media.error("Photo selection failed: \(error.localizedDescription, privacy: .public)")
-            }
+    /// Takes the photo the view's picker returned. Picking itself is the view's
+    /// job now (see PhotoSourceDialog), so what is left here is the part worth
+    /// testing: encoding it and marking the draft.
+    func attachPhoto(_ image: UIImage) async {
+        // Compress off the main actor so the UI thread isn't blocked.
+        // pngData is the fallback: jpegData returns nil for an image with no
+        // CGImage behind it, and the preview then showed a photo that was
+        // never written to disk — a placeholder everywhere else in the app.
+        let compressedData = await Task.detached(priority: .userInitiated) {
+            image.jpegData(compressionQuality: 0.7) ?? image.pngData()
+        }.value
+
+        guard let compressedData else {
+            AppLog.media.error("Picked image could not be encoded; photo not attached")
+            return
         }
+
+        selectedImage = image
+        draft.medicationImageData = compressedData
+        draft.photoModified = true
     }
-    
+
     func removeImage() {
         selectedImage = nil
         draft.medicationImageData = nil

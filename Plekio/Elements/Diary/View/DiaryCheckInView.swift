@@ -81,7 +81,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                             images: viewModel.selectedImages,
                             showingSourceMenu: $viewModel.showingPhotoSourceMenu,
                             onRemove: { viewModel.removePhoto(at: $0) },
-                            onPick: { viewModel.requestImageSelection(source: $0) }
+                            onPick: { image in Task { await viewModel.attachPhoto(image) } }
                         )
                         
                         DiaryTagSection(

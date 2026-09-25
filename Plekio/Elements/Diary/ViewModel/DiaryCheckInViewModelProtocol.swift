@@ -26,7 +26,8 @@ protocol DiaryCheckInViewModelProtocol: ObservableObject {
     func isSymptomSelected(_ symptom: String) -> Bool
     func isMilestoneSelected(_ tag: String) -> Bool
     
-    func requestImageSelection(source: MediaSource)
+    /// Encodes the picked photo into the draft.
+    func attachPhoto(_ image: UIImage) async
     func removePhoto(at index: Int)
     
     /// Switches the form into editing an existing entry: fills the draft and

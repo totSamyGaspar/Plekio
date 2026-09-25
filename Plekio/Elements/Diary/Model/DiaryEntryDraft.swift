@@ -138,7 +138,7 @@ struct DiaryEntryDraft: Identifiable, Equatable {
     // matters to stats and display.
     var isQuickLog: Bool = false
     // Tracks whether the user actually added/removed a photo this session —
-    // set by DiaryCheckInViewModel.requestImageSelection/removePhoto, NOT by
+    // set by DiaryCheckInViewModel.attachPhoto/removePhoto, NOT by
     // DiaryCheckInView.init(editingEntry:) preloading the existing photos.
     // DatabaseService.updateDiaryEntry uses this to skip deleting/rewriting
     // photo files on disk when the user didn't touch photos at all — without

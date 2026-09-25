@@ -17,6 +17,7 @@ protocol AddMedicationViewModelProtocol: ObservableObject {
     /// disk. Called from the view's `.task`, not its `init`.
     func startEditing(_ medication: MedicationSnapshot) async
 
-    func requestImageSelection(source: MediaSource)
+    /// Encodes the picked photo into the draft.
+    func attachPhoto(_ image: UIImage) async
     func removeImage()
 }

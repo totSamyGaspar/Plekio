@@ -207,14 +207,8 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     .disabled(viewModel.draft.name.isEmpty)
                 }
             }
-            .confirmationDialog("Choose Photo", isPresented: $viewModel.showingPhotoSourceMenu, titleVisibility: .visible) {
-                Button("Take Photo (Camera)") {
-                    viewModel.requestImageSelection(source: .camera)
-                }
-                Button("Choose from Library") {
-                    viewModel.requestImageSelection(source: .photoLibrary)
-                }
-                Button("Cancel", role: .cancel) { }
+            .photoSourceDialog("Choose Photo", isPresented: $viewModel.showingPhotoSourceMenu) { image in
+                Task { await viewModel.attachPhoto(image) }
             }
             .task {
                 guard let medicationToEdit else { return }

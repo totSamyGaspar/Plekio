@@ -303,7 +303,7 @@ struct DatabaseServiceTests {
         updatedDraft.mood = .inPain
         updatedDraft.physicalSummary = "Worse today."
         updatedDraft.photos = [Data([0x02])]
-        // DiaryCheckInViewModel.requestImageSelection/removePhoto set this whenever
+        // DiaryCheckInViewModel.attachPhoto/removePhoto set this whenever
         // the user actually touches photos.
         updatedDraft.photosModified = true
 

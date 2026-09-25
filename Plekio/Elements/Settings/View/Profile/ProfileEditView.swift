@@ -45,14 +45,10 @@ struct ProfileEditView: View {
             // how the medication and diary screens already ask the same
             // question, and a menu inside a form inside a sheet is a third
             // presentation stacked on two.
-            .confirmationDialog("Photo", isPresented: $isChoosingSource, titleVisibility: .visible) {
-                Button("Take Photo (Camera)") { pick(from: .camera) }
-                Button("Choose from Library") { pick(from: .photoLibrary) }
-
+            .photoSourceDialog("Photo", isPresented: $isChoosingSource, onPick: saveAvatar) {
                 if profile.avatarId != nil {
                     Button("Remove photo", role: .destructive, action: removeAvatar)
                 }
-                Button("Cancel", role: .cancel) {}
             }
         }
         .appTheme()
@@ -128,28 +124,21 @@ struct ProfileEditView: View {
 
     // MARK: - Avatar
 
-    private func pick(from source: MediaSource) {
+    private func saveAvatar(_ image: UIImage) {
+        let previous = profile.avatarId
+        let photos = dependencies.photoCache
         Task {
-            do {
-                let picker = dependencies.mediaPicker
-                let image = try await picker.pickImage(source: source)
-                let previous = profile.avatarId
-                let photos = dependencies.photoCache
+            // Encoding and the two file operations all happen off the main
+            // actor; only the resulting id comes back to the form.
+            let saved = await Task.detached(priority: .userInitiated) {
+                AvatarStore.save(image, replacing: previous, in: photos)
+            }.value
 
-                // Encoding and the two file operations all happen off the main
-                // actor; only the resulting id comes back to the form.
-                let saved = await Task.detached(priority: .userInitiated) {
-                    AvatarStore.save(image, replacing: previous, in: photos)
-                }.value
-
-                guard let saved else {
-                    AppLog.media.error("Avatar could not be stored; the profile keeps its previous photo")
-                    return
-                }
-                profile.avatarId = saved
-            } catch {
-                AppLog.media.error("Avatar selection failed: \(error.localizedDescription, privacy: .public)")
+            guard let saved else {
+                AppLog.media.error("Avatar could not be stored; the profile keeps its previous photo")
+                return
             }
+            profile.avatarId = saved
         }
     }
 

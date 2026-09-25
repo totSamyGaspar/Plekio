@@ -20,7 +20,7 @@ struct DiaryPhotosCard: View {
     let images: [UIImage]
     @Binding var showingSourceMenu: Bool
     let onRemove: (Int) -> Void
-    let onPick: (MediaSource) -> Void
+    let onPick: (UIImage) -> Void
 
     private let tile: CGFloat = 88
 
@@ -32,11 +32,7 @@ struct DiaryPhotosCard: View {
         .padding(18)
         .background(Color.appSurface)
         .cornerRadius(18)
-        .confirmationDialog("Add Photo", isPresented: $showingSourceMenu, titleVisibility: .visible) {
-            Button("Take Photo (Camera)") { onPick(.camera) }
-            Button("Choose from Library") { onPick(.photoLibrary) }
-            Button("Cancel", role: .cancel) {}
-        }
+        .photoSourceDialog("Add Photo", isPresented: $showingSourceMenu, onPick: onPick)
     }
 
     // MARK: - Heading

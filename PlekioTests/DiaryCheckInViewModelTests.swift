@@ -3,10 +3,8 @@
 //  PlekioTests
 //
 //  Tests for the diary check-in draft's tag toggling/dedup logic and for
-//  save() correctly delegating to DatabaseServiceProtocol. Photo selection via
-//  requestImageSelection(source:) is intentionally NOT tested here, for the
-//  same reason as AddMedicationViewModelTests: it awaits an async picker call
-//  inside Task { ... } without a structured way to await it from a test.
+//  save() correctly delegating to DatabaseServiceProtocol, and for attaching
+//  a picked photo — awaitable since picking moved into the view.
 //
 
 import Testing
@@ -21,8 +19,7 @@ struct DiaryCheckInViewModelTests {
     @Test("Initial state — default draft, no photos")
     func testInitialState() async throws {
         let mockDb = MockDatabaseService()
-        let mockMedia = MockMediaPickerService()
-        let vm = DiaryCheckInViewModel(dbService: mockDb, mediaPickerService: mockMedia, photos: FakePhotoStore(), errors: SpyErrorReporter())
+        let vm = DiaryCheckInViewModel(dbService: mockDb, photos: FakePhotoStore(), errors: SpyErrorReporter())
 
         #expect(vm.draft.mood == .good)
         #expect(vm.draft.symptoms.isEmpty)
@@ -30,9 +27,25 @@ struct DiaryCheckInViewModelTests {
         #expect(vm.selectedImages.isEmpty)
     }
 
+    @Test("attachPhoto добавляет фото к записи, removePhoto убирает его")
+    func attachThenRemovePhoto() async {
+        let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
+
+        await vm.attachPhoto(TestImages.solid())
+        await vm.attachPhoto(TestImages.solid())
+
+        #expect(vm.selectedImages.count == 2)
+        #expect(vm.draft.photos.count == 2)
+        #expect(vm.draft.photosModified)
+
+        vm.removePhoto(at: 0)
+        #expect(vm.selectedImages.count == 1)
+        #expect(vm.draft.photos.count == 1)
+    }
+
     @Test("toggleSymptom adds then removes a symptom")
     func testToggleSymptomAddsAndRemoves() async throws {
-        let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), mediaPickerService: MockMediaPickerService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
+        let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
 
         vm.toggleSymptom("Headache")
         #expect(vm.draft.symptoms == ["Headache"])
@@ -43,7 +56,7 @@ struct DiaryCheckInViewModelTests {
 
     @Test("addCustomSymptom trims whitespace and ignores blank/duplicate input")
     func testAddCustomSymptomTrimsAndDedupes() async throws {
-        let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), mediaPickerService: MockMediaPickerService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
+        let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
 
         vm.addCustomSymptom("  Neck pain  ")
         #expect(vm.draft.symptoms == ["Neck pain"])
@@ -57,7 +70,7 @@ struct DiaryCheckInViewModelTests {
 
     @Test("toggleMilestone adds then removes a tag")
     func testToggleMilestoneAddsAndRemoves() async throws {
-        let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), mediaPickerService: MockMediaPickerService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
+        let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
 
         vm.toggleMilestone("Morning Walk")
         #expect(vm.draft.milestoneTags == ["Morning Walk"])
@@ -68,7 +81,7 @@ struct DiaryCheckInViewModelTests {
 
     @Test("removePhoto keeps selectedImages and draft.photos in sync")
     func testRemovePhotoKeepsArraysInSync() async throws {
-        let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), mediaPickerService: MockMediaPickerService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
+        let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
 
         vm.selectedImages = [UIImage(systemName: "pills.fill")!, UIImage(systemName: "drop.fill")!]
         vm.draft.photos = [Data([0x01]), Data([0x02])]
@@ -82,7 +95,7 @@ struct DiaryCheckInViewModelTests {
     @Test("save() delegates the current draft to DatabaseServiceProtocol")
     func testSaveDelegatesToDatabaseService() async throws {
         let mockDb = MockDatabaseService()
-        let vm = DiaryCheckInViewModel(dbService: mockDb, mediaPickerService: MockMediaPickerService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
+        let vm = DiaryCheckInViewModel(dbService: mockDb, photos: FakePhotoStore(), errors: SpyErrorReporter())
 
         vm.draft.physicalSummary = "Feeling steady today."
         vm.save()
@@ -94,7 +107,7 @@ struct DiaryCheckInViewModelTests {
     @Test("startEditing переносит ВСЕ поля записи в черновик, включая isQuickLog")
     func testStartEditingCopiesEveryField() async throws {
         let mockDb = MockDatabaseService()
-        let vm = DiaryCheckInViewModel(dbService: mockDb, mediaPickerService: MockMediaPickerService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
+        let vm = DiaryCheckInViewModel(dbService: mockDb, photos: FakePhotoStore(), errors: SpyErrorReporter())
 
         // A quick log: its energy/sleep/water are DiaryEntryDraft's static defaults,
         // not values the user entered.
@@ -129,7 +142,7 @@ struct DiaryCheckInViewModelTests {
     @Test("правка быстрой записи сохраняет её быстрой")
     func testEditingQuickLogKeepsFlagOnSave() async throws {
         let mockDb = MockDatabaseService()
-        let vm = DiaryCheckInViewModel(dbService: mockDb, mediaPickerService: MockMediaPickerService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
+        let vm = DiaryCheckInViewModel(dbService: mockDb, photos: FakePhotoStore(), errors: SpyErrorReporter())
 
         let quickEntry = DiaryEntry(
             checkInDate: Date(),
@@ -219,7 +232,7 @@ struct DiaryCheckInViewModelTests {
     @Test("save() updates the existing entry instead of creating a new one when editing")
     func testSaveUpdatesExistingEntryWhenEditing() async throws {
         let mockDb = MockDatabaseService()
-        let vm = DiaryCheckInViewModel(dbService: mockDb, mediaPickerService: MockMediaPickerService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
+        let vm = DiaryCheckInViewModel(dbService: mockDb, photos: FakePhotoStore(), errors: SpyErrorReporter())
 
         let existingEntry = DiaryEntry(
             checkInDate: Date(),
