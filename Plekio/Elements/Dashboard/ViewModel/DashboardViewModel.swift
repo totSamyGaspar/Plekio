@@ -26,8 +26,10 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     @Published var recentAverage: Int = 0
     
     
-    /// The last "Log all", while it can still be undone. Nil at every other time.
-    @Published private(set) var undoableAction: UndoableDoseAction?
+    /// The last logged or skipped action, while it can still be undone — from
+    /// this screen or from a notification's modal. Read through the shared
+    /// DoseUndoCenter; the banner follows it via Observation.
+    var undoableAction: UndoableDoseAction? { undoCenter.current }
     
     /// Reads only: what is due on a day, and the courses behind it.
     private let dbService: any DoseStoring
@@ -35,11 +37,9 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     private let doseLogging: DoseLoggingUseCaseProtocol
     private let errors: any ErrorReporting
     private let time: any TimeSource
+    private let undoCenter: DoseUndoCenter
     private var cancellables = Set<AnyCancellable>()
     
-    /// Closes the undo window on its own. Held so a second "Log all" replaces the
-    /// first countdown instead of racing it.
-    private var undoExpiryTask: Task<Void, Never>?
     
     private static let weekdayFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -53,12 +53,15 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         dbService: any DoseStoring,
         doseLogging: DoseLoggingUseCaseProtocol,
         errors: any ErrorReporting,
-        time: any TimeSource = SystemTime()
+        time: any TimeSource = SystemTime(),
+        undoCenter: DoseUndoCenter? = nil
     ) {
         self.dbService = dbService
         self.doseLogging = doseLogging
         self.errors = errors
         self.time = time
+        // Its own window when none is shared — the shape the tests use.
+        self.undoCenter = undoCenter ?? DoseUndoCenter(doseLogging: doseLogging, errors: errors, time: time)
         self.selectedDate = time.now
         fetchData()
         
@@ -148,14 +151,9 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     /// judges it against what is stored now, so a dose changed by hand in the
     /// meantime is not flipped back.
     func undoLastAction() {
-        guard let action = undoableAction else { return }
-        clearUndoWindow()
-
-        guard let outcome = errors.attempt({ try doseLogging.perform(action.undo) }),
-              outcome.didWrite
-        else { return }
-
-        fetchData()
+        if undoCenter.undo() {
+            fetchData()
+        }
     }
 
     func dismissUndo() {
@@ -163,25 +161,15 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     }
 
     // MARK: - Undo window
-    
-    private func startUndoWindow(_ kind: UndoableDoseAction.Kind, undo: DoseCommand?) {
-        guard let undo else { return }
-        undoExpiryTask?.cancel()
-        undoableAction = UndoableDoseAction(kind: kind, undo: undo, startedAt: time.now)
 
-        undoExpiryTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(UndoableDoseAction.window))
-            guard !Task.isCancelled else { return }
-            self?.undoableAction = nil
-        }
+    private func startUndoWindow(_ kind: UndoableDoseAction.Kind, undo: DoseCommand?) {
+        undoCenter.offer(kind, undo: undo)
     }
-    
+
     private func clearUndoWindow() {
-        undoExpiryTask?.cancel()
-        undoExpiryTask = nil
-        undoableAction = nil
+        undoCenter.dismiss()
     }
-    
+
     // MARK: - Weekly statistics
 
     private func calculateWeeklyStats() {

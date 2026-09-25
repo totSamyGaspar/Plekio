@@ -178,10 +178,6 @@ struct DatabaseServiceTests {
         db.context.insert(course)
         try? db.context.save()
 
-        // ImageCache writes to the real on-disk cache, not a temp dir, so a leftover
-        // file would leak into the next test run.
-        defer { ImageCache.shared.deleteFromDisk(for: med.id) }
-
         var draftWithPhoto = MedicationDraft()
         draftWithPhoto.name = "Омега-3"
         let fakeJPEGBytes = Data([0xFF, 0xD8, 0xFF, 0x00, 0x01, 0x02])
@@ -189,7 +185,7 @@ struct DatabaseServiceTests {
         draftWithPhoto.photoModified = true
 
         try db.updateMedication(med, with: draftWithPhoto)
-        #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == fakeJPEGBytes)
+        #expect(db.photos.loadDataFromDisk(for: med.id) == fakeJPEGBytes)
 
         // An edit that never touched the photo must leave the file alone, even
         // though the draft carries no bytes — the preload may simply not have
@@ -197,7 +193,7 @@ struct DatabaseServiceTests {
         var renameOnly = MedicationDraft()
         renameOnly.name = "Омега-3 форте"
         try db.updateMedication(med, with: renameOnly)
-        #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == fakeJPEGBytes)
+        #expect(db.photos.loadDataFromDisk(for: med.id) == fakeJPEGBytes)
 
         // Removing the photo (photoModified with no bytes) must delete the file,
         // not leave a stale one on disk.
@@ -205,7 +201,7 @@ struct DatabaseServiceTests {
         draftWithoutPhoto.name = "Омега-3"
         draftWithoutPhoto.photoModified = true
         try db.updateMedication(med, with: draftWithoutPhoto)
-        #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == nil)
+        #expect(db.photos.loadDataFromDisk(for: med.id) == nil)
     }
 
     // MARK: - deleteMedication / deleteCourse: cleaning up photo files
@@ -222,12 +218,12 @@ struct DatabaseServiceTests {
             timesOfDay: [testDate(2000, 1, 1, 9, 0)],
             frequencyDays: 1
         )
-        ImageCache.shared.saveToDisk(Data([0x01]), for: med.id)
-        #expect(ImageCache.shared.loadDataFromDisk(for: med.id) != nil)
+        db.photos.saveToDisk(Data([0x01]), for: med.id)
+        #expect(db.photos.loadDataFromDisk(for: med.id) != nil)
 
         try db.deleteMedication(med)
 
-        #expect(ImageCache.shared.loadDataFromDisk(for: med.id) == nil)
+        #expect(db.photos.loadDataFromDisk(for: med.id) == nil)
     }
 
     @Test("deleteCourse removes the photo files of all its medications")
@@ -241,13 +237,13 @@ struct DatabaseServiceTests {
         db.context.insert(course)
         try? db.context.save()
 
-        ImageCache.shared.saveToDisk(Data([0x01]), for: medA.id)
-        ImageCache.shared.saveToDisk(Data([0x02]), for: medB.id)
+        db.photos.saveToDisk(Data([0x01]), for: medA.id)
+        db.photos.saveToDisk(Data([0x02]), for: medB.id)
 
         try db.deleteCourse(course)
 
-        #expect(ImageCache.shared.loadDataFromDisk(for: medA.id) == nil)
-        #expect(ImageCache.shared.loadDataFromDisk(for: medB.id) == nil)
+        #expect(db.photos.loadDataFromDisk(for: medA.id) == nil)
+        #expect(db.photos.loadDataFromDisk(for: medB.id) == nil)
     }
 
     // MARK: - Diary
@@ -284,8 +280,7 @@ struct DatabaseServiceTests {
         #expect(saved.photoIds.count == 1)
 
         for photoId in saved.photoIds {
-            #expect(ImageCache.shared.loadDataFromDisk(for: photoId) == Data([0xFF, 0xD8, 0xFF]))
-            ImageCache.shared.deleteFromDisk(for: photoId)
+            #expect(db.photos.loadDataFromDisk(for: photoId) == Data([0xFF, 0xD8, 0xFF]))
         }
     }
 
@@ -301,7 +296,7 @@ struct DatabaseServiceTests {
 
         let saved = try #require(db.fetchAllDiaryEntries().first)
         let oldPhotoId = try #require(saved.photoIds.first)
-        #expect(ImageCache.shared.loadDataFromDisk(for: oldPhotoId) != nil)
+        #expect(db.photos.loadDataFromDisk(for: oldPhotoId) != nil)
 
         var updatedDraft = DiaryEntryDraft()
         updatedDraft.mood = .inPain
@@ -320,10 +315,9 @@ struct DatabaseServiceTests {
 
         let newPhotoId = try #require(saved.photoIds.first)
         #expect(newPhotoId != oldPhotoId)
-        #expect(ImageCache.shared.loadDataFromDisk(for: newPhotoId) == Data([0x02]))
-        #expect(ImageCache.shared.loadDataFromDisk(for: oldPhotoId) == nil)
+        #expect(db.photos.loadDataFromDisk(for: newPhotoId) == Data([0x02]))
+        #expect(db.photos.loadDataFromDisk(for: oldPhotoId) == nil)
 
-        ImageCache.shared.deleteFromDisk(for: newPhotoId)
     }
 
     @Test("updateDiaryEntry leaves photo files untouched when photosModified is false")
@@ -351,9 +345,8 @@ struct DatabaseServiceTests {
         #expect(saved.moodLabel == "In Pain")
         // The same file, not deleted and rewritten under a fresh UUID.
         #expect(saved.photoIds == [originalPhotoId])
-        #expect(ImageCache.shared.loadDataFromDisk(for: originalPhotoId) == Data([0x01]))
+        #expect(db.photos.loadDataFromDisk(for: originalPhotoId) == Data([0x01]))
 
-        ImageCache.shared.deleteFromDisk(for: originalPhotoId)
     }
 
     @Test("deleteDiaryEntry removes the entry's photo files from disk")
@@ -367,12 +360,12 @@ struct DatabaseServiceTests {
         let saved = try #require(db.fetchAllDiaryEntries().first)
         let photoIds = saved.photoIds
         #expect(photoIds.count == 2)
-        #expect(photoIds.allSatisfy { ImageCache.shared.loadDataFromDisk(for: $0) != nil })
+        #expect(photoIds.allSatisfy { db.photos.loadDataFromDisk(for: $0) != nil })
 
         try db.deleteDiaryEntry(saved)
 
         #expect(db.fetchAllDiaryEntries().isEmpty)
-        #expect(photoIds.allSatisfy { ImageCache.shared.loadDataFromDisk(for: $0) == nil })
+        #expect(photoIds.allSatisfy { db.photos.loadDataFromDisk(for: $0) == nil })
     }
 
     // MARK: - togglePill: back-dated logging

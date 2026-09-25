@@ -60,6 +60,10 @@ final class AppDependencies {
     let doseLogging: any DoseLoggingUseCaseProtocol
     let courseEditing: any CourseEditingUseCaseProtocol
 
+    /// The one undo window for dose actions — the dashboard's and the
+    /// notification modal's alike.
+    let doseUndo: DoseUndoCenter
+
     /// Kept for its subscription: it rebuilds the reminder queue after course
     /// writes for as long as this object lives, which is as long as the app.
     let reminderSync: ReminderSyncCoordinator
@@ -92,6 +96,7 @@ final class AppDependencies {
         self.storeURL = storeURL
 
         doseLogging = DoseLoggingUseCase(dbService: database, notificationService: notifications)
+        doseUndo = DoseUndoCenter(doseLogging: doseLogging, errors: errorPresenter, time: time)
         courseRepository = SwiftDataCourseRepository(store: database)
         diaryRepository = SwiftDataDiaryRepository(store: database)
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)

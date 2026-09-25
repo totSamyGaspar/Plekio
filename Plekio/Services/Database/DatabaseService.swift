@@ -50,10 +50,13 @@ final class DatabaseService {
         self.time = time
     }
 
-    /// The shape existing tests use. Photos still go to the shared cache and
-    /// errors to a presenter nobody shows; pass both explicitly to isolate them.
+    /// The shape most tests use: an in-memory store with a photo folder of its
+    /// own in the temporary directory, so no test reads or writes the app's real
+    /// photos. Errors go to a presenter nobody shows.
     convenience init(inMemoryForTesting: Bool) {
-        self.init(inMemoryForTesting: inMemoryForTesting, photos: ImageCache.shared, errors: AppErrorPresenter())
+        let folder = FileManager.default.temporaryDirectory
+            .appendingPathComponent("PlekioTestPhotos-\(UUID().uuidString)", isDirectory: true)
+        self.init(inMemoryForTesting: inMemoryForTesting, photos: ImageCache(directory: folder), errors: AppErrorPresenter())
     }
 }
 

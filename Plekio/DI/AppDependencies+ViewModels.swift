@@ -25,7 +25,7 @@ extension AppDependencies {
     // MARK: - Today
 
     func makeDashboardViewModel() -> DashboardViewModel {
-        DashboardViewModel(dbService: database, doseLogging: doseLogging, errors: errorPresenter, time: time)
+        DashboardViewModel(dbService: database, doseLogging: doseLogging, errors: errorPresenter, time: time, undoCenter: doseUndo)
     }
 
     func makeStatisticsViewModel() -> StatisticsViewModel {

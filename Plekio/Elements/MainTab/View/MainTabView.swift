@@ -162,13 +162,15 @@ struct MainTabView: View {
             .appTheme()
             
         case .takePill(let pills):
-            // The notification path: straight to the use case. The dashboard
-            // presents its own modal, since its "Take" also starts the undo banner.
+            // The notification path: straight to the use case, then into the shared
+            // undo window — the user lands on Today, where the banner shows it.
             TakePillModalView(pills: pills, onTake: {
-                _ = errorPresenter.attempt { try dependencies.doseLogging.markTaken(pills) }
+                let outcome = errorPresenter.attempt { try dependencies.doseLogging.markTaken(pills) }
+                dependencies.doseUndo.offer(.logged, undo: outcome?.undo)
                 router.dismissSheet()
             }, onSkip: {
-                _ = errorPresenter.attempt { try dependencies.doseLogging.markSkipped(pills) }
+                let outcome = errorPresenter.attempt { try dependencies.doseLogging.markSkipped(pills) }
+                dependencies.doseUndo.offer(.skipped, undo: outcome?.undo)
                 router.dismissSheet()
             }, onSnooze: {
                 let notifService = dependencies.notifications
