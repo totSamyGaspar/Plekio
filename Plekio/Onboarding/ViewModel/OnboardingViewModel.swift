@@ -8,8 +8,8 @@
 import SwiftUI
 import Combine
 
-/// The order is the story: set a course up, use it through the day, stop
-/// needing to open the app, record more than pills, and finally hand the whole
+/// The order is the story: set a course up, use it through the day, answer
+/// the reminder where it lands, record more than pills, and finally hand the whole
 /// thing to a doctor. The last slide is the payoff, which is why it is last.
 final class OnboardingViewModel: OnboardingViewModelProtocol {
 
@@ -31,8 +31,8 @@ final class OnboardingViewModel: OnboardingViewModelProtocol {
         OnboardingPage(
             preview: .reminder,
             glow: .warmAccent,
-            title: "No need to open the app",
-            description: "Log a dose straight from the reminder, and what is left in the pack goes down by itself."
+            title: "Straight from the reminder",
+            description: "Hold the reminder to take a dose, snooze it or skip it — what is left in the pack goes down by itself."
         ),
         OnboardingPage(
             preview: .diary,

@@ -17,6 +17,11 @@ struct OnboardingPageView: View {
 
     let page: OnboardingPage
 
+    /// Whether this is the slide on screen. `TabView` builds its neighbours
+    /// ahead of time, so `onAppear` fires for slides nobody is looking at;
+    /// the scripts start from this instead.
+    var isActive = true
+
     @State private var isGlowing = false
 
     var body: some View {
@@ -67,11 +72,11 @@ struct OnboardingPageView: View {
     @ViewBuilder
     private var preview: some View {
         switch page.preview {
-        case .course: CoursePreview()
-        case .day: DayPreview()
-        case .reminder: ReminderPreview()
-        case .diary: DiaryPreview()
-        case .report: ReportPreview()
+        case .course: CoursePreview(isActive: isActive)
+        case .day: DayPreview(isActive: isActive)
+        case .reminder: ReminderPreview(isActive: isActive)
+        case .diary: DiaryPreview(isActive: isActive)
+        case .report: ReportPreview(isActive: isActive)
         }
     }
 }
