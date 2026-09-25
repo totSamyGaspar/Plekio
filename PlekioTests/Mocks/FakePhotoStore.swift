@@ -14,7 +14,8 @@ nonisolated final class FakePhotoStore: PhotoStoring, @unchecked Sendable {
     private let lock = NSLock()
     private var _saved: [UUID: Data] = [:]
     private var _deleted: [UUID] = []
-    let refusesWrites: Bool
+    /// Settable mid-test to simulate the disk filling up.
+    var refusesWrites: Bool
 
     var saved: [UUID: Data] { lock.withLock { _saved } }
     var deleted: [UUID] { lock.withLock { _deleted } }

@@ -151,6 +151,20 @@ final class PersistenceController {
 
     // MARK: - Photos
 
+    /// Writes all photos or none: on any failure the ones already written are
+    /// deleted and the save is refused, so a record never points at missing files.
+    func writePhotosOrThrow(_ photos: [(UUID, Data)]) throws {
+        var written: [UUID] = []
+        for (id, data) in photos {
+            guard self.photos.saveToDisk(data, for: id) else {
+                for id in written { self.photos.deleteFromDisk(for: id) }
+                AppLog.media.error("Photo not written; save refused")
+                throw DatabaseError.saveFailed(underlying: PhotoWriteFailed())
+            }
+            written.append(id)
+        }
+    }
+
     /// Writes photos after their record is committed. Failures are reported, not
     /// thrown or rolled back: the record is already safely saved.
     func persistPhotos(_ photos: [(UUID, Data)]) {
@@ -215,3 +229,9 @@ enum DatabaseError: LocalizedError, AlertTitled {
         }
     }
 }
+
+// MARK: - PhotoWriteFailed
+
+/// A photo file could not be written, usually for lack of space.
+nonisolated struct PhotoWriteFailed: Error {}
+

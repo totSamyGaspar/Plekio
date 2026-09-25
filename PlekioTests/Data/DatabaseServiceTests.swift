@@ -310,6 +310,60 @@ struct DatabaseServiceTests {
 
     }
 
+    @Test("при добавлении фото нетронутые сохраняют свои id и файлы")
+    func updateKeepsUnchangedPhotoIds() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        var original = DiaryEntryDraft()
+        original.photos = [Data([0x01])]
+        try db.saveDiaryEntry(draft: original)
+        let saved = try #require(db.fetchAllDiaryEntries().first)
+        let keptId = try #require(saved.photoIds.first)
+
+        var edited = DiaryEntryDraft()
+        edited.photos = [Data([0x01]), Data([0x02])]
+        edited.photosModified = true
+        try db.updateDiaryEntry(saved, with: edited)
+
+        #expect(saved.photoIds.count == 2)
+        #expect(saved.photoIds.first == keptId)
+        #expect(db.photos.loadDataFromDisk(for: keptId) == Data([0x01]))
+    }
+
+    @Test("если новое фото не записалось, запись не меняется и старые фото на месте")
+    func failedPhotoWriteKeepsTheOldEntry() async throws {
+        let store = FakePhotoStore()
+        let db = DatabaseService(inMemoryForTesting: true, photos: store, errors: SpyErrorReporter())
+        var original = DiaryEntryDraft()
+        original.physicalSummary = "До"
+        original.photos = [Data([0x01])]
+        try db.saveDiaryEntry(draft: original)
+        let saved = try #require(db.fetchAllDiaryEntries().first)
+        let oldIds = saved.photoIds
+
+        store.refusesWrites = true
+        var edited = DiaryEntryDraft()
+        edited.physicalSummary = "После"
+        edited.photos = [Data([0x02])]
+        edited.photosModified = true
+
+        #expect(throws: DatabaseError.self) { try db.updateDiaryEntry(saved, with: edited) }
+
+        #expect(saved.photoIds == oldIds)
+        #expect(saved.physicalSummary == "До")
+        #expect(store.deleted.isEmpty)
+        #expect(store.saved[oldIds[0]] == Data([0x01]))
+    }
+
+    @Test("новая запись с незаписанным фото не сохраняется вовсе")
+    func failedPhotoWriteRefusesANewEntry() async throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(refusesWrites: true), errors: SpyErrorReporter())
+        var draft = DiaryEntryDraft()
+        draft.photos = [Data([0x01])]
+
+        #expect(throws: DatabaseError.self) { try db.saveDiaryEntry(draft: draft) }
+        #expect(db.fetchAllDiaryEntries().isEmpty)
+    }
+
     @Test("updateDiaryEntry leaves photo files untouched when photosModified is false")
     func testUpdateDiaryEntryLeavesPhotosUntouchedWhenNotModified() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
