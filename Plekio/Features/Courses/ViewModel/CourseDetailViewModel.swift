@@ -64,9 +64,11 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
         reload()
     }
 
-    func addNewMedication(_ draft: MedicationDraft) {
-        guard errors.run({ try courseEditing.addMedication(draft, to: course) }) else { return }
+    @discardableResult
+    func addNewMedication(_ draft: MedicationDraft) -> Bool {
+        guard errors.run({ try courseEditing.addMedication(draft, to: course) }) else { return false }
         reload()
+        return true
     }
 
     func deleteMedication(at offsets: IndexSet) {
@@ -76,9 +78,11 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
         medications.remove(atOffsets: offsets)
     }
 
-    func updateMedication(medication: MedicationSnapshot, with draft: MedicationDraft) {
-        guard errors.run({ try courseEditing.updateMedication(medication, with: draft) }) else { return }
+    @discardableResult
+    func updateMedication(medication: MedicationSnapshot, with draft: MedicationDraft) -> Bool {
+        guard errors.run({ try courseEditing.updateMedication(medication, with: draft) }) else { return false }
         reload()
+        return true
     }
 
     // MARK: - Private

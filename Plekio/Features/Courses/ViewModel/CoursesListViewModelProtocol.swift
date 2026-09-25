@@ -16,9 +16,12 @@ protocol CoursesListViewModelProtocol: ObservableObject {
     var historyCourses: [CourseSnapshot] { get }
 
     func fetchCourses()
-    func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date)
+    /// These return whether the write succeeded, so the screen can confirm it.
+    @discardableResult
+    func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date) -> Bool
     func hasActiveRepeat(of course: CourseSnapshot) -> Bool
-    func deleteCourse(_ course: CourseSnapshot)
+    @discardableResult
+    func deleteCourse(_ course: CourseSnapshot) -> Bool
     /// The card's display values, on this screen's clock.
     func row(for course: CourseSnapshot) -> CourseRowViewModel
 }

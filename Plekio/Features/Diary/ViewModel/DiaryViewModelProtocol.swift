@@ -35,12 +35,16 @@ protocol DiaryViewModelProtocol: ObservableObject {
     // MARK: - Actions
 
     func fetchEntries()
-    func deleteEntry(_ entry: DiaryEntrySnapshot)
+    /// These return whether the write succeeded, so the screen can confirm it.
+    @discardableResult
+    func deleteEntry(_ entry: DiaryEntrySnapshot) -> Bool
 
     /// Saves (or updates today's) minimal entry with just a mood.
-    func quickLog(mood: DiaryMood)
+    @discardableResult
+    func quickLog(mood: DiaryMood) -> Bool
 
-    func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?)
+    @discardableResult
+    func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) -> Bool
     func deleteBloodPressureReading(_ reading: BloodPressureSnapshot)
     func deleteAllBloodPressureReadings()
 

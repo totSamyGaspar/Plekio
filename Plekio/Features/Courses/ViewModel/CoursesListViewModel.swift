@@ -69,12 +69,14 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
 
     /// Copies the course with new dates; the original stays in history. The use
     /// case refuses if the treatment is already running again.
-    func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date) {
+    @discardableResult
+    func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date) -> Bool {
         guard let didRepeat = errors.attempt({
             try courseEditing.repeatCourse(course, startDate: startDate, endDate: endDate)
-        }), didRepeat else { return }
+        }), didRepeat else { return false }
 
         fetchCourses()
+        return true
     }
 
     /// Checked against the on-screen list; the use case re-checks storage on repeat.
@@ -82,9 +84,11 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
         course.hasActiveRepeat(among: activeCourses)
     }
 
-    func deleteCourse(_ course: CourseSnapshot) {
-        guard errors.run({ try courseEditing.deleteCourse(course) }) else { return }
+    @discardableResult
+    func deleteCourse(_ course: CourseSnapshot) -> Bool {
+        guard errors.run({ try courseEditing.deleteCourse(course) }) else { return false }
         fetchCourses()
+        return true
     }
 
     func row(for course: CourseSnapshot) -> CourseRowViewModel {

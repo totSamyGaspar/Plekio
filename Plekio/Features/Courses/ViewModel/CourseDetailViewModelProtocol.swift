@@ -20,6 +20,9 @@ protocol CourseDetailViewModelProtocol: ObservableObject {
 
     func saveCourseChanges()
     func deleteMedication(at offsets: IndexSet)
-    func addNewMedication(_ draft: MedicationDraft)
-    func updateMedication(medication: MedicationSnapshot, with draft: MedicationDraft)
+    /// These return whether the write succeeded, so the screen can confirm it.
+    @discardableResult
+    func addNewMedication(_ draft: MedicationDraft) -> Bool
+    @discardableResult
+    func updateMedication(medication: MedicationSnapshot, with draft: MedicationDraft) -> Bool
 }

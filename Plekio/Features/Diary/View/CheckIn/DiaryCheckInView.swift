@@ -12,6 +12,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     // MARK: - Properties
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppDependencies.self) private var dependencies
     @StateObject private var viewModel: VM
 
     // Separate flags so each popover anchors to its own field.
@@ -245,7 +246,9 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             .buttonStyle(.plain)
 
             Button(action: {
-                if viewModel.save() { dismiss() }
+                guard viewModel.save() else { return }
+                dependencies.toasts.show(.success(entryToEdit == nil ? "Entry saved" : "Changes saved"))
+                dismiss()
             }) {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
@@ -272,5 +275,6 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
 #Preview {
     DiaryCheckInView(viewModel: MockDiaryCheckInViewModel())
+        .environment(AppDependencies.preview)
         .appTheme()
 }
