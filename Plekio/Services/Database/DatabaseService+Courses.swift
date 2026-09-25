@@ -87,7 +87,7 @@ extension DatabaseService: CourseStoring {
             )
             newCourse.medications.append(med)
 
-            if let imageData = ImageCache.shared.loadDataFromDisk(for: source.id) {
+            if let imageData = photos.loadDataFromDisk(for: source.id) {
                 pendingPhotos.append((copyId, imageData))
             }
         }
@@ -137,7 +137,7 @@ extension DatabaseService: CourseStoring {
         if let newImageData {
             persistence.persistPhotos([(medicationId, newImageData)])
         } else {
-            ImageCache.shared.deleteFromDisk(for: medicationId)
+            photos.deleteFromDisk(for: medicationId)
         }
     }
 
@@ -215,7 +215,7 @@ extension DatabaseService: CourseStoring {
         try persistence.commit([.courses])
 
         for id in photoIds {
-            ImageCache.shared.deleteFromDisk(for: id)
+            photos.deleteFromDisk(for: id)
         }
     }
 
@@ -226,7 +226,7 @@ extension DatabaseService: CourseStoring {
 
         // After the record is gone, so a rollback can't leave the medication in the
         // store without its photo.
-        ImageCache.shared.deleteFromDisk(for: photoId)
+        photos.deleteFromDisk(for: photoId)
     }
 
     func updateCourseDetails(course: TreatmentCourse, name: String, startDate: Date, endDate: Date) throws {

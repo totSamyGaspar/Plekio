@@ -21,8 +21,6 @@ import SwiftData
 @MainActor
 final class DatabaseService {
 
-    static let shared = DatabaseService()
-
     let persistence: PersistenceController
 
     var container: ModelContainer { persistence.container }
@@ -32,16 +30,25 @@ final class DatabaseService {
     /// memory. Nothing survives a restart in that mode.
     var storageFailure: Error? { persistence.storageFailure }
 
-    private init() {
-        persistence = PersistenceController()
+    /// Photo files, kept beside the store — see PersistenceController.
+    var photos: any PhotoStoring { persistence.photos }
+
+    /// The on-disk store. Built once, by the composition root
+    /// (`AppDependencies.live()`); there is no `shared` to reach for.
+    init(photos: any PhotoStoring, errors: any ErrorReporting) {
+        persistence = PersistenceController(photos: photos, errors: errors)
     }
 
-    /// Test-only entry point. `shared` is disk-backed, so tests using it would
-    /// collide with real app data and with each other. This builds an independent
-    /// in-memory container on the same schema, exercising the real logic without
-    /// touching disk.
-    init(inMemoryForTesting: Bool) {
-        persistence = PersistenceController(inMemory: inMemoryForTesting)
+    /// Test-only entry point: an independent in-memory container on the same
+    /// schema, exercising the real logic without touching the on-disk store.
+    init(inMemoryForTesting: Bool, photos: any PhotoStoring, errors: any ErrorReporting) {
+        persistence = PersistenceController(inMemory: inMemoryForTesting, photos: photos, errors: errors)
+    }
+
+    /// The shape existing tests use. Photos still go to the shared cache and
+    /// errors to a presenter nobody shows; pass both explicitly to isolate them.
+    convenience init(inMemoryForTesting: Bool) {
+        self.init(inMemoryForTesting: inMemoryForTesting, photos: ImageCache.shared, errors: AppErrorPresenter())
     }
 }
 

@@ -31,6 +31,14 @@ final class AppDependencies {
     let notifications: any NotificationServiceProtocol
     let mediaPicker: any MediaPickerServiceProtocol
 
+    /// Owned here, not reached as a singleton. View models and the storage layer
+    /// get it as `any ErrorReporting`; only MainTabView, which shows the alert,
+    /// needs the concrete type.
+    let errorPresenter: AppErrorPresenter
+
+    /// The store file, for the storage-usage row in Settings. Nil in previews.
+    let storeURL: URL?
+
     // MARK: - Use cases
 
     let doseLogging: any DoseLoggingUseCaseProtocol
@@ -43,11 +51,15 @@ final class AppDependencies {
     init(
         database: any DatabaseServiceProtocol,
         notifications: any NotificationServiceProtocol,
-        mediaPicker: any MediaPickerServiceProtocol
+        mediaPicker: any MediaPickerServiceProtocol,
+        errorPresenter: AppErrorPresenter,
+        storeURL: URL? = nil
     ) {
         self.database = database
         self.notifications = notifications
         self.mediaPicker = mediaPicker
+        self.errorPresenter = errorPresenter
+        self.storeURL = storeURL
 
         doseLogging = DoseLoggingUseCase(dbService: database, notificationService: notifications)
         courseEditing = CourseEditingUseCase(dbService: database, notificationService: notifications)
@@ -56,20 +68,31 @@ final class AppDependencies {
 
     /// The app's graph: the on-disk store and the real notification centre.
     static func live() -> AppDependencies {
-        AppDependencies(
-            database: DatabaseService.shared,
+        // Created first: the store reports into it if it has to fall back to
+        // memory, which happens while it is being built.
+        let errorPresenter = AppErrorPresenter()
+        let database = DatabaseService(photos: ImageCache.shared, errors: errorPresenter)
+
+        return AppDependencies(
+            database: database,
             notifications: NotificationService(),
-            mediaPicker: MediaPickerService()
+            mediaPicker: MediaPickerService(),
+            errorPresenter: errorPresenter,
+            storeURL: database.persistence.storeURL
         )
     }
 
     #if DEBUG
     /// For SwiftUI previews of screens that create other screens: an in-memory
     /// store, so a preview can never touch the user's data.
-    static let preview = AppDependencies(
-        database: DatabaseService(inMemoryForTesting: true),
-        notifications: NotificationService(),
-        mediaPicker: MediaPickerService()
-    )
+    static let preview: AppDependencies = {
+        let errorPresenter = AppErrorPresenter()
+        return AppDependencies(
+            database: DatabaseService(inMemoryForTesting: true, photos: ImageCache.shared, errors: errorPresenter),
+            notifications: NotificationService(),
+            mediaPicker: MediaPickerService(),
+            errorPresenter: errorPresenter
+        )
+    }()
     #endif
 }

@@ -22,6 +22,14 @@ final class PersistenceController {
     let container: ModelContainer
     let context: ModelContext
 
+    /// Photo files, which live beside the store rather than in it.
+    let photos: any PhotoStoring
+
+    /// Where a failure goes when there is no caller left to throw it to — the
+    /// store opening in memory, a photo not reaching disk. An abstraction: this
+    /// layer does not know there is an alert on the other end.
+    private let errors: any ErrorReporting
+
     /// Where the store file sits, for measuring it. In-memory runs still name a
     /// path; nothing is written there, so the measurement comes out zero.
     var storeURL: URL? { container.configurations.first?.url }
@@ -49,7 +57,9 @@ final class PersistenceController {
 
     // MARK: - Init
 
-    init() {
+    init(photos: any PhotoStoring, errors: any ErrorReporting) {
+        self.photos = photos
+        self.errors = errors
         let schema = Self.makeSchema()
 
         do {
@@ -73,10 +83,8 @@ final class PersistenceController {
 
         context = container.mainContext
 
-        if storageFailure != nil {
-            AppErrorPresenter.shared.message = String(
-                localized: "Storage on this device is unavailable. The app is running in temporary mode — entries will not survive a restart."
-            )
+        if let failure = storageFailure {
+            errors.report(DatabaseError.storageUnavailable(underlying: failure))
         }
     }
 
@@ -86,7 +94,9 @@ final class PersistenceController {
     /// initialiser is always in-memory, and `init()` is the disk-backed one. It
     /// reads as `PersistenceController(inMemory: true)` at the only call site,
     /// which is `DatabaseService(inMemoryForTesting:)`.
-    init(inMemory: Bool) {
+    init(inMemory: Bool, photos: any PhotoStoring, errors: any ErrorReporting) {
+        self.photos = photos
+        self.errors = errors
         do {
             let schema = Self.makeSchema()
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
@@ -158,19 +168,23 @@ final class PersistenceController {
     /// precisely which part of it is missing.
     func persistPhotos(_ photos: [(UUID, Data)]) {
         var failures = 0
-        for (id, data) in photos where !ImageCache.shared.saveToDisk(data, for: id) {
+        for (id, data) in photos where !self.photos.saveToDisk(data, for: id) {
             failures += 1
         }
 
         guard failures > 0 else { return }
         AppLog.media.error("Photos not written to disk: \(failures, privacy: .public)")
-        AppErrorPresenter.shared.report(DatabaseError.photoNotSaved)
+        errors.report(DatabaseError.photoNotSaved)
     }
 }
 
 /// A storage write failure. A dedicated type so the UI can show readable text
 /// instead of SwiftData's raw description.
 enum DatabaseError: LocalizedError {
+    /// The on-disk store could not be opened and the app runs from memory.
+    /// Reported once, at launch; nothing survives a restart in that mode.
+    case storageUnavailable(underlying: Error)
+
     case saveFailed(underlying: Error)
 
     /// The record was written but its photo was not. Never thrown — see
@@ -179,6 +193,8 @@ enum DatabaseError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
+        case .storageUnavailable:
+            return String(localized: "Storage on this device is unavailable. The app is running in temporary mode — entries will not survive a restart.")
         case .saveFailed:
             return String(localized: "Couldn't save your changes. They were not written to the device.")
         case .photoNotSaved:
@@ -188,6 +204,10 @@ enum DatabaseError: LocalizedError {
 
     var failureReason: String? {
         switch self {
+        case .storageUnavailable:
+            // The description says all the user can act on; the SwiftData text
+            // is in the log.
+            return nil
         case .saveFailed(let underlying):
             return underlying.localizedDescription
         case .photoNotSaved:

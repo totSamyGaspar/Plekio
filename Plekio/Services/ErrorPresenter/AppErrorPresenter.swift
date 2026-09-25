@@ -12,49 +12,23 @@
 //  lives once in MainTabView and view models run the write through `run`.
 //
 
-import SwiftUI
-import Combine
+import Foundation
+import Observation
 
+/// Turns a reported error into the text of the one alert MainTabView shows.
+///
+/// No longer a singleton: the composition root owns the instance and hands it,
+/// as `any ErrorReporting`, to whatever reports — view models and the storage
+/// layer alike. `@Observable` so the alert follows `message` without Combine.
+@Observable
 @MainActor
-final class AppErrorPresenter: ObservableObject {
-
-    static let shared = AppErrorPresenter()
+final class AppErrorPresenter: ErrorReporting {
 
     /// Text of the last error; nil means there is nothing to show.
-    @Published var message: String?
+    var message: String?
 
-    private init() {}
+    init() {}
 
-    /// Runs a write operation and surfaces the error if it fails.
-    ///
-    /// Returns `false` on failure, so the caller can keep the screen open, keep
-    /// the form filled, and not pretend the data was saved.
-    @discardableResult
-    func run(_ work: () throws -> Void) -> Bool {
-        do {
-            try work()
-            return true
-        } catch {
-            message = Self.describe(error)
-            return false
-        }
-    }
-
-    /// `run` for work that returns something: the value on success, nil after
-    /// the error has been shown.
-    @discardableResult
-    func attempt<T>(_ work: () throws -> T) -> T? {
-        do {
-            return try work()
-        } catch {
-            message = Self.describe(error)
-            return nil
-        }
-    }
-
-    /// Surfaces an error for work that cannot be wrapped in `run`: a failure
-    /// AFTER a successful commit, where there is no operation left to fail and
-    /// nothing for the caller to abandon.
     func report(_ error: Error) {
         message = Self.describe(error)
     }

@@ -19,7 +19,7 @@ struct NewTreatmentViewModelTests {
     func testSaveCourseDelegatesToTheDatabase() async throws {
         let mockDB = MockDatabaseService()
 
-        let vm = NewTreatmentViewModel(courseEditing: CourseEditingUseCase(dbService: mockDB, notificationService: MockNotificationService()))
+        let vm = NewTreatmentViewModel(courseEditing: CourseEditingUseCase(dbService: mockDB, notificationService: MockNotificationService()), errors: SpyErrorReporter())
         vm.courseName = "Витамины"
         vm.addMedication(MedicationDraft(name: "Витамин D"))
 
@@ -31,7 +31,7 @@ struct NewTreatmentViewModelTests {
     @Test("isSaveEnabled requires a non-empty course name and at least one medication")
     func testIsSaveEnabledValidation() async throws {
         let mockDB = MockDatabaseService()
-        let vm = NewTreatmentViewModel(courseEditing: CourseEditingUseCase(dbService: mockDB, notificationService: MockNotificationService()))
+        let vm = NewTreatmentViewModel(courseEditing: CourseEditingUseCase(dbService: mockDB, notificationService: MockNotificationService()), errors: SpyErrorReporter())
 
         #expect(vm.isSaveEnabled == false)
 

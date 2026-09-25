@@ -29,13 +29,16 @@ final class ReportExportViewModel: ObservableObject {
     @Published private(set) var document: URL?
 
     private let database: any CourseStoring & DiaryStoring & BloodPressureStoring
+    private let errors: any ErrorReporting
 
     init(
         database: any CourseStoring & DiaryStoring & BloodPressureStoring,
+        errors: any ErrorReporting,
         calendar: Calendar = .current,
         today: Date = Date()
     ) {
         self.database = database
+        self.errors = errors
 
         // A month back by default: long enough to be worth sending, short
         // enough that the first document is not a hundred pages.
@@ -90,7 +93,7 @@ final class ReportExportViewModel: ObservableObject {
         do {
             document = try ReportDocument.write(rendered, for: data)
         } catch {
-            AppErrorPresenter.shared.report(error)
+            errors.report(error)
         }
     }
 

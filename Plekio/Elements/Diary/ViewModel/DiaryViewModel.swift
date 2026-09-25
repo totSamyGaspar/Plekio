@@ -21,10 +21,12 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     @Published private(set) var bloodPressureReadings: [BloodPressureReading] = []
     
     private let dbService: any DiaryStoring & BloodPressureStoring
+    private let errors: any ErrorReporting
     private var cancellables = Set<AnyCancellable>()
     
-    init(dbService: any DiaryStoring & BloodPressureStoring) {
+    init(dbService: any DiaryStoring & BloodPressureStoring, errors: any ErrorReporting) {
         self.dbService = dbService
+        self.errors = errors
         fetchEntries()
         
         // Only diary writes: otherwise every unrelated write — taking a pill,
@@ -47,27 +49,27 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     }
     
     func deleteEntry(_ entry: DiaryEntry) {
-        guard AppErrorPresenter.shared.run({ try dbService.deleteDiaryEntry(entry) }) else { return }
+        guard errors.run({ try dbService.deleteDiaryEntry(entry) }) else { return }
         fetchEntries()
     }
     
     func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {
         guard PendingBloodPressureReading.save(
             measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse,
-            dbService: dbService
+            dbService: dbService, errors: errors
         ) else { return }
         fetchEntries()
     }
     
     func deleteBloodPressureReading(_ reading: BloodPressureReading) {
-        guard AppErrorPresenter.shared.run({
+        guard errors.run({
             try dbService.deleteBloodPressureReading(reading)
         }) else { return }
         fetchEntries()
     }
     
     func deleteAllBloodPressureReadings() {
-        guard AppErrorPresenter.shared.run({
+        guard errors.run({
             try dbService.deleteAllBloodPressureReadings()
         }) else { return }
         fetchEntries()
@@ -80,7 +82,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         if let existing = todaysEntry {
             var draft = DiaryEntryDraft(from: existing)
             draft.mood = mood
-            guard AppErrorPresenter.shared.run({
+            guard errors.run({
                 try dbService.updateDiaryEntry(existing, with: draft)
             }) else { return }
             fetchEntries()
@@ -94,7 +96,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         // entry so stats that average those fields exclude it.
         draft.isQuickLog = true
         
-        guard AppErrorPresenter.shared.run({ try dbService.saveDiaryEntry(draft: draft) }) else { return }
+        guard errors.run({ try dbService.saveDiaryEntry(draft: draft) }) else { return }
         fetchEntries()
     }
     

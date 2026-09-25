@@ -19,7 +19,7 @@ struct DiaryViewModelTests {
     func testStatsWithNoEntries() async throws {
         let mockDb = MockDatabaseService()
         mockDb.diaryEntriesToReturn = []
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
 
         #expect(vm.avgMoodScore == 0)
         #expect(vm.avgEnergyLevel == 0)
@@ -35,7 +35,7 @@ struct DiaryViewModelTests {
             makeEntry(daysAgo: 0, moodScore: 5, energyLevel: 5, sleepHours: 8, photoCount: 2),
             makeEntry(daysAgo: 1, moodScore: 3, energyLevel: 1, sleepHours: 6, photoCount: 0),
         ]
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
 
         #expect(vm.avgMoodScore == 4.0)   // (5 + 3) / 2
         #expect(vm.avgEnergyLevel == 3.0) // (5 + 1) / 2
@@ -50,7 +50,7 @@ struct DiaryViewModelTests {
         mockDb.diaryEntriesToReturn = [
             makeEntry(daysAgo: 30, moodScore: 2, energyLevel: 2, sleepHours: 5, photoCount: 1),
         ]
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
 
         #expect(vm.avgMoodScore == 2.0)
         #expect(vm.hasCheckedInToday == false)
@@ -59,7 +59,7 @@ struct DiaryViewModelTests {
     @Test("quickLog(mood:) saves a minimal draft with just that mood, flagged as a quick log")
     func testQuickLogSavesMinimalDraft() async throws {
         let mockDb = MockDatabaseService()
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
 
         vm.quickLog(mood: .exhausted)
 
@@ -73,7 +73,7 @@ struct DiaryViewModelTests {
         let today = makeEntry(daysAgo: 0, moodScore: 3, energyLevel: 3, sleepHours: 7, photoCount: 0)
         mockDb.diaryEntriesToReturn = [today]
 
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
         vm.quickLog(mood: .great)
 
         // Duplicates for one day used to pile up silently: todaysEntry showed only
@@ -94,7 +94,7 @@ struct DiaryViewModelTests {
             // averaged in as real data.
             makeEntry(daysAgo: 0, moodScore: 2, energyLevel: 4, sleepHours: 7.5, photoCount: 0, isQuickLog: true),
         ]
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
 
         #expect(vm.avgEnergyLevel == 2.0)
         #expect(vm.avgSleepHours == 6.0)
@@ -113,7 +113,7 @@ struct DiaryViewModelTests {
             makeEntry(daysAgo: 5, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
             makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
         ]
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
         let byDate = vm.photoCheckpoints.sorted { $0.entry.checkInDate < $1.entry.checkInDate }
 
         let pair = try #require(vm.comparisonPair(for: []))
@@ -130,7 +130,7 @@ struct DiaryViewModelTests {
             makeEntry(daysAgo: 5, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
             makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
         ]
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
         let byDate = vm.photoCheckpoints.sorted { $0.entry.checkInDate < $1.entry.checkInDate }
         let older = byDate[0].id
         let newer = byDate[1].id
@@ -150,7 +150,7 @@ struct DiaryViewModelTests {
             makeEntry(daysAgo: 10, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
             makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
         ]
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
         let byDate = vm.photoCheckpoints.sorted { $0.entry.checkInDate < $1.entry.checkInDate }
 
         let pair = try #require(vm.comparisonPair(for: [byDate[1].id, UUID()]))
@@ -165,7 +165,7 @@ struct DiaryViewModelTests {
         mockDb.diaryEntriesToReturn = [
             makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 8, photoCount: 1),
         ]
-        let vm = DiaryViewModel(dbService: mockDb)
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
 
         #expect(vm.comparisonPair(for: []) == nil)
     }

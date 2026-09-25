@@ -50,7 +50,7 @@ struct StatisticsViewModelTests {
         let dayBefore = day(2, taken: 1, total: 3)
         mockDB.pillsByDay = [yesterday.0: yesterday.1, dayBefore.0: dayBefore.1]
 
-        let vm = StatisticsViewModel(dbService: mockDB)
+        let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
 
         #expect(vm.streakDays == 1)
     }
@@ -64,7 +64,7 @@ struct StatisticsViewModelTests {
         let third = day(3, taken: 2, total: 2)
         mockDB.pillsByDay = [first.0: first.1, third.0: third.1]
 
-        let vm = StatisticsViewModel(dbService: mockDB)
+        let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
 
         #expect(vm.streakDays == 2)
     }
@@ -76,7 +76,7 @@ struct StatisticsViewModelTests {
         let today = day(0, taken: 3, total: 3)
         mockDB.pillsByDay = [today.0: today.1]
 
-        let vm = StatisticsViewModel(dbService: mockDB)
+        let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
 
         // This used to be 0: the streak started at yesterday, so a fully logged
         // today never counted.
@@ -91,7 +91,7 @@ struct StatisticsViewModelTests {
         let yesterday = day(1, taken: 2, total: 2)
         mockDB.pillsByDay = [today.0: today.1, yesterday.0: yesterday.1]
 
-        let vm = StatisticsViewModel(dbService: mockDB)
+        let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
 
         #expect(vm.streakDays == 2)
     }
@@ -104,7 +104,7 @@ struct StatisticsViewModelTests {
         let yesterday = day(1, taken: 3, total: 3)
         mockDB.pillsByDay = [today.0: today.1, yesterday.0: yesterday.1]
 
-        let vm = StatisticsViewModel(dbService: mockDB)
+        let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
 
         // Nothing logged yet today is not a miss — the day is not over, so
         // yesterday's streak must survive.
@@ -118,7 +118,7 @@ struct StatisticsViewModelTests {
         let today = day(0, taken: 3, total: 4)
         mockDB.pillsByDay = [today.0: today.1]
 
-        let vm = StatisticsViewModel(dbService: mockDB)
+        let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
 
         #expect(vm.totalCount == 4)
         #expect(vm.takenCount == 3)
@@ -153,7 +153,7 @@ struct StatisticsViewModelTests {
 
         mockDB.coursesToReturn = [active, finished]
 
-        let vm = StatisticsViewModel(dbService: mockDB)
+        let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
 
         #expect(vm.lowStockItems.map(\.name) == ["Магний"])
     }

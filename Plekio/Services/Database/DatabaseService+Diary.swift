@@ -73,7 +73,7 @@ extension DatabaseService: DiaryStoring {
 
         // Disk is synced only after the write succeeds.
         for id in removedPhotoIds {
-            ImageCache.shared.deleteFromDisk(for: id)
+            photos.deleteFromDisk(for: id)
         }
         persistence.persistPhotos(pendingPhotos)
     }
@@ -91,7 +91,7 @@ extension DatabaseService: DiaryStoring {
 
         // Clean up photo files on disk — they aren't removed automatically.
         for photoId in photoIds {
-            ImageCache.shared.deleteFromDisk(for: photoId)
+            photos.deleteFromDisk(for: photoId)
         }
     }
 }

@@ -18,10 +18,12 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
     @Published var endDate: Date
     
     private let courseEditing: CourseEditingUseCaseProtocol
+    private let errors: any ErrorReporting
 
-    init(course: TreatmentCourse, courseEditing: CourseEditingUseCaseProtocol) {
+    init(course: TreatmentCourse, courseEditing: CourseEditingUseCaseProtocol, errors: any ErrorReporting) {
         self.course = course
         self.courseEditing = courseEditing
+        self.errors = errors
 
         self.courseName = course.name
         self.startDate = course.startDate
@@ -35,7 +37,8 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
     convenience init(course: TreatmentCourse, dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
         self.init(
             course: course,
-            courseEditing: CourseEditingUseCase(dbService: dbService, notificationService: notificationService)
+            courseEditing: CourseEditingUseCase(dbService: dbService, notificationService: notificationService),
+            errors: AppErrorPresenter()
         )
     }
 
@@ -45,24 +48,24 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
     // a write is needed, the reminders and the lock screen are the use case's.
 
     func saveCourseChanges() {
-        AppErrorPresenter.shared.run {
+        errors.run {
             _ = try courseEditing.updateDetails(of: course, name: courseName, startDate: startDate, endDate: endDate)
         }
     }
 
     func addNewMedication(_ draft: MedicationDraft) {
-        guard AppErrorPresenter.shared.run({ try courseEditing.addMedication(draft, to: course) }) else { return }
+        guard errors.run({ try courseEditing.addMedication(draft, to: course) }) else { return }
         refreshMedications()
     }
 
     func deleteMedication(at offsets: IndexSet) {
         let toDelete = offsets.map { medications[$0] }
-        guard AppErrorPresenter.shared.run({ try courseEditing.deleteMedications(toDelete) }) else { return }
+        guard errors.run({ try courseEditing.deleteMedications(toDelete) }) else { return }
         medications.remove(atOffsets: offsets)
     }
 
     func updateMedication(medication: MedicationItem, with draft: MedicationDraft) {
-        guard AppErrorPresenter.shared.run({ try courseEditing.updateMedication(medication, with: draft) }) else { return }
+        guard errors.run({ try courseEditing.updateMedication(medication, with: draft) }) else { return }
         refreshMedications()
     }
 

@@ -15,12 +15,14 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     
     private let dbService: any CourseStoring
     private let courseEditing: CourseEditingUseCaseProtocol
+    private let errors: any ErrorReporting
     private var cancellables = Set<AnyCancellable>()
     
     /// `dbService` for reading the list; every write goes through `courseEditing`.
-    init(dbService: any CourseStoring, courseEditing: CourseEditingUseCaseProtocol) {
+    init(dbService: any CourseStoring, courseEditing: CourseEditingUseCaseProtocol, errors: any ErrorReporting) {
         self.dbService = dbService
         self.courseEditing = courseEditing
+        self.errors = errors
         fetchCourses()
         
         // Doses are included deliberately: logging one moves stock, and the rows
@@ -35,7 +37,8 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     convenience init(dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
         self.init(
             dbService: dbService,
-            courseEditing: CourseEditingUseCase(dbService: dbService, notificationService: notificationService)
+            courseEditing: CourseEditingUseCase(dbService: dbService, notificationService: notificationService),
+            errors: AppErrorPresenter()
         )
     }
 
@@ -52,7 +55,7 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     /// stays in the history untouched. The use case refuses a treatment that is
     /// already running again.
     func repeatCourse(_ course: TreatmentCourse, startDate: Date, endDate: Date) {
-        guard let didRepeat = AppErrorPresenter.shared.attempt({
+        guard let didRepeat = errors.attempt({
             try courseEditing.repeatCourse(course, startDate: startDate, endDate: endDate)
         }), didRepeat else { return }
 
@@ -67,7 +70,7 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     }
 
     func deleteCourse(_ course: TreatmentCourse) {
-        guard AppErrorPresenter.shared.run({ try courseEditing.deleteCourse(course) }) else { return }
+        guard errors.run({ try courseEditing.deleteCourse(course) }) else { return }
         fetchCourses()
     }
 }

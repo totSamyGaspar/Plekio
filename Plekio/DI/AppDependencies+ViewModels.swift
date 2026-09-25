@@ -25,25 +25,25 @@ extension AppDependencies {
     // MARK: - Today
 
     func makeDashboardViewModel() -> DashboardViewModel {
-        DashboardViewModel(dbService: database, doseLogging: doseLogging)
+        DashboardViewModel(dbService: database, doseLogging: doseLogging, errors: errorPresenter)
     }
 
     func makeStatisticsViewModel() -> StatisticsViewModel {
-        StatisticsViewModel(dbService: database)
+        StatisticsViewModel(dbService: database, errors: errorPresenter)
     }
 
     // MARK: - Courses
 
     func makeCoursesListViewModel() -> CoursesListViewModel {
-        CoursesListViewModel(dbService: database, courseEditing: courseEditing)
+        CoursesListViewModel(dbService: database, courseEditing: courseEditing, errors: errorPresenter)
     }
 
     func makeCourseDetailViewModel(course: TreatmentCourse) -> CourseDetailViewModel {
-        CourseDetailViewModel(course: course, courseEditing: courseEditing)
+        CourseDetailViewModel(course: course, courseEditing: courseEditing, errors: errorPresenter)
     }
 
     func makeNewTreatmentViewModel() -> NewTreatmentViewModel {
-        NewTreatmentViewModel(courseEditing: courseEditing)
+        NewTreatmentViewModel(courseEditing: courseEditing, errors: errorPresenter)
     }
 
     func makeAddMedicationViewModel() -> AddMedicationViewModel {
@@ -53,16 +53,16 @@ extension AppDependencies {
     // MARK: - Diary
 
     func makeDiaryViewModel() -> DiaryViewModel {
-        DiaryViewModel(dbService: database)
+        DiaryViewModel(dbService: database, errors: errorPresenter)
     }
 
     func makeDiaryCheckInViewModel() -> DiaryCheckInViewModel {
-        DiaryCheckInViewModel(dbService: database, mediaPickerService: mediaPicker)
+        DiaryCheckInViewModel(dbService: database, mediaPickerService: mediaPicker, errors: errorPresenter)
     }
 
     // MARK: - Settings
 
     func makeReportExportViewModel() -> ReportExportViewModel {
-        ReportExportViewModel(database: database)
+        ReportExportViewModel(database: database, errors: errorPresenter)
     }
 }

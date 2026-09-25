@@ -16,11 +16,13 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     @Published var medications: [MedicationDraft] = []
     
     private let courseEditing: CourseEditingUseCaseProtocol
+    private let errors: any ErrorReporting
 
     /// No notification service: the reminders follow the new course on their
     /// own — see ReminderSyncCoordinator.
-    init(courseEditing: CourseEditingUseCaseProtocol) {
+    init(courseEditing: CourseEditingUseCaseProtocol, errors: any ErrorReporting) {
         self.courseEditing = courseEditing
+        self.errors = errors
     }
     
     var isSaveEnabled: Bool {
@@ -34,7 +36,7 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     /// instead of losing what was typed.
     @discardableResult
     func saveCourse() -> Bool {
-        guard AppErrorPresenter.shared.run({
+        guard errors.run({
             try courseEditing.createCourse(name: courseName, startDate: startDate, endDate: endDate, medications: medications)
         }) else { return false }
 

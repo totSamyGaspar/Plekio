@@ -135,7 +135,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let doseLogging = dependencies.doseLogging
         let open = doseLogging.openDoses(medicationIds: medicationIds, at: scheduledTime)
 
-        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markTaken(open) }) else { return }
+        guard let outcome = dependencies.errorPresenter.attempt({ try doseLogging.markTaken(open) }) else { return }
         await outcome.waitForReminders()
     }
 
@@ -145,7 +145,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let doseLogging = dependencies.doseLogging
         let open = doseLogging.openDoses(medicationIds: medicationIds, at: scheduledTime)
 
-        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markSkipped(open) }) else { return }
+        guard let outcome = dependencies.errorPresenter.attempt({ try doseLogging.markSkipped(open) }) else { return }
         await outcome.waitForReminders()
     }
 }

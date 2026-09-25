@@ -21,10 +21,12 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     
     private let dbService: any DiaryStoring
     private let mediaPickerService: MediaPickerServiceProtocol
+    private let errors: any ErrorReporting
     
-    init(dbService: any DiaryStoring, mediaPickerService: MediaPickerServiceProtocol) {
+    init(dbService: any DiaryStoring, mediaPickerService: MediaPickerServiceProtocol, errors: any ErrorReporting) {
         self.dbService = dbService
         self.mediaPickerService = mediaPickerService
+        self.errors = errors
     }
     
     // MARK: - Tags
@@ -136,7 +138,7 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     /// user's input isn't lost.
     @discardableResult
     func save() -> Bool {
-        AppErrorPresenter.shared.run { [self] in
+        errors.run { [self] in
             if let editingEntry {
                 try dbService.updateDiaryEntry(editingEntry, with: draft)
             } else {

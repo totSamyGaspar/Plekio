@@ -13,7 +13,9 @@ struct MainTabView: View {
     
     /// The one write-failure alert for the whole app, instead of the same
     /// `.alert` repeated across seven screens.
-    @ObservedObject private var errorPresenter = AppErrorPresenter.shared
+    /// Read through the environment and observed by `@Observable`: reading
+    /// `message` in the body is enough for the alert to follow it.
+    private var errorPresenter: AppErrorPresenter { dependencies.errorPresenter }
     
     static func configureTabBarAppearance() {
         let appearance = UITabBarAppearance()
@@ -133,10 +135,10 @@ struct MainTabView: View {
             .takePill(
                 pills: pills,
                 onTake: {
-                    _ = AppErrorPresenter.shared.attempt { try doseLogging.markTaken(pills) }
+                    _ = errorPresenter.attempt { try doseLogging.markTaken(pills) }
                 },
                 onSkip: {
-                    _ = AppErrorPresenter.shared.attempt { try doseLogging.markSkipped(pills) }
+                    _ = errorPresenter.attempt { try doseLogging.markSkipped(pills) }
                 }
             )
         )
@@ -172,7 +174,8 @@ struct MainTabView: View {
             BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
                 PendingBloodPressureReading.save(
                     measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse,
-                    dbService: dependencies.database
+                    dbService: dependencies.database,
+                    errors: errorPresenter
                 )
             }
             .appTheme()

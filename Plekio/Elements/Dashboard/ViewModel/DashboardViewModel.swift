@@ -33,6 +33,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     private let dbService: any CourseStoring & DoseStoring
     /// Every write about a dose, together with its reminder side effects.
     private let doseLogging: DoseLoggingUseCaseProtocol
+    private let errors: any ErrorReporting
     private var cancellables = Set<AnyCancellable>()
     
     /// Closes the undo window on its own. Held so a second "Log all" replaces the
@@ -47,9 +48,10 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     
     // MARK: - Init
     
-    init(dbService: any CourseStoring & DoseStoring, doseLogging: DoseLoggingUseCaseProtocol) {
+    init(dbService: any CourseStoring & DoseStoring, doseLogging: DoseLoggingUseCaseProtocol, errors: any ErrorReporting) {
         self.dbService = dbService
         self.doseLogging = doseLogging
+        self.errors = errors
         fetchData()
         
         // Doses as well as courses: this screen is where a dose is logged.
@@ -66,7 +68,8 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     convenience init(dbService: any CourseStoring & DoseStoring, notificationService: NotificationServiceProtocol) {
         self.init(
             dbService: dbService,
-            doseLogging: DoseLoggingUseCase(dbService: dbService, notificationService: notificationService)
+            doseLogging: DoseLoggingUseCase(dbService: dbService, notificationService: notificationService),
+            errors: AppErrorPresenter()
         )
     }
 
@@ -106,7 +109,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
 
     func togglePill(id: PillDose.ID) {
         guard let pill = allPills.first(where: { $0.id == id }),
-              AppErrorPresenter.shared.attempt({ try doseLogging.toggle(pill) }) != nil
+              errors.attempt({ try doseLogging.toggle(pill) }) != nil
         else { return }
 
         fetchData()
@@ -115,7 +118,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     /// "Log all": one write per slot, one reminder rebuild, and an undo banner
     /// offering back exactly what was written.
     func logDoses(_ doses: [PillDose]) {
-        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markTaken(doses) }),
+        guard let outcome = errors.attempt({ try doseLogging.markTaken(doses) }),
               outcome.didWrite
         else { return }
 
@@ -125,7 +128,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
 
     /// The sheet's "Skip" / "Skip All".
     func skipDoses(_ doses: [PillDose]) {
-        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markSkipped(doses) }),
+        guard let outcome = errors.attempt({ try doseLogging.markSkipped(doses) }),
               outcome.didWrite
         else { return }
 
@@ -137,7 +140,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         guard let log = undoableBulkLog else { return }
         clearUndoWindow()
 
-        guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.revertTaken(log.doses) }),
+        guard let outcome = errors.attempt({ try doseLogging.revertTaken(log.doses) }),
               outcome.didWrite
         else { return }
 

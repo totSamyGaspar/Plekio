@@ -10,6 +10,7 @@ import SwiftUI
 /// Its own view because it is the only row here that reads the filesystem, and
 /// that read belongs off the main actor.
 struct StorageUsageSection: View {
+    @Environment(AppDependencies.self) private var dependencies
 
     @State private var usage: StorageUsage?
 
@@ -20,7 +21,7 @@ struct StorageUsageSection: View {
         }
         .listRowBackground(Color.appSurface)
         .task {
-            let storeURL = DatabaseService.shared.persistence.storeURL
+            let storeURL = dependencies.storeURL
             usage = await Task.detached { StorageUsage.measure(storeURL: storeURL) }.value
         }
     }

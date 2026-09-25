@@ -17,6 +17,7 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
     @Published var lowStockItems: [MedicationItem] = []
     
     private let dbService: any CourseStoring & DoseStoring
+    private let errors: any ErrorReporting
     private var cancellables = Set<AnyCancellable>()
     
     private static let streakLookbackDays = 30
@@ -28,8 +29,9 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
         return Double(takenCount) / Double(totalCount)
     }
     
-    init(dbService: any CourseStoring & DoseStoring) {
+    init(dbService: any CourseStoring & DoseStoring, errors: any ErrorReporting) {
         self.dbService = dbService
+        self.errors = errors
         loadStats()
         
         // Adherence is computed from the schedule and the logs, so both matter.
@@ -108,7 +110,7 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
     
     // MARK: - Refill
     func refill(medication: MedicationItem, amount: Int) {
-        guard AppErrorPresenter.shared.run({
+        guard errors.run({
             try dbService.refillStock(for: medication, amount: amount)
         }) else { return }
         
