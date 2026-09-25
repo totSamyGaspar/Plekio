@@ -38,7 +38,8 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
         VStack(spacing: 0) {
             TabView(selection: $viewModel.currentPage) {
                 ForEach(Array(viewModel.pages.enumerated()), id: \.element.id) { index, page in
-                    OnboardingPageView(page: page).tag(index)
+                    OnboardingPageView(page: page, isActive: index == viewModel.currentPage)
+                        .tag(index)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
