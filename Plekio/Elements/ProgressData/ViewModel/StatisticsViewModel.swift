@@ -53,7 +53,7 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
     }
 
     func loadStats() {
-        let calendar = Calendar.current
+        let calendar = time.calendar
         let now = time.now
         let today = calendar.startOfDay(for: now)
 

@@ -151,7 +151,7 @@ extension DatabaseService: CourseStoring {
     /// Logs of removed slots stay in the store as history. Statistics are computed
     /// from the schedule, so they no longer affect any number.
     private func remapLogs(of medication: MedicationItem, from oldTimes: [Date], to newTimes: [Date]) {
-        let calendar = Calendar.current
+        let calendar = time.calendar
 
         /// A dose slot as minutes from midnight. An `(hour, minute)` tuple can't be
         /// used here: tuples can't conform to Equatable, so arrays of them have no

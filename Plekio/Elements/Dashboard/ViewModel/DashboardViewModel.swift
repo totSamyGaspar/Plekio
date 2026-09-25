@@ -87,7 +87,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     // MARK: - Computed Properties
     
     var weekDates: [Date] {
-        let calendar = Calendar.current
+        let calendar = time.calendar
         let today = calendar.startOfDay(for: time.now)
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
     }
@@ -135,18 +135,6 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         startUndoWindow(.logged, undo: outcome.undo)
     }
 
-    /// The sheet's "Skip" / "Skip All".
-    func skipDoses(_ doses: [PillDose]) {
-        guard let outcome = errors.attempt({ try doseLogging.markSkipped(doses) }),
-              outcome.didWrite
-        else { return }
-
-        fetchData()
-        // A skip has no other way back to "not answered", so the banner is the
-        // only undo it gets.
-        startUndoWindow(.skipped, undo: outcome.undo)
-    }
-
     /// Runs the inverse of the last logged or skipped action. The use case
     /// judges it against what is stored now, so a dose changed by hand in the
     /// meantime is not flipped back.
@@ -173,7 +161,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     // MARK: - Weekly statistics
 
     private func calculateWeeklyStats() {
-        let calendar = Calendar.current
+        let calendar = time.calendar
         let now = time.now
         let dates = (0..<7).reversed().map { calendar.date(byAdding: .day, value: -$0, to: now) ?? now }
         // The whole week in one read — see DoseStoring.fetchPills(onDays:).

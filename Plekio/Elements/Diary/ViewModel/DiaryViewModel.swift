@@ -115,8 +115,9 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     /// Entries from the last 7 days (today inclusive); falls back to all
     /// entries when nothing was logged in that window.
     private var recentEntries: [DiaryEntrySnapshot] {
-        let startOfToday = Calendar.current.startOfDay(for: time.now)
-        let cutoff = Calendar.current.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
+        let calendar = time.calendar
+        let startOfToday = calendar.startOfDay(for: time.now)
+        let cutoff = calendar.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
         let recent = entries.filter { $0.checkInDate >= cutoff }
         return recent.isEmpty ? entries : recent
     }
@@ -158,7 +159,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     
     var todaysEntry: DiaryEntrySnapshot? {
         let now = time.now
-        return entries.first { Calendar.current.isDate($0.checkInDate, inSameDayAs: now) }
+        return entries.first { time.calendar.isDate($0.checkInDate, inSameDayAs: now) }
     }
 }
 

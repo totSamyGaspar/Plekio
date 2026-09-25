@@ -18,15 +18,25 @@
 //  Left on `Date()` on purpose: view-level defaults that mean "the moment this
 //  renders" — a date picker's starting value, the undo banner's countdown.
 //
+//  The calendar comes from the same place. "Now" alone does not decide which
+//  day a dose falls on: midnight, the start of the week and a DST switch are
+//  the calendar's. Read as `Calendar.current` inside the rules, they followed
+//  whatever time zone and region the machine running the tests happened to
+//  have.
+//
 
 import Foundation
 
 nonisolated protocol TimeSource: Sendable {
     var now: Date { get }
+    /// The calendar "today", "this week" and "midnight" are counted in.
+    var calendar: Calendar { get }
 }
 
-/// The real clock.
+/// The real clock, in the user's calendar and time zone.
 nonisolated struct SystemTime: TimeSource {
     init() {}
     var now: Date { Date() }
+    /// Autoupdating, so a time zone change while the app runs is picked up.
+    var calendar: Calendar { .autoupdatingCurrent }
 }

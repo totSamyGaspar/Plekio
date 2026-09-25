@@ -58,8 +58,8 @@ extension NotificationServiceProtocol {
     /// This, and the three lines around it, were copied verbatim into five call
     /// sites (PlekioApp, DashboardViewModel, NewTreatmentViewModel and twice in
     /// CourseDetailViewModel), so changing the rule meant finding all five.
-    func activeCourses(from dbService: any CourseStoring, on day: Date = Date()) -> [TreatmentCourse] {
-        dbService.fetchAllCourses().filter { $0.isActive(on: day) }
+    func activeCourses(from dbService: any CourseStoring, on day: Date, calendar: Calendar) -> [TreatmentCourse] {
+        dbService.fetchAllCourses().filter { $0.isActive(on: day, calendar: calendar) }
     }
 
     /// Plain rebuild, for test doubles and any future implementation that has no
@@ -67,6 +67,9 @@ extension NotificationServiceProtocol {
     /// overlapping calls instead of letting them interleave.
     func rescheduleAll(using dbService: any CourseStoring) async {
         await removeAllPending()
-        await scheduleNotifications(activeCourses: activeCourses(from: dbService))
+        // A double has no TimeSource of its own; the real clock is what the
+        // tests of this path have always used.
+        let clock = SystemTime()
+        await scheduleNotifications(activeCourses: activeCourses(from: dbService, on: clock.now, calendar: clock.calendar))
     }
 }

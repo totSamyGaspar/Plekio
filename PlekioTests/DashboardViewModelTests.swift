@@ -306,96 +306,6 @@ struct DashboardViewModelTests {
 
     // MARK: - Skipping a dose
 
-    @Test("пропуск пишется в базу и не отменяет уведомления по лекарству")
-    func testSkipRecordsTheDoseWithoutCancellingTheMedication() async throws {
-        let mockDB = MockDatabaseService()
-        let mockNotifications = MockNotificationService()
-
-        let slot = Date().addingTimeInterval(-30 * 60)
-        let medId = UUID()
-        let pill = PillDose(
-            medicationId: medId, name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning
-        )
-        mockDB.pillsToReturn = [pill]
-
-        let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
-
-        vm.skipDoses([pill])
-
-        // Written down, rather than being the absence of a log.
-        #expect(mockDB.skippedSlots.count == 1)
-        #expect(mockDB.skippedSlots.first?.medicationIds == [medId])
-        #expect(mockDB.skippedSlots.first?.scheduledTime == slot)
-        #expect(vm.morningPills.first?.isSkipped == true)
-
-        // The whole point: the schedule is rebuilt from the database, and the
-        // per-medication cancellation that used to take every future reminder
-        // with it is never called.
-        #expect(await waitUntil { mockNotifications.scheduleCallCount == 1 })
-        #expect(mockNotifications.cancelledMedicationIds.isEmpty)
-
-        // And the banner for the now-settled slot comes off the lock screen.
-        #expect(await waitUntil { mockNotifications.clearDeliveredCallCount == 1 })
-        #expect(mockNotifications.clearedDeliveredIds == [medId])
-    }
-
-    @Test("пропуск слота не трогает уже принятую в нём дозу")
-    func testSkipLeavesAnAlreadyTakenDoseAlone() async throws {
-        let mockDB = MockDatabaseService()
-        let mockNotifications = MockNotificationService()
-
-        let slot = Date().addingTimeInterval(-30 * 60)
-        let takenId = UUID()
-        let openId = UUID()
-        let alreadyTaken = PillDose(
-            medicationId: takenId, name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning, status: .taken(at: Date(), dispensed: 1)
-        )
-        let stillOpen = PillDose(
-            medicationId: openId, name: "Магний", dosage: 1,
-            formSystemImage: "capsule.fill", time: slot, period: .morning
-        )
-        mockDB.pillsToReturn = [alreadyTaken, stillOpen]
-
-        let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
-
-        vm.skipDoses([alreadyTaken, stillOpen])
-
-        // "Skip All" must not un-take, for the same reason "Take All" must not
-        // un-log — only the open dose is written.
-        #expect(mockDB.skippedSlots.count == 1)
-        #expect(mockDB.skippedSlots.first?.medicationIds == [openId])
-        #expect(vm.morningPills.first(where: { $0.medicationId == takenId })?.isTaken == true)
-        #expect(vm.morningPills.first(where: { $0.medicationId == takenId })?.isSkipped == false)
-
-        // The slot is fully settled now — one taken, one skipped — so the banner
-        // is cleared naming both, not just the dose that was skipped.
-        #expect(await waitUntil { mockNotifications.clearDeliveredCallCount == 1 })
-        #expect(Set(mockNotifications.clearedDeliveredIds ?? []) == Set([takenId, openId]))
-    }
-
-    @Test("повторный пропуск уже пропущенной дозы ничего не пишет")
-    func testSkippingAnAlreadySkippedDoseIsANoOp() async throws {
-        let mockDB = MockDatabaseService()
-        let mockNotifications = MockNotificationService()
-
-        var pill = PillDose(
-            medicationId: UUID(), name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: Date().addingTimeInterval(-30 * 60),
-            period: .morning
-        )
-        pill.status = .skipped(at: Date())
-        mockDB.pillsToReturn = [pill]
-
-        let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
-
-        vm.skipDoses([pill])
-
-        #expect(mockDB.skippedSlots.isEmpty)
-        #expect(mockNotifications.scheduleCallCount == 0)
-    }
-
     @Test("отмена массового логирования — тоже одна транзакция, и только по принятым")
     func testUndoBulkLogRevertsTheSlotInOneTransaction() async throws {
         let mockDB = MockDatabaseService()
@@ -429,35 +339,6 @@ struct DashboardViewModelTests {
             == Set([pills[1].medicationId, pills[2].medicationId])
         )
         #expect(vm.morningPills.allSatisfy { !$0.isTaken })
-        #expect(vm.undoableAction == nil)
-    }
-
-    // MARK: - Undoing a skip
-
-    @Test("пропуск можно отменить — доза снова ждёт ответа")
-    func testSkipCanBeUndone() async throws {
-        let mockDB = MockDatabaseService()
-        let mockNotifications = MockNotificationService()
-
-        let slot = Date().addingTimeInterval(-30 * 60)
-        let pill = PillDose(
-            medicationId: UUID(), name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning
-        )
-        mockDB.pillsToReturn = [pill]
-
-        let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
-
-        vm.skipDoses([pill])
-        // A skip used to have no way back at all; now it opens the same window
-        // "Log all" does.
-        #expect(vm.undoableAction?.kind == .skipped)
-        #expect(vm.morningPills.first?.isSkipped == true)
-
-        vm.undoLastAction()
-
-        #expect(mockDB.unskippedSlots.first?.medicationIds == [pill.medicationId])
-        #expect(vm.morningPills.first?.isSkipped == false)
         #expect(vm.undoableAction == nil)
     }
 

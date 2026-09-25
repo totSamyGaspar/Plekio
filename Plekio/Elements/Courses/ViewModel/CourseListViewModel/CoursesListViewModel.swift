@@ -56,8 +56,9 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
         let allCourses = courses.allCourses()
 
         let now = time.now
-        self.activeCourses = allCourses.filter { $0.isActive(on: now) }
-        self.historyCourses = allCourses.filter { !$0.isActive(on: now) }
+        let calendar = time.calendar
+        self.activeCourses = allCourses.filter { $0.isActive(on: now, calendar: calendar) }
+        self.historyCourses = allCourses.filter { !$0.isActive(on: now, calendar: calendar) }
             .sorted { $0.endDate > $1.endDate }
     }
 

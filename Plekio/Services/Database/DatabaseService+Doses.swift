@@ -17,7 +17,7 @@ extension DatabaseService: DoseStoring {
     // MARK: - Fetch
 
     func fetchPills(for date: Date, preFetchedCourses: [TreatmentCourse]? = nil) -> [PillDose] {
-        let calendar = Calendar.current
+        let calendar = time.calendar
         let targetDate = calendar.startOfDay(for: date)
 
         if let cachedPills = persistence.cachedPills(for: targetDate) {
@@ -81,7 +81,7 @@ extension DatabaseService: DoseStoring {
 
     /// One course fetch for the whole range, not one per day.
     func fetchPills(onDays days: [Date]) -> [Date: [PillDose]] {
-        let calendar = Calendar.current
+        let calendar = time.calendar
         let courses = fetch(FetchDescriptor<TreatmentCourse>())
 
         var result: [Date: [PillDose]] = [:]
@@ -113,7 +113,7 @@ extension DatabaseService: DoseStoring {
         let ids = Array(Set(medicationIds))
         guard !ids.isEmpty else { return }
 
-        let calendar = Calendar.current
+        let calendar = time.calendar
         let takenAt = time.now
         var changed = false
 
@@ -143,7 +143,7 @@ extension DatabaseService: DoseStoring {
         let ids = Array(Set(medicationIds))
         guard !ids.isEmpty else { return }
 
-        let calendar = Calendar.current
+        let calendar = time.calendar
         var changed = false
 
         for medicationId in ids {
@@ -174,7 +174,7 @@ extension DatabaseService: DoseStoring {
         let ids = Array(Set(medicationIds))
         guard !ids.isEmpty else { return }
 
-        let calendar = Calendar.current
+        let calendar = time.calendar
         let skippedAt = time.now
 
         // Fetched one at a time rather than with one `ids.contains` query: a slot
@@ -197,7 +197,7 @@ extension DatabaseService: DoseStoring {
         let ids = Array(Set(medicationIds))
         guard !ids.isEmpty else { return }
 
-        let calendar = Calendar.current
+        let calendar = time.calendar
         var changed = false
 
         for medicationId in ids {
@@ -220,7 +220,7 @@ extension DatabaseService: DoseStoring {
     func togglePill(medicationId: UUID, scheduledTime: Date) throws {
         guard let med = fetchMedication(id: medicationId) else { return }
 
-        let existing = DoseSchedule.log(of: med, at: scheduledTime, calendar: Calendar.current)
+        let existing = DoseSchedule.log(of: med, at: scheduledTime, calendar: time.calendar)
         let current = existing?.status ?? .pending
 
         if let reverted = current.reverting() {

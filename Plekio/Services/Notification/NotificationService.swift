@@ -102,7 +102,7 @@ final class NotificationService: NotificationServiceProtocol {
         await serialized { [weak self] in
             guard let self else { return }
             await self.removeAllPending()
-            await self.scheduleNotifications(activeCourses: self.activeCourses(from: dbService, on: self.time.now))
+            await self.scheduleNotifications(activeCourses: self.activeCourses(from: dbService, on: self.time.now, calendar: self.time.calendar))
         }
     }
 
@@ -143,7 +143,7 @@ final class NotificationService: NotificationServiceProtocol {
     // MARK: - Scheduling
 
     func scheduleNotifications(activeCourses: [TreatmentCourse]) async {
-        let calendar = Calendar.current
+        let calendar = time.calendar
         let scheduleMap = ReminderPlanner.buildScheduleMap(
             activeCourses: activeCourses, now: time.now, calendar: calendar
         )

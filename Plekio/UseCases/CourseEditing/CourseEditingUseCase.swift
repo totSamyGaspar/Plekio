@@ -52,7 +52,7 @@ final class CourseEditingUseCase: CourseEditingUseCaseProtocol {
         // Checked against storage, not against whatever list a screen last
         // fetched: the rule has to hold whoever calls this.
         let now = time.now
-        let active = courses.allCourses().filter { $0.isActive(on: now) }
+        let active = courses.allCourses().filter { $0.isActive(on: now, calendar: time.calendar) }
         guard !course.hasActiveRepeat(among: active) else { return false }
 
         try courses.duplicateCourse(id: course.id, startDate: startDate, endDate: endDate)
