@@ -199,4 +199,70 @@ struct NotificationServiceTests {
         // requestPermission may never run on later launches; actions must still exist.
         #expect(!center.registeredCategories.isEmpty)
     }
+
+    // MARK: - Snooze
+
+    @Test("отложенное напоминание несёт время дозы, и «Принять» по нему находит её")
+    func snoozeCarriesTheDoseSlot() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let id = UUID()
+        let slot = date(10, 9)
+
+        await service.scheduleSnooze(for: [id.uuidString], names: ["Ибупрофен"], slot: slot)
+
+        let request = try #require(center.pending.first)
+        #expect(ReminderRequestFactory.isSnooze(request.identifier))
+        let intent = NotificationIntent.parse(
+            userInfo: request.content.userInfo,
+            actionIdentifier: NotificationAction.take
+        )
+        #expect(intent == .take(medicationIds: [id], slot: slot))
+    }
+
+    @Test("пересборка сохраняет отложенное напоминание, пока доза не отмечена")
+    func rebuildKeepsSnoozeOfAnOpenDose() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = database()
+        let med = try #require(db.coursesToReturn.first?.medications.first)
+
+        await service.scheduleSnooze(for: [med.id.uuidString], names: [med.name], slot: date(10, 9))
+        await service.rescheduleAll(using: db)
+
+        #expect(center.pending.contains { ReminderRequestFactory.isSnooze($0.identifier) })
+    }
+
+    @Test("пересборка снимает отложенное напоминание, если дозу уже приняли")
+    func rebuildDropsSnoozeOfATakenDose() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = database()
+        let med = try #require(db.coursesToReturn.first?.medications.first)
+        let slot = date(10, 9)
+
+        await service.scheduleSnooze(for: [med.id.uuidString], names: [med.name], slot: slot)
+        let log = DoseLog(scheduledTime: slot, status: .taken(at: slot, dispensed: 1))
+        log.medication = med
+        med.logs.append(log)
+        await service.rescheduleAll(using: db)
+
+        #expect(!center.pending.contains { ReminderRequestFactory.isSnooze($0.identifier) })
+    }
+
+    @Test("отложенные напоминания разных слотов не затирают друг друга")
+    func snoozesOfDifferentSlotsCoexist() async {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let id = UUID().uuidString
+
+        await service.scheduleSnooze(for: [id], names: ["Ибупрофен"], slot: date(10, 9))
+        await service.scheduleSnooze(for: [id], names: ["Ибупрофен"], slot: date(10, 21))
+
+        #expect(center.pending.filter { ReminderRequestFactory.isSnooze($0.identifier) }.count == 2)
+    }
 }

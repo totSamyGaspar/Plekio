@@ -46,10 +46,16 @@ final class DoseSheetActions {
     /// Schedules a snooze reminder; nothing is written.
     @discardableResult
     func snooze(_ doses: [PillDose]) -> Task<Void, Never> {
-        let ids = doses.map(\.medicationId.uuidString)
-        let names = doses.map(\.name)
+        // One snooze per slot, each carrying its own dose time.
+        let bySlot = Dictionary(grouping: doses, by: \.time)
         return Task { [notifications] in
-            await notifications.scheduleSnooze(for: ids, names: names)
+            for (slot, group) in bySlot {
+                await notifications.scheduleSnooze(
+                    for: group.map(\.medicationId.uuidString),
+                    names: group.map(\.name),
+                    slot: slot
+                )
+            }
         }
     }
 }

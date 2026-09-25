@@ -64,21 +64,29 @@ enum ReminderRequestFactory {
 
     // MARK: - Snooze
 
-    /// Sorted so scheduling and cancelling agree on the same id for a group.
-    static func snoozeIdentifier(for medicationIds: [String]) -> String {
-        "SNOOZE_" + medicationIds.sorted().joined(separator: "_")
+    private static let snoozePrefix = "SNOOZE_"
+
+    /// One id per slot and group, so snoozing one slot never replaces another's snooze.
+    static func snoozeIdentifier(for medicationIds: [String], slot: Date) -> String {
+        snoozePrefix + "\(Int(slot.timeIntervalSince1970))_" + medicationIds.sorted().joined(separator: "_")
     }
 
+    static func isSnooze(_ identifier: String) -> Bool {
+        identifier.hasPrefix(snoozePrefix)
+    }
+
+    /// Fires after `snoozeInterval`, but carries the dose's own `slot`: that is what
+    /// Take / Skip / tap look the dose up by.
     static func snooze(
         medicationIds: [String],
         names: [String],
-        from now: Date
+        slot: Date
     ) -> UNNotificationRequest {
         doseReminder(
-            identifier: snoozeIdentifier(for: medicationIds),
+            identifier: snoozeIdentifier(for: medicationIds, slot: slot),
             medicationIds: medicationIds,
             medicationNames: names,
-            triggerDate: now.addingTimeInterval(snoozeInterval),
+            triggerDate: slot,
             trigger: UNTimeIntervalNotificationTrigger(timeInterval: snoozeInterval, repeats: false)
         )
     }

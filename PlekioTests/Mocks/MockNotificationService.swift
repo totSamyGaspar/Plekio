@@ -16,6 +16,7 @@ final class MockNotificationService: NotificationServiceProtocol {
     var scheduledCourses: [TreatmentCourse]?
     var cancelledMedicationIds: [UUID] = []
     var snoozedMedicationIds: [String]?
+    var snoozedSlot: Date?
     var didCallRemoveAllPending = false
     var clearedDeliveredIds: [UUID]?
     var clearedDeliveredSlot: Date?
@@ -44,8 +45,9 @@ final class MockNotificationService: NotificationServiceProtocol {
         cancelledMedicationIds.append(medicationId)
     }
 
-    func scheduleSnooze(for medicationIds: [String], names: [String]) async {
+    func scheduleSnooze(for medicationIds: [String], names: [String], slot: Date) async {
         snoozedMedicationIds = medicationIds
+        snoozedSlot = slot
     }
 
     func removeAllPending() async {

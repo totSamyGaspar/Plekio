@@ -194,6 +194,34 @@ enum ReminderPlanner {
         )
     }
 
+    // MARK: - Snoozes
+
+    /// Pending snoozes to keep across a rebuild: those with at least one dose still
+    /// unanswered. Medications no longer in an active course don't count.
+    static func snoozesToKeep(
+        pending: [ReminderSnapshot],
+        activeCourses: [TreatmentCourse],
+        calendar: Calendar
+    ) -> Set<String> {
+        let medications = Dictionary(
+            activeCourses.flatMap(\.medications).map { ($0.id.uuidString, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        return Set(pending.compactMap { reminder in
+            guard ReminderRequestFactory.isSnooze(reminder.identifier),
+                  let slotTime = reminder.slotTime else { return nil }
+            let slot = Date(timeIntervalSince1970: slotTime)
+
+            let stillOpen = reminder.medicationIds.contains { id in
+                guard let medication = medications[id] else { return false }
+                let status = DoseSchedule.log(of: medication, at: slot, calendar: calendar)?.status ?? .pending
+                return !status.isSettled
+            }
+            return stillOpen ? reminder.identifier : nil
+        })
+    }
+
     // MARK: - Delivered Cleanup
 
     /// Delivered reminders for `slot` whose medications are all settled; partly open groups stay.

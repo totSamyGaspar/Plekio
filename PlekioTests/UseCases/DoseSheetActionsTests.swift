@@ -90,6 +90,7 @@ struct DoseSheetActionsTests {
         await h.actions.snooze([open]).value
 
         #expect(h.notifications.snoozedMedicationIds == [open.medicationId.uuidString])
+        #expect(h.notifications.snoozedSlot == open.time)
         #expect(h.db.markedTakenSlots.isEmpty)
         #expect(h.db.skippedSlots.isEmpty)
         #expect(h.undo.current == nil)

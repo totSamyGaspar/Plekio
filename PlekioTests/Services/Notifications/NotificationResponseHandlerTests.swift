@@ -59,7 +59,7 @@ struct NotificationResponseHandlerTests {
         #expect(NotificationIntent.parse(userInfo: info, actionIdentifier: NotificationAction.skip)
                 == .skip(medicationIds: [id], slot: slot))
         #expect(NotificationIntent.parse(userInfo: info, actionIdentifier: NotificationAction.snooze)
-                == .snooze(medicationIds: [id.uuidString], names: ["Ибупрофен"]))
+                == .snooze(medicationIds: [id.uuidString], names: ["Ибупрофен"], slot: slot))
         // A plain tap on the body carries the system's default identifier.
         #expect(NotificationIntent.parse(userInfo: info, actionIdentifier: "com.apple.UNNotificationDefaultActionIdentifier")
                 == .openDoseReminder(medicationIds: [id], slot: slot))
@@ -130,9 +130,10 @@ struct NotificationResponseHandlerTests {
         let h = Harness()
         let id = UUID().uuidString
 
-        await h.handler.handle(.snooze(medicationIds: [id], names: ["Ибупрофен"]))
+        await h.handler.handle(.snooze(medicationIds: [id], names: ["Ибупрофен"], slot: slot))
 
         #expect(h.notifications.snoozedMedicationIds == [id])
+        #expect(h.notifications.snoozedSlot == slot)
         #expect(h.db.markedTakenSlots.isEmpty)
         #expect(h.db.skippedSlots.isEmpty)
     }

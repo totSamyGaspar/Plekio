@@ -18,7 +18,7 @@ enum NotificationIntent: Equatable {
     /// "Skip": recorded so the next rebuild does not bring the reminder back.
     case skip(medicationIds: [UUID], slot: Date)
     /// "Snooze". Ids stay strings: that is what the snoozed reminder carries.
-    case snooze(medicationIds: [String], names: [String])
+    case snooze(medicationIds: [String], names: [String], slot: Date)
     /// A plain tap on a dose reminder: open the app on it.
     case openDoseReminder(medicationIds: [UUID], slot: Date)
 
@@ -45,7 +45,7 @@ enum NotificationIntent: Equatable {
         case NotificationAction.skip:
             return .skip(medicationIds: ids, slot: slot)
         case NotificationAction.snooze:
-            return .snooze(medicationIds: idStrings, names: ReminderPayload.medicationNames(in: userInfo))
+            return .snooze(medicationIds: idStrings, names: ReminderPayload.medicationNames(in: userInfo), slot: slot)
         default:
             return .openDoseReminder(medicationIds: ids, slot: slot)
         }
@@ -94,8 +94,8 @@ final class NotificationResponseHandler {
         case .skip(let ids, let slot):
             await write(ids, slot) { try self.doseLogging.markSkipped($0) }
 
-        case .snooze(let ids, let names):
-            await notifications.scheduleSnooze(for: ids, names: names)
+        case .snooze(let ids, let names, let slot):
+            await notifications.scheduleSnooze(for: ids, names: names, slot: slot)
 
         case .openDoseReminder(let ids, let slot):
             router.open(.doseReminder(medicationIds: ids, slot: slot))

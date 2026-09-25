@@ -19,7 +19,8 @@ protocol NotificationServiceProtocol {
 
     func scheduleNotifications(activeCourses: [TreatmentCourse]) async
     func cancelNotifications(for medicationId: UUID) async
-    func scheduleSnooze(for medicationIds: [String], names: [String]) async
+    /// Reminds again about the doses of `slot` after the snooze interval.
+    func scheduleSnooze(for medicationIds: [String], names: [String], slot: Date) async
 
     /// Arms one repeating request per time (minutes past midnight), replacing all previous times.
     func scheduleDailyReminder(_ reminder: DailyReminder, minutesOfDay: [Int]) async

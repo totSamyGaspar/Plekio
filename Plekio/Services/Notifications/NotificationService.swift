@@ -79,8 +79,9 @@ final class NotificationService: NotificationServiceProtocol {
     func rescheduleAll(using dbService: any CourseStoring) async {
         await serialized { [weak self] in
             guard let self else { return }
-            await self.removeAllPending()
-            await self.scheduleNotifications(activeCourses: self.activeCourses(from: dbService, on: self.time.now, calendar: self.time.calendar))
+            let courses = self.activeCourses(from: dbService, on: self.time.now, calendar: self.time.calendar)
+            await self.clearForRebuild(activeCourses: courses)
+            await self.scheduleNotifications(activeCourses: courses)
         }
     }
 
@@ -94,6 +95,19 @@ final class NotificationService: NotificationServiceProtocol {
         }
         queueTail = task
         await task.value
+    }
+
+    /// Clears the queue except snoozes whose doses are still open: the user was
+    /// promised those. Snoozes of doses logged since are dropped with the rest.
+    private func clearForRebuild(activeCourses: [TreatmentCourse]) async {
+        let pending = await center.pendingReminders()
+        let keep = ReminderPlanner.snoozesToKeep(pending: pending, activeCourses: activeCourses, calendar: time.calendar)
+
+        center.removePending(identifiers: pending.map(\.identifier).filter { !keep.contains($0) })
+        // The centre runs calls in order, so this read waits for the removal.
+        _ = await center.pendingReminders()
+
+        await restoreDailyRemindersIfEnabled()
     }
 
     func removeAllPending() async {
@@ -146,11 +160,11 @@ final class NotificationService: NotificationServiceProtocol {
 
     // MARK: - Snooze
 
-    func scheduleSnooze(for medicationIds: [String], names: [String]) async {
+    func scheduleSnooze(for medicationIds: [String], names: [String], slot: Date) async {
         guard !medicationIds.isEmpty else { return }
 
         await add(
-            [ReminderRequestFactory.snooze(medicationIds: medicationIds, names: names, from: time.now)],
+            [ReminderRequestFactory.snooze(medicationIds: medicationIds, names: names, slot: slot)],
             failureMessage: "Snooze failed"
         )
     }
