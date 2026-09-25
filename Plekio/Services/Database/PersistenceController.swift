@@ -47,12 +47,9 @@ final class PersistenceController {
     private var dailyPillsCache: [Date: [PillDose]] = [:]
 
     /// Single source of truth for the schema: both initialisers read it, so a model
-    /// cannot end up registered in only one of them.
+    /// cannot end up registered in only one of them. Versioned — see PlekioSchema.
     private static func makeSchema() -> Schema {
-        Schema([
-            TreatmentCourse.self, MedicationItem.self, DoseLog.self, DiaryEntry.self,
-            BloodPressureReading.self,
-        ])
+        PlekioSchema.current()
     }
 
     // MARK: - Init
@@ -64,7 +61,9 @@ final class PersistenceController {
 
         do {
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-            container = try ModelContainer(for: schema, configurations: [config])
+            // Through the migration plan, so a store written by an older version
+            // is brought up to date instead of refused.
+            container = try ModelContainer(for: schema, migrationPlan: PlekioMigrationPlan.self, configurations: [config])
         } catch {
             // Crashing on launch is the worst outcome: the user just sees the app die
             // with no idea what happened to their history. Fall back to memory and
@@ -100,10 +99,10 @@ final class PersistenceController {
         do {
             let schema = Self.makeSchema()
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-            container = try ModelContainer(for: schema, configurations: [config])
+            container = try ModelContainer(for: schema, migrationPlan: PlekioMigrationPlan.self, configurations: [config])
             context = container.mainContext
         } catch {
-            fatalError("🚨 Failed to initialize test (in-memory) SwiftData: \(error)")
+            fatalError("Failed to initialize test (in-memory) SwiftData: \(error)")
         }
     }
 
