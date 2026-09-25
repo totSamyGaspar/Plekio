@@ -75,6 +75,10 @@ final class AppDependencies {
     /// SwiftUI root, so it exists before the first screen does.
     let router: AppRouter
 
+    /// What a tap on a reminder does. Built with the graph, not on demand, so a
+    /// "Take Now" on a cold launch uses the same use case and router as the UI.
+    let notificationResponses: NotificationResponseHandler
+
     /// "Now" for every rule that depends on it — see TimeSource. One instance,
     /// so the whole app agrees on the time.
     let time: any TimeSource
@@ -106,6 +110,12 @@ final class AppDependencies {
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)
         reminderSync = ReminderSyncCoordinator(notificationService: notifications, dbService: database)
         router = AppRouter()
+        notificationResponses = NotificationResponseHandler(
+            doseLogging: doseLogging,
+            notifications: notifications,
+            router: router,
+            errors: errorPresenter
+        )
     }
 
     /// The app's graph: the on-disk store and the real notification centre.

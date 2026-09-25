@@ -95,7 +95,11 @@ final class MockDatabaseService: DatabaseServiceProtocol {
         }
     }
 
+    /// Set to make markDosesTaken fail, for tests of how a failed write is surfaced.
+    var markTakenError: Error?
+
     func markDosesTaken(medicationIds: [UUID], scheduledTime: Date) throws {
+        if let markTakenError { throw markTakenError }
         markedTakenSlots.append((medicationIds, scheduledTime))
 
         for index in pillsToReturn.indices
