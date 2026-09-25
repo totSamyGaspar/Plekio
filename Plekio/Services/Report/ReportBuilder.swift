@@ -30,7 +30,9 @@ struct ReportBuilder {
         self.now = now
     }
 
-    func build(_ selection: ReportSelection, profile: UserProfile = .current()) -> ReportData {
+    /// `profile` is passed in rather than read here: the builder knows nothing
+    /// about where settings live. Empty by default, which is what tests want.
+    func build(_ selection: ReportSelection, profile: UserProfile = .empty) -> ReportData {
         let from = calendar.startOfDay(for: selection.from)
         let lastDay = calendar.startOfDay(for: selection.to)
 

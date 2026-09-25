@@ -63,6 +63,16 @@ extension AppDependencies {
     // MARK: - Settings
 
     func makeReportExportViewModel() -> ReportExportViewModel {
-        ReportExportViewModel(database: database, images: photoCache, errors: errorPresenter, time: time)
+        ReportExportViewModel(
+            database: database,
+            images: photoCache,
+            errors: errorPresenter,
+            profile: { [settings] in settings.userProfile },
+            time: time
+        )
+    }
+
+    func makeProfileAvatarEditor() -> ProfileAvatarEditor {
+        ProfileAvatarEditor(photos: photoCache)
     }
 }

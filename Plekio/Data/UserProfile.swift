@@ -112,8 +112,10 @@ nonisolated struct StoredProfile: RawRepresentable {
 
 nonisolated extension UserProfile {
 
-    /// For code outside a view, which has no `@AppStorage` to read through.
-    static func current(in defaults: UserDefaults = .standard) -> UserProfile {
+    /// For code outside a view, which has no `@AppStorage` to read through —
+    /// reached via `SettingsStore.userProfile`. No `.standard` default: that was
+    /// how the report read the real app's profile even in previews and tests.
+    static func current(in defaults: UserDefaults) -> UserProfile {
         defaults.string(forKey: storageKey)
             .flatMap(StoredProfile.init(rawValue:))?
             .profile ?? .empty

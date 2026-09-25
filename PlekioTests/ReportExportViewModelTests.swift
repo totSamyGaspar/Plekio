@@ -42,7 +42,7 @@ struct ReportExportViewModelTests {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seed(db)
 
-        let viewModel = ReportExportViewModel(database: db, images: StubImageLoader(), errors: SpyErrorReporter())
+        let viewModel = ReportExportViewModel(database: db, images: StubImageLoader(), errors: SpyErrorReporter(), profile: { .empty })
         viewModel.load()
 
         #expect(viewModel.courses.map(\.id) == [course.id])
@@ -53,7 +53,7 @@ struct ReportExportViewModelTests {
     func testNothingToExportWithoutSections() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
-        let viewModel = ReportExportViewModel(database: db, images: StubImageLoader(), errors: SpyErrorReporter())
+        let viewModel = ReportExportViewModel(database: db, images: StubImageLoader(), errors: SpyErrorReporter(), profile: { .empty })
         #expect(viewModel.canExport)
 
         for section in ReportSection.allCases {
@@ -69,7 +69,7 @@ struct ReportExportViewModelTests {
         let db = DatabaseService(inMemoryForTesting: true)
         seed(db)
 
-        let viewModel = ReportExportViewModel(database: db, images: StubImageLoader(), errors: SpyErrorReporter())
+        let viewModel = ReportExportViewModel(database: db, images: StubImageLoader(), errors: SpyErrorReporter(), profile: { .empty })
         viewModel.load()
 
         await viewModel.makeDocument()
@@ -88,7 +88,7 @@ struct ReportExportViewModelTests {
         let db = DatabaseService(inMemoryForTesting: true)
         seed(db)
 
-        let viewModel = ReportExportViewModel(database: db, images: StubImageLoader(), errors: SpyErrorReporter())
+        let viewModel = ReportExportViewModel(database: db, images: StubImageLoader(), errors: SpyErrorReporter(), profile: { .empty })
         viewModel.load()
         viewModel.selection.from = testDate(2026, 6, 1)
         viewModel.selection.to = testDate(2026, 6, 10)

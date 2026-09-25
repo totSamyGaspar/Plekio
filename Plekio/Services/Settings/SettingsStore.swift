@@ -52,6 +52,15 @@ final class SettingsStore {
         set { defaults.set(newValue, forKey: SettingsKey.hasSeenOnboarding) }
     }
 
+    // MARK: - Profile
+
+    /// Who the report is for. Views edit it through `@AppStorage`, which reads
+    /// the same defaults; this is the way in for code that is not a view.
+    var userProfile: UserProfile {
+        get { UserProfile.current(in: defaults) }
+        set { defaults.set(StoredProfile(newValue).rawValue, forKey: SettingsKey.userProfile) }
+    }
+
     // MARK: - Daily reminders
 
     /// Read by NotificationService as well as the Settings screen: the service

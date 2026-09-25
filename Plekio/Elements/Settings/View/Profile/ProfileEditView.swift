@@ -20,6 +20,10 @@ struct ProfileEditView: View {
 
     @State private var isChoosingSource = false
 
+    /// Made once per sheet: it remembers which change is the latest, so a slow
+    /// write cannot overwrite a newer pick or a removal.
+    @State private var avatars: ProfileAvatarEditor?
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -124,28 +128,27 @@ struct ProfileEditView: View {
 
     // MARK: - Avatar
 
-    private func saveAvatar(_ image: UIImage) {
-        let previous = profile.avatarId
-        let photos = dependencies.photoCache
-        Task {
-            // Encoding and the two file operations all happen off the main
-            // actor; only the resulting id comes back to the form.
-            let saved = await Task.detached(priority: .userInitiated) {
-                AvatarStore.save(image, replacing: previous, in: photos)
-            }.value
+    private var avatarEditor: ProfileAvatarEditor {
+        if let avatars { return avatars }
+        let editor = dependencies.makeProfileAvatarEditor()
+        avatars = editor
+        return editor
+    }
 
-            guard let saved else {
-                AppLog.media.error("Avatar could not be stored; the profile keeps its previous photo")
-                return
+    private func saveAvatar(_ image: UIImage) {
+        let editor = avatarEditor
+        let current = profile.avatarId
+        Task {
+            if let saved = await editor.replace(current, with: image) {
+                profile.avatarId = saved
             }
-            profile.avatarId = saved
         }
     }
 
     private func removeAvatar() {
-        let previous = profile.avatarId
-        let photos = dependencies.photoCache
+        let editor = avatarEditor
+        let current = profile.avatarId
         profile.avatarId = nil
-        Task.detached(priority: .utility) { AvatarStore.remove(previous, in: photos) }
+        Task { await editor.remove(current) }
     }
 }

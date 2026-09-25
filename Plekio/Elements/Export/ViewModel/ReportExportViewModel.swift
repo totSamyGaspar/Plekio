@@ -32,14 +32,19 @@ final class ReportExportViewModel: ObservableObject {
     private let images: any ImageLoading
     private let errors: any ErrorReporting
     private let time: any TimeSource
+    /// Read when the report is built, not when the screen opens: the user may
+    /// have edited the profile in between.
+    private let profile: () -> UserProfile
 
     init(
         database: any CourseStoring & DiaryStoring & BloodPressureStoring,
         images: any ImageLoading,
         errors: any ErrorReporting,
+        profile: @escaping () -> UserProfile,
         calendar: Calendar = .current,
         time: any TimeSource = SystemTime()
     ) {
+        self.profile = profile
         let today = time.now
         self.time = time
         self.database = database
@@ -93,7 +98,7 @@ final class ReportExportViewModel: ObservableObject {
         defer { isWorking = false }
 
         // Reading the store stays here, on the main actor, where SwiftData lives.
-        let data = ReportBuilder(database: database, now: { [time] in time.now }).build(selection)
+        let data = ReportBuilder(database: database, now: { [time] in time.now }).build(selection, profile: profile())
         let photos = selection.includesPhotos ? await photos(in: data) : [:]
 
         do {

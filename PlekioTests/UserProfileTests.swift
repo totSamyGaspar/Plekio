@@ -113,6 +113,21 @@ struct UserProfileTests {
         #expect(UserProfile.current(in: defaults) == filled)
     }
 
+    @MainActor
+    @Test("SettingsStore читает профиль из своих defaults, а не из .standard")
+    func testSettingsStoreUsesItsOwnDefaults() async throws {
+        let suite = "UserProfileTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let settings = SettingsStore(defaults: defaults)
+
+        settings.userProfile = filled
+
+        // The same key @AppStorage reads, in the same domain.
+        #expect(UserProfile.current(in: defaults) == filled)
+        #expect(SettingsStore(defaults: defaults).userProfile == filled)
+    }
+
     // MARK: - Age
 
     @Test("возраст считается от даты рождения, а не хранится числом")
