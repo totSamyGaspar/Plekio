@@ -16,7 +16,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
     @State private var selectedMedForRefill: MedicationSnapshot?
     
     @State private var showSuccessToast = false
-    @State private var successMessage: LocalizedStringKey = ""
+    @State private var successMessage: LocalizedStringKey?
     
     
     init(viewModel: @autoclosure @escaping () -> VM) {
@@ -60,7 +60,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
             
         }
         .overlay(alignment: .top) {
-            if showSuccessToast {
+            if showSuccessToast, let successMessage {
                 HStack(spacing: 12) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.title2)
@@ -87,9 +87,12 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
             
             Button("Add") {
                 if let amount = Int(refillAmountText), amount > 0 {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    let saved = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                         viewModel.refill(medication: med, amount: amount)
                     }
+                    // A failed save is reported by the app's error alert; a
+                    // success toast on top of it would contradict it.
+                    guard saved else { return }
                     
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     successMessage = "\(med.name) stock increased by \(amount) units."
@@ -186,7 +189,7 @@ final class MockStatisticsViewModel: StatisticsViewModelProtocol {
     
     init() {}
     func loadStats() {}
-    func refill(medication: MedicationSnapshot, amount: Int) {}
+    func refill(medication: MedicationSnapshot, amount: Int) -> Bool { true }
 }
 #endif
 

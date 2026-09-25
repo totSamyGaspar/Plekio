@@ -12,6 +12,11 @@ import SwiftUI
 
 struct DailyReminderRows: View {
     @Environment(AppDependencies.self) private var dependencies
+    @Environment(\.openURL) private var openURL
+
+    /// Shown when the user switched the reminder on but notifications are not
+    /// allowed — the switch has already gone back off by then.
+    @State private var showingPermissionAlert = false
     
     private let reminder: DailyReminder
     
@@ -48,6 +53,16 @@ struct DailyReminderRows: View {
         // hang them on, and the switch is the one row that is always present.
         .onChange(of: isEnabled) { _, _ in apply() }
         .onChange(of: minutesRaw) { _, _ in apply() }
+        .alert("Notifications are off", isPresented: $showingPermissionAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(url)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("To get this reminder, allow notifications for Plekio in the Settings app.")
+        }
         
         // Only once the reminder is on: a time picker for something switched off
         // is a control with nothing to control.
@@ -81,20 +96,18 @@ struct DailyReminderRows: View {
     // MARK: - Arming
     
     private func apply() {
-        let service = dependencies.notifications
-        
-        guard isEnabled else {
-            service.cancelDailyReminder(reminder)
-            return
-        }
-        
+        let arming = dependencies.dailyReminderArming
+        let enabled = isEnabled
         let times = minutes
+
         Task {
-            // Asked here rather than at launch: switching a reminder on is the
-            // moment the permission is actually for something, and there is no
-            // point arming a reminder that cannot fire.
-            guard await service.requestPermission() else { return }
-            await service.scheduleDailyReminder(reminder, minutesOfDay: times)
+            let result = await arming.apply(reminder, enabled: enabled, minutesOfDay: times)
+            guard result == .permissionDenied else { return }
+
+            // Back off, so the screen never says "on" for a reminder that cannot
+            // fire — and the user is told why and where to change it.
+            isEnabled = false
+            showingPermissionAlert = true
         }
     }
     

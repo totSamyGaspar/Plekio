@@ -18,5 +18,6 @@ protocol StatisticsViewModelProtocol: ObservableObject {
     var lowStockItems: [MedicationSnapshot] { get }
     
     func loadStats()
-    func refill(medication: MedicationSnapshot, amount: Int)
+    @discardableResult
+    func refill(medication: MedicationSnapshot, amount: Int) -> Bool
 }

@@ -125,11 +125,15 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
 
     // MARK: - Refill
 
-    func refill(medication: MedicationSnapshot, amount: Int) {
+    /// Returns whether the stock was saved, so the screen confirms only what
+    /// actually happened — on failure the error alert is the only thing shown.
+    @discardableResult
+    func refill(medication: MedicationSnapshot, amount: Int) -> Bool {
         guard errors.run({
             try courses.refillStock(medicationId: medication.id, amount: amount)
-        }) else { return }
+        }) else { return false }
 
         loadStats()
+        return true
     }
 }

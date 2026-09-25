@@ -183,4 +183,23 @@ struct StatisticsViewModelTests {
         #expect(mockDB.refilledAmount == 30)
         #expect(errors.reported.isEmpty)
     }
+
+    @Test("неудачное пополнение сообщает об ошибке и не выдаёт себя за успех")
+    func failedRefillReportsFalse() throws {
+        let mockDB = MockDatabaseService()
+        let errors = SpyErrorReporter()
+        let vm = StatisticsViewModel(dbService: mockDB, errors: errors)
+        // A medication the store no longer has — deleted on another screen.
+        let gone = MedicationSnapshot(
+            id: UUID(), name: "Магний", formSystemImage: "pills.fill", dosage: 1,
+            timesOfDay: [Date()], frequencyDays: 1, stockCount: 2, lowStockThreshold: 10
+        )
+
+        let saved = vm.refill(medication: gone, amount: 30)
+
+        // The screen shows its success toast only on `true`.
+        #expect(saved == false)
+        #expect(errors.reported.count == 1)
+        #expect(mockDB.refilledMedication == nil)
+    }
 }

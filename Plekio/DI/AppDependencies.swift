@@ -64,6 +64,9 @@ final class AppDependencies {
     /// notification modal's alike.
     let doseUndo: DoseUndoCenter
 
+    /// Switching the daily reminders on and off, permission included.
+    let dailyReminderArming: DailyReminderArming
+
     /// Kept for its subscription: it rebuilds the reminder queue after course
     /// writes for as long as this object lives, which is as long as the app.
     let reminderSync: ReminderSyncCoordinator
@@ -97,6 +100,7 @@ final class AppDependencies {
 
         doseLogging = DoseLoggingUseCase(dbService: database, notificationService: notifications)
         doseUndo = DoseUndoCenter(doseLogging: doseLogging, errors: errorPresenter, time: time)
+        dailyReminderArming = DailyReminderArming(notifications: notifications)
         courseRepository = SwiftDataCourseRepository(store: database)
         diaryRepository = SwiftDataDiaryRepository(store: database)
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)
