@@ -28,6 +28,7 @@ protocol CourseRepository {
     func addMedication(_ draft: MedicationDraft, toCourse courseId: UUID) throws
     func updateMedication(id: UUID, with draft: MedicationDraft) throws
     func deleteMedication(id: UUID) throws
+    func refillStock(medicationId: UUID, amount: Int) throws
 }
 
 /// A write named a record that is no longer in the store — deleted from another
@@ -88,6 +89,10 @@ final class SwiftDataCourseRepository: CourseRepository {
 
     func deleteMedication(id: UUID) throws {
         try store.deleteMedication(try medicationModel(id))
+    }
+
+    func refillStock(medicationId: UUID, amount: Int) throws {
+        try store.refillStock(for: try medicationModel(medicationId), amount: amount)
     }
 
     // MARK: - From id back to model

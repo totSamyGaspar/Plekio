@@ -13,7 +13,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
     
     @State private var showingRefillAlert = false
     @State private var refillAmountText = ""
-    @State private var selectedMedForRefill: MedicationItem?
+    @State private var selectedMedForRefill: MedicationSnapshot?
     
     @State private var showSuccessToast = false
     @State private var successMessage: LocalizedStringKey = ""
@@ -106,7 +106,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
     }
     
     // MARK: - UI Components
-    private func lowStockWarningCard(for med: MedicationItem) -> some View {
+    private func lowStockWarningCard(for med: MedicationSnapshot) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
                 Image(systemName: "exclamationmark.triangle")
@@ -182,11 +182,11 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
 final class MockStatisticsViewModel: StatisticsViewModelProtocol {
     var progress: Double { 0.93 }
     @Published var streakDays: Int = 1
-    @Published var lowStockItems: [MedicationItem] = []
+    @Published var lowStockItems: [MedicationSnapshot] = []
     
     init() {}
     func loadStats() {}
-    func refill(medication: MedicationItem, amount: Int) {}
+    func refill(medication: MedicationSnapshot, amount: Int) {}
 }
 #endif
 

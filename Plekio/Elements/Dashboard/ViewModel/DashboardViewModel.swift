@@ -30,7 +30,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     @Published private(set) var undoableBulkLog: BulkDoseLog?
     
     /// Reads only: what is due on a day, and the courses behind it.
-    private let dbService: any CourseStoring & DoseStoring
+    private let dbService: any DoseStoring
     /// Every write about a dose, together with its reminder side effects.
     private let doseLogging: DoseLoggingUseCaseProtocol
     private let errors: any ErrorReporting
@@ -48,7 +48,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     
     // MARK: - Init
     
-    init(dbService: any CourseStoring & DoseStoring, doseLogging: DoseLoggingUseCaseProtocol, errors: any ErrorReporting) {
+    init(dbService: any DoseStoring, doseLogging: DoseLoggingUseCaseProtocol, errors: any ErrorReporting) {
         self.dbService = dbService
         self.doseLogging = doseLogging
         self.errors = errors
@@ -90,15 +90,13 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     // MARK: - Data Loading
     
     private func fetchData() {
-        let allCourses = dbService.fetchAllCourses()
-        
-        let pills = dbService.fetchPills(for: selectedDate, preFetchedCourses: allCourses)
+        let pills = dbService.fetchPills(for: selectedDate, preFetchedCourses: nil)
         
         if pills != allPills {
             allPills = pills
         }
         
-        calculateWeeklyStats(with: allCourses)
+        calculateWeeklyStats()
     }
     
     // MARK: - Actions
@@ -172,21 +170,22 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     
     // MARK: - Weekly statistics
 
-    private func calculateWeeklyStats(with allCourses: [TreatmentCourse]) {
+    private func calculateWeeklyStats() {
         let calendar = Calendar.current
+        let dates = (0..<7).reversed().map { calendar.date(byAdding: .day, value: -$0, to: Date()) ?? Date() }
+        // The whole week in one read — see DoseStoring.fetchPills(onDays:).
+        let pillsByDay = dbService.fetchPills(onDays: dates)
         var percentages: [Double] = []
         var daysLabels: [String] = []
         
         var adherenceSum = 0.0
         var daysWithDoses = 0
         
-        for i in (0..<7).reversed() {
-            let date = calendar.date(byAdding: .day, value: -i, to: Date()) ?? Date()
+        for date in dates {
             
             daysLabels.append(Self.weekdayFormatter.string(from: date))
             
-            // Reuse the cached course list here too, to avoid a query per day.
-            let dailyPills = dbService.fetchPills(for: date, preFetchedCourses: allCourses)
+            let dailyPills = pillsByDay[calendar.startOfDay(for: date)] ?? []
             if dailyPills.isEmpty {
                 percentages.append(0.0)
             } else {

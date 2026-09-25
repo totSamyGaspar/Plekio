@@ -15,8 +15,8 @@ protocol StatisticsViewModelProtocol: ObservableObject {
     // protocol would force every implementation to duplicate them.
     var progress: Double { get }
     var streakDays: Int { get }
-    var lowStockItems: [MedicationItem] { get }
+    var lowStockItems: [MedicationSnapshot] { get }
     
     func loadStats()
-    func refill(medication: MedicationItem, amount: Int)
+    func refill(medication: MedicationSnapshot, amount: Int)
 }

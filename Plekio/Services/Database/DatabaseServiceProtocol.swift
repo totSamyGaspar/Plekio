@@ -42,6 +42,15 @@ protocol CourseStoring {
 protocol DoseStoring {
     func fetchPills(for date: Date, preFetchedCourses: [TreatmentCourse]?) -> [PillDose]
 
+    /// The schedule for several days at once, keyed by start of day.
+    ///
+    /// For screens that look at a range — the week strip, the 30-day streak.
+    /// They used to fetch every course themselves just to pass the models back
+    /// in as `preFetchedCourses`, so the store would not query courses once per
+    /// day: an optimisation that put SwiftData models into two view models.
+    /// The store does it here instead.
+    func fetchPills(onDays days: [Date]) -> [Date: [PillDose]]
+
     /// Flips one dose. For the checkbox on a single card, where a toggle is what
     /// the control actually means — the bulk operations below are not toggles.
     func togglePill(medicationId: UUID, scheduledTime: Date) throws
@@ -57,6 +66,20 @@ protocol DoseStoring {
     /// Records a deliberate skip for the medications of one slot. Doses already
     /// taken are left as they are.
     func skipDoses(medicationIds: [UUID], scheduledTime: Date) throws
+}
+
+extension DoseStoring {
+
+    /// Day by day, for a store with nothing to share between days — the test
+    /// double. DatabaseService overrides it to read the courses once.
+    func fetchPills(onDays days: [Date]) -> [Date: [PillDose]] {
+        let calendar = Calendar.current
+        var result: [Date: [PillDose]] = [:]
+        for day in days {
+            result[calendar.startOfDay(for: day)] = fetchPills(for: day, preFetchedCourses: nil)
+        }
+        return result
+    }
 }
 
 // MARK: - Diary

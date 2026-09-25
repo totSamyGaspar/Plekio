@@ -157,4 +157,30 @@ struct StatisticsViewModelTests {
 
         #expect(vm.lowStockItems.map(\.name) == ["Магний"])
     }
+
+    @Test("пополнение запаса находит лекарство по id снимка и пишет в базу")
+    func refillWritesThroughTheRepository() throws {
+        let mockDB = MockDatabaseService()
+        let course = TreatmentCourse(
+            name: "Активный",
+            startDate: Date().addingTimeInterval(-86400),
+            endDate: Date().addingTimeInterval(86400 * 5)
+        )
+        let med = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "pills.fill",
+                                 dosage: 1, timesOfDay: [Date()], frequencyDays: 1,
+                                 stockCount: 2, lowStockThreshold: 10)
+        course.medications.append(med)
+        mockDB.coursesToReturn = [course]
+        let errors = SpyErrorReporter()
+
+        let vm = StatisticsViewModel(dbService: mockDB, errors: errors)
+        let snapshot = try #require(vm.lowStockItems.first)
+
+        vm.refill(medication: snapshot, amount: 30)
+
+        // The screen only ever held the snapshot; the repository found the model.
+        #expect(mockDB.refilledMedication === med)
+        #expect(mockDB.refilledAmount == 30)
+        #expect(errors.reported.isEmpty)
+    }
 }

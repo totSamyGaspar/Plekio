@@ -80,6 +80,18 @@ extension DatabaseService: DoseStoring {
         return sortedPills
     }
 
+    /// One course fetch for the whole range, not one per day.
+    func fetchPills(onDays days: [Date]) -> [Date: [PillDose]] {
+        let calendar = Calendar.current
+        let courses = (try? context.fetch(FetchDescriptor<TreatmentCourse>())) ?? []
+
+        var result: [Date: [PillDose]] = [:]
+        for day in days {
+            result[calendar.startOfDay(for: day)] = fetchPills(for: day, preFetchedCourses: courses)
+        }
+        return result
+    }
+
     // MARK: - Dose slots
 
     /// The one way this service reaches a medication by id. Written out three

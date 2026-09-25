@@ -29,7 +29,7 @@ extension AppDependencies {
     }
 
     func makeStatisticsViewModel() -> StatisticsViewModel {
-        StatisticsViewModel(dbService: database, errors: errorPresenter)
+        StatisticsViewModel(courses: courseRepository, doses: database, errors: errorPresenter)
     }
 
     // MARK: - Courses
