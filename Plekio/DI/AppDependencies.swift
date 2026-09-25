@@ -36,6 +36,10 @@ final class AppDependencies {
     /// environment). Concrete: Settings measures its size on disk.
     let photoCache: ImageCache
 
+    /// Flags and preferences in UserDefaults. The root points `@AppStorage` at
+    /// the same domain with `.defaultAppStorage(settings.defaults)`.
+    let settings: SettingsStore
+
     /// Owned here, not reached as a singleton. View models and the storage layer
     /// get it as `any ErrorReporting`; only MainTabView, which shows the alert,
     /// needs the concrete type.
@@ -65,6 +69,7 @@ final class AppDependencies {
         notifications: any NotificationServiceProtocol,
         mediaPicker: any MediaPickerServiceProtocol,
         photoCache: ImageCache,
+        settings: SettingsStore,
         errorPresenter: AppErrorPresenter,
         storeURL: URL? = nil
     ) {
@@ -72,6 +77,7 @@ final class AppDependencies {
         self.notifications = notifications
         self.mediaPicker = mediaPicker
         self.photoCache = photoCache
+        self.settings = settings
         self.errorPresenter = errorPresenter
         self.storeURL = storeURL
 
@@ -90,12 +96,14 @@ final class AppDependencies {
         // The one place the app's photo cache is chosen.
         let photoCache = ImageCache.shared
         let database = DatabaseService(photos: photoCache, errors: errorPresenter)
+        let settings = SettingsStore(defaults: .standard)
 
         return AppDependencies(
             database: database,
-            notifications: NotificationService(),
+            notifications: NotificationService(settings: settings),
             mediaPicker: MediaPickerService(),
             photoCache: photoCache,
+            settings: settings,
             errorPresenter: errorPresenter,
             storeURL: database.persistence.storeURL
         )
@@ -106,11 +114,14 @@ final class AppDependencies {
     /// store, so a preview can never touch the user's data.
     static let preview: AppDependencies = {
         let errorPresenter = AppErrorPresenter()
+        // Its own domain, so a preview toggling a setting never changes the app's.
+        let settings = SettingsStore(defaults: UserDefaults(suiteName: "PlekioPreviews") ?? .standard)
         return AppDependencies(
             database: DatabaseService(inMemoryForTesting: true, photos: ImageCache.shared, errors: errorPresenter),
-            notifications: NotificationService(),
+            notifications: NotificationService(settings: settings),
             mediaPicker: MediaPickerService(),
             photoCache: ImageCache.shared,
+            settings: settings,
             errorPresenter: errorPresenter
         )
     }()

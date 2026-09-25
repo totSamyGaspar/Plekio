@@ -19,7 +19,7 @@ import Foundation
 extension AppDependencies {
 
     func makeOnboardingViewModel() -> OnboardingViewModel {
-        OnboardingViewModel()
+        OnboardingViewModel(settings: settings)
     }
 
     // MARK: - Today

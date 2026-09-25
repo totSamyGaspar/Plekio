@@ -34,13 +34,18 @@ final class NotificationService: NotificationServiceProtocol {
 
     private let center: any NotificationCenterClient
 
+    /// Where the daily reminders' on/off and times are read when the queue is
+    /// rebuilt.
+    private let settings: SettingsStore
+
     /// The last operation queued through `serialized`. See there.
     private var queueTail: Task<Void, Never>?
 
     // MARK: - Init
 
-    init(center: any NotificationCenterClient) {
+    init(center: any NotificationCenterClient, settings: SettingsStore) {
         self.center = center
+        self.settings = settings
 
         // The categories are registered when the service is created, not only
         // inside requestPermission: on a second launch permission is already
@@ -55,8 +60,8 @@ final class NotificationService: NotificationServiceProtocol {
     /// a default argument is evaluated at the CALL SITE, outside this type's
     /// main-actor isolation, so naming a main-actor-isolated initialiser there
     /// does not compile. Here the call is plainly inside it.
-    convenience init() {
-        self.init(center: SystemNotificationCenterClient())
+    convenience init(settings: SettingsStore) {
+        self.init(center: SystemNotificationCenterClient(), settings: settings)
     }
 
     // MARK: - Permission
@@ -271,8 +276,8 @@ final class NotificationService: NotificationServiceProtocol {
     }
 
     private func restoreDailyRemindersIfEnabled() async {
-        for reminder in DailyReminder.allCases where reminder.isEnabled {
-            await scheduleDailyReminder(reminder, minutesOfDay: reminder.minutesOfDay)
+        for reminder in DailyReminder.allCases where settings.isEnabled(reminder) {
+            await scheduleDailyReminder(reminder, minutesOfDay: settings.minutesOfDay(for: reminder))
         }
     }
 

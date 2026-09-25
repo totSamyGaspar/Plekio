@@ -70,26 +70,8 @@ enum DailyReminder: String, CaseIterable, Identifiable, Sendable {
     /// jumping back to the default after an update.
     var legacyMinuteOfDayKey: String { "\(rawValue)ReminderMinuteOfDay" }
 
-    /// Read by NotificationService as well as the Settings screen: the service
-    /// re-arms the reminder after a schedule rebuild and cannot ask the UI.
-    var isEnabled: Bool {
-        UserDefaults.standard.bool(forKey: enabledKey)
-    }
-
-    var minutesOfDay: [Int] {
-        let defaults = UserDefaults.standard
-
-        if let raw = defaults.string(forKey: timesKey) {
-            let parsed = Self.minutes(fromRaw: raw, limit: maxTimes)
-            if !parsed.isEmpty { return parsed }
-        }
-
-        if let legacy = defaults.object(forKey: legacyMinuteOfDayKey) as? Int {
-            return [Self.clamp(legacy)]
-        }
-
-        return defaultMinutesOfDay
-    }
+    // Reading the stored values is SettingsStore's — `isEnabled(_:)` and
+    // `minutesOfDay(for:)` — so nothing here reaches for UserDefaults.standard.
 
     // MARK: - Times, stored as text
 

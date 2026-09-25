@@ -17,7 +17,7 @@ final class MockOnboardingViewModel: OnboardingViewModelProtocol {
 
     // The real pages: a preview of the carousel is worth nothing if the slides
     // in it are not the ones that ship.
-    let pages = OnboardingViewModel().pages
+    let pages = OnboardingViewModel.allPages
 
     var isLastPage: Bool { currentPage == pages.count - 1 }
 

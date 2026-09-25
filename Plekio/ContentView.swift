@@ -18,7 +18,7 @@ enum RootTransition {
 
 struct ContentView: View {
     @Environment(AppDependencies.self) private var dependencies
-    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
+    @AppStorage(SettingsKey.hasSeenOnboarding) var hasSeenOnboarding: Bool = false
     
     var body: some View {
         Group {

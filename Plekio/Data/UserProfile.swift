@@ -25,7 +25,7 @@ nonisolated struct UserProfile: Codable, Equatable {
     /// at every launch.
     var avatarId: UUID?
 
-    static let storageKey = "userProfile"
+    static let storageKey = SettingsKey.userProfile
     static let empty = UserProfile()
 
     var isEmpty: Bool { self == .empty }

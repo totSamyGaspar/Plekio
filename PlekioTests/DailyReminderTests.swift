@@ -6,10 +6,10 @@
 //  survives a round trip through @AppStorage, and which notification requests
 //  it claims.
 //
-//  The suite is serialized and every test that touches UserDefaults saves and
-//  restores the keys it uses: DailyReminder reads UserDefaults.standard, which
-//  in a test run is the host app's own defaults domain, shared by every test
-//  running at the same time.
+//  Stored values are read through SettingsStore over a UserDefaults suite of
+//  the test's own, created and destroyed around each case. They used to be read
+//  from UserDefaults.standard — the host app's real settings — so every test had
+//  to save and restore the keys it touched.
 //
 
 import Testing
@@ -111,64 +111,64 @@ struct DailyReminderTests {
 
     @Test("без сохранённых значений берётся значение по умолчанию")
     func testFallsBackToDefaults() async throws {
-        withCleanDefaults(for: .bloodPressure) {
-            #expect(DailyReminder.bloodPressure.minutesOfDay == [9 * 60])
-            #expect(DailyReminder.bloodPressure.isEnabled == false)
+        withIsolatedSettings { settings, _ in
+            #expect(settings.minutesOfDay(for: .bloodPressure) == [9 * 60])
+            #expect(settings.isEnabled(.bloodPressure) == false)
         }
     }
 
     @Test("время из прошлой версии подхватывается, а не сбрасывается на дефолт")
     func testReadsTheLegacySingleTimeKey() async throws {
-        withCleanDefaults(for: .diary) {
-            UserDefaults.standard.set(7 * 60 + 45, forKey: DailyReminder.diary.legacyMinuteOfDayKey)
+        withIsolatedSettings { settings, defaults in
+            defaults.set(7 * 60 + 45, forKey: DailyReminder.diary.legacyMinuteOfDayKey)
 
-            #expect(DailyReminder.diary.minutesOfDay == [7 * 60 + 45])
+            #expect(settings.minutesOfDay(for: .diary) == [7 * 60 + 45])
         }
     }
 
     @Test("новый ключ важнее старого")
     func testNewKeyWinsOverLegacy() async throws {
-        withCleanDefaults(for: .diary) {
-            let defaults = UserDefaults.standard
+        withIsolatedSettings { settings, defaults in
             defaults.set(7 * 60, forKey: DailyReminder.diary.legacyMinuteOfDayKey)
             defaults.set("1320", forKey: DailyReminder.diary.timesKey)
 
-            #expect(DailyReminder.diary.minutesOfDay == [22 * 60])
+            #expect(settings.minutesOfDay(for: .diary) == [22 * 60])
         }
     }
 
     @Test("сохранённых времён не может быть больше, чем разрешено напоминанию")
     func testStoredTimesRespectTheCap() async throws {
-        withCleanDefaults(for: .diary) {
+        withIsolatedSettings { settings, defaults in
             // The diary allows one; a longer list — hand-edited defaults, or a
             // build where the cap was different — must not schedule four pushes.
-            UserDefaults.standard.set("540,780,1020,1260", forKey: DailyReminder.diary.timesKey)
+            defaults.set("540,780,1020,1260", forKey: DailyReminder.diary.timesKey)
 
-            #expect(DailyReminder.diary.minutesOfDay == [540])
+            #expect(settings.minutesOfDay(for: .diary) == [540])
+        }
+    }
+
+    @Test("включённое напоминание читается из того же домена, куда пишет @AppStorage")
+    func testEnabledFlagIsReadFromTheStoresDomain() async throws {
+        withIsolatedSettings { settings, defaults in
+            defaults.set(true, forKey: DailyReminder.diary.enabledKey)
+
+            #expect(settings.isEnabled(.diary))
+            #expect(settings.isEnabled(.bloodPressure) == false)
         }
     }
 
     // MARK: - Helpers
 
-    /// Runs `body` with this reminder's keys cleared, then puts back whatever was
-    /// there. Tests share the host app's defaults with the simulator it runs in,
-    /// so leaving values behind would change the app's own settings.
-    private func withCleanDefaults(for reminder: DailyReminder, _ body: () -> Void) {
-        let defaults = UserDefaults.standard
-        let keys = [reminder.enabledKey, reminder.timesKey, reminder.legacyMinuteOfDayKey]
-        let saved = keys.map { defaults.object(forKey: $0) }
-        keys.forEach { defaults.removeObject(forKey: $0) }
-
-        defer {
-            for (key, value) in zip(keys, saved) {
-                if let value {
-                    defaults.set(value, forKey: key)
-                } else {
-                    defaults.removeObject(forKey: key)
-                }
-            }
+    /// A SettingsStore over a suite that exists only for this call, so nothing
+    /// a test writes reaches the app's own settings or another test.
+    private func withIsolatedSettings(_ body: (SettingsStore, UserDefaults) -> Void) {
+        let suite = "PlekioTests.DailyReminder.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suite) else {
+            Issue.record("could not create a UserDefaults suite")
+            return
         }
+        defer { defaults.removePersistentDomain(forName: suite) }
 
-        body()
+        body(SettingsStore(defaults: defaults), defaults)
     }
 }

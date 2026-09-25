@@ -26,7 +26,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
     case dark
 
     /// One name for the defaults key, so a typo cannot split the setting in two.
-    static let storageKey = "appTheme"
+    static let storageKey = SettingsKey.appTheme
 
     var id: String { rawValue }
 

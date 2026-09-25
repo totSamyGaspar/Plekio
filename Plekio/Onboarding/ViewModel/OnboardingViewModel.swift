@@ -15,7 +15,16 @@ final class OnboardingViewModel: OnboardingViewModelProtocol {
 
     @Published var currentPage = 0
 
-    let pages: [OnboardingPage] = [
+    private let settings: SettingsStore
+
+    init(settings: SettingsStore) {
+        self.settings = settings
+    }
+
+    var pages: [OnboardingPage] { Self.allPages }
+
+    /// Static so previews can show a page without building the view model.
+    static let allPages: [OnboardingPage] = [
         OnboardingPage(
             preview: .course,
             glow: .accentPrimary,
@@ -53,6 +62,6 @@ final class OnboardingViewModel: OnboardingViewModelProtocol {
     }
 
     func completeOnboarding() {
-        UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+        settings.hasSeenOnboarding = true
     }
 }
