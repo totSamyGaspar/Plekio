@@ -31,45 +31,7 @@ extension DatabaseService: DoseStoring {
             courses = fetch(descriptor)
         }
 
-        var dailyPills: [PillDose] = []
-
-        for course in courses {
-            let courseStart = calendar.startOfDay(for: course.startDate)
-            let courseEnd = calendar.startOfDay(for: course.endDate)
-
-            for med in course.medications {
-                let slots = DoseSchedule.slots(
-                    for: med,
-                    courseStartDay: courseStart,
-                    courseEndDay: courseEnd,
-                    on: targetDate,
-                    calendar: calendar
-                )
-                guard !slots.isEmpty else { continue }
-
-                let logsBySlot = DoseSchedule.logsBySlot(of: med, on: targetDate, calendar: calendar)
-
-                for slot in slots {
-                    let log = logsBySlot[DoseSchedule.slotKey(slot.date, calendar: calendar)]
-
-                    dailyPills.append(
-                        PillDose(
-                            medicationId: med.id,
-                            name: med.name,
-                            dosage: med.dosage,
-                            formSystemImage: med.formSystemImage,
-                            time: slot.date,
-                            period: DayPeriod(hour: slot.hour),
-                            status: log?.status ?? .pending,
-                            stockCount: med.stockCount,
-                            lowStockThreshold: med.lowStockThreshold
-                        )
-                    )
-                }
-            }
-        }
-
-        let sortedPills = dailyPills.sorted(by: { $0.time < $1.time })
+        let sortedPills = DoseDay.pills(of: courses, on: targetDate, calendar: calendar)
 
         persistence.cachePills(sortedPills, for: targetDate)
         return sortedPills
@@ -85,6 +47,21 @@ extension DatabaseService: DoseStoring {
             result[calendar.startOfDay(for: day)] = fetchPills(for: day, preFetchedCourses: courses)
         }
         return result
+    }
+
+    /// Reads on DoseHistoryReader's context. Sees only committed data, which is
+    /// all there is: every write goes through `commit`.
+    func pillHistory(onDays days: [Date]) async -> [Date: [PillDose]] {
+        let calendar = time.calendar
+        let reader = await persistence.doseHistoryReader()
+        do {
+            let result = try await reader.pills(onDays: days, calendar: calendar)
+            persistence.readSucceeded()
+            return result
+        } catch {
+            persistence.reportReadFailure(error)
+            return [:]
+        }
     }
 
     // MARK: - Lookup

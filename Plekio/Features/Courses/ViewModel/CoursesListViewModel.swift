@@ -86,4 +86,8 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
         guard errors.run({ try courseEditing.deleteCourse(course) }) else { return }
         fetchCourses()
     }
+
+    func row(for course: CourseSnapshot) -> CourseRowViewModel {
+        CourseRowViewModel(course: course, time: time)
+    }
 }

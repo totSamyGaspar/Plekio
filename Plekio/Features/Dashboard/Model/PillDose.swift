@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - DayPeriod
 
-enum DayPeriod: String, CaseIterable, Identifiable {
+nonisolated enum DayPeriod: String, CaseIterable, Identifiable, Sendable {
     case morning = "Morning"
     case noon = "Afternoon"
     case evening = "Evening"
@@ -27,7 +27,7 @@ enum DayPeriod: String, CaseIterable, Identifiable {
 
 // MARK: - PillDose
 
-struct PillDose: Identifiable, Equatable {
+nonisolated struct PillDose: Identifiable, Equatable, Sendable {
 
     var id: String { "\(medicationId.uuidString)@\(time.timeIntervalSince1970)" }
 

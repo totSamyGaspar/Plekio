@@ -686,4 +686,22 @@ struct DatabaseServiceTests {
         #expect(untouched.logs.isEmpty)
         #expect(untouched.stockCount == 10)
     }
+
+    // MARK: - Background History
+
+    @Test("история доз, прочитанная в фоне, совпадает с чтением на главном потоке")
+    func backgroundHistoryMatchesMainActorRead() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = makeCourseWithMed(db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+
+        let days = (8...12).map { testDate(2026, 6, $0) }
+        let background = await db.pillHistory(onDays: days)
+        let main = db.fetchPills(onDays: days)
+
+        #expect(background == main)
+        #expect(background[testDate(2026, 6, 10)]?.first?.isTaken == true)
+        #expect(background[testDate(2026, 6, 11)]?.first?.isTaken == false)
+    }
 }

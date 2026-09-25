@@ -72,7 +72,7 @@ enum ReminderRequestFactory {
     static func snooze(
         medicationIds: [String],
         names: [String],
-        from now: Date = Date()
+        from now: Date
     ) -> UNNotificationRequest {
         doseReminder(
             identifier: snoozeIdentifier(for: medicationIds),

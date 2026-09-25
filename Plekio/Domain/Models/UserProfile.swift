@@ -31,7 +31,7 @@ nonisolated struct UserProfile: Codable, Equatable {
     // MARK: - Age
 
     /// Nil without a birth date or when it is after `date`.
-    func age(on date: Date = Date(), calendar: Calendar = .current) -> Int? {
+    func age(on date: Date, calendar: Calendar = .current) -> Int? {
         guard let birthDate, birthDate <= date else { return nil }
         return calendar.dateComponents([.year], from: birthDate, to: date).year
     }

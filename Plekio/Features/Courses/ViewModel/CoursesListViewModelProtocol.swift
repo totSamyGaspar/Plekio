@@ -19,4 +19,6 @@ protocol CoursesListViewModelProtocol: ObservableObject {
     func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date)
     func hasActiveRepeat(of course: CourseSnapshot) -> Bool
     func deleteCourse(_ course: CourseSnapshot)
+    /// The card's display values, on this screen's clock.
+    func row(for course: CourseSnapshot) -> CourseRowViewModel
 }

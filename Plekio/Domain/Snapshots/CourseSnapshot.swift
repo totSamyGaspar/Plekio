@@ -39,7 +39,7 @@ nonisolated struct CourseSnapshot: Identifiable, Hashable, Sendable {
     var repeatLineageId: UUID { repeatedFromId ?? id }
 
     /// Shares `CourseRules` with `TreatmentCourse.isActive`.
-    func isActive(on day: Date = Date(), calendar: Calendar = .current) -> Bool {
+    func isActive(on day: Date, calendar: Calendar) -> Bool {
         CourseRules.isActive(endDate: endDate, on: day, calendar: calendar)
     }
 

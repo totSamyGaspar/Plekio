@@ -34,8 +34,7 @@ struct CourseRowViewModel {
 
     // MARK: - Init
 
-    /// `now` is injectable so tests can pin the progress date.
-    init(course: CourseSnapshot, today now: Date = Date()) {
+    init(course: CourseSnapshot, time: any TimeSource) {
         self.title = course.name
         self.medications = course.medications
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
@@ -49,14 +48,14 @@ struct CourseRowViewModel {
         ? rangeStart.formatted(date: .abbreviated, time: .omitted)
         : (rangeStart ..< rangeEnd).formatted(date: .abbreviated, time: .omitted)
 
-        let calendar = Calendar.current
+        let calendar = time.calendar
         let start = calendar.startOfDay(for: course.startDate)
         let end = calendar.startOfDay(for: course.endDate)
         let total =
         (calendar.dateComponents([.day], from: start, to: end).day ?? 0) + 1
         self.totalDays = total
 
-        let today = calendar.startOfDay(for: now)
+        let today = calendar.startOfDay(for: time.now)
         if today < start {
             self.currentDayNumber = 0
         } else {

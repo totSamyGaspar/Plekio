@@ -59,7 +59,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                                 // History cards are not navigable; they only offer Repeat.
                                 if selectedSegment == 1 {
                                     CourseRowView(
-                                        course: course,
+                                        row: viewModel.row(for: course),
                                         isHistory: true,
                                         canRepeat: !viewModel.hasActiveRepeat(of: course)
                                     ) {
@@ -67,7 +67,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                                     }
                                 } else {
                                     NavigationLink(value: Route.courseDetail(courseId: course.id)) {
-                                        CourseRowView(course: course, isHistory: false)
+                                        CourseRowView(row: viewModel.row(for: course), isHistory: false)
                                     }
                                 }
                             }

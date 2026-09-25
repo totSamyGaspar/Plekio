@@ -50,6 +50,7 @@ struct StatisticsViewModelTests {
         mockDB.pillsByDay = [yesterday.0: yesterday.1, dayBefore.0: dayBefore.1]
 
         let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
+        await vm.historyLoad?.value
 
         #expect(vm.streakDays == 1)
     }
@@ -64,6 +65,7 @@ struct StatisticsViewModelTests {
         mockDB.pillsByDay = [first.0: first.1, third.0: third.1]
 
         let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
+        await vm.historyLoad?.value
 
         #expect(vm.streakDays == 2)
     }
@@ -76,6 +78,7 @@ struct StatisticsViewModelTests {
         mockDB.pillsByDay = [today.0: today.1]
 
         let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
+        await vm.historyLoad?.value
 
         #expect(vm.streakDays == 1)
     }
@@ -89,6 +92,7 @@ struct StatisticsViewModelTests {
         mockDB.pillsByDay = [today.0: today.1, yesterday.0: yesterday.1]
 
         let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
+        await vm.historyLoad?.value
 
         #expect(vm.streakDays == 2)
     }
@@ -102,6 +106,7 @@ struct StatisticsViewModelTests {
         mockDB.pillsByDay = [today.0: today.1, yesterday.0: yesterday.1]
 
         let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
+        await vm.historyLoad?.value
 
         // Today is not over, so unlogged doses are not a miss yet.
         #expect(vm.streakDays == 1)
@@ -117,6 +122,7 @@ struct StatisticsViewModelTests {
         mockDB.pillsByDay = [today.0: today.1]
 
         let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
+        await vm.historyLoad?.value
 
         #expect(vm.totalCount == 4)
         #expect(vm.takenCount == 3)
@@ -152,6 +158,7 @@ struct StatisticsViewModelTests {
         mockDB.coursesToReturn = [active, finished]
 
         let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
+        await vm.historyLoad?.value
 
         #expect(vm.lowStockItems.map(\.name) == ["Магний"])
     }

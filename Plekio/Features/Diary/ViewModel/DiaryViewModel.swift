@@ -29,7 +29,14 @@ final class DiaryViewModel: DiaryViewModelProtocol {
 
     // MARK: - Init
 
-    init(diary: any DiaryRepository, errors: any ErrorReporting, changes: DatabaseChangeFeed, time: any TimeSource = SystemTime()) {
+    /// `debounce` coalesces bursts of writes; tests pass `.zero` so they need not wait.
+    init(
+        diary: any DiaryRepository,
+        errors: any ErrorReporting,
+        changes: DatabaseChangeFeed,
+        time: any TimeSource = SystemTime(),
+        debounce: RunLoop.SchedulerTimeType.Stride = .milliseconds(300)
+    ) {
         self.time = time
         self.diary = diary
         self.errors = errors
@@ -38,14 +45,23 @@ final class DiaryViewModel: DiaryViewModelProtocol {
 
         // Only diary writes; other writes would needlessly re-fetch every entry.
         changes.publisher(for: [.diary])
-            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .debounce(for: debounce, scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.fetchEntries() }
             .store(in: &cancellables)
     }
 
     /// Over the SwiftData store — the shape tests use.
-    convenience init(dbService: any DiaryStoring & BloodPressureStoring & DatabaseChangeSource, errors: any ErrorReporting) {
-        self.init(diary: SwiftDataDiaryRepository(store: dbService), errors: errors, changes: dbService.changes)
+    convenience init(
+        dbService: any DiaryStoring & BloodPressureStoring & DatabaseChangeSource,
+        errors: any ErrorReporting,
+        debounce: RunLoop.SchedulerTimeType.Stride = .milliseconds(300)
+    ) {
+        self.init(
+            diary: SwiftDataDiaryRepository(store: dbService),
+            errors: errors,
+            changes: dbService.changes,
+            debounce: debounce
+        )
     }
 
     // MARK: - Actions

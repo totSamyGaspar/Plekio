@@ -106,6 +106,22 @@ final class PersistenceController {
         self.changes.send(changes)
     }
 
+    // MARK: - Background Reads
+
+    private var historyReader: DoseHistoryReader?
+
+    /// Created off the main thread: a `@ModelActor` made on the main thread runs its
+    /// context on the main queue, which defeats the point.
+    func doseHistoryReader() async -> DoseHistoryReader {
+        if let historyReader { return historyReader }
+        let container = self.container
+        let reader = await Task.detached(priority: .userInitiated) {
+            DoseHistoryReader(modelContainer: container)
+        }.value
+        historyReader = reader
+        return reader
+    }
+
     // MARK: - Day Cache
 
     func cachedPills(for day: Date) -> [PillDose]? {
@@ -152,7 +168,7 @@ final class PersistenceController {
 // MARK: - DatabaseError
 
 /// Storage failures with user-readable text instead of SwiftData's raw description.
-enum DatabaseError: LocalizedError {
+enum DatabaseError: LocalizedError, AlertTitled {
     /// Running from memory; reported once at launch.
     case storageUnavailable(underlying: Error)
 
@@ -163,6 +179,14 @@ enum DatabaseError: LocalizedError {
 
     /// A read failed and returned nothing. Reported, never thrown.
     case readFailed(underlying: Error)
+
+    // MARK: - AlertTitled
+
+    /// A failed read is not a failed save: the user shouldn't go looking for a lost edit.
+    var alertTitle: LocalizedStringResource {
+        if case .readFailed = self { return "Couldn't load your data" }
+        return "Couldn't save"
+    }
 
     // MARK: - LocalizedError
 

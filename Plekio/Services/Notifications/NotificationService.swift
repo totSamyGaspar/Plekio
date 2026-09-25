@@ -150,7 +150,7 @@ final class NotificationService: NotificationServiceProtocol {
         guard !medicationIds.isEmpty else { return }
 
         await add(
-            [ReminderRequestFactory.snooze(medicationIds: medicationIds, names: names)],
+            [ReminderRequestFactory.snooze(medicationIds: medicationIds, names: names, from: time.now)],
             failureMessage: "Snooze failed"
         )
     }

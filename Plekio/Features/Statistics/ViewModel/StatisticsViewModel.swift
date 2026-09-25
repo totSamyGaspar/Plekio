@@ -24,6 +24,9 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
     private let time: any TimeSource
     private var cancellables = Set<AnyCancellable>()
 
+    /// The in-flight history read. Exposed so tests can await it.
+    private(set) var historyLoad: Task<Void, Never>?
+
     private static let streakLookbackDays = 30
     /// Fraction of a day's doses that must be logged for the day to count toward the streak.
     private static let streakThreshold = 0.9
@@ -54,19 +57,11 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
 
     // MARK: - Loading
 
+    /// Low stock is read at once; the 30-day history off the main actor.
     func loadStats() {
         let calendar = time.calendar
         let now = time.now
         let today = calendar.startOfDay(for: now)
-
-        let days = (0...Self.streakLookbackDays).compactMap {
-            calendar.date(byAdding: .day, value: -$0, to: today)
-        }
-        let pillsByDay = doses.fetchPills(onDays: days)
-
-        let todaysPills = pillsByDay[today] ?? []
-        self.totalCount = todaysPills.count
-        self.takenCount = todaysPills.filter { $0.isTaken }.count
 
         // Active courses only: no restock warning for a course that has ended.
         self.lowStockItems = courses.allCourses()
@@ -74,7 +69,21 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
             .flatMap(\.medications)
             .filter(\.isLowOnStock)
 
-        self.streakDays = Self.streak(pillsByDay: pillsByDay, today: today, calendar: calendar)
+        let days = (0...Self.streakLookbackDays).compactMap {
+            calendar.date(byAdding: .day, value: -$0, to: today)
+        }
+
+        // A newer load supersedes this one; its result must not land on top.
+        historyLoad?.cancel()
+        historyLoad = Task { [weak self, doses] in
+            let pillsByDay = await doses.pillHistory(onDays: days)
+            guard !Task.isCancelled, let self else { return }
+
+            let todaysPills = pillsByDay[today] ?? []
+            self.totalCount = todaysPills.count
+            self.takenCount = todaysPills.filter(\.isTaken).count
+            self.streakDays = Self.streak(pillsByDay: pillsByDay, today: today, calendar: calendar)
+        }
     }
 
     // MARK: - Streak

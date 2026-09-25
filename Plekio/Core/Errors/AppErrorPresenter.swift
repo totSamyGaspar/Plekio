@@ -18,8 +18,10 @@ final class AppErrorPresenter: ErrorReporting {
     /// Text of the last error; nil means there is nothing to show.
     var message: String?
 
-    /// Read failures get their own title so the user doesn't look for a lost edit.
-    private(set) var title: LocalizedStringResource = "Couldn't save"
+    /// Set from the error's `AlertTitled.alertTitle`, else a failed save.
+    private(set) var title: LocalizedStringResource = AppErrorPresenter.defaultTitle
+
+    private static let defaultTitle: LocalizedStringResource = "Couldn't save"
 
     // MARK: - Init
 
@@ -28,11 +30,7 @@ final class AppErrorPresenter: ErrorReporting {
     // MARK: - ErrorReporting
 
     func report(_ error: Error) {
-        if case DatabaseError.readFailed = error {
-            title = "Couldn't load your data"
-        } else {
-            title = "Couldn't save"
-        }
+        title = (error as? AlertTitled)?.alertTitle ?? Self.defaultTitle
         message = Self.describe(error)
     }
 

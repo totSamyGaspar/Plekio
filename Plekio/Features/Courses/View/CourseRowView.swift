@@ -25,12 +25,12 @@ struct CourseRowView: View {
     // MARK: - Init
 
     init(
-        course: CourseSnapshot,
+        row: CourseRowViewModel,
         isHistory: Bool,
         canRepeat: Bool = true,
         repeatAction: (() -> Void)? = nil
     ) {
-        self.viewModel = CourseRowViewModel(course: course)
+        self.viewModel = row
         self.isHistory = isHistory
         self.canRepeat = canRepeat
         self.repeatAction = repeatAction

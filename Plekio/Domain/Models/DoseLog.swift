@@ -8,8 +8,9 @@
 import Foundation
 import SwiftData
 
+/// `nonisolated`: DoseHistoryReader reads it on a background context.
 @Model
-final class DoseLog {
+nonisolated final class DoseLog {
 
     // MARK: - Properties
 

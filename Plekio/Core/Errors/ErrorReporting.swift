@@ -14,6 +14,13 @@ protocol ErrorReporting: AnyObject {
     func report(_ error: Error)
 }
 
+// MARK: - AlertTitled
+
+/// An error that names its own alert title. Anything else is shown as a failed save.
+protocol AlertTitled: Error {
+    var alertTitle: LocalizedStringResource { get }
+}
+
 // MARK: - Running Work
 
 extension ErrorReporting {

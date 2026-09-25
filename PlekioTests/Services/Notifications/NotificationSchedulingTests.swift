@@ -24,7 +24,7 @@ struct NotificationSchedulingTests {
         let medB = MedicationItem(id: UUID(), name: "Витамин Д", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(contentsOf: [medA, medB])
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
 
         #expect(map.count == 1)
         let entries = map.values.first
@@ -43,7 +43,7 @@ struct NotificationSchedulingTests {
         med.logs.append(log)
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
 
         #expect(map.isEmpty)
     }
@@ -57,7 +57,7 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
 
         #expect(map.count == 1)
     }
@@ -79,7 +79,7 @@ struct NotificationSchedulingTests {
         )
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: now)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: now, calendar: .current)
 
         #expect(map.count == 1)
     }
@@ -94,7 +94,7 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(id: UUID(), name: "Витамин C", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
 
         #expect(map.count == 31)
         let lastDay = map.keys.map { Calendar.current.startOfDay(for: $0) }.max()
@@ -109,7 +109,7 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 10)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current, slotBudget: 10)
 
         // One slot a day, so the budget converts one-to-one into days of cover.
         #expect(map.count == 10)
@@ -132,7 +132,7 @@ struct NotificationSchedulingTests {
         )
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 10)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current, slotBudget: 10)
 
         #expect(map.count == 9)
         #expect(Set(map.keys.map { Calendar.current.startOfDay(for: $0) }).count == 3)
@@ -157,7 +157,7 @@ struct NotificationSchedulingTests {
         )
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, slotBudget: 3)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current, slotBudget: 3)
 
         #expect(map.count == 5)
         #expect(Set(map.keys.map { Calendar.current.startOfDay(for: $0) }) == [Calendar.current.startOfDay(for: anchor)])
@@ -173,7 +173,7 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(id: UUID(), name: "Витамин D", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 3)
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: now, slotBudget: 3)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: now, calendar: .current, slotBudget: 3)
 
         let days = map.keys.map { Calendar.current.startOfDay(for: $0) }.sorted()
         #expect(days == [
@@ -195,7 +195,7 @@ struct NotificationSchedulingTests {
         med.logs.append(log)
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
 
         #expect(map.isEmpty)
     }
@@ -214,7 +214,7 @@ struct NotificationSchedulingTests {
         med.logs.append(skipped)
         course.medications.append(med)
 
-        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor)
+        let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
 
         // The 15th is gone; the 16th and the 17th are not.
         let scheduledDays = Set(map.keys.map { Calendar.current.component(.day, from: $0) })

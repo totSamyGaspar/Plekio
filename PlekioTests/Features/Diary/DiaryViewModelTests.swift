@@ -18,14 +18,14 @@ struct DiaryViewModelTests {
     @Test("экран дневника перечитывается на запись дневника и не реагирует на дозы")
     func refreshesOnDiaryWritesOnly() async throws {
         let mockDb = MockDatabaseService()
-        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter(), debounce: .zero)
         #expect(vm.entries.isEmpty)
 
         mockDb.diaryEntriesToReturn = [makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 7, photoCount: 0)]
 
-        // Wait past the 300 ms debounce.
+        // No debounce: one run-loop turn is enough for a refresh to have happened.
         mockDb.changes.send([.doses])
-        try await Task.sleep(for: .milliseconds(500))
+        try await Task.sleep(for: .milliseconds(50))
         #expect(vm.entries.isEmpty)
 
         mockDb.changes.send([.diary])

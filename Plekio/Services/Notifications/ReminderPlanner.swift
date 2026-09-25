@@ -42,8 +42,8 @@ enum ReminderPlanner {
     /// and the horizon runs as far as `slotBudget` allows (nothing re-plans while the app is closed).
     static func buildScheduleMap(
         activeCourses: [TreatmentCourse],
-        now: Date = Date(),
-        calendar: Calendar = .current,
+        now: Date,
+        calendar: Calendar,
         slotBudget: Int = maxScheduled,
         horizonLimitInDays: Int = maxHorizonDays
     ) -> [Date: [(courseName: String, medication: MedicationItem)]] {

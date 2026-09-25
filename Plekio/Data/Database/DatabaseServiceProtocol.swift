@@ -39,6 +39,9 @@ protocol DoseStoring {
     /// The schedule for several days at once, keyed by start of day.
     func fetchPills(onDays days: [Date]) -> [Date: [PillDose]]
 
+    /// Same as `fetchPills(onDays:)`, but read off the main actor. For long ranges.
+    func pillHistory(onDays days: [Date]) async -> [Date: [PillDose]]
+
     /// Flips one dose, for a single card's checkbox. The bulk operations are not toggles.
     func togglePill(medicationId: UUID, scheduledTime: Date) throws
 
@@ -67,6 +70,11 @@ extension DoseStoring {
             result[calendar.startOfDay(for: day)] = fetchPills(for: day, preFetchedCourses: nil)
         }
         return result
+    }
+
+    /// Synchronous by default; DatabaseService reads on a background context.
+    func pillHistory(onDays days: [Date]) async -> [Date: [PillDose]] {
+        fetchPills(onDays: days)
     }
 }
 

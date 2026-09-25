@@ -9,7 +9,7 @@ import Foundation
 
 /// When a medication is due and what counts as the same dose. Shared by the
 /// dose list and the notification planner so they never disagree; pure, calendar injected.
-enum DoseSchedule {
+nonisolated enum DoseSchedule {
 
     // MARK: - Types
 
@@ -118,7 +118,7 @@ enum DoseSchedule {
 
 // MARK: - DayPeriod
 
-extension DayPeriod {
+nonisolated extension DayPeriod {
 
     /// Which part of the day an hour belongs to.
     init(hour: Int) {
