@@ -13,13 +13,15 @@ extension DatabaseService: BloodPressureStoring {
     // MARK: - Blood pressure
 
     func saveBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) throws {
+        // Stored as given. Validation is BloodPressureLogging's: it used to be
+        // clamping here, which quietly turned a typed 1200/80 into 300/80 — a
+        // number nobody measured, in a report meant for a doctor — and still
+        // let an inverted 80/120 through.
         let reading = BloodPressureReading(
             measuredAt: measuredAt,
-            // Same clamping idiom as sleepHours above: a typo like 1200/80 would
-            // otherwise flatten the whole chart.
-            systolic: BloodPressureReading.systolicRange.clamping(systolic),
-            diastolic: BloodPressureReading.diastolicRange.clamping(diastolic),
-            pulse: pulse.map { BloodPressureReading.pulseRange.clamping($0) }
+            systolic: systolic,
+            diastolic: diastolic,
+            pulse: pulse
         )
         context.insert(reading)
         // Posted on the diary channel: the readings live on the diary's own

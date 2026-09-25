@@ -21,23 +21,27 @@ struct BloodPressureEntryView: View {
     private var diastolic: Int? { Int(diastolicText) }
     private var pulse: Int? { Int(pulseText) }
     
-    /// Saving is blocked rather than silently corrected. The database clamps too,
-    /// but a reading quietly turned from 999 into 300 would look like the app
-    /// misread the monitor.
+    /// What the rules say about the typed numbers — the same check
+    /// BloodPressureLogging makes on the write. Nil while a field is empty.
+    private var issue: BloodPressureRules.Issue? {
+        guard let systolic, let diastolic else { return nil }
+        return BloodPressureRules.issue(
+            systolic: systolic, diastolic: diastolic, pulse: pulse,
+            measuredAt: measuredAt, now: latestSelectableDate
+        )
+    }
+
+    /// Saving is blocked rather than silently corrected: a reading quietly
+    /// turned from 999 into 300 would look like the app misread the monitor.
     private var canSave: Bool {
-        guard let systolic, let diastolic else { return false }
-        guard BloodPressureRules.systolicRange.contains(systolic),
-              BloodPressureRules.diastolicRange.contains(diastolic) else { return false }
-        if let pulse, !BloodPressureRules.pulseRange.contains(pulse) { return false }
-        return BloodPressureRules.isOrdered(systolic: systolic, diastolic: diastolic)
+        systolic != nil && diastolic != nil && issue == nil
     }
 
     /// Both numbers in range and still not a reading. Kept apart from `canSave`
     /// because the form has to say so, not just go quiet: a Save button that
     /// dims with every field filled in looks broken.
     private var isInverted: Bool {
-        guard let systolic, let diastolic else { return false }
-        return !BloodPressureRules.isOrdered(systolic: systolic, diastolic: diastolic)
+        issue == .inverted
     }
     
     /// A measurement cannot have happened later than now, and the reading is

@@ -23,12 +23,16 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     private let diary: any DiaryRepository
     private let errors: any ErrorReporting
     private let time: any TimeSource
+    private let bloodPressure: BloodPressureLogging
     private var cancellables = Set<AnyCancellable>()
     
     init(diary: any DiaryRepository, errors: any ErrorReporting, changes: DatabaseChangeFeed, time: any TimeSource = SystemTime()) {
         self.time = time
         self.diary = diary
         self.errors = errors
+        // Built here from what the screen already has: stateless, and the same
+        // rules as the reminder's form, which gets its own from AppDependencies.
+        self.bloodPressure = BloodPressureLogging(diary: diary, errors: errors, time: time)
         fetchEntries()
         
         // Only diary writes: otherwise every unrelated write — taking a pill,
@@ -61,9 +65,8 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     }
     
     func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {
-        guard PendingBloodPressureReading.save(
-            measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse,
-            diary: diary, errors: errors
+        guard bloodPressure.save(
+            measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
         ) else { return }
         fetchEntries()
     }

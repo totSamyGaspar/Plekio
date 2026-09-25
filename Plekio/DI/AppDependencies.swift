@@ -57,6 +57,8 @@ final class AppDependencies {
     let diaryRepository: any DiaryRepository
 
     let doseLogging: any DoseLoggingUseCaseProtocol
+    /// Saving a blood-pressure reading, rules checked on the write.
+    let bloodPressureLogging: BloodPressureLogging
     let courseEditing: any CourseEditingUseCaseProtocol
 
     /// The one undo window for dose actions — the dashboard's and the
@@ -104,6 +106,7 @@ final class AppDependencies {
         dailyReminderArming = DailyReminderArming(notifications: notifications)
         courseRepository = SwiftDataCourseRepository(store: database)
         diaryRepository = SwiftDataDiaryRepository(store: database)
+        bloodPressureLogging = BloodPressureLogging(diary: diaryRepository, errors: errorPresenter, time: time)
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)
         reminderSync = ReminderSyncCoordinator(notificationService: notifications, dbService: database)
         router = AppRouter()

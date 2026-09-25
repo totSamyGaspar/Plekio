@@ -153,10 +153,8 @@ struct MainTabView: View {
             
         case .bloodPressureEntry:
             BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
-                PendingBloodPressureReading.save(
-                    measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse,
-                    diary: dependencies.diaryRepository,
-                    errors: errorPresenter
+                dependencies.bloodPressureLogging.save(
+                    measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
                 )
             }
             .appTheme()

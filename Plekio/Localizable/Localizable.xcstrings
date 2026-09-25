@@ -26101,6 +26101,65 @@
           }
         }
       }
+    },
+    "This reading can't be saved. Check the numbers and try again." : {
+      "comment" : "Error shown when a blood pressure reading fails validation on save.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Messung kann nicht gespeichert werden. Prüfe die Werte und versuche es erneut."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se puede guardar esta medición. Revisa los valores e inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette mesure ne peut pas être enregistrée. Vérifiez les valeurs et réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile salvare questa misurazione. Controlla i valori e riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この測定値は保存できません。数値を確認してもう一度お試しください。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бұл өлшемді сақтау мүмкін емес. Мәндерді тексеріп, қайта көріңіз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Această măsurătoare nu poate fi salvată. Verificați valorile și încercați din nou."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это измерение нельзя сохранить. Проверьте значения и попробуйте ещё раз."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Це вимірювання не можна зберегти. Перевірте значення та спробуйте ще раз."
+          }
+        }
+      }
     }
   },
   "version" : "1.2"

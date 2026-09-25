@@ -91,8 +91,9 @@ nonisolated struct BloodPressureSnapshot: Identifiable, Hashable, Sendable {
     }
 }
 
-/// What counts as a plausible reading. Used by the entry form to validate and
-/// by the store to clamp, so the two cannot disagree.
+/// What counts as a plausible reading. One place, asked by the entry form (to
+/// enable Save and explain why not) and by BloodPressureLogging (to refuse the
+/// write), so the two cannot disagree.
 nonisolated enum BloodPressureRules {
     static let systolicRange = 60...300
     static let diastolicRange = 30...200
@@ -100,6 +101,29 @@ nonisolated enum BloodPressureRules {
 
     static func isOrdered(systolic: Int, diastolic: Int) -> Bool {
         systolic > diastolic
+    }
+
+    /// Why a reading is not one. Checked in this order, so the form names the
+    /// first thing to fix.
+    enum Issue: Equatable, Sendable {
+        case systolicOutOfRange
+        case diastolicOutOfRange
+        case pulseOutOfRange
+        /// Both numbers in range, but the upper one is not above the lower —
+        /// usually the two fields typed the wrong way round.
+        case inverted
+        /// Measured later than now.
+        case inFuture
+    }
+
+    /// Nil for a reading that can be saved.
+    static func issue(systolic: Int, diastolic: Int, pulse: Int?, measuredAt: Date, now: Date) -> Issue? {
+        guard systolicRange.contains(systolic) else { return .systolicOutOfRange }
+        guard diastolicRange.contains(diastolic) else { return .diastolicOutOfRange }
+        if let pulse, !pulseRange.contains(pulse) { return .pulseOutOfRange }
+        guard isOrdered(systolic: systolic, diastolic: diastolic) else { return .inverted }
+        guard measuredAt <= now else { return .inFuture }
+        return nil
     }
 }
 
