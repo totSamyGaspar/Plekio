@@ -60,6 +60,25 @@ final class DatabaseService {
     }
 }
 
+// MARK: - Reading
+
+extension DatabaseService {
+
+    /// The one place the store is read. A failure is reported through the
+    /// persistence controller instead of vanishing into `try?` — see
+    /// `PersistenceController.reportReadFailure`.
+    func fetch<Model: PersistentModel>(_ descriptor: FetchDescriptor<Model>) -> [Model] {
+        do {
+            let result = try context.fetch(descriptor)
+            persistence.readSucceeded()
+            return result
+        } catch {
+            persistence.reportReadFailure(error)
+            return []
+        }
+    }
+}
+
 /// The whole surface, assembled from the four conformances in the extension
 /// files. Declared here and satisfied entirely by them — this type adds no
 /// storage operations of its own.

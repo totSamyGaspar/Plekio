@@ -42,4 +42,35 @@ struct PersistenceReportingTests {
         #expect(errors.reported.isEmpty)
         #expect(photos.saved[id] == Data([0x01]))
     }
+
+    @Test("сбой чтения сообщается один раз на серию и снова — после успешного чтения")
+    func readFailureIsReportedOncePerStreak() {
+        let errors = SpyErrorReporter()
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: errors)
+        let failure = NSError(domain: "test", code: 1)
+
+        db.persistence.reportReadFailure(failure)
+        db.persistence.reportReadFailure(failure)
+        #expect(errors.reported.count == 1)
+        guard case .readFailed = errors.reported.first as? DatabaseError else {
+            Issue.record("expected DatabaseError.readFailed, got \(String(describing: errors.reported.first))")
+            return
+        }
+
+        db.persistence.readSucceeded()
+        db.persistence.reportReadFailure(failure)
+        #expect(errors.reported.count == 2)
+    }
+
+    @Test("алерт о сбое чтения не называется «Couldn't save»")
+    func presenterTitleFollowsTheKindOfFailure() {
+        let presenter = AppErrorPresenter()
+
+        presenter.report(DatabaseError.readFailed(underlying: NSError(domain: "test", code: 1)))
+        #expect(presenter.title.key == "Couldn't load your data")
+        #expect(presenter.message != nil)
+
+        presenter.report(DatabaseError.saveFailed(underlying: NSError(domain: "test", code: 2)))
+        #expect(presenter.title.key == "Couldn't save")
+    }
 }

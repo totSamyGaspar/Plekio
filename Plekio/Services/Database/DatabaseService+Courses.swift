@@ -196,12 +196,12 @@ extension DatabaseService: CourseStoring {
     /// object itself.
     func fetchCourse(id: UUID) -> TreatmentCourse? {
         let descriptor = FetchDescriptor<TreatmentCourse>(predicate: #Predicate { $0.id == id })
-        return try? context.fetch(descriptor).first
+        return fetch(descriptor).first
     }
 
     func fetchAllCourses() -> [TreatmentCourse] {
         let descriptor = FetchDescriptor<TreatmentCourse>(sortBy: [SortDescriptor(\.startDate, order: .reverse)])
-        return (try? context.fetch(descriptor)) ?? []
+        return fetch(descriptor)
     }
 
     func deleteCourse(_ course: TreatmentCourse) throws {

@@ -101,7 +101,7 @@ struct MainTabView: View {
         }
         .onChange(of: router.pendingDeepLink) { _, _ in consumeDeepLink() }
         .alert(
-            "Couldn't save",
+            Text(errorPresenter.title),
             isPresented: Binding(
                 get: { errorPresenter.message != nil },
                 set: { if !$0 { errorPresenter.message = nil } }

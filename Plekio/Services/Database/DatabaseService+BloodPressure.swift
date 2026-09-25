@@ -31,7 +31,7 @@ extension DatabaseService: BloodPressureStoring {
         let descriptor = FetchDescriptor<BloodPressureReading>(
             sortBy: [SortDescriptor(\.measuredAt, order: .reverse)]
         )
-        return (try? context.fetch(descriptor)) ?? []
+        return fetch(descriptor)
     }
 
     func deleteBloodPressureReading(_ reading: BloodPressureReading) throws {

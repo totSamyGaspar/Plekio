@@ -165,6 +165,28 @@ final class PersistenceController {
     /// device, and the bytes exist only in memory, so parking them for later needs
     /// the very disk that just refused. So the record stands and the user is told
     /// precisely which part of it is missing.
+    // MARK: - Read failures
+
+    /// Set once a read failure has been shown, cleared by the next read that
+    /// works. A screen makes several reads in a row; a broken store would
+    /// otherwise raise the same alert for each of them.
+    private var readFailureReported = false
+
+    /// Reads stay non-throwing — a screen shows what it could get rather than
+    /// nothing at all — but a failed one is no longer silent: it is logged, and
+    /// the user is told what is on screen may be incomplete. Before, a broken
+    /// store and an empty one looked the same.
+    func reportReadFailure(_ error: Error) {
+        AppLog.storage.error("Read failed: \(error.localizedDescription, privacy: .public)")
+        guard !readFailureReported else { return }
+        readFailureReported = true
+        errors.report(DatabaseError.readFailed(underlying: error))
+    }
+
+    func readSucceeded() {
+        readFailureReported = false
+    }
+
     func persistPhotos(_ photos: [(UUID, Data)]) {
         var failures = 0
         for (id, data) in photos where !self.photos.saveToDisk(data, for: id) {
@@ -190,12 +212,18 @@ enum DatabaseError: LocalizedError {
     /// `PersistenceController.persistPhotos` for why this one is reported instead.
     case photoNotSaved
 
+    /// A read failed and returned nothing. Never thrown — reported once per run
+    /// of failures, see `PersistenceController.reportReadFailure`.
+    case readFailed(underlying: Error)
+
     var errorDescription: String? {
         switch self {
         case .storageUnavailable:
             return String(localized: "Storage on this device is unavailable. The app is running in temporary mode — entries will not survive a restart.")
         case .saveFailed:
             return String(localized: "Couldn't save your changes. They were not written to the device.")
+        case .readFailed:
+            return String(localized: "Couldn't read your data from the device. What's on screen may be incomplete.")
         case .photoNotSaved:
             return String(localized: "Couldn't save a photo. Everything else was saved — the device may be out of storage.")
         }
@@ -209,7 +237,7 @@ enum DatabaseError: LocalizedError {
             return nil
         case .saveFailed(let underlying):
             return underlying.localizedDescription
-        case .photoNotSaved:
+        case .photoNotSaved, .readFailed:
             return nil
         }
     }

@@ -27,9 +27,19 @@ final class AppErrorPresenter: ErrorReporting {
     /// Text of the last error; nil means there is nothing to show.
     var message: String?
 
+    /// The alert's title. Most failures are writes; a failed read is not a
+    /// "couldn't save", and saying so would send the user looking for an edit
+    /// that never happened.
+    private(set) var title: LocalizedStringResource = "Couldn't save"
+
     init() {}
 
     func report(_ error: Error) {
+        if case DatabaseError.readFailed = error {
+            title = "Couldn't load your data"
+        } else {
+            title = "Couldn't save"
+        }
         message = Self.describe(error)
     }
 

@@ -29,7 +29,7 @@ extension DatabaseService: DoseStoring {
             courses = preFetched
         } else {
             let descriptor = FetchDescriptor<TreatmentCourse>()
-            courses = (try? context.fetch(descriptor)) ?? []
+            courses = fetch(descriptor)
         }
 
         var dailyPills: [PillDose] = []
@@ -83,7 +83,7 @@ extension DatabaseService: DoseStoring {
     /// One course fetch for the whole range, not one per day.
     func fetchPills(onDays days: [Date]) -> [Date: [PillDose]] {
         let calendar = Calendar.current
-        let courses = (try? context.fetch(FetchDescriptor<TreatmentCourse>())) ?? []
+        let courses = fetch(FetchDescriptor<TreatmentCourse>())
 
         var result: [Date: [PillDose]] = [:]
         for day in days {
@@ -100,7 +100,7 @@ extension DatabaseService: DoseStoring {
         let descriptor = FetchDescriptor<MedicationItem>(
             predicate: #Predicate { $0.id == medicationId }
         )
-        return try? context.fetch(descriptor).first
+        return fetch(descriptor).first
     }
 
     // MARK: - Bulk logging

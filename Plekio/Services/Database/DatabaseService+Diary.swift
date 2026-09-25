@@ -80,7 +80,7 @@ extension DatabaseService: DiaryStoring {
 
     func fetchAllDiaryEntries() -> [DiaryEntry] {
         let descriptor = FetchDescriptor<DiaryEntry>(sortBy: [SortDescriptor(\.checkInDate, order: .reverse)])
-        return (try? context.fetch(descriptor)) ?? []
+        return fetch(descriptor)
     }
 
     func deleteDiaryEntry(_ entry: DiaryEntry) throws {

@@ -15,7 +15,8 @@ import SwiftData
 //  All mutating methods throw `DatabaseError` when the write fails, so a failed
 //  save can never be reported to the UI as a success. Reads deliberately stay
 //  non-throwing: on failure they return an empty result — degradation rather than
-//  data loss.
+//  data loss — but the failure is logged and shown to the user once, so a broken
+//  store is not mistaken for an empty one (DatabaseService.fetch).
 
 // MARK: - Courses
 
