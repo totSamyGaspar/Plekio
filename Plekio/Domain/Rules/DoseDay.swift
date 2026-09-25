@@ -10,7 +10,7 @@ import Foundation
 // MARK: - DoseDay
 
 /// One day's doses built from the courses. `nonisolated` so both the main-actor
-/// store and DoseHistoryReader, on its own context, build them the same way.
+/// store and BackgroundReader, on its own context, build them the same way.
 nonisolated enum DoseDay {
 
     /// Sorted by time. `day` must be a start of day in `calendar`.

@@ -108,17 +108,17 @@ final class PersistenceController {
 
     // MARK: - Background Reads
 
-    private var historyReader: DoseHistoryReader?
+    private var cachedReader: BackgroundReader?
 
     /// Created off the main thread: a `@ModelActor` made on the main thread runs its
     /// context on the main queue, which defeats the point.
-    func doseHistoryReader() async -> DoseHistoryReader {
-        if let historyReader { return historyReader }
+    func backgroundReader() async -> BackgroundReader {
+        if let cachedReader { return cachedReader }
         let container = self.container
         let reader = await Task.detached(priority: .userInitiated) {
-            DoseHistoryReader(modelContainer: container)
+            BackgroundReader(modelContainer: container)
         }.value
-        historyReader = reader
+        cachedReader = reader
         return reader
     }
 

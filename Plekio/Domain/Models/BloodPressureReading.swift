@@ -10,8 +10,9 @@ import SwiftData
 
 // MARK: - BloodPressureReading
 
+/// `nonisolated`: BackgroundReader reads it on a background context.
 @Model
-final class BloodPressureReading {
+nonisolated final class BloodPressureReading {
 
     // MARK: - Properties
 

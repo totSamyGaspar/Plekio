@@ -10,8 +10,9 @@ import SwiftData
 
 // MARK: - DiaryEntry
 
+/// `nonisolated`: BackgroundReader reads it on a background context.
 @Model
-final class DiaryEntry {
+nonisolated final class DiaryEntry {
 
     // MARK: - Properties
 
@@ -73,7 +74,7 @@ final class DiaryEntry {
 
 // MARK: - Display
 
-extension DiaryEntry {
+nonisolated extension DiaryEntry {
     var moodTitle: String {
         guard let mood = DiaryMood(rawValue: moodLabel) else { return moodLabel }
         return String(localized: mood.title)

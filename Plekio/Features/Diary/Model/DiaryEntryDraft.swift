@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - DiaryMood
 
-enum DiaryMood: String, CaseIterable, Identifiable {
+nonisolated enum DiaryMood: String, CaseIterable, Identifiable {
     case great = "Great"
     case good = "Good"
     case neutral = "Neutral"

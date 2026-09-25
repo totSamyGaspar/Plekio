@@ -32,7 +32,7 @@ final class ReportExportViewModel: ObservableObject {
     @Published private(set) var isWorking = false
     @Published private(set) var document: URL?
 
-    private let database: any CourseStoring & DiaryStoring & BloodPressureStoring
+    private let database: any CourseStoring & DiaryStoring & BloodPressureStoring & ReportReading
     private let images: any ImageLoading
     private let errors: any ErrorReporting
     private let time: any TimeSource
@@ -42,7 +42,7 @@ final class ReportExportViewModel: ObservableObject {
     // MARK: - Init
 
     init(
-        database: any CourseStoring & DiaryStoring & BloodPressureStoring,
+        database: any CourseStoring & DiaryStoring & BloodPressureStoring & ReportReading,
         images: any ImageLoading,
         errors: any ErrorReporting,
         profile: @escaping () -> UserProfile,
@@ -102,11 +102,10 @@ final class ReportExportViewModel: ObservableObject {
         isWorking = true
         defer { isWorking = false }
 
-        // Store reads stay on the main actor, where SwiftData lives.
-        let data = ReportBuilder(database: database, now: { [time] in time.now }).build(selection, profile: profile())
-        let photos = selection.includesPhotos ? await photos(in: data) : [:]
-
         do {
+            // Read, photos and rendering all off the main actor.
+            let data = try await database.reportData(for: selection, profile: profile(), now: time.now)
+            let photos = selection.includesPhotos ? await photos(in: data) : [:]
             document = try await Self.renderDocument(data, photos: photos)
         } catch {
             errors.report(error)

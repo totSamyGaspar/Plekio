@@ -73,3 +73,23 @@ extension DatabaseService {
 
 /// Satisfied entirely by the per-domain extensions.
 extension DatabaseService: DatabaseServiceProtocol {}
+
+// MARK: - ReportReading
+
+extension DatabaseService {
+
+    /// Reads on BackgroundReader's context, so a long period doesn't freeze the UI.
+    func reportData(for selection: ReportSelection, profile: UserProfile, now: Date) async throws -> ReportData {
+        let calendar = time.calendar
+        let reader = await persistence.backgroundReader()
+        do {
+            let data = try await reader.reportData(for: selection, profile: profile, calendar: calendar, now: now)
+            persistence.readSucceeded()
+            return data
+        } catch {
+            AppLog.storage.error("Report read failed: \(error.localizedDescription, privacy: .public)")
+            throw DatabaseError.readFailed(underlying: error)
+        }
+    }
+}
+

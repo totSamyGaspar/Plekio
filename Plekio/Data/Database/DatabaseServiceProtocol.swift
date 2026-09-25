@@ -102,4 +102,20 @@ protocol BloodPressureStoring {
 
 /// The whole storage surface, for the composition root and test double only.
 @MainActor
-protocol DatabaseServiceProtocol: CourseStoring, DoseStoring, DiaryStoring, BloodPressureStoring, DatabaseChangeSource {}
+protocol DatabaseServiceProtocol: CourseStoring, DoseStoring, DiaryStoring, BloodPressureStoring, DatabaseChangeSource, ReportReading {}
+
+// MARK: - Report
+
+@MainActor
+protocol ReportReading {
+    /// Everything the report needs, read in one go. Throws if the store can't be read.
+    func reportData(for selection: ReportSelection, profile: UserProfile, now: Date) async throws -> ReportData
+}
+
+extension ReportReading where Self: CourseStoring & DiaryStoring & BloodPressureStoring {
+
+    /// On the main actor, through ReportBuilder; DatabaseService reads in the background.
+    func reportData(for selection: ReportSelection, profile: UserProfile, now: Date) async throws -> ReportData {
+        ReportBuilder(database: self, now: { now }).build(selection, profile: profile)
+    }
+}

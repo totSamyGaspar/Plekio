@@ -7,8 +7,10 @@
 
 import Foundation
 
-/// Turns a selection into `ReportData`; the only export code touching SwiftData.
-/// Uses `DoseSchedule` so counts match the dashboard.
+// MARK: - ReportBuilder
+
+/// Reads the store on the main actor and assembles the report. The app uses
+/// BackgroundReader instead; this stays for tests and store doubles.
 @MainActor
 struct ReportBuilder {
 
@@ -35,6 +37,38 @@ struct ReportBuilder {
     // MARK: - Build
 
     func build(_ selection: ReportSelection, profile: UserProfile = .empty) -> ReportData {
+        ReportAssembler(calendar: calendar, now: now()).build(
+            selection,
+            profile: profile,
+            courses: database.fetchAllCourses(),
+            pressure: database.fetchAllBloodPressureReadings(),
+            diary: database.fetchAllDiaryEntries()
+        )
+    }
+}
+
+// MARK: - ReportAssembler
+
+/// Turns a selection and the stored models into `ReportData`. Pure and
+/// `nonisolated`, so it runs on whichever context the models belong to.
+/// Uses `DoseSchedule` so counts match the dashboard.
+nonisolated struct ReportAssembler {
+
+    // MARK: - Properties
+
+    let calendar: Calendar
+    /// Doses past `missedGrace` before this moment count as missed.
+    let now: Date
+
+    // MARK: - Build
+
+    func build(
+        _ selection: ReportSelection,
+        profile: UserProfile,
+        courses allCourses: [TreatmentCourse],
+        pressure allPressure: [BloodPressureReading],
+        diary allDiary: [DiaryEntry]
+    ) -> ReportData {
         let from = calendar.startOfDay(for: selection.from)
         let lastDay = calendar.startOfDay(for: selection.to)
 
@@ -45,23 +79,23 @@ struct ReportBuilder {
             profile: profile,
             from: from,
             to: lastDay,
-            generatedAt: now(),
+            generatedAt: now,
             courses: selection.includes(.medications)
-                ? courses(selection.courseIds, from: from, throughDay: lastDay)
+                ? courses(allCourses, ids: selection.courseIds, from: from, throughDay: lastDay)
                 : [],
             pressure: selection.includes(.bloodPressure)
-                ? pressure(from: from, before: end)
+                ? pressure(allPressure, from: from, before: end)
                 : [],
             diary: selection.includes(.diary)
-                ? diary(from: from, before: end, withPhotos: selection.includesPhotos)
+                ? diary(allDiary, from: from, before: end, withPhotos: selection.includesPhotos)
                 : []
         )
     }
 
     // MARK: - Medications
 
-    private func courses(_ ids: Set<UUID>, from: Date, throughDay lastDay: Date) -> [CourseReport] {
-        database.fetchAllCourses()
+    private func courses(_ all: [TreatmentCourse], ids: Set<UUID>, from: Date, throughDay lastDay: Date) -> [CourseReport] {
+        all
             .filter { ids.contains($0.id) }
             .sorted { $0.startDate < $1.startDate }
             .map { course in
@@ -138,7 +172,7 @@ struct ReportBuilder {
         case .pending, nil: break
         }
 
-        return slot.addingTimeInterval(DoseSchedule.missedGrace) < now() ? .missed : .upcoming
+        return slot.addingTimeInterval(DoseSchedule.missedGrace) < now ? .missed : .upcoming
     }
 
     /// Logs indexed by slot once, instead of scanning per slot.
@@ -151,8 +185,8 @@ struct ReportBuilder {
 
     // MARK: - Diary and Blood Pressure
 
-    private func pressure(from: Date, before end: Date) -> [PressureReading] {
-        database.fetchAllBloodPressureReadings()
+    private func pressure(_ all: [BloodPressureReading], from: Date, before end: Date) -> [PressureReading] {
+        all
             .filter { $0.measuredAt >= from && $0.measuredAt < end }
             .sorted { $0.measuredAt < $1.measuredAt }
             .map {
@@ -165,8 +199,8 @@ struct ReportBuilder {
             }
     }
 
-    private func diary(from: Date, before end: Date, withPhotos: Bool) -> [DiaryDay] {
-        database.fetchAllDiaryEntries()
+    private func diary(_ all: [DiaryEntry], from: Date, before end: Date, withPhotos: Bool) -> [DiaryDay] {
+        all
             .filter { $0.checkInDate >= from && $0.checkInDate < end }
             .sorted { $0.checkInDate < $1.checkInDate }
             .map { entry in

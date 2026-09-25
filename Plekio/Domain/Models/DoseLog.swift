@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-/// `nonisolated`: DoseHistoryReader reads it on a background context.
+/// `nonisolated`: BackgroundReader reads it on a background context.
 @Model
 nonisolated final class DoseLog {
 

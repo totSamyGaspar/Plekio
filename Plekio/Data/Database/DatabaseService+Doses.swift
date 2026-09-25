@@ -49,11 +49,11 @@ extension DatabaseService: DoseStoring {
         return result
     }
 
-    /// Reads on DoseHistoryReader's context. Sees only committed data, which is
+    /// Reads on BackgroundReader's context. Sees only committed data, which is
     /// all there is: every write goes through `commit`.
     func pillHistory(onDays days: [Date]) async -> [Date: [PillDose]] {
         let calendar = time.calendar
-        let reader = await persistence.doseHistoryReader()
+        let reader = await persistence.backgroundReader()
         do {
             let result = try await reader.pills(onDays: days, calendar: calendar)
             persistence.readSucceeded()

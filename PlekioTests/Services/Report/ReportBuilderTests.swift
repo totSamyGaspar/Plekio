@@ -255,4 +255,25 @@ struct ReportBuilderTests {
         let with = builder(db, now: afterwards).build(onlyDiary)
         #expect(with.diary[0].photoIds.count == 1)
     }
+
+    // MARK: - Background Read
+
+    @Test("отчёт, собранный в фоне, совпадает с отчётом с главного потока")
+    func backgroundReportMatchesMainActorBuild() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let course = seedCourse(db)
+        log(course, at: testDate(2026, 6, 2, 9, 0), taken: true)
+        log(course, at: testDate(2026, 6, 3, 9, 0), taken: false, skipped: true)
+        try db.context.save()
+
+        var all = selection(course, from: testDate(2026, 6, 1), to: testDate(2026, 6, 10))
+        all.sections = Set(ReportSection.allCases)
+
+        let main = builder(db, now: afterwards).build(all)
+        let background = try await db.reportData(for: all, profile: .empty, now: afterwards)
+
+        #expect(background == main)
+        #expect(background.courses.first?.adherence.taken == 1)
+        #expect(background.courses.first?.adherence.skipped == 1)
+    }
 }
