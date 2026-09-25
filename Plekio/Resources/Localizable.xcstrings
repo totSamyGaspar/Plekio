@@ -26449,6 +26449,242 @@
           }
         }
       }
+    },
+    "Delete all diary entries" : {
+      "comment" : "Settings > Storage: deleting every diary entry.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Tagebucheinträge löschen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar todas las entradas del diario"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer toutes les entrées du journal"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina tutte le voci del diario"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日記の記録をすべて削除"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Күнделіктің барлық жазбаларын жою"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Șterge toate înregistrările din jurnal"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить все записи дневника"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити всі записи щоденника"
+          }
+        }
+      }
+    },
+    "Delete all diary entries?" : {
+      "comment" : "Settings > Storage: deleting every diary entry.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Tagebucheinträge löschen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar todas las entradas del diario?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer toutes les entrées du journal ?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminare tutte le voci del diario?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日記の記録をすべて削除しますか？"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Күнделіктің барлық жазбаларын жою керек пе?"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ștergeți toate înregistrările din jurnal?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить все записи дневника?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити всі записи щоденника?"
+          }
+        }
+      }
+    },
+    "Entries: %lld, photos: %lld. Blood pressure readings are kept. This can't be undone." : {
+      "comment" : "Settings > Storage: deleting every diary entry.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einträge: %1$lld, Fotos: %2$lld. Blutdruckwerte bleiben erhalten. Das kann nicht rückgängig gemacht werden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entradas: %1$lld, fotos: %2$lld. Las mediciones de presión se conservan. No se puede deshacer."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrées : %1$lld, photos : %2$lld. Les mesures de tension sont conservées. Action irréversible."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voci: %1$lld, foto: %2$lld. Le misurazioni della pressione restano. L'azione è irreversibile."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録：%1$lld件、写真：%2$lld枚。血圧の記録は残ります。この操作は取り消せません。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жазбалар: %1$lld, фотолар: %2$lld. Қан қысымы өлшемдері сақталады. Бұл әрекетті қайтару мүмкін емес."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Înregistrări: %1$lld, fotografii: %2$lld. Măsurătorile tensiunii se păstrează. Acțiunea nu poate fi anulată."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записей: %1$lld, фото: %2$lld. Измерения давления сохранятся. Это действие нельзя отменить."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записів: %1$lld, фото: %2$lld. Вимірювання тиску збережуться. Цю дію не можна скасувати."
+          }
+        }
+      }
+    },
+    "Diary cleared" : {
+      "comment" : "Settings > Storage: deleting every diary entry.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagebuch geleert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diario vaciado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journal vidé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diario svuotato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日記を削除しました"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Күнделік тазартылды"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jurnal golit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дневник очищен"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щоденник очищено"
+          }
+        }
+      }
     }
   },
   "version" : "1.2"

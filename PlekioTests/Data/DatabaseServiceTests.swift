@@ -481,6 +481,24 @@ struct DatabaseServiceTests {
 
     }
 
+    @Test("удаление всего дневника стирает записи и их фото, но не давление")
+    func deleteAllDiaryEntriesKeepsBloodPressure() async throws {
+        let store = FakePhotoStore()
+        let db = DatabaseService(inMemoryForTesting: true, photos: store, errors: SpyErrorReporter())
+        var first = DiaryEntryDraft()
+        first.photos = [Data([0x01])]
+        try db.saveDiaryEntry(draft: first)
+        try db.saveDiaryEntry(draft: DiaryEntryDraft())
+        try db.saveBloodPressureReading(measuredAt: testDate(2026, 6, 1), systolic: 120, diastolic: 80, pulse: nil)
+        let photoId = try #require(db.fetchAllDiaryEntries().flatMap(\.photoIds).first)
+
+        try db.deleteAllDiaryEntries()
+
+        #expect(db.fetchAllDiaryEntries().isEmpty)
+        #expect(store.saved[photoId] == nil)
+        #expect(db.fetchAllBloodPressureReadings().count == 1)
+    }
+
     @Test("deleteDiaryEntry removes the entry's photo files from disk")
     func testDeleteDiaryEntryRemovesPhotoFiles() async throws {
         let db = DatabaseService(inMemoryForTesting: true)

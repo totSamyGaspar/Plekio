@@ -86,6 +86,8 @@ protocol DiaryStoring {
     func updateDiaryEntry(_ entry: DiaryEntry, with draft: DiaryEntryDraft) throws
     func fetchAllDiaryEntries() -> [DiaryEntry]
     func deleteDiaryEntry(_ entry: DiaryEntry) throws
+    /// Every diary entry and its photo files; blood pressure readings are kept.
+    func deleteAllDiaryEntries() throws
 }
 
 // MARK: - Blood Pressure

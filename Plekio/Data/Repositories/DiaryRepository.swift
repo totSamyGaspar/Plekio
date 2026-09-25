@@ -17,6 +17,8 @@ protocol DiaryRepository {
     func saveEntry(_ draft: DiaryEntryDraft) throws
     func updateEntry(id: UUID, with draft: DiaryEntryDraft) throws
     func deleteEntry(id: UUID) throws
+    /// Entries and their photos; blood pressure readings stay.
+    func deleteAllEntries() throws
 
     func allBloodPressureReadings() -> [BloodPressureSnapshot]
     func saveBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) throws
@@ -66,6 +68,10 @@ final class SwiftDataDiaryRepository: DiaryRepository {
 
     func deleteEntry(id: UUID) throws {
         try store.deleteDiaryEntry(try entryModel(id))
+    }
+
+    func deleteAllEntries() throws {
+        try store.deleteAllDiaryEntries()
     }
 
     // MARK: - Blood Pressure
