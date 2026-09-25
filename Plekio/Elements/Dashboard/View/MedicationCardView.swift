@@ -18,7 +18,7 @@ struct MedicationCardView: View {
     /// Taken or skipped: either way the user has answered for this dose, and the
     /// row recedes. Only a taken one gets the strikethrough — a skip is a decision
     /// about the dose, not a record of having swallowed it.
-    private var isSettled: Bool { pill.isTaken || pill.isSkipped }
+    private var isSettled: Bool { pill.status.isSettled }
     
     /// The wash laid over the card, and the word written on it.
     ///
@@ -214,7 +214,6 @@ struct MedicationCardView: View {
                     formSystemImage: "pills.fill",
                     time: Date(),
                     period: .morning,
-                    isTaken: false,
                     stockCount: 9,
                     lowStockThreshold: 10
                 ),
@@ -230,7 +229,7 @@ struct MedicationCardView: View {
                     formSystemImage: "capsule.fill",
                     time: Date().addingTimeInterval(3600),
                     period: .morning,
-                    isTaken: true,
+                    status: .taken(at: Date(), dispensed: 1),
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),
@@ -246,8 +245,7 @@ struct MedicationCardView: View {
                     formSystemImage: "pills.fill",
                     time: Date().addingTimeInterval(-3600),
                     period: .morning,
-                    isTaken: false,
-                    isSkipped: true,
+                    status: .skipped(at: Date()),
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),
@@ -263,7 +261,6 @@ struct MedicationCardView: View {
                     formSystemImage: "capsule.fill",
                     time: Date().addingTimeInterval(-7200),
                     period: .morning,
-                    isTaken: false,
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),

@@ -64,8 +64,7 @@ extension DatabaseService: DoseStoring {
                             formSystemImage: med.formSystemImage,
                             time: slot.date,
                             period: DayPeriod(hour: slot.hour),
-                            isTaken: log?.status.isTaken ?? false,
-                            isSkipped: log?.status.isSkipped ?? false,
+                            status: log?.status ?? .pending,
                             stockCount: med.stockCount,
                             lowStockThreshold: med.lowStockThreshold
                         )

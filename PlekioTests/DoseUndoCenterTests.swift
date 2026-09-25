@@ -16,7 +16,7 @@ struct DoseUndoCenterTests {
 
     private func pill(at slot: Date) -> PillDose {
         PillDose(medicationId: UUID(), name: "Ибупрофен", dosage: 1, formSystemImage: "pills.fill",
-                 time: slot, period: .morning, isTaken: false)
+                 time: slot, period: .morning)
     }
 
     @Test("нечего отменять — окно не открывается")

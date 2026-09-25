@@ -33,11 +33,12 @@ struct PillDose: Identifiable, Equatable {
     let formSystemImage: String
     let time: Date
     let period: DayPeriod
-    var isTaken: Bool
-    /// Deliberately passed on, as opposed to merely not logged yet. Declared
-    /// after isTaken and before the stock fields so the memberwise initialiser
-    /// keeps its existing argument order.
-    var isSkipped: Bool = false
+    /// What the user has answered for this slot — the same DoseStatus the log
+    /// stores. It used to be two independent flags, `isTaken` and `isSkipped`,
+    /// that nothing kept from being true together; each writer (the database
+    /// read, the test mocks, the previews) had to remember to clear one when it
+    /// set the other.
+    var status: DoseStatus = .pending
     // No image data here by design: the view loads the photo lazily via
     // the environment's imageLoader, keyed on medicationId,
     // instead of copying the photo blob into every PillDose instance.
@@ -47,6 +48,9 @@ struct PillDose: Identifiable, Equatable {
     
     /// Late and unaccounted for. A skipped dose is accounted for — the user
     /// answered — so it never becomes "missed" no matter how long ago it was.
+    var isTaken: Bool { status.isTaken }
+    var isSkipped: Bool { status.isSkipped }
+
     var isMissed: Bool {
         isMissed(at: Date())
     }
@@ -54,7 +58,7 @@ struct PillDose: Identifiable, Equatable {
     /// Late and unaccounted for, as of `now`. The rule itself — the property
     /// above is the view's "as of this render".
     func isMissed(at now: Date) -> Bool {
-        !isTaken && !isSkipped && now > time.addingTimeInterval(DoseSchedule.missedGrace)
+        status == .pending && now > time.addingTimeInterval(DoseSchedule.missedGrace)
     }
     
     var isLoggable: Bool {

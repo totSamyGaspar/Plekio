@@ -74,7 +74,7 @@ final class DoseLoggingUseCase: DoseLoggingUseCaseProtocol {
     func markSkipped(_ doses: [PillDose]) throws -> DoseLogOutcome {
         // A taken dose is not skippable, and an already skipped one would only
         // have its timestamp moved.
-        let open = current(doses).filter { !$0.isTaken && !$0.isSkipped }
+        let open = current(doses).filter { $0.status == .pending }
         guard !open.isEmpty else { return .nothing }
 
         let bySlot = Dictionary(grouping: open, by: \.time)
@@ -160,7 +160,7 @@ final class DoseLoggingUseCase: DoseLoggingUseCaseProtocol {
                 // medication in it is answered for, and some may have been taken or
                 // skipped earlier.
                 let settled = Self.scheduled(in: dbService, at: slot)
-                    .filter { $0.isTaken || $0.isSkipped }
+                    .filter(\.status.isSettled)
                     .map(\.medicationId)
                 guard !settled.isEmpty else { continue }
                 await notificationService.clearDelivered(settledMedicationIds: settled, scheduledTime: slot)

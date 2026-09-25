@@ -16,12 +16,13 @@ import Foundation
 struct DoseLoggingUseCaseTests {
 
     private func dose(at slot: Date, taken: Bool = false, skipped: Bool = false) -> PillDose {
-        var pill = PillDose(
+        let status: DoseStatus = taken ? .taken(at: slot, dispensed: 1)
+            : skipped ? .skipped(at: slot)
+            : .pending
+        return PillDose(
             medicationId: UUID(), name: "Доза", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning, isTaken: taken
+            formSystemImage: "pills.fill", time: slot, period: .morning, status: status
         )
-        pill.isSkipped = skipped
-        return pill
     }
 
     @Test("markTaken пишет только открытые дозы, а outcome позволяет дождаться напоминаний")
@@ -74,7 +75,7 @@ struct DoseLoggingUseCaseTests {
 
         // Handed in as they were at "Log all" time — both taken.
         var staleCopy = untickedByHand
-        staleCopy.isTaken = true
+        staleCopy.status = .taken(at: slot, dispensed: 1)
         let outcome = try useCase.revertTaken([stillTaken, staleCopy])
 
         #expect(db.unmarkedTakenSlots.first?.medicationIds == [stillTaken.medicationId])

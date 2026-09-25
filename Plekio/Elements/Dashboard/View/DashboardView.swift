@@ -140,7 +140,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     private var upNextPills: [PillDose]? {
         guard Calendar.current.isDateInToday(viewModel.selectedDate) else { return nil }
         guard let earliest = allPills
-            .filter({ !$0.isTaken && !$0.isSkipped && !$0.isMissed })
+            .filter({ $0.status == .pending && !$0.isMissed })
             .min(by: { $0.time < $1.time })?.time
         else { return nil }
         return allPills.filter {
@@ -222,7 +222,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 onTogglePill: { id in viewModel.togglePill(id: id) },
                 onPillTap: { pill in
                     presentTakeSheet(
-                        for: pills.filter { $0.time == pill.time && !$0.isTaken && !$0.isSkipped }
+                        for: pills.filter { $0.time == pill.time && $0.status == .pending }
                     )
                 }
             )

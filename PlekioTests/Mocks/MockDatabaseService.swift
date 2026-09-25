@@ -85,12 +85,13 @@ final class MockDatabaseService: DatabaseServiceProtocol {
         toggleCalls.append((medicationId, scheduledTime))
 
         // Mirror the real service: the next fetchPills must return the slot with its
-        // new isTaken. Without this there is no way to test view-model logic that
+        // new status. Without this there is no way to test view-model logic that
         // inspects the state AFTER the write, such as "is the whole slot closed".
         for index in pillsToReturn.indices
         where pillsToReturn[index].medicationId == medicationId
             && pillsToReturn[index].time == scheduledTime {
-            pillsToReturn[index].isTaken.toggle()
+            let status = pillsToReturn[index].status
+            pillsToReturn[index].status = status.isTaken ? .pending : .taken(at: Date(), dispensed: pillsToReturn[index].dosage)
         }
     }
 
@@ -99,10 +100,11 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
         for index in pillsToReturn.indices
         where medicationIds.contains(pillsToReturn[index].medicationId)
-            && pillsToReturn[index].time == scheduledTime
-            && !pillsToReturn[index].isTaken {
-            pillsToReturn[index].isTaken = true
-            pillsToReturn[index].isSkipped = false
+            && pillsToReturn[index].time == scheduledTime {
+            let dosage = pillsToReturn[index].dosage
+            if let taken = pillsToReturn[index].status.taking(at: Date(), dispensed: dosage) {
+                pillsToReturn[index].status = taken
+            }
         }
     }
 
@@ -111,9 +113,10 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
         for index in pillsToReturn.indices
         where medicationIds.contains(pillsToReturn[index].medicationId)
-            && pillsToReturn[index].time == scheduledTime
-            && pillsToReturn[index].isTaken {
-            pillsToReturn[index].isTaken = false
+            && pillsToReturn[index].time == scheduledTime {
+            if let reverted = pillsToReturn[index].status.reverting() {
+                pillsToReturn[index].status = reverted.status
+            }
         }
     }
 
@@ -121,12 +124,14 @@ final class MockDatabaseService: DatabaseServiceProtocol {
         skippedSlots.append((medicationIds, scheduledTime))
 
         // Mirror the real service, so a view model that re-reads after the write
-        // sees the skip — same reason togglePill flips isTaken here.
+        // sees the skip — same reason togglePill flips the status here. The moves
+        // are DoseStatus's own, so the mock cannot drift from the real rules.
         for index in pillsToReturn.indices
         where medicationIds.contains(pillsToReturn[index].medicationId)
-            && pillsToReturn[index].time == scheduledTime
-            && !pillsToReturn[index].isTaken {
-            pillsToReturn[index].isSkipped = true
+            && pillsToReturn[index].time == scheduledTime {
+            if let skipped = pillsToReturn[index].status.skipping(at: Date()) {
+                pillsToReturn[index].status = skipped
+            }
         }
     }
 
@@ -135,9 +140,10 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
         for index in pillsToReturn.indices
         where medicationIds.contains(pillsToReturn[index].medicationId)
-            && pillsToReturn[index].time == scheduledTime
-            && pillsToReturn[index].isSkipped {
-            pillsToReturn[index].isSkipped = false
+            && pillsToReturn[index].time == scheduledTime {
+            if let pending = pillsToReturn[index].status.unskipping() {
+                pillsToReturn[index].status = pending
+            }
         }
     }
 

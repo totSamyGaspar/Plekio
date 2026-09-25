@@ -240,8 +240,8 @@ struct ActionButton: View {
 #Preview {
     TakePillModalView(
         pills: [
-            PillDose(medicationId: UUID(), name: "Sertraline", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .morning, isTaken: false, stockCount: 10, lowStockThreshold: 5),
-            PillDose(medicationId: UUID(), name: "Vitamin D", dosage: 1, formSystemImage: "capsule.fill", time: Date(), period: .morning, isTaken: false, stockCount: 10, lowStockThreshold: 5)
+            PillDose(medicationId: UUID(), name: "Sertraline", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .morning, stockCount: 10, lowStockThreshold: 5),
+            PillDose(medicationId: UUID(), name: "Vitamin D", dosage: 1, formSystemImage: "capsule.fill", time: Date(), period: .morning, stockCount: 10, lowStockThreshold: 5)
         ],
         onTake: {}, onSkip: {}, onSnooze: {}
     )

@@ -41,7 +41,6 @@ struct DashboardViewModelTests {
             formSystemImage: "pills.fill",
             time: Date(),
             period: .morning,
-            isTaken: false,
             stockCount: 10,
             lowStockThreshold: 3
         )
@@ -65,9 +64,9 @@ struct DashboardViewModelTests {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
-        let morning = PillDose(medicationId: UUID(), name: "Утро", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .morning, isTaken: false)
-        let noon = PillDose(medicationId: UUID(), name: "День", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .noon, isTaken: false)
-        let evening = PillDose(medicationId: UUID(), name: "Вечер", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .evening, isTaken: false)
+        let morning = PillDose(medicationId: UUID(), name: "Утро", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .morning)
+        let noon = PillDose(medicationId: UUID(), name: "День", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .noon)
+        let evening = PillDose(medicationId: UUID(), name: "Вечер", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .evening)
         mockDB.pillsToReturn = [morning, noon, evening]
 
         let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
@@ -103,8 +102,8 @@ struct DashboardViewModelTests {
         for offset in 0...2 {
             let day = calendar.date(byAdding: .day, value: -offset, to: startOfToday)!
             mockDB.pillsByDay[day] = [
-                PillDose(medicationId: UUID(), name: "Аспирин", dosage: 1, formSystemImage: "pills.fill", time: day.addingTimeInterval(9 * 3600), period: .morning, isTaken: true),
-                PillDose(medicationId: UUID(), name: "Магний", dosage: 1, formSystemImage: "capsule.fill", time: day.addingTimeInterval(20 * 3600), period: .evening, isTaken: true),
+                PillDose(medicationId: UUID(), name: "Аспирин", dosage: 1, formSystemImage: "pills.fill", time: day.addingTimeInterval(9 * 3600), period: .morning, status: .taken(at: Date(), dispensed: 1)),
+                PillDose(medicationId: UUID(), name: "Магний", dosage: 1, formSystemImage: "capsule.fill", time: day.addingTimeInterval(20 * 3600), period: .evening, status: .taken(at: Date(), dispensed: 1)),
             ]
         }
 
@@ -138,8 +137,8 @@ struct DashboardViewModelTests {
         let slot = Date().addingTimeInterval(-2 * 3600)
         let firstId = UUID()
         let secondId = UUID()
-        let first = PillDose(medicationId: firstId, name: "Ибупрофен", dosage: 1, formSystemImage: "pills.fill", time: slot, period: .morning, isTaken: false)
-        let second = PillDose(medicationId: secondId, name: "Магний", dosage: 1, formSystemImage: "capsule.fill", time: slot, period: .morning, isTaken: false)
+        let first = PillDose(medicationId: firstId, name: "Ибупрофен", dosage: 1, formSystemImage: "pills.fill", time: slot, period: .morning)
+        let second = PillDose(medicationId: secondId, name: "Магний", dosage: 1, formSystemImage: "capsule.fill", time: slot, period: .morning)
         mockDB.pillsToReturn = [first, second]
 
         let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
@@ -164,7 +163,7 @@ struct DashboardViewModelTests {
         let pill = PillDose(
             medicationId: UUID(), name: "Ибупрофен", dosage: 1,
             formSystemImage: "pills.fill", time: Date().addingTimeInterval(-2 * 3600),
-            period: .morning, isTaken: false
+            period: .morning
         )
         mockDB.pillsToReturn = [pill]
 
@@ -197,11 +196,11 @@ struct DashboardViewModelTests {
         let pendingId = UUID()
         let alreadyTaken = PillDose(
             medicationId: takenId, name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning, isTaken: true
+            formSystemImage: "pills.fill", time: slot, period: .morning, status: .taken(at: Date(), dispensed: 1)
         )
         let stillPending = PillDose(
             medicationId: pendingId, name: "Магний", dosage: 1,
-            formSystemImage: "capsule.fill", time: slot, period: .morning, isTaken: false
+            formSystemImage: "capsule.fill", time: slot, period: .morning
         )
         mockDB.pillsToReturn = [alreadyTaken, stillPending]
 
@@ -233,7 +232,7 @@ struct DashboardViewModelTests {
         let pills = (0..<3).map { index in
             PillDose(
                 medicationId: UUID(), name: "Доза \(index)", dosage: 1,
-                formSystemImage: "pills.fill", time: slot, period: .noon, isTaken: false
+                formSystemImage: "pills.fill", time: slot, period: .noon
             )
         }
         mockDB.pillsToReturn = pills
@@ -268,7 +267,7 @@ struct DashboardViewModelTests {
         let slot = Date().addingTimeInterval(-3 * 3600)
         let pill = PillDose(
             medicationId: UUID(), name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning, isTaken: false
+            formSystemImage: "pills.fill", time: slot, period: .morning
         )
         #expect(pill.isMissed)
         mockDB.pillsToReturn = [pill]
@@ -290,7 +289,7 @@ struct DashboardViewModelTests {
         let pills = (0..<2).map { index in
             PillDose(
                 medicationId: UUID(), name: "Доза \(index)", dosage: 1,
-                formSystemImage: "pills.fill", time: slot, period: .evening, isTaken: true
+                formSystemImage: "pills.fill", time: slot, period: .evening, status: .taken(at: Date(), dispensed: 1)
             )
         }
         mockDB.pillsToReturn = pills
@@ -316,7 +315,7 @@ struct DashboardViewModelTests {
         let medId = UUID()
         let pill = PillDose(
             medicationId: medId, name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning, isTaken: false
+            formSystemImage: "pills.fill", time: slot, period: .morning
         )
         mockDB.pillsToReturn = [pill]
 
@@ -351,11 +350,11 @@ struct DashboardViewModelTests {
         let openId = UUID()
         let alreadyTaken = PillDose(
             medicationId: takenId, name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning, isTaken: true
+            formSystemImage: "pills.fill", time: slot, period: .morning, status: .taken(at: Date(), dispensed: 1)
         )
         let stillOpen = PillDose(
             medicationId: openId, name: "Магний", dosage: 1,
-            formSystemImage: "capsule.fill", time: slot, period: .morning, isTaken: false
+            formSystemImage: "capsule.fill", time: slot, period: .morning
         )
         mockDB.pillsToReturn = [alreadyTaken, stillOpen]
 
@@ -384,9 +383,9 @@ struct DashboardViewModelTests {
         var pill = PillDose(
             medicationId: UUID(), name: "Ибупрофен", dosage: 1,
             formSystemImage: "pills.fill", time: Date().addingTimeInterval(-30 * 60),
-            period: .morning, isTaken: false
+            period: .morning
         )
-        pill.isSkipped = true
+        pill.status = .skipped(at: Date())
         mockDB.pillsToReturn = [pill]
 
         let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
@@ -406,7 +405,7 @@ struct DashboardViewModelTests {
         let pills = (0..<3).map { index in
             PillDose(
                 medicationId: UUID(), name: "Доза \(index)", dosage: 1,
-                formSystemImage: "pills.fill", time: slot, period: .morning, isTaken: false
+                formSystemImage: "pills.fill", time: slot, period: .morning
             )
         }
         mockDB.pillsToReturn = pills
@@ -443,7 +442,7 @@ struct DashboardViewModelTests {
         let slot = Date().addingTimeInterval(-30 * 60)
         let pill = PillDose(
             medicationId: UUID(), name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning, isTaken: false
+            formSystemImage: "pills.fill", time: slot, period: .morning
         )
         mockDB.pillsToReturn = [pill]
 
@@ -467,7 +466,7 @@ struct DashboardViewModelTests {
         let mockDB = MockDatabaseService()
         let pill = PillDose(
             medicationId: UUID(), name: "Ибупрофен", dosage: 1,
-            formSystemImage: "pills.fill", time: Date(), period: .morning, isTaken: false
+            formSystemImage: "pills.fill", time: Date(), period: .morning
         )
         mockDB.pillsToReturn = [pill]
 

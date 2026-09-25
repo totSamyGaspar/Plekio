@@ -16,7 +16,7 @@ import Foundation
 @Suite("PillDose")
 struct PillDoseTests {
 
-    private func dose(at time: Date, isTaken: Bool = false) -> PillDose {
+    private func dose(at time: Date, status: DoseStatus = .pending) -> PillDose {
         PillDose(
             medicationId: UUID(),
             name: "Ибупрофен",
@@ -24,7 +24,7 @@ struct PillDoseTests {
             formSystemImage: "pills.fill",
             time: time,
             period: .morning,
-            isTaken: isTaken
+            status: status
         )
     }
 
@@ -70,7 +70,7 @@ struct PillDoseTests {
 
     @Test("отмеченная доза просроченной не считается")
     func testTakenDoseIsNeverMissed() async throws {
-        let taken = dose(at: Date().addingTimeInterval(-5 * 3600), isTaken: true)
+        let taken = dose(at: Date().addingTimeInterval(-5 * 3600), status: .taken(at: Date(), dispensed: 1))
 
         #expect(taken.isMissed == false)
     }
@@ -81,10 +81,20 @@ struct PillDoseTests {
     // While skipping was merely the absence of a log there was nothing to tell
     // the two apart, and a declined dose eventually showed a MISSED badge.
 
+    @Test("статус из базы доходит до дозы целиком: отметка и пропуск не бывают одновременно")
+    func statusIsOneValue() {
+        let taken = dose(at: Date(), status: .taken(at: Date(), dispensed: 1))
+        #expect(taken.isTaken && !taken.isSkipped)
+
+        var reopened = taken
+        reopened.status = .skipped(at: Date())
+        #expect(reopened.isSkipped && !reopened.isTaken)
+    }
+
     @Test("пропущенная намеренно доза не становится просроченной")
     func testSkippedDoseIsNeverMissed() async throws {
         var skipped = dose(at: Date().addingTimeInterval(-5 * 3600))
-        skipped.isSkipped = true
+        skipped.status = .skipped(at: Date())
 
         #expect(skipped.isMissed == false)
         #expect(skipped.isTaken == false)

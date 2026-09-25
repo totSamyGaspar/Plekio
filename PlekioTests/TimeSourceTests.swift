@@ -25,7 +25,7 @@ struct TimeSourceTests {
 
     private func dose(at time: Date) -> PillDose {
         PillDose(medicationId: UUID(), name: "Доза", dosage: 1, formSystemImage: "pills.fill",
-                 time: time, period: .morning, isTaken: false)
+                 time: time, period: .morning)
     }
 
     // MARK: - PillDose

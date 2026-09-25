@@ -24,7 +24,7 @@ struct StatisticsViewModelTests {
             formSystemImage: "pills.fill",
             time: time,
             period: .morning,
-            isTaken: taken,
+            status: taken ? .taken(at: time, dispensed: 1) : .pending,
             stockCount: 30,
             lowStockThreshold: 10
         )
