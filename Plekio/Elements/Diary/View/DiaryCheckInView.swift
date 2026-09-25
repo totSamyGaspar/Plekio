@@ -278,22 +278,6 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     }
 }
 
-extension DiaryCheckInView where VM == DiaryCheckInViewModel {
-    init() {
-        self.init(viewModel: DIContainer.shared.resolve(DiaryCheckInViewModel.self))
-    }
-    
-    /// Opens the form on an existing entry: saving updates it rather than
-    /// creating a new one. The draft itself is filled by `startEditing(_:)`
-    /// from `.task`.
-    init(editingEntry: DiaryEntry) {
-        self.init(
-            viewModel: DIContainer.shared.resolve(DiaryCheckInViewModel.self),
-            editingEntry: editingEntry
-        )
-    }
-}
-
 #Preview {
     DiaryCheckInView(viewModel: MockDiaryCheckInViewModel())
         .appTheme()

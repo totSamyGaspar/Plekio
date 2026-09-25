@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @Environment(AppDependencies.self) private var dependencies
     @EnvironmentObject var router: AppRouter
     
     /// The one write-failure alert for the whole app, instead of the same
@@ -43,13 +44,13 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $router.selectedTab) {
             NavigationStack {
-                DashboardView()
+                DashboardView(viewModel: dependencies.makeDashboardViewModel())
             }
             .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
             .tag(0)
             
             NavigationStack(path: $router.coursesPath) {
-                CoursesListView()
+                CoursesListView(viewModel: dependencies.makeCoursesListViewModel())
                     .navigationDestination(for: Route.self) { route in
                         switch route {
                         case .courseDetail(let courseId):
@@ -61,7 +62,7 @@ struct MainTabView: View {
             .tag(1)
             
             NavigationStack {
-                DiaryView()
+                DiaryView(viewModel: dependencies.makeDiaryViewModel())
             }
             .tabItem { Label("Diary", systemImage: "text.book.closed.fill") }
             .tag(2)
@@ -118,7 +119,7 @@ struct MainTabView: View {
     private func consumePendingPush() {
         guard let (medicationIds, scheduledTime) = router.consumePendingPush() else { return }
 
-        let doseLogging = DIContainer.shared.resolve(DoseLoggingUseCaseProtocol.self)
+        let doseLogging = dependencies.doseLogging
 
         // Doses come from the schedule by slot time, not from the dashboard view
         // model, so the modal does not depend on whether that screen is rendered or
@@ -160,18 +161,18 @@ struct MainTabView: View {
         switch sheet {
             
         case .newTreatment:
-            NewTreatmentView()
+            NewTreatmentView(viewModel: dependencies.makeNewTreatmentViewModel())
                 .appTheme()
             
         case .diaryCheckIn:
-            DiaryCheckInView()
+            DiaryCheckInView(viewModel: dependencies.makeDiaryCheckInViewModel())
                 .appTheme()
             
         case .bloodPressureEntry:
             BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
                 PendingBloodPressureReading.save(
                     measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse,
-                    dbService: DIContainer.shared.resolve(DatabaseServiceProtocol.self)
+                    dbService: dependencies.database
                 )
             }
             .appTheme()
@@ -184,7 +185,7 @@ struct MainTabView: View {
                 onSkip()
                 router.dismissSheet()
             }, onSnooze: {
-                let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
+                let notifService = dependencies.notifications
                 let ids = pills.map { $0.medicationId.uuidString }
                 let names = pills.map { $0.name }
                 Task { await notifService.scheduleSnooze(for: ids, names: names) }
@@ -198,4 +199,5 @@ struct MainTabView: View {
 #Preview {
     MainTabView()
         .environmentObject(AppRouter())
+        .environment(AppDependencies.preview)
 }

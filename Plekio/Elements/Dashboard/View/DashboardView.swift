@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct DashboardView<VM: DashboardViewModelProtocol>: View {
+    @Environment(AppDependencies.self) private var dependencies
     @StateObject private var viewModel: VM
     @EnvironmentObject private var router: AppRouter
 
@@ -57,7 +58,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                     } else {
                         timelineSection
                     }
-                    StatisticsView()
+                    StatisticsView(viewModel: dependencies.makeStatisticsViewModel())
                 }
                 .padding(.bottom, 100)
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: allTakenStates)
@@ -222,14 +223,9 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     
 }
 
-extension DashboardView where VM == DashboardViewModel {
-    init() {
-        self.init(viewModel: DIContainer.shared.resolve(DashboardViewModel.self))
-    }
-}
-
 #Preview {
     DashboardView(viewModel: MockDashboardViewModel())
         .environmentObject(AppRouter())
+        .environment(AppDependencies.preview)
         .appTheme()
 }

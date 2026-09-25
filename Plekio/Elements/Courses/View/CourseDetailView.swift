@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
+    @Environment(AppDependencies.self) private var dependencies
     @StateObject private var viewModel: VM
     @EnvironmentObject private var router: AppRouter
     
@@ -75,13 +76,13 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
             }
         }
         .sheet(isPresented: $showingAddMedication) {
-            AddMedicationView { draft in
+            AddMedicationView(viewModel: dependencies.makeAddMedicationViewModel()) { draft in
                 viewModel.addNewMedication(draft)
                 showingAddMedication = false
             }
         }
         .sheet(item: $medicationToEdit) { med in
-            AddMedicationView(editingMedication: med) { updatedDraft in
+            AddMedicationView(viewModel: dependencies.makeAddMedicationViewModel(), editingMedication: med) { updatedDraft in
                 viewModel.updateMedication(medication: med, with: updatedDraft)
                 medicationToEdit = nil
             }
@@ -92,18 +93,13 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
     }
 }
 
-extension CourseDetailView where VM == CourseDetailViewModel {
-    init(course: TreatmentCourse) {
-        self.init(viewModel: DIContainer.shared.resolve(CourseDetailViewModel.self, argument: course))
-    }
-}
-
 struct CourseDetailDestination: View {
+    @Environment(AppDependencies.self) private var dependencies
     let courseId: UUID
     
     var body: some View {
-        if let course = DIContainer.shared.resolve(DatabaseServiceProtocol.self).fetchCourse(id: courseId) {
-            CourseDetailView(course: course)
+        if let course = dependencies.database.fetchCourse(id: courseId) {
+            CourseDetailView(viewModel: dependencies.makeCourseDetailViewModel(course: course))
         } else {
             ZStack {
                 Color.appBackground.ignoresSafeArea()

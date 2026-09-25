@@ -257,28 +257,7 @@ struct ImagePreviewView: View {
     }
 }
 
-// MARK: - Extensions for Init
-extension AddMedicationView where VM == AddMedicationViewModel {
-    
-    init(onSave: @escaping (MedicationDraft) -> Void) {
-        self.init(
-            viewModel: DIContainer.shared.resolve(AddMedicationViewModel.self),
-            onSave: onSave
-        )
-    }
-    
-    /// Opens the form on an existing medication. Filling the draft and loading the
-    /// photo is done by `startEditing(_:)` from `.task`.
-    init(editingMedication: MedicationItem, onSave: @escaping (MedicationDraft) -> Void) {
-        self.init(
-            viewModel: DIContainer.shared.resolve(AddMedicationViewModel.self),
-            editingMedication: editingMedication,
-            onSave: onSave
-        )
-    }
-}
-
 #Preview {
-    AddMedicationView(onSave: { _ in })
+    AddMedicationView(viewModel: AppDependencies.preview.makeAddMedicationViewModel(), onSave: { _ in })
         .appTheme()
 }

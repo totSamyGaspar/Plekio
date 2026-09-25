@@ -88,4 +88,6 @@ struct SplashView: View {
 
 #Preview {
     SplashView()
+        .environmentObject(AppRouter())
+        .environment(AppDependencies.preview)
 }

@@ -178,13 +178,6 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
     }
 }
 
-// MARK: - DI Extension & Preview
-extension StatisticsView where VM == StatisticsViewModel {
-    init() {
-        self.init(viewModel: DIContainer.shared.resolve(StatisticsViewModel.self))
-    }
-}
-
 #if DEBUG
 final class MockStatisticsViewModel: StatisticsViewModelProtocol {
     var progress: Double { 0.93 }

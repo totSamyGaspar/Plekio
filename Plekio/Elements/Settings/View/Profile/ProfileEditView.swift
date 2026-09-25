@@ -12,6 +12,7 @@ import os
 /// file it replaces, and a Cancel that rolled the profile back would leave it
 /// pointing at a photo already gone from disk.
 struct ProfileEditView: View {
+    @Environment(AppDependencies.self) private var dependencies
 
     @Binding var profile: UserProfile
 
@@ -130,7 +131,7 @@ struct ProfileEditView: View {
     private func pick(from source: MediaSource) {
         Task {
             do {
-                let picker = DIContainer.shared.resolve(MediaPickerServiceProtocol.self)
+                let picker = dependencies.mediaPicker
                 let image = try await picker.pickImage(source: source)
                 let previous = profile.avatarId
 

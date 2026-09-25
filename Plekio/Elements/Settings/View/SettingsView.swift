@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(AppDependencies.self) private var dependencies
     /// Read straight from defaults rather than through a view model: every
     /// screen that reacts to the theme reads the same key, so a store in
     /// between would only add a second place for it to go stale.
@@ -64,7 +65,7 @@ struct SettingsView: View {
                     
                     Section(header: Text("Export").foregroundColor(.textSecondary)) {
                         NavigationLink {
-                            ReportExportView()
+                            ReportExportView(viewModel: dependencies.makeReportExportViewModel())
                         } label: {
                             Label("Create document", systemImage: "doc.text")
                                 .foregroundColor(.textPrimary)
@@ -117,4 +118,5 @@ struct SettingsView: View {
         SettingsView()
             .appTheme()
     }
+    .environment(AppDependencies.preview)
 }

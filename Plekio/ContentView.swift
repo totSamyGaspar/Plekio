@@ -17,6 +17,7 @@ enum RootTransition {
 }
 
 struct ContentView: View {
+    @Environment(AppDependencies.self) private var dependencies
     @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
     
     var body: some View {
@@ -25,11 +26,11 @@ struct ContentView: View {
                 MainTabView()
                     .transition(.opacity)
                     .onAppear {
-                        let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
+                        let notifService = dependencies.notifications
                         Task { await notifService.requestPermission() }
                     }
             } else {
-                OnboardingView()
+                OnboardingView(viewModel: dependencies.makeOnboardingViewModel())
                     .transition(.opacity)
             }
         }
@@ -41,4 +42,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(AppRouter())
+        .environment(AppDependencies.preview)
 }

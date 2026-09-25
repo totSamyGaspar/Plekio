@@ -38,6 +38,7 @@ private struct DiaryComparisonPayload: Identifiable {
 private let comparisonSourceID = "diary.comparison"
 
 struct DiaryView<VM: DiaryViewModelProtocol>: View {
+    @Environment(AppDependencies.self) private var dependencies
     @StateObject private var viewModel: VM
     @EnvironmentObject private var router: AppRouter
     
@@ -95,7 +96,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showingCheckIn) {
-            DiaryCheckInView()
+            DiaryCheckInView(viewModel: dependencies.makeDiaryCheckInViewModel())
                 .appTheme()
         }
         .sheet(isPresented: $showingBloodPressureEntry) {
@@ -106,7 +107,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             }
         }
         .sheet(item: $entryBeingEdited) { entry in
-            DiaryCheckInView(editingEntry: entry)
+            DiaryCheckInView(viewModel: dependencies.makeDiaryCheckInViewModel(), editingEntry: entry)
                 .appTheme()
         }
         .sheet(item: $inspectingPhoto) { photo in
@@ -241,16 +242,11 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     }
 }
 
-extension DiaryView where VM == DiaryViewModel {
-    init() {
-        self.init(viewModel: DIContainer.shared.resolve(DiaryViewModel.self))
-    }
-}
-
 #Preview {
     NavigationStack {
         DiaryView(viewModel: MockDiaryViewModel())
             .appTheme()
     }
     .environmentObject(AppRouter())
+    .environment(AppDependencies.preview)
 }

@@ -139,15 +139,10 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
     
 }
 
-extension CoursesListView where VM == CoursesListViewModel {
-    init() {
-        self.init(viewModel: DIContainer.shared.resolve(CoursesListViewModel.self))
-    }
-}
-
 #Preview {
     NavigationStack {
-        CoursesListView()
+        CoursesListView(viewModel: AppDependencies.preview.makeCoursesListViewModel())
             .appTheme()
     }
+    .environment(AppDependencies.preview)
 }

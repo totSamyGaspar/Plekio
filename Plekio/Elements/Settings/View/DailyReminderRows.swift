@@ -11,6 +11,7 @@
 import SwiftUI
 
 struct DailyReminderRows: View {
+    @Environment(AppDependencies.self) private var dependencies
     
     private let reminder: DailyReminder
     
@@ -80,7 +81,7 @@ struct DailyReminderRows: View {
     // MARK: - Arming
     
     private func apply() {
-        let service = DIContainer.shared.resolve(NotificationServiceProtocol.self)
+        let service = dependencies.notifications
         
         guard isEnabled else {
             service.cancelDailyReminder(reminder)

@@ -16,9 +16,6 @@ struct PlekioApp: App {
     @StateObject private var router = AppRouter()
     
     init() {
-        // Created up front, not on first use: it has to be listening before the
-        // first course is written.
-        _ = DIContainer.shared.resolve(ReminderSyncCoordinator.self)
         MainTabView.configureTabBarAppearance()
         AppAppearance.configureSliders()
     }
@@ -27,6 +24,8 @@ struct PlekioApp: App {
         WindowGroup {
             SplashView()
                 .environmentObject(router)
+                // The composition root, for every screen below — see AppDependencies.
+                .environment(appDelegate.dependencies)
                 .onAppear {
                     appDelegate.router = router
                 }
@@ -40,6 +39,6 @@ struct PlekioApp: App {
     /// Nothing was written, but time has passed: the queue only covers a window
     /// ahead of "now", so it is topped up whenever the user comes back.
     private func refreshAllNotifications() {
-        DIContainer.shared.resolve(ReminderSyncCoordinator.self).sync()
+        appDelegate.dependencies.reminderSync.sync()
     }
 }

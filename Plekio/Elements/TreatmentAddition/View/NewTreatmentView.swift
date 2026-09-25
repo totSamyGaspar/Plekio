@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
+    @Environment(AppDependencies.self) private var dependencies
     @StateObject private var viewModel: VM
     @EnvironmentObject private var router: AppRouter
     @Environment(\.dismiss) private var dismiss
@@ -93,7 +94,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
             }
             .appTheme()
             .sheet(isPresented: $showingAddMedication) {
-                AddMedicationView { draft in
+                AddMedicationView(viewModel: dependencies.makeAddMedicationViewModel()) { draft in
                     withAnimation { viewModel.addMedication(draft) }
                     showingAddMedication = false
                 }
@@ -103,13 +104,8 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
     }
 }
 
-extension NewTreatmentView where VM == NewTreatmentViewModel {
-    init() {
-        self.init(viewModel: DIContainer.shared.resolve(NewTreatmentViewModel.self))
-    }
-}
-
 #Preview {
     NewTreatmentView(viewModel: MockNewTreatmentViewModel())
         .environmentObject(AppRouter())
+        .environment(AppDependencies.preview)
 }

@@ -92,13 +92,6 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
     }
 }
 
-extension OnboardingView where VM == OnboardingViewModel {
-    init() {
-        let resolvedViewModel = DIContainer.shared.resolve(OnboardingViewModel.self)
-        self.init(viewModel: resolvedViewModel)
-    }
-}
-
 #Preview {
     OnboardingView(viewModel: MockOnboardingViewModel())
 }

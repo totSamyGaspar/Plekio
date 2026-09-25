@@ -24,7 +24,7 @@ final class MediaPickerService: NSObject, MediaPickerServiceProtocol {
 
     /// The pick currently in flight. One slot — only one picker can be on screen.
     ///
-    /// This is an app-wide singleton (see DIContainer), which made the old
+    /// This is an app-wide singleton (see AppDependencies), which made the old
     /// "if continuation != nil { throw }" guard a one-way door: any pick that never
     /// came back — `present` refused because something was already on top, or
     /// PHPicker's load callback never fired — left the slot occupied forever, and

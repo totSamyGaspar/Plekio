@@ -16,6 +16,15 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didSet { flushBufferedPush() }
     }
     
+    /// The app's object graph, built on first touch.
+    ///
+    /// Owned here rather than by PlekioApp because a notification action can
+    /// arrive on a cold launch before any SwiftUI view exists — "Take Now"
+    /// logs a dose without ever showing a screen — and it needs the same graph
+    /// the UI will use. `didFinishLaunching` touches it, so it exists (and the
+    /// reminder sync is listening) before anything else runs.
+    private(set) lazy var dependencies: AppDependencies = .live()
+
     private var bufferedPush: (medicationIds: [UUID], time: Date)?
     private var bufferedReminder: DailyReminder?
     
@@ -36,6 +45,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        _ = dependencies
         return true
     }
     
@@ -92,8 +102,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 self.router?.selectedTab = 0
                 
             case NotificationAction.snooze:
-                let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-                await notifService.scheduleSnooze(for: medIdStrings, names: names)
+                guard let self else { return }
+                await self.dependencies.notifications.scheduleSnooze(for: medIdStrings, names: names)
                 
                 // Recorded, not ignored. A skip is not the absence of a log: without a
                 // row nothing tells it apart from a dose the user never answered, and
@@ -122,7 +132,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     /// changes nothing. Waits for the reminder rebuild before returning, because
     /// iOS may suspend the app once the response is reported handled.
     private func logDoses(medicationIds: [UUID], scheduledTime: Date) async {
-        let doseLogging = DIContainer.shared.resolve(DoseLoggingUseCaseProtocol.self)
+        let doseLogging = dependencies.doseLogging
         let open = doseLogging.openDoses(medicationIds: medicationIds, at: scheduledTime)
 
         guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markTaken(open) }) else { return }
@@ -132,7 +142,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     /// "Skip" on the notification. Idempotent the same way: `openDoses` drops
     /// what is taken, `markSkipped` what is already skipped.
     private func skipDoses(medicationIds: [UUID], scheduledTime: Date) async {
-        let doseLogging = DIContainer.shared.resolve(DoseLoggingUseCaseProtocol.self)
+        let doseLogging = dependencies.doseLogging
         let open = doseLogging.openDoses(medicationIds: medicationIds, at: scheduledTime)
 
         guard let outcome = AppErrorPresenter.shared.attempt({ try doseLogging.markSkipped(open) }) else { return }

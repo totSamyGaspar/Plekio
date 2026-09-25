@@ -147,9 +147,3 @@ struct ReportExportView: View {
     }
 }
 
-extension ReportExportView {
-
-    init() {
-        self.init(viewModel: DIContainer.shared.resolve(ReportExportViewModel.self))
-    }
-}
