@@ -10,17 +10,17 @@ import Combine
 
 @MainActor
 final class CoursesListViewModel: CoursesListViewModelProtocol {
-    @Published var activeCourses: [TreatmentCourse] = []
-    @Published var historyCourses: [TreatmentCourse] = []
+    @Published var activeCourses: [CourseSnapshot] = []
+    @Published var historyCourses: [CourseSnapshot] = []
     
-    private let dbService: any CourseStoring
+    private let courses: any CourseRepository
     private let courseEditing: CourseEditingUseCaseProtocol
     private let errors: any ErrorReporting
     private var cancellables = Set<AnyCancellable>()
     
-    /// `dbService` for reading the list; every write goes through `courseEditing`.
-    init(dbService: any CourseStoring, courseEditing: CourseEditingUseCaseProtocol, errors: any ErrorReporting) {
-        self.dbService = dbService
+    /// `courses` for reading the list; every write goes through `courseEditing`.
+    init(courses: any CourseRepository, courseEditing: CourseEditingUseCaseProtocol, errors: any ErrorReporting) {
+        self.courses = courses
         self.courseEditing = courseEditing
         self.errors = errors
         fetchCourses()
@@ -35,15 +35,16 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     }
     
     convenience init(dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
+        let courses = SwiftDataCourseRepository(store: dbService)
         self.init(
-            dbService: dbService,
-            courseEditing: CourseEditingUseCase(dbService: dbService, notificationService: notificationService),
+            courses: courses,
+            courseEditing: CourseEditingUseCase(courses: courses, notificationService: notificationService),
             errors: AppErrorPresenter()
         )
     }
 
     func fetchCourses() {
-        let allCourses = dbService.fetchAllCourses()
+        let allCourses = courses.allCourses()
 
         self.activeCourses = allCourses.filter { $0.isActive() }
         self.historyCourses = allCourses.filter { !$0.isActive() }
@@ -54,7 +55,7 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     /// which lands in `activeCourses` as soon as the re-fetch runs. The original
     /// stays in the history untouched. The use case refuses a treatment that is
     /// already running again.
-    func repeatCourse(_ course: TreatmentCourse, startDate: Date, endDate: Date) {
+    func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date) {
         guard let didRepeat = errors.attempt({
             try courseEditing.repeatCourse(course, startDate: startDate, endDate: endDate)
         }), didRepeat else { return }
@@ -65,11 +66,11 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
     /// For the button: whether "Repeat" should be offered at all. Checked on the
     /// list already on screen, so a row costs no fetch; the use case checks again
     /// against storage when the button is pressed.
-    func hasActiveRepeat(of course: TreatmentCourse) -> Bool {
+    func hasActiveRepeat(of course: CourseSnapshot) -> Bool {
         course.hasActiveRepeat(among: activeCourses)
     }
 
-    func deleteCourse(_ course: TreatmentCourse) {
+    func deleteCourse(_ course: CourseSnapshot) {
         guard errors.run({ try courseEditing.deleteCourse(course) }) else { return }
         fetchCourses()
     }

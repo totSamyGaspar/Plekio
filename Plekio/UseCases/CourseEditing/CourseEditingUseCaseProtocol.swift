@@ -21,19 +21,19 @@ protocol CourseEditingUseCaseProtocol {
     /// Writes only if something actually changed, so leaving the screen
     /// untouched costs no commit and no reminder rebuild. Returns whether it wrote.
     @discardableResult
-    func updateDetails(of course: TreatmentCourse, name: String, startDate: Date, endDate: Date) throws -> Bool
+    func updateDetails(of course: CourseSnapshot, name: String, startDate: Date, endDate: Date) throws -> Bool
 
-    func addMedication(_ draft: MedicationDraft, to course: TreatmentCourse) throws
-    func updateMedication(_ medication: MedicationItem, with draft: MedicationDraft) throws
+    func addMedication(_ draft: MedicationDraft, to course: CourseSnapshot) throws
+    func updateMedication(_ medication: MedicationSnapshot, with draft: MedicationDraft) throws
 
     /// Deletes, and takes the medications' delivered reminders off the lock screen.
-    func deleteMedications(_ medications: [MedicationItem]) throws
+    func deleteMedications(_ medications: [MedicationSnapshot]) throws
 
     /// Deletes the course with its medications, and their delivered reminders.
-    func deleteCourse(_ course: TreatmentCourse) throws
+    func deleteCourse(_ course: CourseSnapshot) throws
 
     /// A copy of a finished course with new dates. Refused — returns false,
     /// writes nothing — while the treatment is already running again.
     @discardableResult
-    func repeatCourse(_ course: TreatmentCourse, startDate: Date, endDate: Date) throws -> Bool
+    func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date) throws -> Bool
 }

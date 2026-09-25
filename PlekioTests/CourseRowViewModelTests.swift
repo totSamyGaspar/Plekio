@@ -48,7 +48,7 @@ struct CourseRowViewModelTests {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = course(db, named: ["Омепразол", "Аспирин", "Ибупрофен"])
 
-        let viewModel = CourseRowViewModel(course: course)
+        let viewModel = CourseRowViewModel(course: CourseSnapshot(course))
 
         #expect(viewModel.medications.map(\.name) == ["Аспирин", "Ибупрофен", "Омепразол"])
     }
@@ -58,7 +58,7 @@ struct CourseRowViewModelTests {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = course(db, named: ["Аспирин", "Бисопролол"])
 
-        let viewModel = CourseRowViewModel(course: course)
+        let viewModel = CourseRowViewModel(course: CourseSnapshot(course))
 
         #expect(viewModel.medications.map(\.dosage) == [1, 2])
         #expect(viewModel.medicationsCount == 2)
@@ -69,7 +69,7 @@ struct CourseRowViewModelTests {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = course(db, named: [])
 
-        let viewModel = CourseRowViewModel(course: course)
+        let viewModel = CourseRowViewModel(course: CourseSnapshot(course))
 
         #expect(viewModel.medications.isEmpty)
         #expect(viewModel.medicationsCount == 0)

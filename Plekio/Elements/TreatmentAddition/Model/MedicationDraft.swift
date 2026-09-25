@@ -29,12 +29,12 @@ struct MedicationDraft: Identifiable, Equatable {
 }
 
 extension MedicationDraft {
-    /// The single place MedicationItem fields are moved into the form; copying them
+    /// The single place a medication's fields are moved into the form; copying them
     /// by hand elsewhere loses one too easily — same reason as
     /// `DiaryEntryDraft.init(from:)`. The photo is not carried over: it lives on
     /// disk and is loaded off the main thread by `AddMedicationViewModel.startEditing`,
     /// which is why `photoModified` stays false here — preloading is not an edit.
-    init(from medication: MedicationItem) {
+    init(from medication: MedicationSnapshot) {
         self.init(
             id: medication.id,
             name: medication.name,

@@ -79,6 +79,8 @@ struct CourseDetailViewModelTests {
             frequencyDays: 1
         )
         course.medications.append(med)
+        // The screen names the medication by id; the store has to be able to find it.
+        mockDB.coursesToReturn = [course]
 
         let vm = CourseDetailViewModel(course: course, dbService: mockDB, notificationService: mockNotifications)
 

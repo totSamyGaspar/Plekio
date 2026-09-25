@@ -9,8 +9,8 @@ import SwiftUI
 
 @MainActor
 protocol CourseDetailViewModelProtocol: ObservableObject {
-    var course: TreatmentCourse { get }
-    var medications: [MedicationItem] { get }
+    var course: CourseSnapshot { get }
+    var medications: [MedicationSnapshot] { get }
     
     var courseName: String { get set }
     var startDate: Date { get set }
@@ -19,5 +19,5 @@ protocol CourseDetailViewModelProtocol: ObservableObject {
     func saveCourseChanges()
     func deleteMedication(at offsets: IndexSet)
     func addNewMedication(_ draft: MedicationDraft)
-    func updateMedication(medication: MedicationItem, with draft: MedicationDraft)
+    func updateMedication(medication: MedicationSnapshot, with draft: MedicationDraft)
 }

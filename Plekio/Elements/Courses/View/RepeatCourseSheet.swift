@@ -12,7 +12,7 @@ import SwiftUI
 /// It only collects and confirms — the copying itself belongs to the list view
 /// model, so nothing here touches the database.
 struct RepeatCourseSheet: View {
-    let course: TreatmentCourse
+    let course: CourseSnapshot
     let onConfirm: (_ startDate: Date, _ endDate: Date) -> Void
     
     @Environment(\.dismiss) private var dismiss
@@ -20,7 +20,7 @@ struct RepeatCourseSheet: View {
     @State private var startDate: Date
     @State private var endDate: Date
     
-    init(course: TreatmentCourse, onConfirm: @escaping (Date, Date) -> Void) {
+    init(course: CourseSnapshot, onConfirm: @escaping (Date, Date) -> Void) {
         self.course = course
         self.onConfirm = onConfirm
         

@@ -10,11 +10,11 @@ import Combine
 
 @MainActor
 protocol CoursesListViewModelProtocol: ObservableObject {
-    var activeCourses: [TreatmentCourse] { get }
-    var historyCourses: [TreatmentCourse] { get }
+    var activeCourses: [CourseSnapshot] { get }
+    var historyCourses: [CourseSnapshot] { get }
     
     func fetchCourses()
-    func repeatCourse(_ course: TreatmentCourse, startDate: Date, endDate: Date)
-    func hasActiveRepeat(of course: TreatmentCourse) -> Bool
-    func deleteCourse(_ course: TreatmentCourse)
+    func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date)
+    func hasActiveRepeat(of course: CourseSnapshot) -> Bool
+    func deleteCourse(_ course: CourseSnapshot)
 }

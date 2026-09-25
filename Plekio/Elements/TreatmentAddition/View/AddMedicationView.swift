@@ -14,13 +14,13 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
     
     /// The medication being edited (nil means adding a new one). Consumed in
     /// `.task` rather than `init`: SwiftUI re-creates the view struct many times.
-    private let medicationToEdit: MedicationItem?
+    private let medicationToEdit: MedicationSnapshot?
     private var isEditing: Bool { medicationToEdit != nil }
     
     var onSave: (MedicationDraft) -> Void
     
     init(viewModel: @autoclosure @escaping () -> VM,
-         editingMedication: MedicationItem? = nil,
+         editingMedication: MedicationSnapshot? = nil,
          onSave: @escaping (MedicationDraft) -> Void) {
         self._viewModel = StateObject(wrappedValue: viewModel())
         self.medicationToEdit = editingMedication

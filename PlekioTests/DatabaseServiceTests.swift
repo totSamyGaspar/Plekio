@@ -125,7 +125,7 @@ struct DatabaseServiceTests {
         // Move the dose to 11:00. The log used to stay pinned to 9:00 where the
         // schedule no longer looked for it, so the day read as unlogged even though
         // the stock had already been deducted.
-        var draft = MedicationDraft(from: med)
+        var draft = MedicationDraft(from: MedicationSnapshot(med))
         draft.timesOfDay = [testDate(2000, 1, 1, 11, 0)]
         try db.updateMedication(med, with: draft)
 

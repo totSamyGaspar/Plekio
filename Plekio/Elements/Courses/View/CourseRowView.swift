@@ -24,7 +24,7 @@ struct CourseRowView: View {
     @State private var animatedProgress: Double = 0.0
     
     init(
-        course: TreatmentCourse,
+        course: CourseSnapshot,
         isHistory: Bool,
         canRepeat: Bool = true,
         repeatAction: (() -> Void)? = nil

@@ -13,7 +13,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
     @EnvironmentObject private var router: AppRouter
     
     @State private var showingAddMedication = false
-    @State private var medicationToEdit: MedicationItem?
+    @State private var medicationToEdit: MedicationSnapshot?
     
     init(viewModel: @autoclosure @escaping () -> VM) {
         self._viewModel = StateObject(wrappedValue: viewModel())
@@ -98,7 +98,7 @@ struct CourseDetailDestination: View {
     let courseId: UUID
     
     var body: some View {
-        if let course = dependencies.database.fetchCourse(id: courseId) {
+        if let course = dependencies.courseRepository.course(id: courseId) {
             CourseDetailView(viewModel: dependencies.makeCourseDetailViewModel(course: course))
         } else {
             ZStack {

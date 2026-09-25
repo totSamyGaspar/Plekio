@@ -26,7 +26,7 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
     
     // MARK: - Editing
     
-    func startEditing(_ medication: MedicationItem) async {
+    func startEditing(_ medication: MedicationSnapshot) async {
         // .task can fire more than once — a second pass would wipe the user's edits.
         guard !hasLoadedEditedMedication else { return }
         hasLoadedEditedMedication = true

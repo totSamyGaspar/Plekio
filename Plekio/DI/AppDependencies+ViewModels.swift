@@ -35,11 +35,11 @@ extension AppDependencies {
     // MARK: - Courses
 
     func makeCoursesListViewModel() -> CoursesListViewModel {
-        CoursesListViewModel(dbService: database, courseEditing: courseEditing, errors: errorPresenter)
+        CoursesListViewModel(courses: courseRepository, courseEditing: courseEditing, errors: errorPresenter)
     }
 
-    func makeCourseDetailViewModel(course: TreatmentCourse) -> CourseDetailViewModel {
-        CourseDetailViewModel(course: course, courseEditing: courseEditing, errors: errorPresenter)
+    func makeCourseDetailViewModel(course: CourseSnapshot) -> CourseDetailViewModel {
+        CourseDetailViewModel(course: course, courses: courseRepository, courseEditing: courseEditing, errors: errorPresenter)
     }
 
     func makeNewTreatmentViewModel() -> NewTreatmentViewModel {

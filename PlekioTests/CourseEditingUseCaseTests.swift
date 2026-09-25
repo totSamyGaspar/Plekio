@@ -22,7 +22,7 @@ struct CourseEditingUseCaseTests {
         let useCase = CourseEditingUseCase(dbService: db, notificationService: MockNotificationService())
         let course = TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
 
-        let wrote = try useCase.updateDetails(of: course, name: course.name, startDate: course.startDate, endDate: course.endDate)
+        let wrote = try useCase.updateDetails(of: CourseSnapshot(course), name: course.name, startDate: course.startDate, endDate: course.endDate)
 
         #expect(wrote == false)
         #expect(db.didCallUpdateCourseDetails == false)
@@ -34,7 +34,9 @@ struct CourseEditingUseCaseTests {
         let useCase = CourseEditingUseCase(dbService: db, notificationService: MockNotificationService())
         let course = TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
 
-        let wrote = try useCase.updateDetails(of: course, name: "Новое имя", startDate: course.startDate, endDate: course.endDate)
+        db.coursesToReturn = [course]
+
+        let wrote = try useCase.updateDetails(of: CourseSnapshot(course), name: "Новое имя", startDate: course.startDate, endDate: course.endDate)
 
         #expect(wrote == true)
         #expect(db.updatedCourseName == "Новое имя")
@@ -57,7 +59,7 @@ struct CourseEditingUseCaseTests {
         )
         db.coursesToReturn = [original, runningCopy]
 
-        let repeated = try useCase.repeatCourse(original, startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
+        let repeated = try useCase.repeatCourse(CourseSnapshot(original), startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
 
         #expect(repeated == false)
         #expect(db.duplicatedCourse == nil)
@@ -74,7 +76,7 @@ struct CourseEditingUseCaseTests {
         )
         db.coursesToReturn = [original]
 
-        let repeated = try useCase.repeatCourse(original, startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
+        let repeated = try useCase.repeatCourse(CourseSnapshot(original), startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
 
         #expect(repeated == true)
         #expect(db.duplicatedCourse === original)
@@ -94,7 +96,8 @@ struct CourseEditingUseCaseTests {
         }
         course.medications.append(contentsOf: meds)
 
-        try useCase.deleteCourse(course)
+        db.coursesToReturn = [course]
+        try useCase.deleteCourse(CourseSnapshot(course))
 
         #expect(db.deletedCourse === course)
         #expect(await waitUntil { notifications.cancelledMedicationIds.count == 2 })

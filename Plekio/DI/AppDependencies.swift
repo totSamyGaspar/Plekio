@@ -46,6 +46,10 @@ final class AppDependencies {
 
     // MARK: - Use cases
 
+    /// Courses as snapshots, by id — what the courses screens read. No
+    /// SwiftData model reaches a screen through it.
+    let courseRepository: any CourseRepository
+
     let doseLogging: any DoseLoggingUseCaseProtocol
     let courseEditing: any CourseEditingUseCaseProtocol
 
@@ -69,7 +73,8 @@ final class AppDependencies {
         self.storeURL = storeURL
 
         doseLogging = DoseLoggingUseCase(dbService: database, notificationService: notifications)
-        courseEditing = CourseEditingUseCase(dbService: database, notificationService: notifications)
+        courseRepository = SwiftDataCourseRepository(store: database)
+        courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications)
         reminderSync = ReminderSyncCoordinator(notificationService: notifications, dbService: database)
     }
 

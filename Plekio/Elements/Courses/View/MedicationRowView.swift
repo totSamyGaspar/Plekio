@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 
 struct MedicationRowView: View {
-    let med: MedicationItem
+    let med: MedicationSnapshot
     
     var body: some View {
         HStack(spacing: 12) {

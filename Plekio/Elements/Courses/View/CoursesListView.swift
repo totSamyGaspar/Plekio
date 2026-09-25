@@ -13,8 +13,8 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
     
     @State private var selectedSegment = 0
     @State private var showingDeleteAlert = false
-    @State private var courseToDelete: TreatmentCourse?
-    @State private var courseToRepeat: TreatmentCourse?
+    @State private var courseToDelete: CourseSnapshot?
+    @State private var courseToRepeat: CourseSnapshot?
     
     init(viewModel: @autoclosure @escaping () -> VM) {
         self._viewModel = StateObject(wrappedValue: viewModel())

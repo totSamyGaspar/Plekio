@@ -31,7 +31,7 @@ struct CourseRowViewModel {
     let currentDayNumber: Int
     let daysProgress: Double
     
-    init(course: TreatmentCourse) {
+    init(course: CourseSnapshot) {
         self.title = course.name
         self.medications = course.medications
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
