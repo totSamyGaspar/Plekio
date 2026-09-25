@@ -74,16 +74,20 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         bloodPressureReadings = diary.allBloodPressureReadings()
     }
 
-    func deleteEntry(_ entry: DiaryEntrySnapshot) {
-        guard errors.run({ try diary.deleteEntry(id: entry.id) }) else { return }
+    @discardableResult
+    func deleteEntry(_ entry: DiaryEntrySnapshot) -> Bool {
+        guard errors.run({ try diary.deleteEntry(id: entry.id) }) else { return false }
         fetchEntries()
+        return true
     }
 
-    func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {
+    @discardableResult
+    func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) -> Bool {
         guard bloodPressure.save(
             measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
-        ) else { return }
+        ) else { return false }
         fetchEntries()
+        return true
     }
 
     func deleteBloodPressureReading(_ reading: BloodPressureSnapshot) {
@@ -100,16 +104,17 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         fetchEntries()
     }
 
-    func quickLog(mood: DiaryMood) {
+    @discardableResult
+    func quickLog(mood: DiaryMood) -> Bool {
         // One entry per day: update today's instead of adding a duplicate.
         if let existing = todaysEntry {
             var draft = DiaryEntryDraft(from: existing)
             draft.mood = mood
             guard errors.run({
                 try diary.updateEntry(id: existing.id, with: draft)
-            }) else { return }
+            }) else { return false }
             fetchEntries()
-            return
+            return true
         }
 
         var draft = DiaryEntryDraft()
@@ -117,8 +122,9 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         // Energy/sleep/water are defaults, not user input; stats must exclude them.
         draft.isQuickLog = true
 
-        guard errors.run({ try diary.saveEntry(draft) }) else { return }
+        guard errors.run({ try diary.saveEntry(draft) }) else { return false }
         fetchEntries()
+        return true
     }
 
     // MARK: - Stats
@@ -187,9 +193,9 @@ final class MockDiaryViewModel: DiaryViewModelProtocol {
     init() {}
 
     func fetchEntries() {}
-    func deleteEntry(_ entry: DiaryEntrySnapshot) {}
-    func quickLog(mood: DiaryMood) {}
-    func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {}
+    func deleteEntry(_ entry: DiaryEntrySnapshot) -> Bool { true }
+    func quickLog(mood: DiaryMood) -> Bool { true }
+    func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) -> Bool { true }
     func deleteBloodPressureReading(_ reading: BloodPressureSnapshot) {}
     func deleteAllBloodPressureReadings() {}
 }

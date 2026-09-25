@@ -15,11 +15,16 @@ struct BloodPressureCard: View {
     // MARK: - Properties
 
     let readings: [BloodPressureSnapshot]
+    /// Both buttons zoom into their sheets; "Add reading" is presented by the parent.
+    let transitions: Namespace.ID
     var onAdd: () -> Void
     var onDelete: (BloodPressureSnapshot) -> Void
     var onDeleteAll: () -> Void
 
     @State private var isHistoryShown = false
+
+    static let addSourceID = "diary.bloodPressure.add"
+    private static let historySourceID = "diary.bloodPressure.history"
 
     // MARK: - Derived state
 
@@ -73,6 +78,7 @@ struct BloodPressureCard: View {
                 onDelete: onDelete,
                 onDeleteAll: onDeleteAll
             )
+            .navigationTransition(.zoom(sourceID: Self.historySourceID, in: transitions))
         }
     }
 
@@ -253,6 +259,7 @@ struct BloodPressureCard: View {
                     )
             }
             .buttonStyle(.plain)
+            .matchedTransitionSource(id: Self.historySourceID, in: transitions)
             .disabled(readings.isEmpty)
             .opacity(readings.isEmpty ? 0.4 : 1)
             .accessibilityLabel("Measurement history")
@@ -270,6 +277,7 @@ struct BloodPressureCard: View {
                     .cornerRadius(14)
             }
             .buttonStyle(.plain)
+            .matchedTransitionSource(id: Self.addSourceID, in: transitions)
         }
     }
 }

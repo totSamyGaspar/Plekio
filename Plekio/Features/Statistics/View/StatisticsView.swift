@@ -12,14 +12,12 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
 
     // MARK: - Properties
 
+    @Environment(AppDependencies.self) private var dependencies
     @StateObject private var viewModel: VM
 
     @State private var showingRefillAlert = false
     @State private var refillAmountText = ""
     @State private var selectedMedForRefill: MedicationSnapshot?
-
-    @State private var showSuccessToast = false
-    @State private var successMessage: LocalizedStringKey?
 
     // MARK: - Init
 
@@ -62,26 +60,6 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 .padding(.horizontal)
 
         }
-        .overlay(alignment: .top) {
-            if showSuccessToast, let successMessage {
-                HStack(spacing: 12) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.accentPrimary)
-                    Text(successMessage)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 14)
-                .background(Color.appSurface)
-                .cornerRadius(24)
-                .overlay(RoundedRectangle(cornerRadius: 24).stroke(Color.accentPrimary.opacity(0.3), lineWidth: 1))
-                .shadow(color: Color.accentPrimary.opacity(0.2), radius: 10, x: 0, y: 5)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .zIndex(100)
-            }
-        }
         .alert("Refill Stock", isPresented: $showingRefillAlert, presenting: selectedMedForRefill) { med in
             TextField("Amount (e.g.: 30)", text: $refillAmountText)
                 .keyboardType(.numberPad)
@@ -96,13 +74,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                     // A failed save shows the error alert; no success toast on top.
                     guard saved else { return }
 
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    successMessage = "\(med.name) stock increased by \(amount) units."
-                    withAnimation(.spring()) { showSuccessToast = true }
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        withAnimation { showSuccessToast = false }
-                    }
+                    dependencies.toasts.show(.success("\(med.name) stock increased by \(amount) units."))
                 }
             }
         } message: { med in
@@ -202,5 +174,6 @@ final class MockStatisticsViewModel: StatisticsViewModelProtocol {
 
 #Preview {
     StatisticsView(viewModel: MockStatisticsViewModel())
+        .environment(AppDependencies.preview)
         .appTheme()
 }

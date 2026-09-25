@@ -12,8 +12,9 @@ struct DiaryHeaderView: View {
 
     // MARK: - Properties
 
-    /// Zoom-transition source for the comparison sheet, which is presented by the parent screen.
-    let transitionSourceID: String
+    /// Zoom-transition sources for the sheets the parent screen presents.
+    let compareSourceID: String
+    let newEntrySourceID: String
     let transitionNamespace: Namespace.ID
 
     let onCompare: () -> Void
@@ -51,7 +52,7 @@ struct DiaryHeaderView: View {
                         .cornerRadius(14)
                 }
                 .buttonStyle(.plain)
-                .matchedTransitionSource(id: transitionSourceID, in: transitionNamespace)
+                .matchedTransitionSource(id: compareSourceID, in: transitionNamespace)
 
                 Button(action: onAddEntry) {
                     Label("Add New Entry", systemImage: "plus")
@@ -65,6 +66,7 @@ struct DiaryHeaderView: View {
                         .cornerRadius(14)
                 }
                 .buttonStyle(.plain)
+                .matchedTransitionSource(id: newEntrySourceID, in: transitionNamespace)
             }
             .fixedSize(horizontal: false, vertical: true)
         }

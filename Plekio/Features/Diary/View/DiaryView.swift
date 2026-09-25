@@ -22,8 +22,9 @@ private struct DiaryComparisonPayload: Identifiable {
     let afterId: UUID
 }
 
-/// One id shared by the zoom transition's source and destination.
+/// Ids shared by each zoom transition's source button and its sheet.
 private let comparisonSourceID = "diary.comparison"
+private let newEntrySourceID = "diary.newEntry"
 
 // MARK: - DiaryView
 
@@ -46,7 +47,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     @State private var comparisonPayload: DiaryComparisonPayload?
     @State private var inspectingPhoto: DiaryPhotoInspection?
 
-    @Namespace private var comparisonTransition
+    @Namespace private var transitions
 
     // MARK: - Init
 
@@ -63,8 +64,9 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     DiaryHeaderView(
-                        transitionSourceID: comparisonSourceID,
-                        transitionNamespace: comparisonTransition,
+                        compareSourceID: comparisonSourceID,
+                        newEntrySourceID: newEntrySourceID,
+                        transitionNamespace: transitions,
                         onCompare: { openComparison() },
                         onAddEntry: { showingCheckIn = true }
                     )
@@ -72,7 +74,11 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                     DiaryTodayCard(
                         entry: viewModel.todaysEntry,
                         quickMoods: DiaryTodayCard.QuickMood.standard,
-                        onQuickLog: { viewModel.quickLog(mood: $0) },
+                        onQuickLog: { mood in
+                            if viewModel.quickLog(mood: mood) {
+                                dependencies.toasts.show(.success("Mood logged"))
+                            }
+                        },
                         onEdit: { entryBeingEdited = $0 }
                     )
 
@@ -94,14 +100,18 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showingCheckIn) {
             DiaryCheckInView(viewModel: dependencies.makeDiaryCheckInViewModel())
+                .navigationTransition(.zoom(sourceID: newEntrySourceID, in: transitions))
                 .appTheme()
         }
         .sheet(isPresented: $showingBloodPressureEntry) {
             BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
-                viewModel.addBloodPressureReading(
+                if viewModel.addBloodPressureReading(
                     measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
-                )
+                ) {
+                    dependencies.toasts.show(.success("Blood pressure saved"))
+                }
             }
+            .navigationTransition(.zoom(sourceID: BloodPressureCard.addSourceID, in: transitions))
         }
         .sheet(item: $entryBeingEdited) { entry in
             DiaryCheckInView(viewModel: dependencies.makeDiaryCheckInViewModel(), editingEntry: entry)
@@ -116,12 +126,14 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 beforePhotoId: payload.beforeId,
                 afterPhotoId: payload.afterId
             )
-            .navigationTransition(.zoom(sourceID: comparisonSourceID, in: comparisonTransition))
+            .navigationTransition(.zoom(sourceID: comparisonSourceID, in: transitions))
             .appTheme()
         }
         .alert("Delete Check-in?", isPresented: $showingDeleteAlert, presenting: entryToDelete) { entry in
             Button("Delete", role: .destructive) {
-                viewModel.deleteEntry(entry)
+                if viewModel.deleteEntry(entry) {
+                    dependencies.toasts.show(.success("Entry deleted"))
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: { _ in
@@ -143,6 +155,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     private var bloodPressureSection: some View {
         BloodPressureCard(
             readings: viewModel.bloodPressureReadings,
+            transitions: transitions,
             onAdd: { showingBloodPressureEntry = true },
             onDelete: { viewModel.deleteBloodPressureReading($0) },
             onDeleteAll: { viewModel.deleteAllBloodPressureReadings() }
@@ -233,7 +246,8 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     /// Falls back to the gallery tab when the selection doesn't form a pair.
     private func openComparison() {
         guard let pair = viewModel.comparisonPair(for: comparisonSelection) else {
-            withAnimation { selectedSubTab = .progressGallery }
+            // Fewer than two photos: nothing to compare yet.
+            dependencies.toasts.show(.info("Add at least two progress photos to compare"))
             return
         }
         comparisonPayload = DiaryComparisonPayload(beforeId: pair.before, afterId: pair.after)

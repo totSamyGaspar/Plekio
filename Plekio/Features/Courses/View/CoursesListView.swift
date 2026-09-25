@@ -11,6 +11,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
 
     // MARK: - Properties
 
+    @Environment(AppDependencies.self) private var dependencies
     @StateObject private var viewModel: VM
     @EnvironmentObject private var router: AppRouter
 
@@ -90,7 +91,9 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                 .scrollContentBackground(.hidden)
                 .alert("Delete Course?", isPresented: $showingDeleteAlert, presenting: courseToDelete) { course in
                     Button("Delete", role: .destructive) {
-                        viewModel.deleteCourse(course)
+                        if viewModel.deleteCourse(course) {
+                            dependencies.toasts.show(.success("Course deleted"))
+                        }
                     }
                     Button("Cancel", role: .cancel) {}
                 } message: { course in
@@ -98,7 +101,8 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                 }
                 .sheet(item: $courseToRepeat) { course in
                     RepeatCourseSheet(course: course) { startDate, endDate in
-                        viewModel.repeatCourse(course, startDate: startDate, endDate: endDate)
+                        guard viewModel.repeatCourse(course, startDate: startDate, endDate: endDate) else { return }
+                        dependencies.toasts.show(.success("Course repeated"))
                         // Show the Active tab, where the new copy lands.
                         selectedSegment = 0
                     }

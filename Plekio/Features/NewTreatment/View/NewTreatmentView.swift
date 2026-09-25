@@ -87,7 +87,9 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     // Dismiss only on success so typed input isn't lost.
                     Button("Save") {
-                        if viewModel.saveCourse() { dismiss() }
+                        guard viewModel.saveCourse() else { return }
+                        dependencies.toasts.show(.success("Course created"))
+                        dismiss()
                     }
                     .font(.headline)
                     .foregroundColor(viewModel.isSaveEnabled ? .accentPrimary : .textTertiary)

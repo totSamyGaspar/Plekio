@@ -84,13 +84,17 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
         }
         .sheet(isPresented: $showingAddMedication) {
             AddMedicationView(viewModel: dependencies.makeAddMedicationViewModel()) { draft in
-                viewModel.addNewMedication(draft)
+                if viewModel.addNewMedication(draft) {
+                    dependencies.toasts.show(.success("Medication added"))
+                }
                 showingAddMedication = false
             }
         }
         .sheet(item: $medicationToEdit) { med in
             AddMedicationView(viewModel: dependencies.makeAddMedicationViewModel(), editingMedication: med) { updatedDraft in
-                viewModel.updateMedication(medication: med, with: updatedDraft)
+                if viewModel.updateMedication(medication: med, with: updatedDraft) {
+                    dependencies.toasts.show(.success("Changes saved"))
+                }
                 medicationToEdit = nil
             }
         }

@@ -94,6 +94,7 @@ struct MainTabView: View {
             consumeDeepLink()
         }
         .onChange(of: router.pendingDeepLink) { _, _ in consumeDeepLink() }
+        .toastOverlay(dependencies.toasts)
         .alert(
             Text(errorPresenter.title),
             isPresented: Binding(
@@ -145,9 +146,11 @@ struct MainTabView: View {
 
         case .bloodPressureEntry:
             BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
-                dependencies.bloodPressureLogging.save(
+                if dependencies.bloodPressureLogging.save(
                     measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
-                )
+                ) {
+                    dependencies.toasts.show(.success("Blood pressure saved"))
+                }
             }
             .appTheme()
 

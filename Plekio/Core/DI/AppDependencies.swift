@@ -28,6 +28,8 @@ final class AppDependencies {
 
     /// Handed out as `any ErrorReporting`; only MainTabView needs the concrete type.
     let errorPresenter: AppErrorPresenter
+    /// Short confirmations and hints, shown over every screen.
+    let toasts = ToastCenter()
 
     /// The store file, for the storage-usage row in Settings. Nil in previews.
     let storeURL: URL?
