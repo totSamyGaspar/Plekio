@@ -12,6 +12,11 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     @StateObject private var viewModel: VM
     @EnvironmentObject private var router: AppRouter
 
+    /// The doses the take-sheet is asking about. Presented here rather than
+    /// through the router: "Take" on this screen goes through the view model,
+    /// which also opens the undo banner — behaviour a route should not carry.
+    @State private var doseSheet: DoseSheet?
+
     /// Tied to the title's text style so the mark grows with the wordmark
     /// instead of shrinking away from it at large Dynamic Type sizes.
     @ScaledMetric(relativeTo: .largeTitle) private var logoSize: CGFloat = 34
@@ -80,6 +85,24 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.undoableBulkLog)
         .toolbar(.hidden, for: .navigationBar)
+        .fullScreenCover(item: $doseSheet) { sheet in
+            TakePillModalView(pills: sheet.pills, onTake: {
+                // Logs only what is still pending. Toggling the group un-logged
+                // any dose the user had already ticked off beforehand.
+                viewModel.logDoses(sheet.pills)
+                doseSheet = nil
+            }, onSkip: {
+                viewModel.skipDoses(sheet.pills)
+                doseSheet = nil
+            }, onSnooze: {
+                let notifications = dependencies.notifications
+                let ids = sheet.pills.map { $0.medicationId.uuidString }
+                let names = sheet.pills.map(\.name)
+                Task { await notifications.scheduleSnooze(for: ids, names: names) }
+                doseSheet = nil
+            })
+            .presentationBackground(.clear)
+        }
         
     }
     
@@ -207,18 +230,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
 
     private func presentTakeSheet(for doses: [PillDose]) {
         guard !doses.isEmpty else { return }
-        
-        router.presentFullScreen(
-            .takePill(
-                pills: doses,
-                onTake: {
-                    // Logs only what is still pending. Toggling the group un-logged
-                    // any dose the user had already ticked off beforehand.
-                    viewModel.logDoses(doses)
-                },
-                onSkip: { viewModel.skipDoses(doses) }
-            )
-        )
+        doseSheet = DoseSheet(pills: doses)
     }
     
 }
@@ -229,3 +241,10 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         .environment(AppDependencies.preview)
         .appTheme()
 }
+
+/// One slot's doses, as the take-sheet's item.
+private struct DoseSheet: Identifiable {
+    let pills: [PillDose]
+    var id: String { pills.map(\.id).joined(separator: "-") }
+}
+

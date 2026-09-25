@@ -9,13 +9,6 @@ import SwiftUI
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-    /// A notification tap can arrive before SwiftUI has drawn the first screen and
-    /// assigned the router, so the payload is buffered and replayed the moment the
-    /// router appears. Without this a tap on a cold launch was silently lost.
-    weak var router: AppRouter? {
-        didSet { flushBufferedPush() }
-    }
-    
     /// The app's object graph, built on first touch.
     ///
     /// Owned here rather than by PlekioApp because a notification action can
@@ -25,23 +18,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     /// reminder sync is listening) before anything else runs.
     private(set) lazy var dependencies: AppDependencies = .live()
 
-    private var bufferedPush: (medicationIds: [UUID], time: Date)?
-    private var bufferedReminder: DailyReminder?
-    
-    private func flushBufferedPush() {
-        guard let router else { return }
-        
-        if let push = bufferedPush {
-            bufferedPush = nil
-            router.handlePushNotification(medicationIds: push.medicationIds, time: push.time)
-        }
-        
-        if let reminder = bufferedReminder {
-            bufferedReminder = nil
-            router.handleReminder(reminder)
-        }
-    }
-    
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
@@ -59,13 +35,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // recognised before the dose branch's guard drops them as malformed.
         if let kind = userInfo[DailyReminder.userInfoKey] as? String,
            let reminder = DailyReminder(rawValue: kind) {
+            // The router exists from launch (it is part of the graph), so a tap
+            // on a cold launch is handed over directly and parked there.
             DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                if let router = self.router {
-                    router.handleReminder(reminder)
-                } else {
-                    self.bufferedReminder = reminder
-                }
+                self?.dependencies.router.open(.dailyReminder(reminder))
             }
             completionHandler()
             return
@@ -99,7 +72,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             case NotificationAction.take:
                 guard let self else { return }
                 await self.logDoses(medicationIds: medIds, scheduledTime: scheduledTime)
-                self.router?.selectedTab = 0
+                self.dependencies.router.selectedTab = .today
                 
             case NotificationAction.snooze:
                 guard let self else { return }
@@ -117,11 +90,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 // A plain tap on the notification body: open the app and show the modal.
             default:
                 guard let self else { return }
-                if let router = self.router {
-                    router.handlePushNotification(medicationIds: medIds, time: scheduledTime)
-                } else {
-                    self.bufferedPush = (medIds, scheduledTime)
-                }
+                self.dependencies.router.open(.doseReminder(medicationIds: medIds, slot: scheduledTime))
             }
         }
     }

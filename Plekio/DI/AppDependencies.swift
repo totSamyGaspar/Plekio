@@ -64,6 +64,10 @@ final class AppDependencies {
     /// writes for as long as this object lives, which is as long as the app.
     let reminderSync: ReminderSyncCoordinator
 
+    /// Navigation state and the entry point for deep links. Here, not in the
+    /// SwiftUI root, so it exists before the first screen does.
+    let router: AppRouter
+
     /// "Now" for every rule that depends on it — see TimeSource. One instance,
     /// so the whole app agrees on the time.
     let time: any TimeSource
@@ -92,6 +96,7 @@ final class AppDependencies {
         diaryRepository = SwiftDataDiaryRepository(store: database)
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)
         reminderSync = ReminderSyncCoordinator(notificationService: notifications, dbService: database)
+        router = AppRouter()
     }
 
     /// The app's graph: the on-disk store and the real notification centre.

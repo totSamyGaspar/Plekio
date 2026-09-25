@@ -15,80 +15,92 @@ import Foundation
 @Suite("AppRouter Tests")
 struct AppRouterTests {
 
-    // MARK: - Reminders
+    // MARK: - Daily reminders
 
     @Test("напоминание о давлении ведёт в дневник, на вкладку с показаниями")
-    func testBloodPressureReminderDeepLinksToTrends() async throws {
+    func testBloodPressureReminderDeepLinksToTrends() {
         let router = AppRouter()
 
-        router.handleReminder(.bloodPressure)
+        router.open(.dailyReminder(.bloodPressure))
 
-        #expect(router.selectedTab == 2)
-        #expect(router.pendingReminder == .bloodPressure)
+        #expect(router.selectedTab == .diary)
+        #expect(router.pendingDeepLink == .dailyReminder(.bloodPressure))
         // Behind the entry form: dismissing it should leave the new measurement
         // on screen, not the journal feed.
         #expect(router.pendingDiarySubTab == .moodTrends)
     }
 
     @Test("напоминание дневника не переключает подвкладку")
-    func testDiaryReminderLeavesTheSubTabAlone() async throws {
+    func testDiaryReminderLeavesTheSubTabAlone() {
         let router = AppRouter()
 
-        router.handleReminder(.diary)
+        router.open(.dailyReminder(.diary))
 
-        #expect(router.selectedTab == 2)
-        #expect(router.pendingReminder == .diary)
+        #expect(router.selectedTab == .diary)
+        #expect(router.pendingDeepLink == .dailyReminder(.diary))
         // The check-in is not about any one sub-tab, so the diary opens wherever
         // the user left it.
         #expect(router.pendingDiarySubTab == nil)
     }
 
-    @Test("запрос забирается один раз")
-    func testPendingReminderIsConsumedOnce() async throws {
-        // Consumed rather than read: the sheet is presented from a .task and an
-        // .onChange, and both run for the same tap. A request that survived
-        // being read would present the form twice.
-        let router = AppRouter()
-        router.handleReminder(.bloodPressure)
+    // MARK: - Dose reminders
 
-        #expect(router.consumePendingReminder() == .bloodPressure)
-        #expect(router.consumePendingReminder() == nil)
+    @Test("пуш о приёме ведёт на сегодняшний экран и переносит слот целиком")
+    func testDosePushCarriesItsSlot() {
+        let router = AppRouter()
+        let ids = [UUID(), UUID()]
+        let slot = Date(timeIntervalSince1970: 1_780_000_000)
+
+        router.open(.doseReminder(medicationIds: ids, slot: slot))
+
+        #expect(router.selectedTab == .today)
+        #expect(router.consumeDeepLink() == .doseReminder(medicationIds: ids, slot: slot))
+        #expect(router.pendingDiarySubTab == nil)
+    }
+
+    // MARK: - Consuming
+
+    @Test("ссылка забирается один раз")
+    func testDeepLinkIsConsumedOnce() {
+        // Consumed rather than read: the link is presented from a .task and an
+        // .onChange, and both run for the same tap. A link that survived being
+        // read would present the form twice.
+        let router = AppRouter()
+        router.open(.dailyReminder(.bloodPressure))
+
+        #expect(router.consumeDeepLink() == .dailyReminder(.bloodPressure))
+        #expect(router.consumeDeepLink() == nil)
 
         #expect(router.consumePendingDiarySubTab() == .moodTrends)
         #expect(router.consumePendingDiarySubTab() == nil)
     }
 
-    @Test("без запроса потребление ничего не возвращает")
-    func testNothingToConsumeByDefault() async throws {
+    @Test("без ссылки потребление ничего не возвращает")
+    func testNothingToConsumeByDefault() {
         let router = AppRouter()
 
-        #expect(router.consumePendingReminder() == nil)
+        #expect(router.consumeDeepLink() == nil)
         #expect(router.consumePendingDiarySubTab() == nil)
-        #expect(router.consumePendingPush() == nil)
     }
 
-    // MARK: - Dose push
-
-    @Test("пуш о приёме ведёт на сегодняшний экран и переносит слот целиком")
-    func testDosePushCarriesItsSlot() async throws {
+    @Test("новая ссылка заменяет ещё не обработанную")
+    func testALaterLinkReplacesAnUnconsumedOne() {
+        // Two taps before the tab bar appears: the last one is what the user
+        // is looking at now, so it is the one to act on.
         let router = AppRouter()
-        let ids = [UUID(), UUID()]
-        let time = Date(timeIntervalSince1970: 1_780_000_000)
+        router.open(.dailyReminder(.diary))
+        router.open(.doseReminder(medicationIds: [UUID()], slot: Date()))
 
-        router.handlePushNotification(medicationIds: ids, time: time)
-
-        #expect(router.selectedTab == 0)
-
-        let consumed = try #require(router.consumePendingPush())
-        #expect(consumed.0 == ids)
-        #expect(consumed.1 == time)
-        #expect(router.consumePendingPush() == nil)
+        #expect(router.selectedTab == .today)
+        if case .doseReminder = router.consumeDeepLink() {} else {
+            Issue.record("expected the dose reminder to win")
+        }
     }
 
     // MARK: - Sheets
 
     @Test("dismissSheet закрывает и обычный лист, и полноэкранный")
-    func testDismissClearsBothPresentations() async throws {
+    func testDismissClearsBothPresentations() {
         // They are separate properties, and a dose modal opens the full-screen
         // one while a reminder opens the sheet — a dismiss that cleared only one
         // would leave whichever it missed on screen.

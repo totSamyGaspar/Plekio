@@ -49,7 +49,7 @@ struct MainTabView: View {
                 DashboardView(viewModel: dependencies.makeDashboardViewModel())
             }
             .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
-            .tag(0)
+            .tag(AppTab.today)
             
             NavigationStack(path: $router.coursesPath) {
                 CoursesListView(viewModel: dependencies.makeCoursesListViewModel())
@@ -61,19 +61,19 @@ struct MainTabView: View {
                     }
             }
             .tabItem { Label("Courses", systemImage: "list.clipboard.fill") }
-            .tag(1)
+            .tag(AppTab.courses)
             
             NavigationStack {
                 DiaryView(viewModel: dependencies.makeDiaryViewModel())
             }
             .tabItem { Label("Diary", systemImage: "text.book.closed.fill") }
-            .tag(2)
+            .tag(AppTab.diary)
             
             NavigationStack {
                 SettingsView()
             }
             .tabItem { Label("Settings", systemImage: "gearshape.fill") }
-            .tag(3)
+            .tag(AppTab.settings)
         }
         .tint(.accentPrimary)
         .appTheme()
@@ -97,11 +97,9 @@ struct MainTabView: View {
         // fullScreenCover requested while the presenting view is still appearing.
         .task {
             try? await Task.sleep(for: .seconds(RootTransition.presentationDelay))
-            consumePendingPush()
-            consumePendingReminder()
+            consumeDeepLink()
         }
-        .onChange(of: router.pendingPushMedicationIds) { _, _ in consumePendingPush() }
-        .onChange(of: router.pendingReminder) { _, _ in consumePendingReminder() }
+        .onChange(of: router.pendingDeepLink) { _, _ in consumeDeepLink() }
         .alert(
             "Couldn't save",
             isPresented: Binding(
@@ -116,48 +114,31 @@ struct MainTabView: View {
         }
     }
     
-    // MARK: - Push
-    
-    private func consumePendingPush() {
-        guard let (medicationIds, scheduledTime) = router.consumePendingPush() else { return }
+    // MARK: - Deep links
 
-        let doseLogging = dependencies.doseLogging
+    /// Presented from here rather than from the screen the link is about: this
+    /// view is in the hierarchy whenever the app is, while on a cold launch the
+    /// diary or the dashboard may not be yet.
+    private func consumeDeepLink() {
+        guard let link = router.consumeDeepLink() else { return }
 
-        // Doses come from the schedule by slot time, not from the dashboard view
-        // model, so the modal does not depend on whether that screen is rendered or
-        // on which date it happens to be showing.
-        let pills = doseLogging.openDoses(medicationIds: medicationIds, at: scheduledTime)
-        guard !pills.isEmpty else { return }
+        switch link {
+        case .doseReminder(let medicationIds, let slot):
+            // Doses come from the schedule by slot time, not from the dashboard
+            // view model, so the modal does not depend on whether that screen is
+            // rendered or on which date it happens to be showing.
+            let pills = dependencies.doseLogging.openDoses(medicationIds: medicationIds, at: slot)
+            guard !pills.isEmpty else { return }
+            router.presentFullScreen(.takePill(pills: pills))
 
-        // No Task here: the write is synchronous, and the reminder rebuild runs
-        // behind it on its own — nothing on screen waits for it.
-        router.presentFullScreen(
-            .takePill(
-                pills: pills,
-                onTake: {
-                    _ = errorPresenter.attempt { try doseLogging.markTaken(pills) }
-                },
-                onSkip: {
-                    _ = errorPresenter.attempt { try doseLogging.markSkipped(pills) }
-                }
-            )
-        )
-    }
-
-    /// Presented from here rather than from the diary screen: on a cold launch a
-    /// reminder is tapped before that screen is in the hierarchy, which is the
-    /// same reason the dose push is handled here.
-    private func consumePendingReminder() {
-        guard let reminder = router.consumePendingReminder() else { return }
-        
-        switch reminder {
-        case .diary:
+        case .dailyReminder(.diary):
             router.present(.diaryCheckIn)
-        case .bloodPressure:
+
+        case .dailyReminder(.bloodPressure):
             router.present(.bloodPressureEntry)
         }
     }
-    
+
     @ViewBuilder
     private func sheetContent(for sheet: SheetRoute) -> some View {
         switch sheet {
@@ -180,12 +161,14 @@ struct MainTabView: View {
             }
             .appTheme()
             
-        case .takePill(let pills, let onTake, let onSkip):
+        case .takePill(let pills):
+            // The notification path: straight to the use case. The dashboard
+            // presents its own modal, since its "Take" also starts the undo banner.
             TakePillModalView(pills: pills, onTake: {
-                onTake()
+                _ = errorPresenter.attempt { try dependencies.doseLogging.markTaken(pills) }
                 router.dismissSheet()
             }, onSkip: {
-                onSkip()
+                _ = errorPresenter.attempt { try dependencies.doseLogging.markSkipped(pills) }
                 router.dismissSheet()
             }, onSnooze: {
                 let notifService = dependencies.notifications

@@ -17,7 +17,10 @@ enum Route: Hashable {
 enum SheetRoute: Identifiable {
     
     case newTreatment
-    case takePill(pills: [PillDose], onTake: () -> Void, onSkip: () -> Void)
+    /// Confirm the open doses of a notification's slot. Data only: what "Take"
+    /// and "Skip" do is decided by the screen that presents it, not carried
+    /// in the route as closures.
+    case takePill(pills: [PillDose])
     case diaryCheckIn
     /// The blood-pressure entry form. Presented from MainTabView rather than
     /// from the diary screen so a reminder can open it on a cold launch, where
@@ -29,7 +32,7 @@ enum SheetRoute: Identifiable {
         switch self {
         case .newTreatment:
             return "newTreatment"
-        case .takePill(let pills, _, _):
+        case .takePill(let pills):
             return "takePill-" + pills.map(\.id).joined(separator: "-")
         case .diaryCheckIn:
             return "diaryCheckIn"

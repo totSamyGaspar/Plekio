@@ -13,8 +13,6 @@ struct PlekioApp: App {
     
     @Environment(\.scenePhase) private var scenePhase
     
-    @StateObject private var router = AppRouter()
-    
     init() {
         MainTabView.configureTabBarAppearance()
         AppAppearance.configureSliders()
@@ -23,16 +21,13 @@ struct PlekioApp: App {
     var body: some Scene {
         WindowGroup {
             SplashView()
-                .environmentObject(router)
+                .environmentObject(appDelegate.dependencies.router)
                 // The composition root, for every screen below — see AppDependencies.
                 .environment(appDelegate.dependencies)
                 // Photo views read the loader from here rather than from ImageCache.shared.
                 .environment(\.imageLoader, appDelegate.dependencies.photoCache)
                 // Every @AppStorage below reads the domain SettingsStore writes.
                 .defaultAppStorage(appDelegate.dependencies.settings.defaults)
-                .onAppear {
-                    appDelegate.router = router
-                }
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {
                         refreshAllNotifications()
