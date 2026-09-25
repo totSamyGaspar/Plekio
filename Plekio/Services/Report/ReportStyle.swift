@@ -17,7 +17,7 @@ import UIKit
 /// worth answering by building rather than by guessing. Moving the render off
 /// it is a later, measured step — `ReportData` is already nonisolated, which is
 /// the half that matters for crossing over.
-struct ReportStyle {
+nonisolated struct ReportStyle {
 
     /// A4 at 72 points to the inch, which is the unit a PDF context works in.
     let pageSize = CGSize(width: 595, height: 842)

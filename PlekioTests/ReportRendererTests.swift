@@ -194,4 +194,33 @@ struct ReportRendererTests {
         // Разделы: препараты и давление. Дневника нет — закладки тоже.
         #expect(written.outlineRoot?.numberOfChildren == 2)
     }
+
+    // MARK: - Off the main actor
+
+    @Test("отчёт рисуется и записывается вне главного потока")
+    func rendersOffTheMainThread() async throws {
+        // The export screen froze while a long report was drawn on the main
+        // actor. Rendering now runs detached; this keeps it possible — the
+        // pipeline must not quietly pick up a main-actor dependency again.
+        let data = report()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("PlekioReportTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let (url, onMain) = try await Task.detached {
+            let rendered = ReportRenderer().render(data)
+            let url = try ReportDocument.write(rendered, for: data, in: directory)
+            return (url, Self.isMainThread())
+        }.value
+
+        #expect(onMain == false)
+        #expect(FileManager.default.fileExists(atPath: url.path))
+    }
+
+    /// `Thread.isMainThread` is not allowed straight inside an async closure;
+    /// asked through a synchronous function, it is.
+    nonisolated private static func isMainThread() -> Bool {
+        Thread.isMainThread
+    }
 }

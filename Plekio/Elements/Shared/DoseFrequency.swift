@@ -10,7 +10,9 @@
 
 import Foundation
 
-enum DoseFrequency: Int, CaseIterable, Identifiable {
+/// `nonisolated`: plain data, and the PDF report — drawn off the main actor —
+/// prints the same labels.
+nonisolated enum DoseFrequency: Int, CaseIterable, Identifiable {
     case daily = 1
     case everyOtherDay = 2
     case everyThreeDays = 3

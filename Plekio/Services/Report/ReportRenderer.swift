@@ -9,7 +9,7 @@ import UIKit
 ///
 /// `ReportData` carries what the user recorded; this carries what the app puts
 /// on it. Mixing the two would mean the builder had to know about assets.
-struct ReportBranding {
+nonisolated struct ReportBranding {
 
     let logo: UIImage?
     let appName: String
@@ -22,7 +22,7 @@ struct ReportBranding {
     }
 }
 
-struct RenderedReport {
+nonisolated struct RenderedReport {
 
     let data: Data
 
@@ -41,7 +41,11 @@ struct RenderedReport {
 /// Knows nothing about SwiftData and nothing about sharing: values in, bytes
 /// out. That is what lets the layout be exercised in tests against made-up
 /// data, without a store and without a share sheet.
-struct ReportRenderer {
+///
+/// `nonisolated`, with everything it draws with: rendering a few months with
+/// photos is many pages, and it runs off the main actor so the export screen
+/// stays responsive while it does.
+nonisolated struct ReportRenderer {
 
     private let style: ReportStyle
     private let branding: ReportBranding

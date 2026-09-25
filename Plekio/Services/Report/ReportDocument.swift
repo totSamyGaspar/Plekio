@@ -14,7 +14,7 @@ import PDFKit
 /// to a document once the pages exist: the metadata a mail client shows instead
 /// of "Untitled", the bookmark tree that lets a reader jump to a section, and
 /// the write itself.
-enum ReportDocument {
+nonisolated enum ReportDocument {
 
     enum Failure: Error {
         case unreadable

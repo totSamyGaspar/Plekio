@@ -10,7 +10,7 @@ import UIKit
 /// Every method returns the page its heading landed on, which is what the
 /// bookmark tree is built from — cheaper and more honest than searching the
 /// finished file for its own headings.
-struct ReportSections {
+nonisolated struct ReportSections {
 
     let canvas: PageCanvas
     let photos: [UUID: UIImage]

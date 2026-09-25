@@ -92,15 +92,26 @@ final class ReportExportViewModel: ObservableObject {
         isWorking = true
         defer { isWorking = false }
 
+        // Reading the store stays here, on the main actor, where SwiftData lives.
         let data = ReportBuilder(database: database, now: { [time] in time.now }).build(selection)
         let photos = selection.includesPhotos ? await photos(in: data) : [:]
-        let rendered = ReportRenderer().render(data, photos: photos)
 
         do {
-            document = try ReportDocument.write(rendered, for: data)
+            document = try await Self.renderDocument(data, photos: photos)
         } catch {
             errors.report(error)
         }
+    }
+
+    /// Drawing and writing the PDF are the slow part — a few months with photos
+    /// is many pages — and they need nothing from the main actor: values in, a
+    /// file out. Done there, they froze the export screen, progress indicator
+    /// and all, until the file was ready.
+    nonisolated private static func renderDocument(_ data: ReportData, photos: [UUID: UIImage]) async throws -> URL {
+        try await Task.detached(priority: .userInitiated) {
+            let rendered = ReportRenderer().render(data, photos: photos)
+            return try ReportDocument.write(rendered, for: data)
+        }.value
     }
 
     /// Decoded before drawing starts: reading a photo is asynchronous and

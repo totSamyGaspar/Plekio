@@ -16,7 +16,7 @@ import UIKit
 /// because a block has to be able to end mid-paragraph and continue overleaf —
 /// a long diary note is exactly the thing that does not fit in what is left of
 /// a page, and UIKit's draw would silently clip it.
-final class PageCanvas {
+nonisolated final class PageCanvas {
 
     private let context: UIGraphicsPDFRendererContext
     let style: ReportStyle
@@ -210,7 +210,10 @@ final class PageCanvas {
 
 // MARK: - Text
 
-extension PageCanvas {
+// `nonisolated` here as well as on the class: with MainActor as the module's
+// default, an extension is main-actor isolated unless it says otherwise, even
+// when the type it extends is not.
+nonisolated extension PageCanvas {
 
     /// The attributed string a caller would otherwise build by hand at every
     /// call site, with the paragraph spacing the document is set in.
