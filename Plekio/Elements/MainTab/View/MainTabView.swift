@@ -160,21 +160,17 @@ struct MainTabView: View {
             .appTheme()
             
         case .takePill(let pills):
-            // The notification path: straight to the use case, then into the shared
-            // undo window — the user lands on Today, where the banner shows it.
+            // Opened by a tapped reminder and by the dashboard alike; the buttons
+            // are the same object either way.
+            let actions = dependencies.doseSheetActions
             TakePillModalView(pills: pills, onTake: {
-                let outcome = errorPresenter.attempt { try dependencies.doseLogging.markTaken(pills) }
-                dependencies.doseUndo.offer(.logged, undo: outcome?.undo)
+                actions.take(pills)
                 router.dismissSheet()
             }, onSkip: {
-                let outcome = errorPresenter.attempt { try dependencies.doseLogging.markSkipped(pills) }
-                dependencies.doseUndo.offer(.skipped, undo: outcome?.undo)
+                actions.skip(pills)
                 router.dismissSheet()
             }, onSnooze: {
-                let notifService = dependencies.notifications
-                let ids = pills.map { $0.medicationId.uuidString }
-                let names = pills.map { $0.name }
-                Task { await notifService.scheduleSnooze(for: ids, names: names) }
+                actions.snooze(pills)
                 router.dismissSheet()
             })
             .presentationBackground(.clear)

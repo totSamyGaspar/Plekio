@@ -65,6 +65,9 @@ final class AppDependencies {
     /// notification modal's alike.
     let doseUndo: DoseUndoCenter
 
+    /// The take-sheet's Take / Skip / Snooze, wherever the sheet is opened from.
+    let doseSheetActions: DoseSheetActions
+
     /// Switching the daily reminders on and off, permission included.
     let dailyReminderArming: DailyReminderArming
 
@@ -103,6 +106,7 @@ final class AppDependencies {
 
         doseLogging = DoseLoggingUseCase(dbService: database, notificationService: notifications)
         doseUndo = DoseUndoCenter(doseLogging: doseLogging, errors: errorPresenter, time: time)
+        doseSheetActions = DoseSheetActions(doseLogging: doseLogging, notifications: notifications, undo: doseUndo, errors: errorPresenter)
         dailyReminderArming = DailyReminderArming(notifications: notifications)
         courseRepository = SwiftDataCourseRepository(store: database)
         diaryRepository = SwiftDataDiaryRepository(store: database)

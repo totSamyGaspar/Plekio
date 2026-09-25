@@ -17,9 +17,9 @@ enum Route: Hashable {
 enum SheetRoute: Identifiable {
     
     case newTreatment
-    /// Confirm the open doses of a notification's slot. Data only: what "Take"
-    /// and "Skip" do is decided by the screen that presents it, not carried
-    /// in the route as closures.
+    /// Confirm the open doses of one slot — from a tapped reminder or from the
+    /// dashboard. Data only: what the buttons do is DoseSheetActions', not
+    /// carried in the route as closures.
     case takePill(pills: [PillDose])
     case diaryCheckIn
     /// The blood-pressure entry form. Presented from MainTabView rather than
