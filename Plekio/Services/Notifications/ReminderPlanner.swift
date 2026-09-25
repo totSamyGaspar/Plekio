@@ -58,7 +58,11 @@ enum ReminderPlanner {
                 return MedicationPlan(
                     courseName: course.name,
                     medication: med,
-                    startDay: calendar.startOfDay(for: course.startDate),
+                    startDay: DoseSchedule.startDay(
+                        of: med,
+                        courseStartDay: calendar.startOfDay(for: course.startDate),
+                        calendar: calendar
+                    ),
                     endDay: calendar.startOfDay(for: course.endDate),
                     frequencyDays: med.frequencyDays,
                     times: DoseSchedule.timesOfDay(med.timesOfDay, calendar: calendar),

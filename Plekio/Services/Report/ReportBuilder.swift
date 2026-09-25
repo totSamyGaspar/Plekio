@@ -149,11 +149,14 @@ nonisolated struct ReportAssembler {
             }
         }
 
+        // The schedule as it stood at the end of the period, not as it is today.
+        let shown = DoseSchedule.schedule(of: medication, on: min(lastDay, courseEnd))
+
         return MedicationReport(
             name: medication.name,
-            dosage: medication.dosage,
-            timesOfDay: medication.timesOfDay,
-            frequencyDays: medication.frequencyDays,
+            dosage: shown.dosage,
+            timesOfDay: shown.timesOfDay,
+            frequencyDays: shown.frequencyDays,
             adherence: adherence,
             exceptions: exceptions.sorted { $0.time < $1.time }
         )

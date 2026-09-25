@@ -103,6 +103,7 @@ extension DatabaseService: CourseStoring {
         // Captured first: the old schedule is kept for past days, and today's logs remapped.
         let previousTimes = medication.timesOfDay
         let previousFrequency = medication.frequencyDays
+        let previousDosage = medication.dosage
 
         medication.name = draft.name
         medication.formSystemImage = draft.formSystemImage
@@ -112,7 +113,7 @@ extension DatabaseService: CourseStoring {
         medication.frequencyDays = draft.frequencyDays
         medication.timesOfDay = draft.timesOfDay
 
-        recordRevision(of: medication, times: previousTimes, frequencyDays: previousFrequency)
+        recordRevision(of: medication, times: previousTimes, frequencyDays: previousFrequency, dosage: previousDosage)
         remapLogs(of: medication, from: previousTimes, to: draft.timesOfDay)
 
         // Touch disk only after commit and only if the photo was modified: an
@@ -135,20 +136,29 @@ extension DatabaseService: CourseStoring {
     /// Keeps the schedule that applied before today, so past days, statistics and
     /// the report aren't recomputed on the new one. Nothing to keep if the course
     /// hasn't started or the schedule didn't change.
-    private func recordRevision(of medication: MedicationItem, times oldTimes: [Date], frequencyDays oldFrequency: Int) {
+    private func recordRevision(
+        of medication: MedicationItem,
+        times oldTimes: [Date],
+        frequencyDays oldFrequency: Int,
+        dosage oldDosage: Int
+    ) {
         let calendar = time.calendar
         let today = calendar.startOfDay(for: time.now)
 
         func minutes(_ times: [Date]) -> [Int] {
             times.map { calendar.component(.hour, from: $0) * 60 + calendar.component(.minute, from: $0) }
         }
-        guard minutes(oldTimes) != minutes(medication.timesOfDay) || oldFrequency != medication.frequencyDays else { return }
+        guard minutes(oldTimes) != minutes(medication.timesOfDay)
+                || oldFrequency != medication.frequencyDays
+                || oldDosage != medication.dosage else { return }
 
         guard let course = medication.course, calendar.startOfDay(for: course.startDate) < today else { return }
         // Edited again today: the revision already holds what applied before today.
         guard !medication.scheduleRevisions.contains(where: { $0.validUntil == today }) else { return }
 
-        let revision = ScheduleRevision(validUntil: today, timesOfDay: oldTimes, frequencyDays: oldFrequency)
+        let revision = ScheduleRevision(
+            validUntil: today, timesOfDay: oldTimes, frequencyDays: oldFrequency, dosage: oldDosage
+        )
         revision.medication = medication
         medication.scheduleRevisions.append(revision)
     }
@@ -233,7 +243,12 @@ extension DatabaseService: CourseStoring {
         try persistence.commit([.courses])
     }
 
+    /// Added to a running course, it starts today: earlier days weren't its to miss.
     func addMedication(draft: MedicationDraft, to course: TreatmentCourse) throws {
+        let calendar = time.calendar
+        let today = calendar.startOfDay(for: time.now)
+        let courseStarted = calendar.startOfDay(for: course.startDate) < today
+
         let med = MedicationItem(
             id: draft.id,
             name: draft.name,
@@ -242,7 +257,8 @@ extension DatabaseService: CourseStoring {
             timesOfDay: draft.timesOfDay,
             frequencyDays: draft.frequencyDays,
             stockCount: draft.stockCount,
-            lowStockThreshold: draft.lowStockThreshold
+            lowStockThreshold: draft.lowStockThreshold,
+            startDate: courseStarted ? today : nil
         )
         course.medications.append(med)
 

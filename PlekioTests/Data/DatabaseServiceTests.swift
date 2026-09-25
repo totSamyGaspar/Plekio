@@ -188,6 +188,38 @@ struct DatabaseServiceTests {
         #expect(pastDays.allSatisfy { db.fetchPills(for: $0).count == 1 })
     }
 
+    @Test("смена дозировки не меняет дозировку прошлых дней")
+    func testChangingDosageKeepsThePast() async throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12, 0)))
+        let med = makeCourseWithMed(db, dosage: 2)
+
+        var draft = MedicationDraft(from: MedicationSnapshot(med))
+        draft.dosage = 1
+        try db.updateMedication(med, with: draft)
+
+        #expect(db.fetchPills(for: testDate(2026, 6, 9)).first?.dosage == 2)
+        #expect(db.fetchPills(for: testDate(2026, 6, 10)).first?.dosage == 1)
+    }
+
+    @Test("лекарство, добавленное в идущий курс, не даёт пропусков за дни до добавления")
+    func testMedicationAddedMidCourseStartsToday() async throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12, 0)))
+        let course = makeCourseWithMed(db).course
+        let owner = try #require(course)
+
+        var draft = MedicationDraft()
+        draft.name = "Магний"
+        draft.timesOfDay = [testDate(2000, 1, 1, 20, 0)]
+        draft.frequencyDays = 1
+        try db.addMedication(draft: draft, to: owner)
+
+        let names: (Date) -> [String] = { day in db.fetchPills(for: day).map(\.name) }
+        #expect(!names(testDate(2026, 6, 9)).contains("Магний"))
+        #expect(names(testDate(2026, 6, 10)).contains("Магний"))
+    }
+
     // MARK: - refillStock
 
     @Test("refillStock increases stockCount by the given amount")

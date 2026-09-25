@@ -22,6 +22,8 @@ nonisolated final class MedicationItem {
     var timesOfDay: [Date]
     var frequencyDays: Int
     var course: TreatmentCourse?
+    /// First day it's taken, when added to a course already running; nil means from the course start.
+    var startDate: Date?
     var stockCount: Int
     var lowStockThreshold: Int
 
@@ -42,7 +44,8 @@ nonisolated final class MedicationItem {
         timesOfDay: [Date],
         frequencyDays: Int,
         stockCount: Int = 30,
-        lowStockThreshold: Int = 10
+        lowStockThreshold: Int = 10,
+        startDate: Date? = nil
     ) {
         self.id = id
         self.name = name
@@ -54,5 +57,6 @@ nonisolated final class MedicationItem {
         self.scheduleRevisions = []
         self.stockCount = stockCount
         self.lowStockThreshold = lowStockThreshold
+        self.startDate = startDate
     }
 }

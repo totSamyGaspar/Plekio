@@ -61,14 +61,30 @@ nonisolated enum DoseSchedule {
         calendar.date(bySettingHour: hour, minute: minute, second: 0, of: day)
     }
 
-    /// The times and frequency in force on `day` (start of day): the earliest
-    /// revision still valid then, else the medication's current schedule.
-    static func schedule(of medication: MedicationItem, on day: Date) -> (timesOfDay: [Date], frequencyDays: Int) {
+    /// A medication's schedule as of one day.
+    struct Schedule: Equatable {
+        let timesOfDay: [Date]
+        let frequencyDays: Int
+        let dosage: Int
+    }
+
+    /// The schedule in force on `day` (start of day): the earliest revision still
+    /// valid then, else the medication's current fields.
+    static func schedule(of medication: MedicationItem, on day: Date) -> Schedule {
         let revision = medication.scheduleRevisions
             .filter { $0.validUntil > day }
             .min { $0.validUntil < $1.validUntil }
-        return revision.map { ($0.timesOfDay, $0.frequencyDays) }
-            ?? (medication.timesOfDay, medication.frequencyDays)
+        if let revision {
+            return Schedule(timesOfDay: revision.timesOfDay, frequencyDays: revision.frequencyDays, dosage: revision.dosage)
+        }
+        return Schedule(timesOfDay: medication.timesOfDay, frequencyDays: medication.frequencyDays, dosage: medication.dosage)
+    }
+
+    /// The first day a medication is taken: its own start when added mid-course,
+    /// else the course start. Also the anchor for "every N days".
+    static func startDay(of medication: MedicationItem, courseStartDay: Date, calendar: Calendar) -> Date {
+        guard let own = medication.startDate else { return courseStartDay }
+        return max(courseStartDay, calendar.startOfDay(for: own))
     }
 
     /// Every slot a medication has on `day`, given its course.
@@ -80,11 +96,12 @@ nonisolated enum DoseSchedule {
         calendar: Calendar
     ) -> [Slot] {
         let schedule = schedule(of: medication, on: day)
+        let start = startDay(of: medication, courseStartDay: courseStartDay, calendar: calendar)
 
-        guard isActive(courseStartDay: courseStartDay, courseEndDay: courseEndDay, day: day),
+        guard isActive(courseStartDay: start, courseEndDay: courseEndDay, day: day),
               isDoseDay(
                 frequencyDays: schedule.frequencyDays,
-                courseStartDay: courseStartDay,
+                courseStartDay: start,
                 day: day,
                 calendar: calendar
               )

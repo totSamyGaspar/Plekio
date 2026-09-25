@@ -23,14 +23,16 @@ nonisolated final class ScheduleRevision {
     var validUntil: Date
     var timesOfDay: [Date]
     var frequencyDays: Int
+    var dosage: Int
 
     var medication: MedicationItem?
 
     // MARK: - Init
 
-    init(validUntil: Date, timesOfDay: [Date], frequencyDays: Int) {
+    init(validUntil: Date, timesOfDay: [Date], frequencyDays: Int, dosage: Int) {
         self.validUntil = validUntil
         self.timesOfDay = timesOfDay
         self.frequencyDays = frequencyDays
+        self.dosage = dosage
     }
 }
