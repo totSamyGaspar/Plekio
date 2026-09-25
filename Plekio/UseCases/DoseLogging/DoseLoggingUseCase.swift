@@ -32,6 +32,11 @@ final class DoseLoggingUseCase: DoseLoggingUseCaseProtocol {
     }
 
     // MARK: - Writing
+    //
+    // Every write is judged against what is stored when it runs, not against
+    // the copies handed in — they may be stale (a screen that has not refreshed
+    // yet) or recorded long ago (an undo). And every write hands back its
+    // inverse, so undo is just the next command.
 
     func toggle(_ dose: PillDose) throws -> DoseLogOutcome {
         try dbService.togglePill(medicationId: dose.medicationId, scheduledTime: dose.time)
@@ -41,14 +46,15 @@ final class DoseLoggingUseCase: DoseLoggingUseCaseProtocol {
         let nowTaken = !dose.isTaken
         return DoseLogOutcome(
             written: [dose],
-            reminderSync: syncReminders(clearingSettledAt: nowTaken ? [dose.time] : [])
+            reminderSync: syncReminders(clearingSettledAt: nowTaken ? [dose.time] : []),
+            undo: nowTaken ? .revertTake([dose]) : .take([dose])
         )
     }
 
     func markTaken(_ doses: [PillDose]) throws -> DoseLogOutcome {
         // Only "already taken" is filtered out. Being late is no reason to refuse:
         // a confirmation that crosses the missed threshold must still be logged.
-        let pending = doses.filter { !$0.isTaken }
+        let pending = current(doses).filter { !$0.isTaken }
         guard !pending.isEmpty else { return .nothing }
 
         // One write per slot, not per dose: each is its own commit, cache reset
@@ -60,14 +66,15 @@ final class DoseLoggingUseCase: DoseLoggingUseCaseProtocol {
 
         return DoseLogOutcome(
             written: pending,
-            reminderSync: syncReminders(clearingSettledAt: Array(bySlot.keys))
+            reminderSync: syncReminders(clearingSettledAt: Array(bySlot.keys)),
+            undo: .revertTake(pending)
         )
     }
 
     func markSkipped(_ doses: [PillDose]) throws -> DoseLogOutcome {
         // A taken dose is not skippable, and an already skipped one would only
         // have its timestamp moved.
-        let open = doses.filter { !$0.isTaken && !$0.isSkipped }
+        let open = current(doses).filter { !$0.isTaken && !$0.isSkipped }
         guard !open.isEmpty else { return .nothing }
 
         let bySlot = Dictionary(grouping: open, by: \.time)
@@ -80,17 +87,15 @@ final class DoseLoggingUseCase: DoseLoggingUseCaseProtocol {
         // treats a skipped slot like a taken one, so the rebuild leaves it out.
         return DoseLogOutcome(
             written: open,
-            reminderSync: syncReminders(clearingSettledAt: Array(bySlot.keys))
+            reminderSync: syncReminders(clearingSettledAt: Array(bySlot.keys)),
+            undo: .revertSkip(open)
         )
     }
 
     func revertTaken(_ doses: [PillDose]) throws -> DoseLogOutcome {
-        // Re-read rather than trusting the doses handed in: toggling a dose the
-        // user already unticked would log it instead of undoing it.
-        let requested = Set(doses.map(\.id))
-        let toRevert = Set(doses.map(\.time))
-            .flatMap { scheduled(at: $0) }
-            .filter { requested.contains($0.id) && $0.isTaken }
+        // Only doses still taken: the user may have unticked one by hand since,
+        // and un-logging that one again would log it instead of undoing it.
+        let toRevert = current(doses).filter(\.isTaken)
         guard !toRevert.isEmpty else { return .nothing }
 
         for (slot, group) in Dictionary(grouping: toRevert, by: \.time) {
@@ -99,7 +104,46 @@ final class DoseLoggingUseCase: DoseLoggingUseCaseProtocol {
 
         // Rebuilt so the reminders dropped by the original log come back —
         // that is the point of an undo. Nothing is settled, so nothing to clear.
-        return DoseLogOutcome(written: toRevert, reminderSync: syncReminders(clearingSettledAt: []))
+        return DoseLogOutcome(
+            written: toRevert,
+            reminderSync: syncReminders(clearingSettledAt: []),
+            undo: .take(toRevert)
+        )
+    }
+
+    func revertSkipped(_ doses: [PillDose]) throws -> DoseLogOutcome {
+        // Only doses still skipped: one taken since stays taken.
+        let toRevert = current(doses).filter(\.isSkipped)
+        guard !toRevert.isEmpty else { return .nothing }
+
+        for (slot, group) in Dictionary(grouping: toRevert, by: \.time) {
+            try dbService.unskipDoses(medicationIds: group.map(\.medicationId), scheduledTime: slot)
+        }
+
+        // The slot is unanswered again, so its reminder comes back.
+        return DoseLogOutcome(
+            written: toRevert,
+            reminderSync: syncReminders(clearingSettledAt: []),
+            undo: .skip(toRevert)
+        )
+    }
+
+    func perform(_ command: DoseCommand) throws -> DoseLogOutcome {
+        switch command {
+        case .take(let doses): return try markTaken(doses)
+        case .skip(let doses): return try markSkipped(doses)
+        case .revertTake(let doses): return try revertTaken(doses)
+        case .revertSkip(let doses): return try revertSkipped(doses)
+        }
+    }
+
+    /// The stored state of `doses`, matched by id within their slots. A dose no
+    /// longer on the schedule — its medication deleted — drops out.
+    private func current(_ doses: [PillDose]) -> [PillDose] {
+        let requested = Set(doses.map(\.id))
+        return Set(doses.map(\.time))
+            .flatMap { scheduled(at: $0) }
+            .filter { requested.contains($0.id) }
     }
 
     // MARK: - Side effects

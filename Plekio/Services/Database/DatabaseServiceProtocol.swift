@@ -66,6 +66,10 @@ protocol DoseStoring {
     /// Records a deliberate skip for the medications of one slot. Doses already
     /// taken are left as they are.
     func skipDoses(medicationIds: [UUID], scheduledTime: Date) throws
+
+    /// Reverses `skipDoses` for one slot, in one transaction. Doses that are not
+    /// skipped are left alone, so an undo can only ever un-skip.
+    func unskipDoses(medicationIds: [UUID], scheduledTime: Date) throws
 }
 
 extension DoseStoring {

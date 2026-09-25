@@ -25,6 +25,10 @@ struct DoseLogOutcome {
     /// The rebuild started by the write. Nil when nothing was written.
     let reminderSync: Task<Void, Never>?
 
+    /// The command that takes this action back — nil when nothing was written.
+    /// A screen that offers undo keeps it and runs it through `perform(_:)`.
+    var undo: DoseCommand? = nil
+
     var didWrite: Bool { !written.isEmpty }
 
     /// For the notification action handler: iOS may suspend the app as soon as
@@ -61,4 +65,12 @@ protocol DoseLoggingUseCaseProtocol {
     /// unticked by hand in the meantime is not touched again.
     @discardableResult
     func revertTaken(_ doses: [PillDose]) throws -> DoseLogOutcome
+
+    /// Takes back a skip. Judged on what is stored now, like `revertTaken`.
+    @discardableResult
+    func revertSkipped(_ doses: [PillDose]) throws -> DoseLogOutcome
+
+    /// Runs any dose command — the way an undo is carried out.
+    @discardableResult
+    func perform(_ command: DoseCommand) throws -> DoseLogOutcome
 }

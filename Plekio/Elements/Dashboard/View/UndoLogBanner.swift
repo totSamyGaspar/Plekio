@@ -5,12 +5,13 @@
 
 import SwiftUI
 
-/// The way back from a mistapped "Log all".
+/// The way back from a mistapped "Log all" or "Skip".
 ///
 /// A banner rather than a confirmation dialog: the correct path — the user did
 /// mean to log the doses — stays a single tap, and only the mistake costs a
 /// second one.
 struct UndoLogBanner: View {
+    let kind: UndoableDoseAction.Kind
     let count: Int
     /// When the undo window opened, so the bar below shows what is actually left
     /// of it rather than restarting whenever this view is rebuilt.
@@ -20,14 +21,23 @@ struct UndoLogBanner: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    /// A LocalizedStringKey per case, so both lines go through the string
+    /// catalog — a ternary of two literals would decay to an unlocalized String.
+    private var message: LocalizedStringKey {
+        switch kind {
+        case .logged: "\(count) doses logged"
+        case .skipped: "\(count) doses skipped"
+        }
+    }
+
     var body: some View {
         VStack(spacing: 10) {
             HStack(spacing: 12) {
-                Image(systemName: "checkmark.circle.fill")
+                Image(systemName: kind == .logged ? "checkmark.circle.fill" : "forward.end.circle.fill")
                     .font(.subheadline)
                     .foregroundColor(.accentPrimary)
 
-                Text("\(count) doses logged")
+                Text(message)
                     .font(.subheadline.weight(.semibold))
                     .foregroundColor(.textPrimary)
                     .lineLimit(1)

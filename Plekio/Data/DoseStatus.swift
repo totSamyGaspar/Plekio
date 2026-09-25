@@ -75,6 +75,11 @@ nonisolated enum DoseStatus: Equatable, Sendable {
         isTaken ? nil : .skipped(at: date)
     }
 
+    /// Takes back a skip: the dose is unanswered again. Only from skipped.
+    func unskipping() -> DoseStatus? {
+        isSkipped ? .pending : nil
+    }
+
     /// Un-logs a taken dose. Returns what to credit back to the stock: exactly
     /// what went out, or nil when the log predates that record — the caller then
     /// has only the dosage to go by.

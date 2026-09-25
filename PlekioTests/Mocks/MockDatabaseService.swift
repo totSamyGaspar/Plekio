@@ -25,6 +25,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     var markedTakenSlots: [(medicationIds: [UUID], scheduledTime: Date)] = []
     var unmarkedTakenSlots: [(medicationIds: [UUID], scheduledTime: Date)] = []
     var skippedSlots: [(medicationIds: [UUID], scheduledTime: Date)] = []
+    var unskippedSlots: [(medicationIds: [UUID], scheduledTime: Date)] = []
 
     var toggledPillMedicationId: UUID?
     var toggledPillScheduledTime: Date?
@@ -126,6 +127,17 @@ final class MockDatabaseService: DatabaseServiceProtocol {
             && pillsToReturn[index].time == scheduledTime
             && !pillsToReturn[index].isTaken {
             pillsToReturn[index].isSkipped = true
+        }
+    }
+
+    func unskipDoses(medicationIds: [UUID], scheduledTime: Date) throws {
+        unskippedSlots.append((medicationIds, scheduledTime))
+
+        for index in pillsToReturn.indices
+        where medicationIds.contains(pillsToReturn[index].medicationId)
+            && pillsToReturn[index].time == scheduledTime
+            && pillsToReturn[index].isSkipped {
+            pillsToReturn[index].isSkipped = false
         }
     }
 

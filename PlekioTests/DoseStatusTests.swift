@@ -42,6 +42,13 @@ struct DoseStatusTests {
         #expect(DoseStatus.skipped(at: now).reverting() == nil)
     }
 
+    @Test("отменить можно только пропуск")
+    func unskippingOnlyMovesASkip() {
+        #expect(DoseStatus.skipped(at: now).unskipping() == .pending)
+        #expect(DoseStatus.pending.unskipping() == nil)
+        #expect(DoseStatus.taken(at: now, dispensed: 1).unskipping() == nil)
+    }
+
     @Test("isSettled: принятая и пропущенная — да, ожидающая — нет")
     func settledCoversTakenAndSkipped() {
         #expect(DoseStatus.taken(at: now, dispensed: 1).isSettled)

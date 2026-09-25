@@ -27,7 +27,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     
     
     /// The last "Log all", while it can still be undone. Nil at every other time.
-    @Published private(set) var undoableBulkLog: BulkDoseLog?
+    @Published private(set) var undoableAction: UndoableDoseAction?
     
     /// Reads only: what is due on a day, and the courses behind it.
     private let dbService: any DoseStoring
@@ -129,7 +129,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         else { return }
 
         fetchData()
-        startUndoWindow(with: outcome.written)
+        startUndoWindow(.logged, undo: outcome.undo)
     }
 
     /// The sheet's "Skip" / "Skip All".
@@ -139,14 +139,19 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         else { return }
 
         fetchData()
+        // A skip has no other way back to "not answered", so the banner is the
+        // only undo it gets.
+        startUndoWindow(.skipped, undo: outcome.undo)
     }
 
-    /// Puts back exactly what the last "Log all" wrote.
-    func undoBulkLog() {
-        guard let log = undoableBulkLog else { return }
+    /// Runs the inverse of the last logged or skipped action. The use case
+    /// judges it against what is stored now, so a dose changed by hand in the
+    /// meantime is not flipped back.
+    func undoLastAction() {
+        guard let action = undoableAction else { return }
         clearUndoWindow()
 
-        guard let outcome = errors.attempt({ try doseLogging.revertTaken(log.doses) }),
+        guard let outcome = errors.attempt({ try doseLogging.perform(action.undo) }),
               outcome.didWrite
         else { return }
 
@@ -159,21 +164,22 @@ final class DashboardViewModel: DashboardViewModelProtocol {
 
     // MARK: - Undo window
     
-    private func startUndoWindow(with doses: [PillDose]) {
+    private func startUndoWindow(_ kind: UndoableDoseAction.Kind, undo: DoseCommand?) {
+        guard let undo else { return }
         undoExpiryTask?.cancel()
-        undoableBulkLog = BulkDoseLog(doses: doses)
-        
+        undoableAction = UndoableDoseAction(kind: kind, undo: undo, startedAt: time.now)
+
         undoExpiryTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(BulkDoseLog.window))
+            try? await Task.sleep(for: .seconds(UndoableDoseAction.window))
             guard !Task.isCancelled else { return }
-            self?.undoableBulkLog = nil
+            self?.undoableAction = nil
         }
     }
     
     private func clearUndoWindow() {
         undoExpiryTask?.cancel()
         undoExpiryTask = nil
-        undoableBulkLog = nil
+        undoableAction = nil
     }
     
     // MARK: - Weekly statistics

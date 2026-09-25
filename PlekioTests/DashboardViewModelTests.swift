@@ -221,7 +221,7 @@ struct DashboardViewModelTests {
         #expect(vm.morningPills.allSatisfy { $0.isTaken })
 
         // The undo banner offers back only the dose this action actually wrote.
-        #expect(vm.undoableBulkLog?.doses.map(\.medicationId) == [pendingId])
+        #expect(vm.undoableAction?.doses.map(\.medicationId) == [pendingId])
     }
 
     @Test("логирование слота — одна транзакция и одна перепланировка")
@@ -302,7 +302,7 @@ struct DashboardViewModelTests {
         #expect(mockDB.markedTakenSlots.isEmpty)
         #expect(mockNotifications.scheduleCallCount == 0)
         // Nothing was written, so there is nothing to offer back.
-        #expect(vm.undoableBulkLog == nil)
+        #expect(vm.undoableAction == nil)
     }
 
     // MARK: - Skipping a dose
@@ -414,13 +414,13 @@ struct DashboardViewModelTests {
         let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
 
         vm.logDoses(pills)
-        #expect(vm.undoableBulkLog?.count == 3)
+        #expect(vm.undoableAction?.count == 3)
 
         // The user unticks one by hand before using the banner.
         vm.togglePill(id: pills[0].id)
         #expect(vm.morningPills.first(where: { $0.medicationId == pills[0].medicationId })?.isTaken == false)
 
-        vm.undoBulkLog()
+        vm.undoLastAction()
 
         // One reversal for the slot, and it names only the two doses still logged:
         // reverting the hand-unticked one would log it rather than undo it.
@@ -430,6 +430,51 @@ struct DashboardViewModelTests {
             == Set([pills[1].medicationId, pills[2].medicationId])
         )
         #expect(vm.morningPills.allSatisfy { !$0.isTaken })
-        #expect(vm.undoableBulkLog == nil)
+        #expect(vm.undoableAction == nil)
+    }
+
+    // MARK: - Undoing a skip
+
+    @Test("пропуск можно отменить — доза снова ждёт ответа")
+    func testSkipCanBeUndone() async throws {
+        let mockDB = MockDatabaseService()
+        let mockNotifications = MockNotificationService()
+
+        let slot = Date().addingTimeInterval(-30 * 60)
+        let pill = PillDose(
+            medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+            formSystemImage: "pills.fill", time: slot, period: .morning, isTaken: false
+        )
+        mockDB.pillsToReturn = [pill]
+
+        let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
+
+        vm.skipDoses([pill])
+        // A skip used to have no way back at all; now it opens the same window
+        // "Log all" does.
+        #expect(vm.undoableAction?.kind == .skipped)
+        #expect(vm.morningPills.first?.isSkipped == true)
+
+        vm.undoLastAction()
+
+        #expect(mockDB.unskippedSlots.first?.medicationIds == [pill.medicationId])
+        #expect(vm.morningPills.first?.isSkipped == false)
+        #expect(vm.undoableAction == nil)
+    }
+
+    @Test("одиночная галочка баннер отмены не открывает")
+    func testSingleToggleOpensNoUndoWindow() async throws {
+        let mockDB = MockDatabaseService()
+        let pill = PillDose(
+            medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+            formSystemImage: "pills.fill", time: Date(), period: .morning, isTaken: false
+        )
+        mockDB.pillsToReturn = [pill]
+
+        let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
+        vm.togglePill(id: pill.id)
+
+        // Tapping the checkbox again is its undo; a banner would be noise.
+        #expect(vm.undoableAction == nil)
     }
 }

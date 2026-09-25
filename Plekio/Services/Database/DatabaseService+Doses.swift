@@ -192,6 +192,29 @@ extension DatabaseService: DoseStoring {
         try persistence.commit([.doses])
     }
 
+    /// Reverses `skipDoses` for one slot. `DoseStatus.unskipping` moves only a
+    /// skipped dose, so a dose taken in the meantime is left as it is.
+    func unskipDoses(medicationIds: [UUID], scheduledTime: Date) throws {
+        let ids = Array(Set(medicationIds))
+        guard !ids.isEmpty else { return }
+
+        let calendar = Calendar.current
+        var changed = false
+
+        for medicationId in ids {
+            guard let med = fetchMedication(id: medicationId),
+                  let log = DoseSchedule.log(of: med, at: scheduledTime, calendar: calendar),
+                  let pending = log.status.unskipping()
+            else { continue }
+
+            log.status = pending
+            changed = true
+        }
+
+        guard changed else { return }
+        try persistence.commit([.doses])
+    }
+
     // MARK: - Toggle take
 
     /// Flips one dose: taken becomes pending, anything else becomes taken.

@@ -70,20 +70,21 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             }
         }
         .overlay(alignment: .bottom) {
-            if let log = viewModel.undoableBulkLog {
+            if let action = viewModel.undoableAction {
                 UndoLogBanner(
-                    count: log.count,
-                    startedAt: log.loggedAt,
-                    duration: BulkDoseLog.window
+                    kind: action.kind,
+                    count: action.count,
+                    startedAt: action.startedAt,
+                    duration: UndoableDoseAction.window
                 ) {
-                    viewModel.undoBulkLog()
+                    viewModel.undoLastAction()
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 8)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.undoableBulkLog)
+        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.undoableAction)
         .toolbar(.hidden, for: .navigationBar)
         .fullScreenCover(item: $doseSheet) { sheet in
             TakePillModalView(pills: sheet.pills, onTake: {

@@ -102,4 +102,64 @@ struct DoseLoggingUseCaseTests {
 
         #expect(found.map(\.medicationId) == [open.medicationId])
     }
+
+    // MARK: - Commands and undo
+
+    @Test("у каждой команды есть обратная, и обратная к обратной — она сама")
+    func everyCommandHasAnInverse() {
+        let doses = [dose(at: Date())]
+        for command in [DoseCommand.take(doses), .skip(doses), .revertTake(doses), .revertSkip(doses)] {
+            #expect(command.inverse != command)
+            #expect(command.inverse.inverse == command)
+        }
+    }
+
+    @Test("пропуск возвращает команду отмены, и она возвращает дозу в «ожидает»")
+    func skipHandsBackItsUndo() throws {
+        let db = MockDatabaseService()
+        let slot = Date().addingTimeInterval(-30 * 60)
+        let open = dose(at: slot)
+        db.pillsToReturn = [open]
+        let useCase = DoseLoggingUseCase(dbService: db, notificationService: MockNotificationService())
+
+        let skipped = try useCase.markSkipped([open])
+        let undo = try #require(skipped.undo)
+        #expect(undo == .revertSkip(skipped.written))
+
+        let reverted = try useCase.perform(undo)
+
+        #expect(db.unskippedSlots.first?.medicationIds == [open.medicationId])
+        #expect(db.pillsToReturn.first?.isSkipped == false)
+        // And the undo can itself be undone: redo is the next command too.
+        #expect(reverted.undo == .skip(reverted.written))
+    }
+
+    @Test("отмена судит по базе: доза, принятая после пропуска, так и остаётся принятой")
+    func undoOfASkipLeavesALaterTakeAlone() throws {
+        let db = MockDatabaseService()
+        let slot = Date().addingTimeInterval(-30 * 60)
+        let open = dose(at: slot)
+        db.pillsToReturn = [open]
+        let useCase = DoseLoggingUseCase(dbService: db, notificationService: MockNotificationService())
+
+        let undo = try #require(try useCase.markSkipped([open]).undo)
+        // The user changes their mind by hand before pressing Undo.
+        _ = try useCase.markTaken([open])
+
+        let outcome = try useCase.perform(undo)
+
+        #expect(!outcome.didWrite)
+        #expect(db.unskippedSlots.isEmpty)
+        #expect(db.pillsToReturn.first?.isTaken == true)
+    }
+
+    @Test("когда писать нечего, отменять тоже нечего")
+    func nothingWrittenMeansNoUndo() throws {
+        let db = MockDatabaseService()
+        let taken = dose(at: Date(), taken: true)
+        db.pillsToReturn = [taken]
+        let useCase = DoseLoggingUseCase(dbService: db, notificationService: MockNotificationService())
+
+        #expect(try useCase.markTaken([taken]).undo == nil)
+    }
 }
