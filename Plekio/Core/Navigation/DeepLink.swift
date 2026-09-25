@@ -10,7 +10,7 @@ import Foundation
 // MARK: - AppTab
 
 enum AppTab: Hashable, CaseIterable {
-    case today, courses, diary, settings
+    case today, diary, courses, settings
 }
 
 // MARK: - DeepLink

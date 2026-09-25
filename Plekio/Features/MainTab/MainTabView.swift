@@ -52,6 +52,12 @@ struct MainTabView: View {
             .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
             .tag(AppTab.today)
 
+            NavigationStack {
+                DiaryView(viewModel: dependencies.makeDiaryViewModel())
+            }
+            .tabItem { Label("Diary", systemImage: "text.book.closed.fill") }
+            .tag(AppTab.diary)
+
             NavigationStack(path: $router.coursesPath) {
                 CoursesListView(viewModel: dependencies.makeCoursesListViewModel())
                     .navigationDestination(for: Route.self) { route in
@@ -63,12 +69,6 @@ struct MainTabView: View {
             }
             .tabItem { Label("Courses", systemImage: "list.clipboard.fill") }
             .tag(AppTab.courses)
-
-            NavigationStack {
-                DiaryView(viewModel: dependencies.makeDiaryViewModel())
-            }
-            .tabItem { Label("Diary", systemImage: "text.book.closed.fill") }
-            .tag(AppTab.diary)
 
             NavigationStack {
                 SettingsView()
