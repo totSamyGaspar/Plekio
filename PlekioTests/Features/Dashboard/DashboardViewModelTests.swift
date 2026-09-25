@@ -107,6 +107,7 @@ struct DashboardViewModelTests {
 
         let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
 
+        await vm.weeklyLoad?.value
         #expect(vm.recentAverage == 100)
         #expect(vm.weeklyPercentages.count == 7)
         #expect(vm.weeklyDays.count == 7)
@@ -119,6 +120,7 @@ struct DashboardViewModelTests {
 
         let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
 
+        await vm.weeklyLoad?.value
         #expect(vm.recentAverage == 0)
         #expect(vm.weeklyPercentages == Array(repeating: 0.0, count: 7))
     }

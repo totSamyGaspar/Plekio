@@ -146,12 +146,24 @@ final class DashboardViewModel: DashboardViewModelProtocol {
 
     // MARK: - Weekly statistics
 
+    /// The in-flight week read. Exposed so tests can await it.
+    private(set) var weeklyLoad: Task<Void, Never>?
+
+    /// The week is read off the main actor; today's list stays synchronous so a tap shows at once.
     private func calculateWeeklyStats() {
         let calendar = time.calendar
         let now = time.now
         let dates = (0..<7).reversed().map { calendar.date(byAdding: .day, value: -$0, to: now) ?? now }
-        // Single read for the whole week — see DoseStoring.fetchPills(onDays:).
-        let pillsByDay = dbService.fetchPills(onDays: dates)
+
+        weeklyLoad?.cancel()
+        weeklyLoad = Task { [weak self, dbService] in
+            let pillsByDay = await dbService.pillHistory(onDays: dates)
+            guard !Task.isCancelled, let self else { return }
+            self.applyWeeklyStats(pillsByDay, dates: dates, calendar: calendar)
+        }
+    }
+
+    private func applyWeeklyStats(_ pillsByDay: [Date: [PillDose]], dates: [Date], calendar: Calendar) {
         var percentages: [Double] = []
         var daysLabels: [String] = []
 
