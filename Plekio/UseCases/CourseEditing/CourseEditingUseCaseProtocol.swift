@@ -2,38 +2,32 @@
 //  CourseEditingUseCaseProtocol.swift
 //  Plekio
 //
-//  Every change to a course or its medications, from any screen.
-//
-//  What it does NOT do is rebuild the reminder queue: every write here announces
-//  `.courses`, and ReminderSyncCoordinator follows that. What it does own is
-//  what the queue rebuild cannot reach — banners already delivered for a
-//  medication that no longer exists — and the rules that decide whether a write
-//  should happen at all.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import Foundation
+
+// MARK: - CourseEditingUseCaseProtocol
 
 @MainActor
 protocol CourseEditingUseCaseProtocol {
 
     func createCourse(name: String, startDate: Date, endDate: Date, medications: [MedicationDraft]) throws
 
-    /// Writes only if something actually changed, so leaving the screen
-    /// untouched costs no commit and no reminder rebuild. Returns whether it wrote.
+    /// Writes only if something changed (avoids a reminder rebuild); returns whether it wrote.
     @discardableResult
     func updateDetails(of course: CourseSnapshot, name: String, startDate: Date, endDate: Date) throws -> Bool
 
     func addMedication(_ draft: MedicationDraft, to course: CourseSnapshot) throws
     func updateMedication(_ medication: MedicationSnapshot, with draft: MedicationDraft) throws
 
-    /// Deletes, and takes the medications' delivered reminders off the lock screen.
+    /// Also removes the medications' delivered reminders.
     func deleteMedications(_ medications: [MedicationSnapshot]) throws
 
     /// Deletes the course with its medications, and their delivered reminders.
     func deleteCourse(_ course: CourseSnapshot) throws
 
-    /// A copy of a finished course with new dates. Refused — returns false,
-    /// writes nothing — while the treatment is already running again.
+    /// Copies the course with new dates; returns false and writes nothing if a repeat is already active.
     @discardableResult
     func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date) throws -> Bool
 }

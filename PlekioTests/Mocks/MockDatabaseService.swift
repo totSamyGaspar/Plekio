@@ -1,22 +1,29 @@
+//
+//  MockDatabaseService.swift
+//  PlekioTests
+//
+//  Created by Edward Gasparian on 21.08.2026.
+//
+
 import Foundation
 @testable import Plekio
 
 @MainActor
 final class MockDatabaseService: DatabaseServiceProtocol {
 
-    /// Silent unless a test sends on it: the mock's writes do not announce
-    /// themselves, so a view model refreshes only when the test says so.
+    /// Silent unless a test sends on it; mock writes do not announce themselves.
     let changes = DatabaseChangeFeed()
 
-    // MARK: - Stub properties (control what the mock returns)
+    // MARK: - Stubs
+
     var pillsToReturn: [PillDose] = []
-    /// Per-day schedule, keyed by start of day. A date with no entry falls back to
-    /// `pillsToReturn`, so tests written before this existed still work.
+    /// Per-day schedule keyed by start of day; missing days fall back to `pillsToReturn`.
     var pillsByDay: [Date: [PillDose]] = [:]
     var coursesToReturn: [TreatmentCourse] = []
     var diaryEntriesToReturn: [DiaryEntry] = []
 
-    // MARK: - Spy properties (record calls for assertions)
+    // MARK: - Spies
+
     var didCallSaveCourse = false
     var savedCourseName: String?
 
@@ -33,8 +40,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
     var toggledPillMedicationId: UUID?
     var toggledPillScheduledTime: Date?
-    /// Every toggle in order. The single-value spies above keep the last call, which
-    /// cannot show that a bulk log left an already-taken dose alone.
+    /// Every toggle in order; the single-value spies above keep only the last call.
     var toggleCalls: [(medicationId: UUID, scheduledTime: Date)] = []
 
     var deletedCourse: TreatmentCourse?
@@ -62,7 +68,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     var deletedBloodPressureReading: BloodPressureReading?
     var didCallDeleteAllBloodPressureReadings = false
 
-    // MARK: - Protocol Implementation
+    // MARK: - DatabaseServiceProtocol: Courses
 
     func saveCourse(name: String, startDate: Date, endDate: Date, drafts: [MedicationDraft]) throws {
         didCallSaveCourse = true
@@ -74,6 +80,8 @@ final class MockDatabaseService: DatabaseServiceProtocol {
         duplicatedStartDate = startDate
         duplicatedEndDate = endDate
     }
+
+    // MARK: - DatabaseServiceProtocol: Doses
 
     func fetchPills(for date: Date, preFetchedCourses: [TreatmentCourse]? = nil) -> [PillDose] {
         fetchedPillsDate = date
@@ -88,9 +96,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
         toggledPillScheduledTime = scheduledTime
         toggleCalls.append((medicationId, scheduledTime))
 
-        // Mirror the real service: the next fetchPills must return the slot with its
-        // new status. Without this there is no way to test view-model logic that
-        // inspects the state AFTER the write, such as "is the whole slot closed".
+        // Mirror the real service so the next fetchPills sees the new status.
         for index in pillsToReturn.indices
         where pillsToReturn[index].medicationId == medicationId
             && pillsToReturn[index].time == scheduledTime {
@@ -131,9 +137,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     func skipDoses(medicationIds: [UUID], scheduledTime: Date) throws {
         skippedSlots.append((medicationIds, scheduledTime))
 
-        // Mirror the real service, so a view model that re-reads after the write
-        // sees the skip — same reason togglePill flips the status here. The moves
-        // are DoseStatus's own, so the mock cannot drift from the real rules.
+        // Uses DoseStatus's own moves so the mock cannot drift from the real rules.
         for index in pillsToReturn.indices
         where medicationIds.contains(pillsToReturn[index].medicationId)
             && pillsToReturn[index].time == scheduledTime {
@@ -154,6 +158,8 @@ final class MockDatabaseService: DatabaseServiceProtocol {
             }
         }
     }
+
+    // MARK: - DatabaseServiceProtocol: Courses and medications
 
     func fetchAllCourses() -> [TreatmentCourse] {
         return coursesToReturn
@@ -191,6 +197,8 @@ final class MockDatabaseService: DatabaseServiceProtocol {
         refilledAmount = amount
     }
 
+    // MARK: - DatabaseServiceProtocol: Blood pressure
+
     func saveBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) throws {
         savedBloodPressure = (measuredAt, systolic, diastolic, pulse)
     }
@@ -207,6 +215,8 @@ final class MockDatabaseService: DatabaseServiceProtocol {
         didCallDeleteAllBloodPressureReadings = true
         bloodPressureReadingsToReturn = []
     }
+
+    // MARK: - DatabaseServiceProtocol: Diary
 
     func saveDiaryEntry(draft: DiaryEntryDraft) throws {
         savedDiaryDraft = draft

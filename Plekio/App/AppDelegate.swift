@@ -9,14 +9,14 @@ import SwiftUI
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-    /// The app's object graph, built on first touch.
-    ///
-    /// Owned here rather than by PlekioApp because a notification action can
-    /// arrive on a cold launch before any SwiftUI view exists — "Take Now"
-    /// logs a dose without ever showing a screen — and it needs the same graph
-    /// the UI will use. `didFinishLaunching` touches it, so it exists (and the
-    /// reminder sync is listening) before anything else runs.
+
+    // MARK: - Properties
+
+    /// Owned here, not by PlekioApp: notification actions can arrive on a cold
+    /// launch before any view exists and must use the same graph as the UI.
     private(set) lazy var dependencies: AppDependencies = .live()
+
+    // MARK: - UIApplicationDelegate
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
@@ -24,10 +24,11 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         _ = dependencies
         return true
     }
-    
-    /// Only unwraps the response. What it means and what to do about it are in
-    /// NotificationIntent and NotificationResponseHandler, which can be tested —
-    /// `UNNotificationResponse` cannot be built outside the system.
+
+    // MARK: - UNUserNotificationCenterDelegate
+
+    /// Only unwraps the response; the testable logic lives in NotificationIntent
+    /// and NotificationResponseHandler.
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
@@ -40,9 +41,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
 
         Task { @MainActor [weak self] in
-            // Called only once the work is done, not before it starts. iOS may
-            // suspend the app as soon as this returns, and logging a dose ends
-            // in a full reschedule that could be cut off halfway.
+            // Complete only after the work: iOS may suspend the app mid-reschedule.
             defer { completionHandler() }
             await self?.dependencies.notificationResponses.handle(intent)
         }

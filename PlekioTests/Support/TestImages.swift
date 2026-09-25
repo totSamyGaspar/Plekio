@@ -2,12 +2,12 @@
 //  TestImages.swift
 //  PlekioTests
 //
-//  A real bitmap for tests that encode images. `UIImage(systemName:)` is a
-//  symbol, and `UIImage()` has nothing behind it at all — neither says anything
-//  about how a photo from the camera is handled.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import UIKit
+
+// MARK: - TestImages
 
 enum TestImages {
 

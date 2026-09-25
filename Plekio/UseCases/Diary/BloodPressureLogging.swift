@@ -2,20 +2,14 @@
 //  BloodPressureLogging.swift
 //  Plekio
 //
-//  Saving one blood-pressure reading — the diary screen's button and the form a
-//  reminder opens both come here.
-//
-//  Replaces PendingBloodPressureReading, which only forwarded to the repository:
-//  the plausibility rules lived in the entry form alone, and the store clamped
-//  whatever reached it. Anything that wrote around that form — another screen,
-//  an import later — could put an inverted 80/120 into the report for the
-//  doctor. The rules are now checked here, on the write, whatever the caller.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import Foundation
 
-/// A reading the rules refuse. The form never offers Save for one, so reaching
-/// this means a caller skipped the form's check.
+// MARK: - BloodPressureError
+
+/// A reading rejected by `BloodPressureRules`.
 enum BloodPressureError: LocalizedError {
     case invalid(BloodPressureRules.Issue)
 
@@ -24,12 +18,18 @@ enum BloodPressureError: LocalizedError {
     }
 }
 
+// MARK: - BloodPressureLogging
+
 @MainActor
 final class BloodPressureLogging {
+
+    // MARK: - Properties
 
     private let diary: any DiaryRepository
     private let errors: any ErrorReporting
     private let time: any TimeSource
+
+    // MARK: - Init
 
     init(diary: any DiaryRepository, errors: any ErrorReporting, time: any TimeSource) {
         self.diary = diary
@@ -37,8 +37,9 @@ final class BloodPressureLogging {
         self.time = time
     }
 
-    /// Validates, then writes. False when the reading was refused or the write
-    /// failed; either way the reason has been reported.
+    // MARK: - Public
+
+    /// Validates, then writes. False if rejected or the write failed (error already reported).
     @discardableResult
     func save(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) -> Bool {
         if let issue = BloodPressureRules.issue(

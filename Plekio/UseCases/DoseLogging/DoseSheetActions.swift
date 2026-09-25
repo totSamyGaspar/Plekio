@@ -2,14 +2,7 @@
 //  DoseSheetActions.swift
 //  Plekio
 //
-//  What the three buttons of the take-sheet (TakePillModalView) do.
-//
-//  The sheet used to be presented from two places, each wiring the buttons
-//  itself: DashboardView through its view model, MainTabView (a tapped
-//  reminder) straight through the use case and the undo centre. "Snooze" was
-//  written out in both views, calling the notification service directly. Two
-//  copies of one behaviour drift; now both open the same route and the sheet's
-//  buttons come here.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import Foundation
@@ -17,10 +10,14 @@ import Foundation
 @MainActor
 final class DoseSheetActions {
 
+    // MARK: - Properties
+
     private let doseLogging: any DoseLoggingUseCaseProtocol
     private let notifications: any NotificationServiceProtocol
     private let undo: DoseUndoCenter
     private let errors: any ErrorReporting
+
+    // MARK: - Init
 
     init(doseLogging: any DoseLoggingUseCaseProtocol,
          notifications: any NotificationServiceProtocol,
@@ -32,20 +29,21 @@ final class DoseSheetActions {
         self.errors = errors
     }
 
-    /// Logs what of `doses` is still pending and offers it back in the shared
-    /// undo banner — the user lands on Today, where the banner shows.
+    // MARK: - Actions
+
+    /// Logs pending doses and offers undo in the shared banner on Today.
     func take(_ doses: [PillDose]) {
         guard let outcome = errors.attempt({ try doseLogging.markTaken(doses) }) else { return }
         undo.offer(.logged, undo: outcome.undo)
     }
 
-    /// Skips what is still open. The banner is the only way back from a skip.
+    /// Skips open doses; the undo banner is the only way to revert.
     func skip(_ doses: [PillDose]) {
         guard let outcome = errors.attempt({ try doseLogging.markSkipped(doses) }) else { return }
         undo.offer(.skipped, undo: outcome.undo)
     }
 
-    /// Asks again in a while. Nothing is written: the dose stays open.
+    /// Schedules a snooze reminder; nothing is written.
     @discardableResult
     func snooze(_ doses: [PillDose]) -> Task<Void, Never> {
         let ids = doses.map(\.medicationId.uuidString)

@@ -2,16 +2,14 @@
 //  FakePhotoStore.swift
 //  PlekioTests
 //
-//  In-memory PhotoStoring, so nothing a test does lands in the app's real
-//  photo folder.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import Foundation
 @testable import Plekio
 
-/// Remembers what it was asked to store, and can be told to refuse.
-///
-/// Locked: callers write from detached tasks, and a test may run two at once.
+/// Records stored photos and can be told to refuse writes.
+/// Locked: callers write from detached tasks, possibly concurrently.
 nonisolated final class FakePhotoStore: PhotoStoring, @unchecked Sendable {
     private let lock = NSLock()
     private var _saved: [UUID: Data] = [:]
@@ -24,6 +22,8 @@ nonisolated final class FakePhotoStore: PhotoStoring, @unchecked Sendable {
     init(refusesWrites: Bool = false) {
         self.refusesWrites = refusesWrites
     }
+
+    // MARK: - PhotoStoring
 
     func saveToDisk(_ data: Data, for id: UUID) -> Bool {
         guard !refusesWrites else { return false }

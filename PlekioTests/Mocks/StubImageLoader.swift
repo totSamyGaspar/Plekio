@@ -2,12 +2,13 @@
 //  StubImageLoader.swift
 //  PlekioTests
 //
-//  ImageLoading that serves whatever a test put in it, and records what it
-//  was asked for.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import UIKit
 @testable import Plekio
+
+// MARK: - StubImageLoader
 
 nonisolated final class StubImageLoader: ImageLoading, @unchecked Sendable {
     var images: [UUID: UIImage] = [:]

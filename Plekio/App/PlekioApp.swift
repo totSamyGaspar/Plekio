@@ -9,25 +9,30 @@ import SwiftUI
 
 @main
 struct PlekioApp: App {
+
+    // MARK: - Properties
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+
     @Environment(\.scenePhase) private var scenePhase
-    
+
+    // MARK: - Init
+
     init() {
         MainTabView.configureTabBarAppearance()
         AppAppearance.configureSliders()
     }
-    
+
+    // MARK: - Body
+
     var body: some Scene {
         WindowGroup {
             SplashView()
                 .environmentObject(appDelegate.dependencies.router)
-                // The composition root, for every screen below — see AppDependencies.
                 .environment(appDelegate.dependencies)
-                // Photo views read the loader from here rather than from ImageCache.shared.
                 .environment(\.imageLoader, appDelegate.dependencies.photoCache)
                 .environment(\.databaseChanges, appDelegate.dependencies.database.changes)
-                // Every @AppStorage below reads the domain SettingsStore writes.
+                // @AppStorage below must read the same defaults SettingsStore writes.
                 .defaultAppStorage(appDelegate.dependencies.settings.defaults)
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {
@@ -36,8 +41,10 @@ struct PlekioApp: App {
                 }
         }
     }
-    /// Nothing was written, but time has passed: the queue only covers a window
-    /// ahead of "now", so it is topped up whenever the user comes back.
+
+    // MARK: - Helpers
+
+    /// The notification queue only covers a window ahead of now, so top it up on return.
     private func refreshAllNotifications() {
         appDelegate.dependencies.reminderSync.sync()
     }

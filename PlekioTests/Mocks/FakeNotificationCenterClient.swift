@@ -2,13 +2,7 @@
 //  FakeNotificationCenterClient.swift
 //  PlekioTests
 //
-//  An in-memory notification centre. Keeps real UNNotificationRequests, so what
-//  NotificationService builds is what the tests read back.
-//
-//  It yields where the real centre makes a round trip — reading the queue,
-//  adding, clearing — because those are the points where two unserialised
-//  rebuilds would interleave. A fake that never suspended could not show the
-//  bug the service's queue exists to prevent.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import Foundation
@@ -18,12 +12,16 @@ import UserNotifications
 @MainActor
 final class FakeNotificationCenterClient: NotificationCenterClient {
 
+    // MARK: - State
+
     var pending: [UNNotificationRequest] = []
     var delivered: [UNNotificationRequest] = []
     private(set) var registeredCategories: Set<UNNotificationCategory> = []
 
     var grantsAuthorization = true
     var authorizationError: Error?
+
+    // MARK: - NotificationCenterClient
 
     func setCategories(_ categories: Set<UNNotificationCategory>) {
         registeredCategories = categories

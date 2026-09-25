@@ -2,8 +2,7 @@
 //  CourseEditingUseCase.swift
 //  Plekio
 //
-//  Works on snapshots and ids, through CourseRepository — it never holds a
-//  SwiftData model, so neither does anything that calls it.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import Foundation
@@ -11,9 +10,13 @@ import Foundation
 @MainActor
 final class CourseEditingUseCase: CourseEditingUseCaseProtocol {
 
+    // MARK: - Properties
+
     private let courses: any CourseRepository
     private let notificationService: NotificationServiceProtocol
     private let time: any TimeSource
+
+    // MARK: - Init
 
     init(courses: any CourseRepository, notificationService: NotificationServiceProtocol, time: any TimeSource = SystemTime()) {
         self.time = time
@@ -21,7 +24,7 @@ final class CourseEditingUseCase: CourseEditingUseCaseProtocol {
         self.notificationService = notificationService
     }
 
-    /// Over the SwiftData store — the shape tests and the old call sites use.
+    /// Backed by the SwiftData store.
     convenience init(dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
         self.init(courses: SwiftDataCourseRepository(store: dbService), notificationService: notificationService)
     }
@@ -49,8 +52,7 @@ final class CourseEditingUseCase: CourseEditingUseCaseProtocol {
     }
 
     func repeatCourse(_ course: CourseSnapshot, startDate: Date, endDate: Date) throws -> Bool {
-        // Checked against storage, not against whatever list a screen last
-        // fetched: the rule has to hold whoever calls this.
+        // Checked against storage, not a screen's cached list, so the rule holds for any caller.
         let now = time.now
         let active = courses.allCourses().filter { $0.isActive(on: now, calendar: time.calendar) }
         guard !course.hasActiveRepeat(among: active) else { return false }
@@ -62,8 +64,7 @@ final class CourseEditingUseCase: CourseEditingUseCaseProtocol {
     // MARK: - Deleting
 
     func deleteMedications(_ medications: [MedicationSnapshot]) throws {
-        // Cleaned up in `defer`, so if the third delete fails, the two that
-        // succeeded still lose their banners.
+        // `defer` so medications deleted before a failure still get cleaned up.
         var deleted: [UUID] = []
         defer { clearDeliveredReminders(for: deleted) }
 
@@ -80,10 +81,8 @@ final class CourseEditingUseCase: CourseEditingUseCaseProtocol {
 
     // MARK: - Side effects
 
-    /// The coordinator's rebuild drops the PENDING reminders of a deleted
-    /// medication; this is for the ones already DELIVERED, which a rebuild does
-    /// not reach. NotificationService queues it with the rebuild, so the two
-    /// never interleave.
+    /// Removes already-delivered reminders (the rebuild only drops pending ones).
+    /// NotificationService serializes this with the rebuild.
     private func clearDeliveredReminders(for medicationIds: [UUID]) {
         guard !medicationIds.isEmpty else { return }
         Task { [notificationService] in

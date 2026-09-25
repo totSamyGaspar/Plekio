@@ -2,38 +2,29 @@
 //  DoseLoggingUseCaseProtocol.swift
 //  Plekio
 //
-//  Every way the user answers for a dose — the checkbox on the dashboard,
-//  "Log all", "Skip", the undo banner, the buttons on a notification and the
-//  sheet a notification opens — goes through this one boundary.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import Foundation
 
-/// What a dose action actually changed, and a handle on the reminder work it
-/// started.
-///
-/// The write is synchronous and already done when this comes back, so a screen
-/// can refresh at once. The reminder rebuild runs behind it; `reminderSync`
-/// is there for the one caller that must not return before it finishes.
+// MARK: - DoseLogOutcome
+
+/// Result of a dose write (already done) plus the reminder rebuild it started.
 struct DoseLogOutcome {
 
-    /// The doses that were written. Empty means there was nothing to write —
-    /// every dose was already in the requested state — and no reminder work was
-    /// started.
+    /// Empty when every dose was already in the requested state.
     let written: [PillDose]
 
-    /// The rebuild started by the write. Nil when nothing was written.
+    /// Nil when nothing was written.
     let reminderSync: Task<Void, Never>?
 
-    /// The command that takes this action back — nil when nothing was written.
-    /// A screen that offers undo keeps it and runs it through `perform(_:)`.
+    /// Inverse command for undo via `perform(_:)`; nil when nothing was written.
     var undo: DoseCommand? = nil
 
     var didWrite: Bool { !written.isEmpty }
 
-    /// For the notification action handler: iOS may suspend the app as soon as
-    /// it reports the response handled, so it waits for the queue to be
-    /// consistent first. Screens do not wait.
+    /// For notification actions: iOS may suspend the app once the response is
+    /// reported handled, so wait for reminders first. Screens don't wait.
     func waitForReminders() async {
         await reminderSync?.value
     }
@@ -41,19 +32,19 @@ struct DoseLogOutcome {
     static let nothing = DoseLogOutcome(written: [], reminderSync: nil)
 }
 
+// MARK: - DoseLoggingUseCaseProtocol
+
 @MainActor
 protocol DoseLoggingUseCaseProtocol {
 
-    /// Doses of one slot that are not taken yet — what a tapped notification
-    /// is still asking about. Matched with a one-second tolerance, because the
-    /// slot time arrives from `userInfo` as a Double.
+    /// Untaken doses in a slot, matched within 1 s (slot arrives from `userInfo` as a Double).
     func openDoses(medicationIds: [UUID], at slot: Date) -> [PillDose]
 
-    /// The dashboard checkbox: flips one dose.
+    /// Flips one dose (dashboard checkbox).
     @discardableResult
     func toggle(_ dose: PillDose) throws -> DoseLogOutcome
 
-    /// Logs as taken. Doses already taken are left alone — never a toggle.
+    /// Logs as taken; already-taken doses are left alone (never toggles).
     @discardableResult
     func markTaken(_ doses: [PillDose]) throws -> DoseLogOutcome
 
@@ -61,16 +52,15 @@ protocol DoseLoggingUseCaseProtocol {
     @discardableResult
     func markSkipped(_ doses: [PillDose]) throws -> DoseLogOutcome
 
-    /// Undoes a "Log all". Judged on what is stored now, so a dose the user has
-    /// unticked by hand in the meantime is not touched again.
+    /// Undoes "Log all"; doses unticked by hand since are not touched.
     @discardableResult
     func revertTaken(_ doses: [PillDose]) throws -> DoseLogOutcome
 
-    /// Takes back a skip. Judged on what is stored now, like `revertTaken`.
+    /// Undoes a skip; doses taken since stay taken.
     @discardableResult
     func revertSkipped(_ doses: [PillDose]) throws -> DoseLogOutcome
 
-    /// Runs any dose command — the way an undo is carried out.
+    /// Runs any dose command; used for undo.
     @discardableResult
     func perform(_ command: DoseCommand) throws -> DoseLogOutcome
 }

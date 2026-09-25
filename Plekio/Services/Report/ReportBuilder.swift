@@ -2,23 +2,25 @@
 //  ReportBuilder.swift
 //  Plekio
 //
+//  Created by Edward Gasparian on 19.09.2026.
+//
 
 import Foundation
 
-/// Turns a selection into the values a report is drawn from.
-///
-/// The only place in the export that touches SwiftData. It asks `DoseSchedule`
-/// what was due rather than deciding for itself: a report that counted doses by
-/// its own rules would quietly disagree with the dashboard the user is looking
-/// at.
+/// Turns a selection into `ReportData`; the only export code touching SwiftData.
+/// Uses `DoseSchedule` so counts match the dashboard.
 @MainActor
 struct ReportBuilder {
+
+    // MARK: - Properties
 
     private let database: any CourseStoring & DiaryStoring & BloodPressureStoring
     private let calendar: Calendar
 
-    /// Injected so "missed" is testable without waiting for a dose to go stale.
+    /// Injected so "missed" is testable.
     private let now: () -> Date
+
+    // MARK: - Init
 
     init(
         database: any CourseStoring & DiaryStoring & BloodPressureStoring,
@@ -30,14 +32,13 @@ struct ReportBuilder {
         self.now = now
     }
 
-    /// `profile` is passed in rather than read here: the builder knows nothing
-    /// about where settings live. Empty by default, which is what tests want.
+    // MARK: - Build
+
     func build(_ selection: ReportSelection, profile: UserProfile = .empty) -> ReportData {
         let from = calendar.startOfDay(for: selection.from)
         let lastDay = calendar.startOfDay(for: selection.to)
 
-        // One past the end, so a reading taken at 23:50 on the closing day is
-        // inside the period rather than just outside it.
+        // Exclusive end: start of the day after the last day.
         let end = calendar.date(byAdding: .day, value: 1, to: lastDay) ?? lastDay
 
         return ReportData(
@@ -88,8 +89,7 @@ struct ReportBuilder {
         var adherence = Adherence.none
         var exceptions: [DoseException] = []
 
-        // The period and the course overlap; outside the overlap the schedule
-        // called for nothing, so there is nothing to count either way.
+        // Only the overlap of the period and the course.
         for day in days(from: max(from, courseStart), through: min(lastDay, courseEnd)) {
             let slots = DoseSchedule.slots(
                 for: medication,
@@ -141,8 +141,7 @@ struct ReportBuilder {
         return slot.addingTimeInterval(DoseSchedule.missedGrace) < now() ? .missed : .upcoming
     }
 
-    /// Every log of a medication, indexed once. Scanning the array per slot
-    /// turns a year-long course into hundreds of thousands of comparisons.
+    /// Logs indexed by slot once, instead of scanning per slot.
     private func logsBySlot(of medication: MedicationItem) -> [DateComponents: DoseLog] {
         Dictionary(
             medication.logs.map { (DoseSchedule.slotKey($0.scheduledTime, calendar: calendar), $0) },
@@ -150,7 +149,7 @@ struct ReportBuilder {
         )
     }
 
-    // MARK: - Diary and blood pressure
+    // MARK: - Diary and Blood Pressure
 
     private func pressure(from: Date, before end: Date) -> [PressureReading] {
         database.fetchAllBloodPressureReadings()

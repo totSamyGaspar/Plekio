@@ -2,17 +2,17 @@
 //  FixedTime.swift
 //  PlekioTests
 //
-//  A clock that says whatever the test tells it, and moves only when asked.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import Foundation
 @testable import Plekio
 
+// MARK: - FixedTime
+
 nonisolated final class FixedTime: TimeSource, @unchecked Sendable {
     var now: Date
-    /// The calendar the test helpers build dates in (`testDate`), so "today"
-    /// here and in the test agree. The test run pins its time zone and region
-    /// — see TestEnvironmentTests.
+    /// Should match the calendar `testDate` uses, so "today" agrees with the test.
     var calendar: Calendar
 
     init(_ now: Date, calendar: Calendar = .current) {

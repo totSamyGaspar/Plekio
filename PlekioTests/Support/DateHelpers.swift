@@ -2,15 +2,14 @@
 //  DateHelpers.swift
 //  PlekioTests
 //
-//  Shared helper for constructing specific dates/times in tests
-//  (Calendar.current + DateComponents), factored out to avoid duplicating
-//  this code in every test file.
+//  Created by Edward Gasparian on 22.08.2026.
 //
 
 import Foundation
 
-/// Builds a specific date/time in the current calendar — useful for tests
-/// where the weekday/hour/minute matters, not the absolute timestamp.
+// MARK: - Date builders
+
+/// A date/time in the current calendar, for tests where local hour/day matters.
 func testDate(_ year: Int, _ month: Int, _ day: Int, _ hour: Int = 0, _ minute: Int = 0) -> Date {
     var comps = DateComponents()
     comps.year = year

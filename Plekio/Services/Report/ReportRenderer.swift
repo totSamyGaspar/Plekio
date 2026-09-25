@@ -2,32 +2,32 @@
 //  ReportRenderer.swift
 //  Plekio
 //
+//  Created by Edward Gasparian on 19.09.2026.
+//
 
 import UIKit
 
-/// The app's own mark on the document, kept apart from the user's data.
-///
-/// `ReportData` carries what the user recorded; this carries what the app puts
-/// on it. Mixing the two would mean the builder had to know about assets.
+// MARK: - ReportBranding
+
+/// The app's logo and name for the report header, kept apart from user data.
 nonisolated struct ReportBranding {
 
     let logo: UIImage?
     let appName: String
 
-    /// Nil until an image set named `Logo` exists in the asset catalog. The
-    /// header sets the mark beside the wordmark, so a build without the image
-    /// set loses the mark and keeps the name rather than losing both.
+    /// `logo` is nil when the asset is missing; the header then shows the name alone.
     static var app: ReportBranding {
         ReportBranding(logo: UIImage(named: AppBrand.logoAssetName), appName: AppBrand.name)
     }
 }
 
+// MARK: - RenderedReport
+
 nonisolated struct RenderedReport {
 
     let data: Data
 
-    /// Where each section begins, collected while drawing. Searching the
-    /// finished file for its own headings would be both slower and a guess.
+    /// Page index where each section begins, collected while drawing.
     let bookmarks: [Bookmark]
 
     struct Bookmark: Equatable {
@@ -36,16 +36,13 @@ nonisolated struct RenderedReport {
     }
 }
 
-/// Draws a report into PDF bytes.
-///
-/// Knows nothing about SwiftData and nothing about sharing: values in, bytes
-/// out. That is what lets the layout be exercised in tests against made-up
-/// data, without a store and without a share sheet.
-///
-/// `nonisolated`, with everything it draws with: rendering a few months with
-/// photos is many pages, and it runs off the main actor so the export screen
-/// stays responsive while it does.
+// MARK: - ReportRenderer
+
+/// Draws `ReportData` into PDF bytes; no SwiftData or sharing, so it is testable.
+/// Nonisolated so long reports render off the main actor.
 nonisolated struct ReportRenderer {
+
+    // MARK: - Properties
 
     private let style: ReportStyle
     private let branding: ReportBranding
@@ -55,9 +52,9 @@ nonisolated struct ReportRenderer {
         self.branding = branding
     }
 
-    /// `photos` is resolved by the caller: reading them is asynchronous and
-    /// drawing is not, so the pictures arrive already decoded rather than the
-    /// renderer waiting on a cache mid-page.
+    // MARK: - Render
+
+    /// `photos` must be pre-loaded by the caller: loading is async, drawing is not.
     func render(_ data: ReportData, photos: [UUID: UIImage] = [:]) -> RenderedReport {
         var bookmarks: [RenderedReport.Bookmark] = []
 
@@ -103,10 +100,8 @@ nonisolated struct ReportRenderer {
 
     // MARK: - Header
 
-    /// `withTintColor` is meant for a template image on its way into a view;
-    /// asked for one inside a PDF context it painted the whole frame solid
-    /// instead of the mark. So the colour is composited here: draw the
-    /// artwork, then fill only the pixels it left opaque.
+    /// `withTintColor` paints the whole frame solid in a PDF context, so tint by
+    /// compositing with `.sourceIn` instead.
     private func tinted(_ image: UIImage, _ color: UIColor) -> UIImage {
         UIGraphicsImageRenderer(size: image.size).image { context in
             image.draw(at: .zero)
@@ -150,11 +145,7 @@ nonisolated struct ReportRenderer {
         canvas.space(style.sectionGap)
     }
 
-    /// Skipped entirely for an empty profile: a header of blank labels says
-    /// less than no header at all.
-    ///
-    /// The age is stated as of the day the document was made, not as of now —
-    /// a report from last spring should keep saying what it said then.
+    /// Skipped for an empty profile. Age is as of the report date, not today.
     private func patient(on canvas: PageCanvas, profile: UserProfile, on date: Date) {
         guard !profile.isEmpty else { return }
 
@@ -181,5 +172,4 @@ nonisolated struct ReportRenderer {
 
         canvas.space(8)
     }
-
 }

@@ -2,14 +2,13 @@
 //  SpyErrorReporter.swift
 //  PlekioTests
 //
-//  Stands in for AppErrorPresenter now that view models take their error
-//  reporter through init instead of reaching for a shared one. Records what
-//  was reported, so a test can assert a failure was surfaced rather than
-//  swallowed.
+//  Created by Edward Gasparian on 25.09.2026.
 //
 
 import Foundation
 @testable import Plekio
+
+// MARK: - SpyErrorReporter
 
 @MainActor
 final class SpyErrorReporter: ErrorReporting {

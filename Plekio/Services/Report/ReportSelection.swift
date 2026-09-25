@@ -2,33 +2,32 @@
 //  ReportSelection.swift
 //  Plekio
 //
+//  Created by Edward Gasparian on 19.09.2026.
+//
 
 import Foundation
 
-/// What the user asked the document to contain.
-///
-/// Everything the export screen collects and nothing else: the builder turns
-/// this into data, the renderer draws that data, and neither of them has to
-/// know what a checkbox looked like.
+// MARK: - ReportSelection
+
+/// The export screen's choices: period, courses, sections and photos.
 nonisolated struct ReportSelection: Equatable {
 
-    /// Inclusive, in whole days. `to` is normalised to the end of its day by
-    /// the builder, so a report "to the 14th" contains the 14th.
+    /// Inclusive whole days; the builder extends `to` to the end of its day.
     var from: Date
     var to: Date
 
-    /// Which courses to include. Empty means the medication section has nothing
-    /// to show — it is a selection of none, not a selection of all.
+    /// Empty means no courses, not all courses.
     var courseIds: Set<UUID> = []
 
     var sections: Set<ReportSection> = Set(ReportSection.allCases)
 
-    /// Off by default. Diary photos are what turns a document that fits in an
-    /// email into one that does not.
+    /// Off by default: photos make the PDF too large for email.
     var includesPhotos = false
 
     func includes(_ section: ReportSection) -> Bool { sections.contains(section) }
 }
+
+// MARK: - ReportSection
 
 nonisolated enum ReportSection: String, CaseIterable, Identifiable {
 
@@ -38,9 +37,7 @@ nonisolated enum ReportSection: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// The same keys the sections carry inside the document and the same ones
-    /// the rest of the app already uses, so a heading in the PDF and its
-    /// checkbox on the export screen cannot drift apart.
+    /// Same localization keys as the PDF headings, so the two stay in sync.
     var title: LocalizedStringResource {
         switch self {
         case .medications:   "Medications"

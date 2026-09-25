@@ -2,30 +2,27 @@
 //  PageCanvas.swift
 //  Plekio
 //
+//  Created by Edward Gasparian on 19.09.2026.
+//
 
 import CoreText
 import UIKit
 
-/// Writes down a page and starts a new one when it runs out.
-///
-/// The one piece of the export that knows about page breaks. Sections above it
-/// ask for text, a rule or a gap and never count millimetres; the renderer
-/// below it only opens and closes the document.
-///
-/// Text goes through CoreText rather than `NSAttributedString.draw(in:)`
-/// because a block has to be able to end mid-paragraph and continue overleaf —
-/// a long diary note is exactly the thing that does not fit in what is left of
-/// a page, and UIKit's draw would silently clip it.
+/// Lays blocks down a PDF page and breaks to a new page when it runs out.
+/// Uses CoreText so text can split mid-paragraph across pages instead of being clipped.
 nonisolated final class PageCanvas {
+
+    // MARK: - Properties
 
     private let context: UIGraphicsPDFRendererContext
     let style: ReportStyle
 
-    /// Zero-based, so it can be handed straight to `PDFDocument.page(at:)` when
-    /// the outline is built.
+    /// Zero-based, matching `PDFDocument.page(at:)`.
     private(set) var pageIndex = -1
 
     private var cursor: CGFloat = 0
+
+    // MARK: - Init
 
     init(context: UIGraphicsPDFRendererContext, style: ReportStyle) {
         self.context = context
@@ -41,8 +38,7 @@ nonisolated final class PageCanvas {
 
     var remaining: CGFloat { floor - cursor }
 
-    /// True when nothing has been written on the page yet, which is how the
-    /// text loop tells "does not fit here" from "does not fit anywhere".
+    /// True before anything is written on the page; tells "not here" from "nowhere".
     private var isPageEmpty: Bool { cursor == style.margin }
 
     // MARK: - Pages
@@ -54,8 +50,7 @@ nonisolated final class PageCanvas {
         drawFooter()
     }
 
-    /// Starts a new page if `height` would not fit on this one. Used to keep a
-    /// heading attached to the first line of what it introduces.
+    /// Starts a new page if `height` would not fit, e.g. to keep a heading with its content.
     func reserve(_ height: CGFloat) {
         guard !isPageEmpty, height > remaining else { return }
         beginPage()
@@ -90,8 +85,7 @@ nonisolated final class PageCanvas {
             )
 
             guard fitted.length > 0 else {
-                // Nothing fits even on a page of its own: one line taller than
-                // the text area. Stop rather than loop forever on it.
+                // Taller than an empty page: stop rather than loop forever.
                 if isPageEmpty { break }
                 beginPage()
                 continue
@@ -125,8 +119,7 @@ nonisolated final class PageCanvas {
         cursor += 1
     }
 
-    /// Draws at the given height, keeping the image's proportions, and moves
-    /// the cursor past it like any other block.
+    /// Draws at `height`, keeping the aspect ratio, and advances the cursor.
     func image(_ image: UIImage, height: CGFloat, x: CGFloat? = nil, gap: CGFloat = 0) {
         reserve(height)
 
@@ -137,9 +130,7 @@ nonisolated final class PageCanvas {
         space(gap)
     }
 
-    /// An image with a line of text beside it, the shorter of the two centred
-    /// on the taller. `image` and `write` each take a line of their own, which
-    /// is right for a block and wrong for a mark standing next to its wordmark.
+    /// An image with a line of text beside it, vertically centred on each other.
     func imageRow(
         _ image: UIImage,
         height: CGFloat,
@@ -170,9 +161,7 @@ nonisolated final class PageCanvas {
 
     // MARK: - CoreText
 
-    /// CoreText measures from the bottom left and UIKit hands us a context
-    /// flipped the other way, so the frame is drawn through an inverted
-    /// transform and the rect mirrored about the middle of the page.
+    /// Flips the UIKit context and rect for CoreText's bottom-left origin.
     private func draw(_ framesetter: CTFramesetter, range: CFRange, in rect: CGRect) {
         let cg = context.cgContext
 
@@ -210,13 +199,10 @@ nonisolated final class PageCanvas {
 
 // MARK: - Text
 
-// `nonisolated` here as well as on the class: with MainActor as the module's
-// default, an extension is main-actor isolated unless it says otherwise, even
-// when the type it extends is not.
+// `nonisolated` again: extensions default to MainActor in this module.
 nonisolated extension PageCanvas {
 
-    /// The attributed string a caller would otherwise build by hand at every
-    /// call site, with the paragraph spacing the document is set in.
+    /// An attributed string in the document's paragraph style.
     func text(
         _ string: String,
         font: UIFont,
@@ -248,8 +234,7 @@ nonisolated extension PageCanvas {
         write(text(string, font: font, color: color), indent: indent, gap: gap)
     }
 
-    /// A row of cells at fixed left offsets — the one shape a table needs, and
-    /// cheaper than a layout engine for three columns of numbers.
+    /// A single-line row of cells at fixed left offsets.
     func row(_ cells: [(text: String, x: CGFloat)], font: UIFont, color: UIColor? = nil, gap: CGFloat = 0) {
         let height = ceil(font.lineHeight)
         reserve(height)
