@@ -35,3 +35,17 @@ extension EnvironmentValues {
         set { self[ImageLoaderKey.self] = newValue }
     }
 }
+
+private nonisolated struct DatabaseChangesKey: EnvironmentKey {
+    /// A feed nobody writes to: a view outside the app's root — a preview —
+    /// simply never hears of a change. The root sets the store's own feed.
+    static let defaultValue = DatabaseChangeFeed()
+}
+
+extension EnvironmentValues {
+    /// The store's writes, for views that react to them without a view model.
+    nonisolated var databaseChanges: DatabaseChangeFeed {
+        get { self[DatabaseChangesKey.self] }
+        set { self[DatabaseChangesKey.self] = newValue }
+    }
+}

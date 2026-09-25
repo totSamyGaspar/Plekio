@@ -33,7 +33,7 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
         return Double(takenCount) / Double(totalCount)
     }
 
-    init(courses: any CourseRepository, doses: any DoseStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
+    init(courses: any CourseRepository, doses: any DoseStoring, errors: any ErrorReporting, changes: DatabaseChangeFeed, time: any TimeSource = SystemTime()) {
         self.time = time
         self.courses = courses
         self.doses = doses
@@ -41,15 +41,15 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
         loadStats()
 
         // Adherence is computed from the schedule and the logs, so both matter.
-        NotificationCenter.default.publisher(forDatabaseChanges: [.courses, .doses])
+        changes.publisher(for: [.courses, .doses])
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.loadStats() }
             .store(in: &cancellables)
     }
 
     /// Over the SwiftData store — the shape tests use.
-    convenience init(dbService: any CourseStoring & DoseStoring, errors: any ErrorReporting) {
-        self.init(courses: SwiftDataCourseRepository(store: dbService), doses: dbService, errors: errors)
+    convenience init(dbService: any CourseStoring & DoseStoring & DatabaseChangeSource, errors: any ErrorReporting) {
+        self.init(courses: SwiftDataCourseRepository(store: dbService), doses: dbService, errors: errors, changes: dbService.changes)
     }
 
     func loadStats() {

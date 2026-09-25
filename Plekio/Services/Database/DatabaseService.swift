@@ -36,6 +36,9 @@ final class DatabaseService {
     /// Photo files, kept beside the store — see PersistenceController.
     var photos: any PhotoStoring { persistence.photos }
 
+    /// This store's writes — see DatabaseChangeFeed.
+    var changes: DatabaseChangeFeed { persistence.changes }
+
     /// The on-disk store. Built once, by the composition root
     /// (`AppDependencies.live()`); there is no `shared` to reach for.
     init(photos: any PhotoStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {

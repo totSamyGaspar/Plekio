@@ -24,6 +24,7 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
         courses: any CourseRepository,
         courseEditing: CourseEditingUseCaseProtocol,
         errors: any ErrorReporting,
+        changes: DatabaseChangeFeed,
         time: any TimeSource = SystemTime()
     ) {
         self.time = time
@@ -35,18 +36,19 @@ final class CoursesListViewModel: CoursesListViewModelProtocol {
         // Doses are included deliberately: logging one moves stock, and the rows
         // show it. A needless re-fetch here is cheap; a row left showing a stock
         // count that is no longer true is not.
-        NotificationCenter.default.publisher(forDatabaseChanges: [.courses, .doses])
+        changes.publisher(for: [.courses, .doses])
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.fetchCourses() }
             .store(in: &cancellables)
     }
     
-    convenience init(dbService: any CourseStoring, notificationService: NotificationServiceProtocol) {
+    convenience init(dbService: any CourseStoring & DatabaseChangeSource, notificationService: NotificationServiceProtocol) {
         let courses = SwiftDataCourseRepository(store: dbService)
         self.init(
             courses: courses,
             courseEditing: CourseEditingUseCase(courses: courses, notificationService: notificationService),
-            errors: AppErrorPresenter()
+            errors: AppErrorPresenter(),
+            changes: dbService.changes
         )
     }
 

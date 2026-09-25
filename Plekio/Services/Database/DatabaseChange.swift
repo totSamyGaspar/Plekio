@@ -2,7 +2,7 @@
 //  DatabaseChange.swift
 //  Plekio
 //
-//  What a storage write touched, and the one channel it is announced on.
+//  What a storage write touched, and the channel it is announced on.
 //
 //  Named areas rather than one "something changed" signal, which every screen has
 //  to treat as "everything changed": saving a diary entry would make the
@@ -11,6 +11,13 @@
 //  `.diaryDidUpdate`, posted alongside the broad one — which fixed the diary and
 //  left the asymmetry in place. A name per area does not scale; a payload does.
 //
+//  The channel used to be `NotificationCenter.default`: a string name, the set
+//  carried in `userInfo` under another string, and a cast on the receiving end.
+//  It was also global — one database's writes woke every subscriber in the
+//  process, so tests running side by side refreshed each other's view models.
+//  Now each store owns a DatabaseChangeFeed and whoever listens is handed that
+//  feed: the type says what travels on it, and two stores cannot hear each other.
+//
 
 import Combine
 import Foundation
@@ -18,7 +25,7 @@ import Foundation
 /// The areas a write can touch. A write declares what it changed, a subscriber
 /// declares what concerns it, and the two are matched — instead of every screen
 /// reacting to every write in the app.
-enum DatabaseChange: String, Hashable, Sendable {
+nonisolated enum DatabaseChange: String, Hashable, Sendable {
 
     /// Courses and medications: names, dates, schedule times, stock, photos,
     /// additions and deletions.
@@ -32,45 +39,35 @@ enum DatabaseChange: String, Hashable, Sendable {
     /// Diary entries, their photos, and blood pressure readings. One area: they
     /// are written from the same screens and read by the same one.
     case diary
-
-    /// Key the change set travels under in `Notification.userInfo`.
-    static let userInfoKey = "databaseChanges"
 }
 
-extension Notification.Name {
+/// The stream of one store's writes.
+///
+/// Nonisolated and `@unchecked Sendable` so it can sit in the SwiftUI
+/// environment and in default arguments; the only state is a
+/// PassthroughSubject, which Combine documents as safe to send to from any
+/// thread. In practice every write commits on the main actor.
+nonisolated final class DatabaseChangeFeed: @unchecked Sendable {
 
-    /// One channel for every storage write. What changed rides in the payload,
-    /// not in the name.
-    static let databaseDidChange = Notification.Name("databaseDidChange")
-}
+    private let subject = PassthroughSubject<Set<DatabaseChange>, Never>()
 
-extension Notification {
+    init() {}
 
-    /// Whether this notification announces a change to any of `interests`.
-    ///
-    /// A notification with no payload counts as touching everything: better a
-    /// needless refresh than a screen left showing stale data, should something
-    /// ever post the name by hand.
-    ///
-    /// Named rather than inlined into the publisher below so the rule can be
-    /// tested without going through the global notification centre — which is
-    /// shared by the whole test process and would make such a test depend on
-    /// what else happens to be running.
-    func touchesDatabase(_ interests: Set<DatabaseChange>) -> Bool {
-        guard let posted = userInfo?[DatabaseChange.userInfoKey] as? Set<DatabaseChange> else {
-            return true
-        }
-        return !posted.isDisjoint(with: interests)
+    /// Called by PersistenceController after a successful commit, and by tests.
+    func send(_ changes: Set<DatabaseChange>) {
+        subject.send(changes)
     }
-}
 
-extension NotificationCenter {
-
-    /// Fires when a write touched any of `changes`, and stays silent otherwise.
-    func publisher(forDatabaseChanges changes: Set<DatabaseChange>) -> AnyPublisher<Void, Never> {
-        publisher(for: .databaseDidChange)
-            .filter { $0.touchesDatabase(changes) }
+    /// Fires when a write touched any of `interests`, and stays silent otherwise.
+    func publisher(for interests: Set<DatabaseChange>) -> AnyPublisher<Void, Never> {
+        subject
+            .filter { !$0.isDisjoint(with: interests) }
             .map { _ in () }
             .eraseToAnyPublisher()
     }
+}
+
+/// Anything that announces its writes: the real store and the test mock.
+protocol DatabaseChangeSource {
+    var changes: DatabaseChangeFeed { get }
 }

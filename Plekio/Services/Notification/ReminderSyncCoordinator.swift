@@ -34,7 +34,7 @@ final class ReminderSyncCoordinator {
     private(set) var lastSync: Task<Void, Never>?
 
     /// `changes` fires once per burst of writes the queue has to follow. Injected
-    /// so a test can drive it without the global notification centre.
+    /// so a test can drive it without a store behind it.
     init(
         notificationService: NotificationServiceProtocol,
         dbService: any CourseStoring,
@@ -48,15 +48,15 @@ final class ReminderSyncCoordinator {
             .store(in: &cancellables)
     }
 
-    /// The app's coordinator: course writes from the storage channel, debounced
+    /// The app's coordinator: course writes from the store's own feed, debounced
     /// so that a burst — saving a course and its medications, deleting several
     /// rows — costs one rebuild rather than one each.
-    convenience init(notificationService: NotificationServiceProtocol, dbService: any CourseStoring) {
+    convenience init(notificationService: NotificationServiceProtocol, dbService: any CourseStoring & DatabaseChangeSource) {
         self.init(
             notificationService: notificationService,
             dbService: dbService,
-            changes: NotificationCenter.default
-                .publisher(forDatabaseChanges: [.courses])
+            changes: dbService.changes
+                .publisher(for: [.courses])
                 .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
                 .eraseToAnyPublisher()
         )

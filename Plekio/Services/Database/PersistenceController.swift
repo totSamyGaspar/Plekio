@@ -39,6 +39,10 @@ final class PersistenceController {
     /// to tell the user.
     private(set) var storageFailure: Error?
 
+    /// Where this store announces its writes. One per store, so an in-memory
+    /// store in one test is never heard by another.
+    let changes = DatabaseChangeFeed()
+
     /// Today's doses, and any other day the user has scrolled to in this session.
     ///
     /// Private, and reached through the two accessors below: it is cleared by
@@ -132,11 +136,7 @@ final class PersistenceController {
         // on screen.
         dailyPillsCache.removeAll()
 
-        NotificationCenter.default.post(
-            name: .databaseDidChange,
-            object: nil,
-            userInfo: [DatabaseChange.userInfoKey: changes]
-        )
+        self.changes.send(changes)
     }
 
     // MARK: - Day cache

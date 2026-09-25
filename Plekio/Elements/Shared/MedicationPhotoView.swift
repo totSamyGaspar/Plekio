@@ -12,6 +12,7 @@ import SwiftUI
 
 struct MedicationPhotoView<Placeholder: View>: View {
     @Environment(\.imageLoader) private var imageLoader
+    @Environment(\.databaseChanges) private var databaseChanges
     let medicationId: UUID
     let size: CGFloat
     let cornerRadius: CGFloat
@@ -37,7 +38,7 @@ struct MedicationPhotoView<Placeholder: View>: View {
         // signal instead. Courses only, not every write: otherwise each dose logged
         // on the dashboard sends every visible photo back to disk to be read and
         // decoded again.
-        .onReceive(NotificationCenter.default.publisher(forDatabaseChanges: [.courses])) { _ in
+        .onReceive(databaseChanges.publisher(for: [.courses])) { _ in
             Task { await load(force: true) }
         }
     }

@@ -25,7 +25,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     private let time: any TimeSource
     private var cancellables = Set<AnyCancellable>()
     
-    init(diary: any DiaryRepository, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
+    init(diary: any DiaryRepository, errors: any ErrorReporting, changes: DatabaseChangeFeed, time: any TimeSource = SystemTime()) {
         self.time = time
         self.diary = diary
         self.errors = errors
@@ -34,15 +34,15 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         // Only diary writes: otherwise every unrelated write — taking a pill,
         // refilling stock, editing a course — would re-fetch every diary entry
         // and rebuild the photo checkpoints with it.
-        NotificationCenter.default.publisher(forDatabaseChanges: [.diary])
+        changes.publisher(for: [.diary])
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.fetchEntries() }
             .store(in: &cancellables)
     }
 
     /// Over the SwiftData store — the shape tests use.
-    convenience init(dbService: any DiaryStoring & BloodPressureStoring, errors: any ErrorReporting) {
-        self.init(diary: SwiftDataDiaryRepository(store: dbService), errors: errors)
+    convenience init(dbService: any DiaryStoring & BloodPressureStoring & DatabaseChangeSource, errors: any ErrorReporting) {
+        self.init(diary: SwiftDataDiaryRepository(store: dbService), errors: errors, changes: dbService.changes)
     }
     
     func fetchEntries() {

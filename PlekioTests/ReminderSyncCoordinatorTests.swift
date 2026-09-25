@@ -3,9 +3,8 @@
 //  PlekioTests
 //
 //  The coordinator is what keeps the reminders in step with course edits now
-//  that no screen rebuilds them itself. Driven through an injected publisher
-//  rather than the global notification centre, which the whole test process
-//  shares.
+//  that no screen rebuilds them itself. Driven through an injected publisher,
+//  so a test controls exactly when a change arrives.
 //
 
 import Testing

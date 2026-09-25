@@ -115,4 +115,4 @@ protocol BloodPressureStoring {
 /// it. A view model should take the one or two protocols above that it actually
 /// uses instead.
 @MainActor
-protocol DatabaseServiceProtocol: CourseStoring, DoseStoring, DiaryStoring, BloodPressureStoring {}
+protocol DatabaseServiceProtocol: CourseStoring, DoseStoring, DiaryStoring, BloodPressureStoring, DatabaseChangeSource {}

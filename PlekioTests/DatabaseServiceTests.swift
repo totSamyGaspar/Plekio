@@ -9,6 +9,7 @@
 //
 
 import Testing
+import Combine
 import Foundation
 import SwiftData
 @testable import Plekio
@@ -429,30 +430,52 @@ struct DatabaseServiceTests {
     // MARK: - Change payload
 
     @Test("подписчик просыпается только на интересующие его области")
-    func testChangePayloadMatching() async throws {
-        func notification(_ changes: Set<DatabaseChange>) -> Notification {
-            Notification(
-                name: .databaseDidChange,
-                object: nil,
-                userInfo: [DatabaseChange.userInfoKey: changes]
-            )
-        }
+    func testChangeFeedMatching() {
+        let feed = DatabaseChangeFeed()
+        var heard: [String] = []
+        let subscriptions = [
+            feed.publisher(for: [.courses, .doses]).sink { heard.append("dashboard") },
+            feed.publisher(for: [.diary]).sink { heard.append("diary") },
+            feed.publisher(for: [.courses]).sink { heard.append("photo") }
+        ]
+        defer { subscriptions.forEach { $0.cancel() } }
 
         // A diary write must not wake the dashboard, the course list or the
         // statistics — that re-fetch on every unrelated write is what the payload
         // exists to stop.
-        #expect(notification([.diary]).touchesDatabase([.courses, .doses]) == false)
-        #expect(notification([.diary]).touchesDatabase([.diary]) == true)
+        feed.send([.diary])
+        #expect(heard == ["diary"])
 
         // A logged dose must not send every visible medication photo back to disk.
-        #expect(notification([.doses]).touchesDatabase([.courses]) == false)
-        #expect(notification([.doses]).touchesDatabase([.courses, .doses]) == true)
+        heard.removeAll()
+        feed.send([.doses])
+        #expect(heard == ["dashboard"])
 
         // Partial overlap is enough.
-        #expect(notification([.courses, .diary]).touchesDatabase([.doses, .diary]) == true)
+        heard.removeAll()
+        feed.send([.courses, .diary])
+        #expect(Set(heard) == ["dashboard", "diary", "photo"])
+    }
 
-        // No payload means "assume everything changed".
-        #expect(Notification(name: .databaseDidChange).touchesDatabase([.courses]) == true)
+    @Test("запись объявляется в ленте своей базы, а не всем базам процесса")
+    func testCommitAnnouncesOnItsOwnFeedOnly() throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let other = DatabaseService(inMemoryForTesting: true)
+        var ownHeard = 0
+        var otherHeard = 0
+        let own = db.changes.publisher(for: [.courses]).sink { ownHeard += 1 }
+        let foreign = other.changes.publisher(for: [.courses]).sink { otherHeard += 1 }
+        defer { own.cancel(); foreign.cancel() }
+
+        // The helper saves the context directly; the refill is the write that
+        // goes through commit and is announced.
+        let med = makeCourseWithMed(db)
+        try db.refillStock(for: med, amount: 5)
+
+        #expect(ownHeard == 1)
+        // With NotificationCenter.default both would have fired: the channel was
+        // global, and tests running side by side refreshed each other.
+        #expect(otherHeard == 0)
     }
 
     @Test("остаток не уходит в минус")

@@ -15,6 +15,27 @@ import Foundation
 @Suite("DiaryViewModel Tests")
 struct DiaryViewModelTests {
 
+    @Test("экран дневника перечитывается на запись дневника и не реагирует на дозы")
+    func refreshesOnDiaryWritesOnly() async throws {
+        let mockDb = MockDatabaseService()
+        let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter())
+        #expect(vm.entries.isEmpty)
+
+        mockDb.diaryEntriesToReturn = [makeEntry(daysAgo: 0, moodScore: 4, energyLevel: 4, sleepHours: 7, photoCount: 0)]
+
+        // A dose write: past the 300 ms debounce, and still nothing re-read.
+        mockDb.changes.send([.doses])
+        try await Task.sleep(for: .milliseconds(500))
+        #expect(vm.entries.isEmpty)
+
+        // A diary write on the same store's feed is heard.
+        mockDb.changes.send([.diary])
+        for _ in 0..<40 where vm.entries.isEmpty {
+            try await Task.sleep(for: .milliseconds(50))
+        }
+        #expect(vm.entries.count == 1)
+    }
+
     @Test("Stats are zero/false with no entries")
     func testStatsWithNoEntries() async throws {
         let mockDb = MockDatabaseService()

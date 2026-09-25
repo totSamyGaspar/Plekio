@@ -50,7 +50,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     // MARK: - Init
     
     init(
-        dbService: any DoseStoring,
+        dbService: any DoseStoring & DatabaseChangeSource,
         doseLogging: DoseLoggingUseCaseProtocol,
         errors: any ErrorReporting,
         time: any TimeSource = SystemTime(),
@@ -66,7 +66,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         fetchData()
         
         // Doses as well as courses: this screen is where a dose is logged.
-        NotificationCenter.default.publisher(forDatabaseChanges: [.courses, .doses])
+        dbService.changes.publisher(for: [.courses, .doses])
             .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.fetchData()
@@ -76,7 +76,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     
     /// Builds the default use case from the two services. Kept so tests and
     /// previews can keep constructing the screen from mocks of those two.
-    convenience init(dbService: any CourseStoring & DoseStoring, notificationService: NotificationServiceProtocol) {
+    convenience init(dbService: any CourseStoring & DoseStoring & DatabaseChangeSource, notificationService: NotificationServiceProtocol) {
         self.init(
             dbService: dbService,
             doseLogging: DoseLoggingUseCase(dbService: dbService, notificationService: notificationService),

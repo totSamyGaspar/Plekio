@@ -84,6 +84,7 @@ struct TimeSourceTests {
             courses: SwiftDataCourseRepository(store: db),
             courseEditing: CourseEditingUseCase(dbService: db, notificationService: MockNotificationService()),
             errors: SpyErrorReporter(),
+            changes: db.changes,
             time: FixedTime(today)
         )
 

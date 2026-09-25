@@ -26,6 +26,7 @@ struct PlekioApp: App {
                 .environment(appDelegate.dependencies)
                 // Photo views read the loader from here rather than from ImageCache.shared.
                 .environment(\.imageLoader, appDelegate.dependencies.photoCache)
+                .environment(\.databaseChanges, appDelegate.dependencies.database.changes)
                 // Every @AppStorage below reads the domain SettingsStore writes.
                 .defaultAppStorage(appDelegate.dependencies.settings.defaults)
                 .onChange(of: scenePhase) { _, newPhase in

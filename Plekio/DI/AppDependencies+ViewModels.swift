@@ -29,13 +29,13 @@ extension AppDependencies {
     }
 
     func makeStatisticsViewModel() -> StatisticsViewModel {
-        StatisticsViewModel(courses: courseRepository, doses: database, errors: errorPresenter, time: time)
+        StatisticsViewModel(courses: courseRepository, doses: database, errors: errorPresenter, changes: database.changes, time: time)
     }
 
     // MARK: - Courses
 
     func makeCoursesListViewModel() -> CoursesListViewModel {
-        CoursesListViewModel(courses: courseRepository, courseEditing: courseEditing, errors: errorPresenter, time: time)
+        CoursesListViewModel(courses: courseRepository, courseEditing: courseEditing, errors: errorPresenter, changes: database.changes, time: time)
     }
 
     func makeCourseDetailViewModel(course: CourseSnapshot) -> CourseDetailViewModel {
@@ -53,7 +53,7 @@ extension AppDependencies {
     // MARK: - Diary
 
     func makeDiaryViewModel() -> DiaryViewModel {
-        DiaryViewModel(diary: diaryRepository, errors: errorPresenter, time: time)
+        DiaryViewModel(diary: diaryRepository, errors: errorPresenter, changes: database.changes, time: time)
     }
 
     func makeDiaryCheckInViewModel() -> DiaryCheckInViewModel {

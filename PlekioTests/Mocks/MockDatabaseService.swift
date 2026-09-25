@@ -4,6 +4,10 @@ import Foundation
 @MainActor
 final class MockDatabaseService: DatabaseServiceProtocol {
 
+    /// Silent unless a test sends on it: the mock's writes do not announce
+    /// themselves, so a view model refreshes only when the test says so.
+    let changes = DatabaseChangeFeed()
+
     // MARK: - Stub properties (control what the mock returns)
     var pillsToReturn: [PillDose] = []
     /// Per-day schedule, keyed by start of day. A date with no entry falls back to
