@@ -151,10 +151,9 @@ struct DoseScheduleTests {
     func testSettledSlotsCoverTakenAndSkipped() async throws {
         let med = medication(times: [testDate(2000, 1, 1, 9, 0)])
 
-        let taken = DoseLog(scheduledTime: testDate(2026, 6, 10, 9, 0), isTaken: true)
-        let skipped = DoseLog(scheduledTime: testDate(2026, 6, 11, 9, 0), isTaken: false)
-        skipped.skippedAt = Date()
-        let untouched = DoseLog(scheduledTime: testDate(2026, 6, 12, 9, 0), isTaken: false)
+        let taken = DoseLog(scheduledTime: testDate(2026, 6, 10, 9, 0), status: .taken(at: Date(), dispensed: 1))
+        let skipped = DoseLog(scheduledTime: testDate(2026, 6, 11, 9, 0), status: .skipped(at: Date()))
+        let untouched = DoseLog(scheduledTime: testDate(2026, 6, 12, 9, 0))
         med.logs.append(contentsOf: [taken, skipped, untouched])
 
         let settled = DoseSchedule.settledSlots(of: med, calendar: calendar)
@@ -168,8 +167,8 @@ struct DoseScheduleTests {
     func testLogsBySlotIsScopedToOneDay() async throws {
         let med = medication(times: [testDate(2000, 1, 1, 9, 0)])
 
-        let today = DoseLog(scheduledTime: testDate(2026, 6, 10, 9, 0), isTaken: true)
-        let tomorrow = DoseLog(scheduledTime: testDate(2026, 6, 11, 9, 0), isTaken: true)
+        let today = DoseLog(scheduledTime: testDate(2026, 6, 10, 9, 0), status: .taken(at: Date(), dispensed: 1))
+        let tomorrow = DoseLog(scheduledTime: testDate(2026, 6, 11, 9, 0), status: .taken(at: Date(), dispensed: 1))
         med.logs.append(contentsOf: [today, tomorrow])
 
         let indexed = DoseSchedule.logsBySlot(of: med, on: day(2026, 6, 10), calendar: calendar)

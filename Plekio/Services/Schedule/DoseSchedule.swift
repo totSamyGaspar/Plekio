@@ -130,7 +130,7 @@ enum DoseSchedule {
     static func settledSlots(of medication: MedicationItem, calendar: Calendar) -> Set<DateComponents> {
         Set(
             medication.logs
-                .filter { $0.isTaken || $0.skippedAt != nil }
+                .filter { $0.status.isSettled }
                 .map { slotKey($0.scheduledTime, calendar: calendar) }
         )
     }

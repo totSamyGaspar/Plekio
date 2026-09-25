@@ -64,8 +64,8 @@ extension DatabaseService: DoseStoring {
                             formSystemImage: med.formSystemImage,
                             time: slot.date,
                             period: DayPeriod(hour: slot.hour),
-                            isTaken: log?.isTaken ?? false,
-                            isSkipped: log?.skippedAt != nil,
+                            isTaken: log?.status.isTaken ?? false,
+                            isSkipped: log?.status.isSkipped ?? false,
                             stockCount: med.stockCount,
                             lowStockThreshold: med.lowStockThreshold
                         )
@@ -108,8 +108,8 @@ extension DatabaseService: DoseStoring {
     /// Logs every still-open dose of one slot as taken, in a single transaction.
     ///
     /// Deliberately not a toggle: over a list of doses in unknown states a toggle
-    /// un-logs the ones already ticked off. A dose already logged is left where it
-    /// is, and the slot costs one commit rather than one per dose.
+    /// un-logs the ones already ticked off. `DoseStatus.taking` refuses a dose
+    /// already taken, and the slot costs one commit rather than one per dose.
     func markDosesTaken(medicationIds: [UUID], scheduledTime: Date) throws {
         let ids = Array(Set(medicationIds))
         guard !ids.isEmpty else { return }
@@ -120,25 +120,13 @@ extension DatabaseService: DoseStoring {
 
         for medicationId in ids {
             guard let med = fetchMedication(id: medicationId) else { continue }
-
             let existing = DoseSchedule.log(of: med, at: scheduledTime, calendar: calendar)
-            if existing?.isTaken == true { continue }
 
-            let taken = Self.dispensed(med.dosage, from: med.stockCount)
-            med.stockCount -= taken
+            let quantity = Self.dispensed(med.dosage, from: med.stockCount)
+            guard let taken = (existing?.status ?? .pending).taking(at: takenAt, dispensed: quantity) else { continue }
 
-            if let existing {
-                existing.isTaken = true
-                existing.actualTakeTime = takenAt
-                // Taking a dose overrides an earlier decision to skip it.
-                existing.skippedAt = nil
-                existing.dispensedQuantity = taken
-            } else {
-                let newLog = DoseLog(scheduledTime: scheduledTime, isTaken: true)
-                newLog.actualTakeTime = takenAt
-                newLog.dispensedQuantity = taken
-                med.logs.append(newLog)
-            }
+            med.stockCount -= quantity
+            write(taken, to: existing, of: med, at: scheduledTime)
             changed = true
         }
 
@@ -150,8 +138,8 @@ extension DatabaseService: DoseStoring {
 
     /// Reverses `markDosesTaken` for one slot, in a single transaction.
     ///
-    /// Doses that are not logged as taken are left alone, so an undo can only ever
-    /// un-log — it cannot log something the user never did.
+    /// Only taken doses move, so an undo can only ever un-log — it cannot log
+    /// something the user never did.
     func unmarkDosesTaken(medicationIds: [UUID], scheduledTime: Date) throws {
         let ids = Array(Set(medicationIds))
         guard !ids.isEmpty else { return }
@@ -162,14 +150,11 @@ extension DatabaseService: DoseStoring {
         for medicationId in ids {
             guard let med = fetchMedication(id: medicationId),
                   let log = DoseSchedule.log(of: med, at: scheduledTime, calendar: calendar),
-                  log.isTaken
+                  let reverted = log.status.reverting()
             else { continue }
 
-            // Exactly what was taken out — see DoseLog.dispensedQuantity.
-            med.stockCount += log.dispensedQuantity ?? med.dosage
-            log.isTaken = false
-            log.actualTakeTime = nil
-            log.dispensedQuantity = nil
+            med.stockCount += Self.credit(reverted.credit, dosage: med.dosage)
+            log.status = reverted.status
             changed = true
         }
 
@@ -182,13 +167,10 @@ extension DatabaseService: DoseStoring {
     /// Records a deliberate skip for every medication in one slot, in a single
     /// transaction.
     ///
-    /// Separate from `togglePill` because a skip is not "not taken": the statistics
-    /// have to tell a declined dose from a forgotten one, and the schedule rebuild
-    /// has to leave a skipped slot out while an untaken one gets its reminder back.
-    /// Stock is untouched — nothing left the bottle.
-    ///
-    /// Doses already logged as taken are left alone rather than being un-taken —
-    /// same rule as `markDosesTaken`: a bulk action never reverses what it finds.
+    /// Separate from `togglePill` because a skip is not "not taken" — see
+    /// DoseStatus.skipped. Stock is untouched: nothing left the bottle. Doses
+    /// already taken are left alone — `DoseStatus.skipping` refuses them, the
+    /// same rule as bulk logging: a bulk action never reverses what it finds.
     func skipDoses(medicationIds: [UUID], scheduledTime: Date) throws {
         let ids = Array(Set(medicationIds))
         guard !ids.isEmpty else { return }
@@ -201,21 +183,48 @@ extension DatabaseService: DoseStoring {
         // commit, not a single fetch.
         for medicationId in ids {
             guard let med = fetchMedication(id: medicationId) else { continue }
+            let existing = DoseSchedule.log(of: med, at: scheduledTime, calendar: calendar)
 
-            if let existingLog = DoseSchedule.log(of: med, at: scheduledTime, calendar: calendar) {
-                guard !existingLog.isTaken else { continue }
-                existingLog.skippedAt = skippedAt
-            } else {
-                let newLog = DoseLog(scheduledTime: scheduledTime, isTaken: false)
-                newLog.skippedAt = skippedAt
-                med.logs.append(newLog)
-            }
+            guard let skipped = (existing?.status ?? .pending).skipping(at: skippedAt) else { continue }
+            write(skipped, to: existing, of: med, at: scheduledTime)
         }
 
         try persistence.commit([.doses])
     }
 
     // MARK: - Toggle take
+
+    /// Flips one dose: taken becomes pending, anything else becomes taken.
+    func togglePill(medicationId: UUID, scheduledTime: Date) throws {
+        guard let med = fetchMedication(id: medicationId) else { return }
+
+        let existing = DoseSchedule.log(of: med, at: scheduledTime, calendar: Calendar.current)
+        let current = existing?.status ?? .pending
+
+        if let reverted = current.reverting() {
+            med.stockCount += Self.credit(reverted.credit, dosage: med.dosage)
+            existing?.status = reverted.status
+        } else {
+            let quantity = Self.dispensed(med.dosage, from: med.stockCount)
+            // Always applies: `reverting` failed, so the dose is not taken.
+            guard let taken = current.taking(at: Date(), dispensed: quantity) else { return }
+            med.stockCount -= quantity
+            write(taken, to: existing, of: med, at: scheduledTime)
+        }
+        try persistence.commit([.doses])
+    }
+
+    // MARK: - Helpers
+
+    /// Updates the slot's log, or creates it: a slot nobody has answered for yet
+    /// has no log at all.
+    private func write(_ status: DoseStatus, to existing: DoseLog?, of med: MedicationItem, at scheduledTime: Date) {
+        if let existing {
+            existing.status = status
+        } else {
+            med.logs.append(DoseLog(scheduledTime: scheduledTime, status: status))
+        }
+    }
 
     /// How many units a dose of `dosage` can actually take out of `stock`.
     ///
@@ -226,41 +235,10 @@ extension DatabaseService: DoseStoring {
         max(0, min(dosage, stock))
     }
 
-    func togglePill(medicationId: UUID, scheduledTime: Date) throws {
-        guard let med = fetchMedication(id: medicationId) else { return }
-
-        let calendar = Calendar.current
-
-        if let existingLog = DoseSchedule.log(of: med, at: scheduledTime, calendar: calendar) {
-            existingLog.isTaken.toggle()
-            existingLog.actualTakeTime = existingLog.isTaken ? Date() : nil
-            if existingLog.isTaken {
-                // Taking a dose overrides an earlier decision to skip it, so the
-                // two states can never both be set on one log.
-                existingLog.skippedAt = nil
-
-                let taken = Self.dispensed(med.dosage, from: med.stockCount)
-                med.stockCount -= taken
-                existingLog.dispensedQuantity = taken
-            } else {
-                // Exactly what was taken out, not a full dose. A log from before
-                // this field existed records nothing, and a full dose is the best
-                // guess available for those — and only for those.
-                med.stockCount += existingLog.dispensedQuantity ?? med.dosage
-                existingLog.dispensedQuantity = nil
-            }
-        } else {
-            // actualTakeTime records when the dose was actually logged, which is how
-            // lateness is captured: for a back-dated dose it exceeds scheduledTime.
-            let newLog = DoseLog(scheduledTime: scheduledTime, isTaken: true)
-            newLog.actualTakeTime = Date()
-
-            let taken = Self.dispensed(med.dosage, from: med.stockCount)
-            med.stockCount -= taken
-            newLog.dispensedQuantity = taken
-
-            med.logs.append(newLog)
-        }
-        try persistence.commit([.doses])
+    /// What goes back into the stock on un-logging: exactly what went out. A log
+    /// from before that was recorded has only the dosage to go by — and only
+    /// those logs fall back to it.
+    private static func credit(_ recorded: Int?, dosage: Int) -> Int {
+        recorded ?? dosage
     }
 }

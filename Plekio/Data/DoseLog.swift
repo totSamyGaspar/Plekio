@@ -12,36 +12,59 @@ import SwiftData
 final class DoseLog {
     @Attribute(.unique) var id: UUID
     var scheduledTime: Date
-    var actualTakeTime: Date?
-    var isTaken: Bool
-    /// When the user deliberately passed on this dose.
-    ///
-    /// Nil covers both "still due" and "never logged", because those two are the
-    /// same thing to every reader. A skip is not: "decided against it" and
-    /// "forgot" produce identical rows otherwise, and the schedule rebuild has to
-    /// tell them apart — an untaken slot gets its reminder back, a skipped one
-    /// must not. Optional with an implicit nil, so the store migrates in place.
-    var skippedAt: Date?
-    
-    /// How many units actually left the stock when this dose was logged.
-    ///
-    /// Not the same as the medication's dosage. Stock is clamped at zero, so a
-    /// dose logged with a nearly empty bottle takes out less than a full dose —
-    /// sometimes nothing at all. Crediting back a full dosage on undo would invent
-    /// pills that were never there: log a dose at zero stock, undo it, and the
-    /// bottle has refilled itself.
-    ///
-    /// Nil means this dose is not currently logged as taken, or predates the
-    /// field. It is also what makes an edit to the dosage safe after the fact:
-    /// what comes back is what went out, not what a dose happens to be today.
-    var dispensedQuantity: Int?
-    
-    
+
+    // MARK: - Storage behind `status`
+    //
+    // The same four columns as before — the schema is unchanged — but private:
+    // they are written only by `status`'s setter, all four together, so the
+    // combinations DoseStatus rules out cannot reach the store either.
+
+    private var isTaken: Bool
+    private var actualTakeTime: Date?
+    private var skippedAt: Date?
+    private var dispensedQuantity: Int?
+
     var medication: MedicationItem?
-    
-    init(scheduledTime: Date, isTaken: Bool) {
+
+    init(scheduledTime: Date, status: DoseStatus = .pending) {
         self.id = UUID()
         self.scheduledTime = scheduledTime
-        self.isTaken = isTaken
+        self.isTaken = false
+        self.status = status
+    }
+
+    /// What the user has answered for this dose. The only way to read or
+    /// change it — see DoseStatus.
+    var status: DoseStatus {
+        get {
+            if isTaken {
+                // A taken log always had its time written; the scheduled time is
+                // only a floor for a record that somehow lacks one.
+                return .taken(at: actualTakeTime ?? scheduledTime, dispensed: dispensedQuantity)
+            }
+            if let skippedAt {
+                return .skipped(at: skippedAt)
+            }
+            return .pending
+        }
+        set {
+            switch newValue {
+            case .pending:
+                isTaken = false
+                actualTakeTime = nil
+                skippedAt = nil
+                dispensedQuantity = nil
+            case .taken(let at, let dispensed):
+                isTaken = true
+                actualTakeTime = at
+                skippedAt = nil
+                dispensedQuantity = dispensed
+            case .skipped(let at):
+                isTaken = false
+                actualTakeTime = nil
+                skippedAt = at
+                dispensedQuantity = nil
+            }
+        }
     }
 }

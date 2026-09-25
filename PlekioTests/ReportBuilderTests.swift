@@ -54,8 +54,8 @@ struct ReportBuilderTests {
     }
 
     private func log(_ course: TreatmentCourse, at time: Date, taken: Bool, skipped: Bool = false) {
-        let log = DoseLog(scheduledTime: time, isTaken: taken)
-        if skipped { log.skippedAt = time }
+        let status: DoseStatus = taken ? .taken(at: time, dispensed: 1) : skipped ? .skipped(at: time) : .pending
+        let log = DoseLog(scheduledTime: time, status: status)
         log.medication = course.medications[0]
         course.medications[0].logs.append(log)
     }

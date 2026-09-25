@@ -104,12 +104,12 @@ struct DatabaseServiceTests {
 
         try db.togglePill(medicationId: med.id, scheduledTime: scheduledTime)
         #expect(med.logs.count == 1)
-        #expect(med.logs.first?.isTaken == true)
+        #expect(med.logs.first?.status.isTaken == true)
         #expect(med.stockCount == 28)
 
         try db.togglePill(medicationId: med.id, scheduledTime: scheduledTime)
         #expect(med.logs.count == 1) // the same DoseLog is reused, not duplicated
-        #expect(med.logs.first?.isTaken == false)
+        #expect(med.logs.first?.status.isTaken == false)
         #expect(med.stockCount == 30)
     }
 
@@ -470,7 +470,7 @@ struct DatabaseServiceTests {
         try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 10, 9, 0))
 
         #expect(med.stockCount == 0)
-        #expect(med.logs.first?.isTaken == true)
+        #expect(med.logs.first?.status.isTaken == true)
     }
 
     @Test("доза прошедшего дня отмечается, actualTakeTime позже запланированного")
@@ -482,11 +482,11 @@ struct DatabaseServiceTests {
         try db.togglePill(medicationId: med.id, scheduledTime: scheduled)
 
         let log = try #require(med.logs.first)
-        #expect(log.isTaken == true)
+        #expect(log.status.isTaken)
         #expect(log.scheduledTime == scheduled)
         // Logged now against a slot in the past, so the delay is visible in the log
         // itself and needs no separate field.
-        let actualTakeTime = try #require(log.actualTakeTime)
+        let actualTakeTime = try #require(log.status.takenAt)
         #expect(actualTakeTime > scheduled)
 
         #expect(db.fetchPills(for: testDate(2026, 6, 10)).first?.isTaken == true)
@@ -528,11 +528,11 @@ struct DatabaseServiceTests {
         try db.togglePill(medicationId: med.id, scheduledTime: slot)
         #expect(med.stockCount == 0)
         // Nothing left the bottle, and that is what is written down.
-        #expect(med.logs.first?.dispensedQuantity == 0)
+        #expect(med.logs.first?.status.dispensed == 0)
 
         try db.togglePill(medicationId: med.id, scheduledTime: slot)
         #expect(med.stockCount == 0)   // was 2 before the fix
-        #expect(med.logs.first?.dispensedQuantity == nil)
+        #expect(med.logs.first?.status.dispensed == nil)
     }
 
     @Test("частичный остаток: возвращается ровно столько, сколько списалось")
@@ -544,7 +544,7 @@ struct DatabaseServiceTests {
         // One tablet for a two-tablet dose: the bottle only had one.
         try db.togglePill(medicationId: med.id, scheduledTime: slot)
         #expect(med.stockCount == 0)
-        #expect(med.logs.first?.dispensedQuantity == 1)
+        #expect(med.logs.first?.status.dispensed == 1)
 
         try db.togglePill(medicationId: med.id, scheduledTime: slot)
         #expect(med.stockCount == 1)   // was 2 before the fix
@@ -558,7 +558,7 @@ struct DatabaseServiceTests {
 
         try db.togglePill(medicationId: med.id, scheduledTime: slot)
         #expect(med.stockCount == 8)
-        #expect(med.logs.first?.dispensedQuantity == 2)
+        #expect(med.logs.first?.status.dispensed == 2)
 
         try db.togglePill(medicationId: med.id, scheduledTime: slot)
         #expect(med.stockCount == 10)
@@ -594,9 +594,9 @@ struct DatabaseServiceTests {
         // rather than recording a zero dispense, which would mean "taken, but the
         // bottle was empty".
         #expect(med.stockCount == 10)
-        #expect(med.logs.first?.skippedAt != nil)
-        #expect(med.logs.first?.isTaken == false)
-        #expect(med.logs.first?.dispensedQuantity == nil)
+        #expect(med.logs.first?.status.isSkipped == true)
+        #expect(med.logs.first?.status.isTaken == false)
+        #expect(med.logs.first?.status.dispensed == nil)
     }
 
     @Test("передумал после пропуска: доза списывается как обычно")
@@ -609,8 +609,8 @@ struct DatabaseServiceTests {
         try db.togglePill(medicationId: med.id, scheduledTime: slot)
 
         #expect(med.logs.count == 1)   // the skip's log is reused, not duplicated
-        #expect(med.logs.first?.isTaken == true)
-        #expect(med.logs.first?.skippedAt == nil)
+        #expect(med.logs.first?.status.isTaken == true)
+        #expect(med.logs.first?.status.isSkipped == false)
         #expect(med.stockCount == 8)
     }
 
@@ -638,11 +638,11 @@ struct DatabaseServiceTests {
 
         // The already-logged one is untouched — not toggled off, not deducted twice.
         #expect(first.logs.count == 1)
-        #expect(first.logs.first?.isTaken == true)
+        #expect(first.logs.first?.status.isTaken == true)
         #expect(first.stockCount == 28)
 
         #expect(second.logs.count == 1)
-        #expect(second.logs.first?.isTaken == true)
+        #expect(second.logs.first?.status.isTaken == true)
         #expect(second.stockCount == 9)
     }
 
@@ -673,8 +673,8 @@ struct DatabaseServiceTests {
         try db.markDosesTaken(medicationIds: [med.id], scheduledTime: slot)
 
         #expect(med.logs.count == 1)
-        #expect(med.logs.first?.isTaken == true)
-        #expect(med.logs.first?.skippedAt == nil)
+        #expect(med.logs.first?.status.isTaken == true)
+        #expect(med.logs.first?.status.isSkipped == false)
         #expect(med.stockCount == 8)
     }
 
@@ -696,8 +696,8 @@ struct DatabaseServiceTests {
 
         try db.unmarkDosesTaken(medicationIds: [logged.id, untouched.id], scheduledTime: slot)
 
-        #expect(logged.logs.first?.isTaken == false)
-        #expect(logged.logs.first?.dispensedQuantity == nil)
+        #expect(logged.logs.first?.status.isTaken == false)
+        #expect(logged.logs.first?.status.dispensed == nil)
         #expect(logged.stockCount == 30)
 
         // The one that was never logged gains nothing: an undo can only un-log.

@@ -130,8 +130,11 @@ struct ReportBuilder {
     private func outcome(at slot: Date, logs: [DateComponents: DoseLog]) -> Outcome {
         let log = logs[DoseSchedule.slotKey(slot, calendar: calendar)]
 
-        if log?.isTaken == true { return .taken }
-        if log?.skippedAt != nil { return .skipped }
+        switch log?.status {
+        case .taken: return .taken
+        case .skipped: return .skipped
+        case .pending, nil: break
+        }
 
         return slot.addingTimeInterval(DoseSchedule.missedGrace) < now() ? .missed : .upcoming
     }

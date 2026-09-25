@@ -46,7 +46,7 @@ struct NotificationSchedulingTests {
         let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: anchor)
 
         let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
-        let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), isTaken: true)
+        let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), status: .taken(at: testDate(2026, 6, 15, 9, 0), dispensed: 1))
         med.logs.append(log)
         course.medications.append(med)
 
@@ -207,8 +207,7 @@ struct NotificationSchedulingTests {
         let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: anchor)
 
         let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
-        let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), isTaken: false)
-        log.skippedAt = anchor
+        let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), status: .skipped(at: anchor))
         med.logs.append(log)
         course.medications.append(med)
 
@@ -232,8 +231,7 @@ struct NotificationSchedulingTests {
         )
 
         let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
-        let skipped = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), isTaken: false)
-        skipped.skippedAt = anchor
+        let skipped = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), status: .skipped(at: anchor))
         med.logs.append(skipped)
         course.medications.append(med)
 
