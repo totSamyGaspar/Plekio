@@ -2,15 +2,16 @@
 //  ReportSections.swift
 //  Plekio
 //
+//  Created by Edward Gasparian on 19.09.2026.
+//
 
 import UIKit
 
-/// The body of the document: what each section puts on the page.
-///
-/// Every method returns the page its heading landed on, which is what the
-/// bookmark tree is built from — cheaper and more honest than searching the
-/// finished file for its own headings.
-struct ReportSections {
+/// Draws the report body. Each section method returns the page index of its
+/// heading, used for the PDF bookmarks.
+nonisolated struct ReportSections {
+
+    // MARK: - Properties
 
     let canvas: PageCanvas
     let photos: [UUID: UIImage]
@@ -67,9 +68,7 @@ struct ReportSections {
         exceptions(medication.exceptions)
     }
 
-    /// The doses that did not go as planned, capped. A course a user kept for a
-    /// year can carry hundreds, and a document that is mostly one list of dates
-    /// stops being readable long before it stops being accurate.
+    /// Skipped/missed doses, capped so long courses don't flood the document.
     private func exceptions(_ exceptions: [DoseException]) {
         guard !exceptions.isEmpty else { return }
 
@@ -181,9 +180,7 @@ struct ReportSections {
         return page
     }
 
-    /// A one-tap mood entry carries no sleep, energy or water behind it, so
-    /// those fields are left out rather than printed as measurements someone
-    /// never took.
+    /// Quick-log entries show mood only; their other fields were never measured.
     private func measures(of entry: DiaryDay) -> String {
         var parts = [String(localized: "Mood: \(entry.mood)")]
 
@@ -206,7 +203,7 @@ struct ReportSections {
         }
     }
 
-    // MARK: - Shared
+    // MARK: - Helpers
 
     private func heading(_ title: String) -> Int {
         canvas.reserve(70)

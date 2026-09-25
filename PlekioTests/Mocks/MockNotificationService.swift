@@ -1,23 +1,34 @@
+//
+//  MockNotificationService.swift
+//  PlekioTests
+//
+//  Created by Edward Gasparian on 22.08.2026.
+//
+
 import Foundation
 @testable import Plekio
 
 final class MockNotificationService: NotificationServiceProtocol {
 
+    // MARK: - Spies and stubs
+
     var didCallRequestPermission = false
     var scheduledCourses: [TreatmentCourse]?
     var cancelledMedicationIds: [UUID] = []
     var snoozedMedicationIds: [String]?
+    var snoozedSlot: Date?
     var didCallRemoveAllPending = false
     var clearedDeliveredIds: [UUID]?
     var clearedDeliveredSlot: Date?
     var clearDeliveredCallCount = 0
     var scheduledReminders: [DailyReminder: [Int]] = [:]
     var cancelledReminders: [DailyReminder] = []
-    /// What requestPermission() answers. Tests that care flip it.
+    /// What requestPermission() returns.
     var permissionGranted = true
-    /// Counts rebuilds. `scheduledCourses` is overwritten by each one, so a test
-    /// that needs to know a *second* rebuild has happened counts instead.
+    /// Number of rebuilds; `scheduledCourses` only keeps the last one.
     var scheduleCallCount = 0
+
+    // MARK: - NotificationServiceProtocol
 
     @discardableResult
     func requestPermission() async -> Bool {
@@ -34,8 +45,9 @@ final class MockNotificationService: NotificationServiceProtocol {
         cancelledMedicationIds.append(medicationId)
     }
 
-    func scheduleSnooze(for medicationIds: [String], names: [String]) async {
+    func scheduleSnooze(for medicationIds: [String], names: [String], slot: Date) async {
         snoozedMedicationIds = medicationIds
+        snoozedSlot = slot
     }
 
     func removeAllPending() async {
@@ -57,13 +69,10 @@ final class MockNotificationService: NotificationServiceProtocol {
     }
 }
 
-/// Yields the main actor until `condition` holds.
-///
-/// The view models hand notification work to a `Task` now — the schedule rebuild
-/// is asynchronous and nothing on screen waits for it — so an assertion made
-/// straight after the call would race it. Yielding beats sleeping for a guessed
-/// interval: it costs nothing when the work is already done and does not turn
-/// into a flaky test on a loaded machine.
+// MARK: - Waiting
+
+/// Yields the main actor until `condition` holds; returns false if it never does.
+/// Notification work runs in a `Task`, so asserting right after the call would race it.
 @MainActor
 func waitUntil(_ condition: @MainActor () -> Bool, iterations: Int = 500) async -> Bool {
     for _ in 0..<iterations {

@@ -2,15 +2,14 @@
 //  ReportData.swift
 //  Plekio
 //
+//  Created by Edward Gasparian on 19.09.2026.
+//
 
 import Foundation
 
-/// The document, as values.
-///
-/// The seam between the two halves of the export: the builder reads SwiftData
-/// and produces this, the renderer draws it and never sees a `@Model`. That is
-/// what lets page layout be tested without a store, and the numbers be tested
-/// without a PDF.
+// MARK: - Report
+
+/// The report as plain values: the renderer draws it and never sees a `@Model`.
 nonisolated struct ReportData: Equatable {
 
     let profile: UserProfile
@@ -47,33 +46,25 @@ nonisolated struct MedicationReport: Equatable {
     let frequencyDays: Int
     let adherence: Adherence
 
-    /// Only the doses that did not go as planned. A full log of a year is
-    /// thousands of identical lines, and what a reader looks for in it is the
-    /// handful that are not.
+    /// Only doses that were skipped or missed.
     let exceptions: [DoseException]
 }
 
-/// How a course of doses actually went.
-///
-/// The four counts partition every slot the schedule called for, so they always
-/// add up to `scheduled` — which is why `scheduled` is derived rather than
-/// stored beside them and free to drift.
+/// How doses went. The four counts partition the scheduled slots, so `scheduled` is derived.
 nonisolated struct Adherence: Equatable {
 
     var taken = 0
     var skipped = 0
     var missed = 0
 
-    /// Slots inside the period that have not come due yet. Counted separately
-    /// so a course still running is not marked down for tomorrow.
+    /// Slots not yet due; excluded from `rate`.
     var upcoming = 0
 
     static let none = Adherence()
 
     var scheduled: Int { taken + skipped + missed + upcoming }
 
-    /// Nil when nothing has come due — no adherence at all, which is not the
-    /// same as nothing taken.
+    /// Taken over settled slots; nil when nothing has come due (not the same as 0%).
     var rate: Double? {
         let settled = taken + skipped + missed
         guard settled > 0 else { return nil }
@@ -93,9 +84,9 @@ nonisolated struct Adherence: Equatable {
 nonisolated struct DoseException: Equatable {
 
     enum Kind: Equatable {
-        /// The user said no on purpose.
+        /// Deliberately declined by the user.
         case skipped
-        /// Nobody ever answered.
+        /// Never answered.
         case missed
     }
 
@@ -103,7 +94,7 @@ nonisolated struct DoseException: Equatable {
     let kind: Kind
 }
 
-// MARK: - Blood pressure
+// MARK: - Blood Pressure
 
 nonisolated struct PressureReading: Equatable {
 
@@ -128,11 +119,9 @@ nonisolated struct DiaryDay: Equatable {
     let symptoms: [String]
     let notes: String
 
-    /// Empty unless the selection asked for photos — the builder drops them
-    /// rather than the renderer deciding twice.
+    /// Empty unless the selection includes photos.
     let photoIds: [UUID]
 
-    /// A one-tap mood entry has no sleep, water or energy behind it; printing
-    /// zeroes for those would read as measurements.
+    /// One-tap mood entry: sleep, water and energy are not measured and must not print as zero.
     let isQuickLog: Bool
 }

@@ -2,23 +2,27 @@
 //  ReportBuilder.swift
 //  Plekio
 //
+//  Created by Edward Gasparian on 19.09.2026.
+//
 
 import Foundation
 
-/// Turns a selection into the values a report is drawn from.
-///
-/// The only place in the export that touches SwiftData. It asks `DoseSchedule`
-/// what was due rather than deciding for itself: a report that counted doses by
-/// its own rules would quietly disagree with the dashboard the user is looking
-/// at.
+// MARK: - ReportBuilder
+
+/// Reads the store on the main actor and assembles the report. The app uses
+/// BackgroundReader instead; this stays for tests and store doubles.
 @MainActor
 struct ReportBuilder {
+
+    // MARK: - Properties
 
     private let database: any CourseStoring & DiaryStoring & BloodPressureStoring
     private let calendar: Calendar
 
-    /// Injected so "missed" is testable without waiting for a dose to go stale.
+    /// Injected so "missed" is testable.
     private let now: () -> Date
+
+    // MARK: - Init
 
     init(
         database: any CourseStoring & DiaryStoring & BloodPressureStoring,
@@ -30,35 +34,68 @@ struct ReportBuilder {
         self.now = now
     }
 
-    func build(_ selection: ReportSelection, profile: UserProfile = .current()) -> ReportData {
+    // MARK: - Build
+
+    func build(_ selection: ReportSelection, profile: UserProfile = .empty) -> ReportData {
+        ReportAssembler(calendar: calendar, now: now()).build(
+            selection,
+            profile: profile,
+            courses: database.fetchAllCourses(),
+            pressure: database.fetchAllBloodPressureReadings(),
+            diary: database.fetchAllDiaryEntries()
+        )
+    }
+}
+
+// MARK: - ReportAssembler
+
+/// Turns a selection and the stored models into `ReportData`. Pure and
+/// `nonisolated`, so it runs on whichever context the models belong to.
+/// Uses `DoseSchedule` so counts match the dashboard.
+nonisolated struct ReportAssembler {
+
+    // MARK: - Properties
+
+    let calendar: Calendar
+    /// Doses past `missedGrace` before this moment count as missed.
+    let now: Date
+
+    // MARK: - Build
+
+    func build(
+        _ selection: ReportSelection,
+        profile: UserProfile,
+        courses allCourses: [TreatmentCourse],
+        pressure allPressure: [BloodPressureReading],
+        diary allDiary: [DiaryEntry]
+    ) -> ReportData {
         let from = calendar.startOfDay(for: selection.from)
         let lastDay = calendar.startOfDay(for: selection.to)
 
-        // One past the end, so a reading taken at 23:50 on the closing day is
-        // inside the period rather than just outside it.
+        // Exclusive end: start of the day after the last day.
         let end = calendar.date(byAdding: .day, value: 1, to: lastDay) ?? lastDay
 
         return ReportData(
             profile: profile,
             from: from,
             to: lastDay,
-            generatedAt: now(),
+            generatedAt: now,
             courses: selection.includes(.medications)
-                ? courses(selection.courseIds, from: from, throughDay: lastDay)
+                ? courses(allCourses, ids: selection.courseIds, from: from, throughDay: lastDay)
                 : [],
             pressure: selection.includes(.bloodPressure)
-                ? pressure(from: from, before: end)
+                ? pressure(allPressure, from: from, before: end)
                 : [],
             diary: selection.includes(.diary)
-                ? diary(from: from, before: end, withPhotos: selection.includesPhotos)
+                ? diary(allDiary, from: from, before: end, withPhotos: selection.includesPhotos)
                 : []
         )
     }
 
     // MARK: - Medications
 
-    private func courses(_ ids: Set<UUID>, from: Date, throughDay lastDay: Date) -> [CourseReport] {
-        database.fetchAllCourses()
+    private func courses(_ all: [TreatmentCourse], ids: Set<UUID>, from: Date, throughDay lastDay: Date) -> [CourseReport] {
+        all
             .filter { ids.contains($0.id) }
             .sorted { $0.startDate < $1.startDate }
             .map { course in
@@ -86,8 +123,7 @@ struct ReportBuilder {
         var adherence = Adherence.none
         var exceptions: [DoseException] = []
 
-        // The period and the course overlap; outside the overlap the schedule
-        // called for nothing, so there is nothing to count either way.
+        // Only the overlap of the period and the course.
         for day in days(from: max(from, courseStart), through: min(lastDay, courseEnd)) {
             let slots = DoseSchedule.slots(
                 for: medication,
@@ -113,11 +149,14 @@ struct ReportBuilder {
             }
         }
 
+        // The schedule as it stood at the end of the period, not as it is today.
+        let shown = DoseSchedule.schedule(of: medication, on: min(lastDay, courseEnd))
+
         return MedicationReport(
             name: medication.name,
-            dosage: medication.dosage,
-            timesOfDay: medication.timesOfDay,
-            frequencyDays: medication.frequencyDays,
+            dosage: shown.dosage,
+            timesOfDay: shown.timesOfDay,
+            frequencyDays: shown.frequencyDays,
             adherence: adherence,
             exceptions: exceptions.sorted { $0.time < $1.time }
         )
@@ -130,14 +169,16 @@ struct ReportBuilder {
     private func outcome(at slot: Date, logs: [DateComponents: DoseLog]) -> Outcome {
         let log = logs[DoseSchedule.slotKey(slot, calendar: calendar)]
 
-        if log?.isTaken == true { return .taken }
-        if log?.skippedAt != nil { return .skipped }
+        switch log?.status {
+        case .taken: return .taken
+        case .skipped: return .skipped
+        case .pending, nil: break
+        }
 
-        return slot.addingTimeInterval(DoseSchedule.missedGrace) < now() ? .missed : .upcoming
+        return slot.addingTimeInterval(DoseSchedule.missedGrace) < now ? .missed : .upcoming
     }
 
-    /// Every log of a medication, indexed once. Scanning the array per slot
-    /// turns a year-long course into hundreds of thousands of comparisons.
+    /// Logs indexed by slot once, instead of scanning per slot.
     private func logsBySlot(of medication: MedicationItem) -> [DateComponents: DoseLog] {
         Dictionary(
             medication.logs.map { (DoseSchedule.slotKey($0.scheduledTime, calendar: calendar), $0) },
@@ -145,10 +186,10 @@ struct ReportBuilder {
         )
     }
 
-    // MARK: - Diary and blood pressure
+    // MARK: - Diary and Blood Pressure
 
-    private func pressure(from: Date, before end: Date) -> [PressureReading] {
-        database.fetchAllBloodPressureReadings()
+    private func pressure(_ all: [BloodPressureReading], from: Date, before end: Date) -> [PressureReading] {
+        all
             .filter { $0.measuredAt >= from && $0.measuredAt < end }
             .sorted { $0.measuredAt < $1.measuredAt }
             .map {
@@ -161,8 +202,8 @@ struct ReportBuilder {
             }
     }
 
-    private func diary(from: Date, before end: Date, withPhotos: Bool) -> [DiaryDay] {
-        database.fetchAllDiaryEntries()
+    private func diary(_ all: [DiaryEntry], from: Date, before end: Date, withPhotos: Bool) -> [DiaryDay] {
+        all
             .filter { $0.checkInDate >= from && $0.checkInDate < end }
             .sorted { $0.checkInDate < $1.checkInDate }
             .map { entry in

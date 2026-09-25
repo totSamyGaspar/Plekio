@@ -9,25 +9,31 @@ import SwiftUI
 
 @main
 struct PlekioApp: App {
+
+    // MARK: - Properties
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+
     @Environment(\.scenePhase) private var scenePhase
-    
-    @StateObject private var router = AppRouter()
-    
+
+    // MARK: - Init
+
     init() {
-        _ = DIContainer.shared
         MainTabView.configureTabBarAppearance()
         AppAppearance.configureSliders()
     }
-    
+
+    // MARK: - Body
+
     var body: some Scene {
         WindowGroup {
             SplashView()
-                .environmentObject(router)
-                .onAppear {
-                    appDelegate.router = router
-                }
+                .environmentObject(appDelegate.dependencies.router)
+                .environment(appDelegate.dependencies)
+                .environment(\.imageLoader, appDelegate.dependencies.photoCache)
+                .environment(\.databaseChanges, appDelegate.dependencies.database.changes)
+                // @AppStorage below must read the same defaults SettingsStore writes.
+                .defaultAppStorage(appDelegate.dependencies.settings.defaults)
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {
                         refreshAllNotifications()
@@ -35,10 +41,11 @@ struct PlekioApp: App {
                 }
         }
     }
+
+    // MARK: - Helpers
+
+    /// The notification queue only covers a window ahead of now, so top it up on return.
     private func refreshAllNotifications() {
-        let dbService = DIContainer.shared.resolve(DatabaseServiceProtocol.self)
-        let notifService = DIContainer.shared.resolve(NotificationServiceProtocol.self)
-        
-        Task { await notifService.rescheduleAll(using: dbService) }
+        appDelegate.dependencies.reminderSync.sync()
     }
 }

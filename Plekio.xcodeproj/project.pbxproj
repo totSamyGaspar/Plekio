@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		123BA7102FA6296900FFA528 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 123BA70F2FA6296900FFA528 /* Swinject */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		12E9B40D2FD44E9C00EDFB8C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -56,7 +52,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				123BA7102FA6296900FFA528 /* Swinject in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,7 +103,6 @@
 			);
 			name = Plekio;
 			packageProductDependencies = (
-				123BA70F2FA6296900FFA528 /* Swinject */,
 			);
 			productName = Plekio;
 			productReference = 123BA6E62FA61C8500FFA528 /* Plekio.app */;
@@ -175,7 +169,6 @@
 			mainGroup = 123BA6DD2FA61C8500FFA528;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				123BA70E2FA6296900FFA528 /* XCRemoteSwiftPackageReference "Swinject" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 123BA6E72FA61C8500FFA528 /* Products */;
@@ -503,25 +496,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		123BA70E2FA6296900FFA528 /* XCRemoteSwiftPackageReference "Swinject" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Swinject/Swinject.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.10.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		123BA70F2FA6296900FFA528 /* Swinject */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 123BA70E2FA6296900FFA528 /* XCRemoteSwiftPackageReference "Swinject" */;
-			productName = Swinject;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 123BA6DE2FA61C8500FFA528 /* Project object */;
 }

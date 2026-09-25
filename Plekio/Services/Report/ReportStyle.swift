@@ -2,36 +2,29 @@
 //  ReportStyle.swift
 //  Plekio
 //
+//  Created by Edward Gasparian on 19.09.2026.
+//
 
 import UIKit
 
-/// Page geometry, type and colour for an exported document.
-///
-/// Deliberately not built from the app's palette. The app is dark; a document
-/// is printed, forwarded and read in a mail client, so it is black on white
-/// whatever theme the phone is in. Pulling `Color.appBackground` in here would
-/// produce a report that comes out of a printer as a solid dark rectangle.
-///
-/// Left on the main actor for now, along with the canvas: whether UIKit's font
-/// and PDF renderer types are main-actor isolated under this SDK is a question
-/// worth answering by building rather than by guessing. Moving the render off
-/// it is a later, measured step — `ReportData` is already nonisolated, which is
-/// the half that matters for crossing over.
-struct ReportStyle {
+/// Page geometry, fonts and colours for the exported PDF.
+/// Always black on white, never the app palette: documents get printed.
+nonisolated struct ReportStyle {
 
-    /// A4 at 72 points to the inch, which is the unit a PDF context works in.
+    // MARK: - Page
+
+    /// A4 in PDF points (72 per inch).
     let pageSize = CGSize(width: 595, height: 842)
     let margin: CGFloat = 48
 
     /// Room kept at the foot of every page for the page number.
     let footerHeight: CGFloat = 28
 
-    /// Less space than this at the bottom is not worth starting a block in.
+    /// Below this remaining height a new block starts on the next page.
     let minimumBlockHeight: CGFloat = 40
 
     // MARK: - Type
 
-    /// Serif for headings, matching the screen titles in the app.
     let title = ReportStyle.serif(24, .bold)
     let heading = ReportStyle.serif(16, .bold)
     let subheading = UIFont.systemFont(ofSize: 12, weight: .semibold)
@@ -52,8 +45,7 @@ struct ReportStyle {
     let mutedInk = UIColor(white: 0.55, alpha: 1)
     let rule = UIColor(white: 0.82, alpha: 1)
 
-    /// The app's accent, spelled out rather than read from the palette: the
-    /// palette answers differently in dark mode, and a document has no mode.
+    /// Hard-coded accent: the palette colour varies with dark mode.
     let accent = UIColor(red: 0.05, green: 0.78, blue: 0.65, alpha: 1)
 
     // MARK: - Rhythm
