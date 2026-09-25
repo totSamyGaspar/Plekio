@@ -17,18 +17,33 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     
     /// Set only through `startEditing(_:)`. Kept private because the view used
     /// to assign it directly, bypassing the protocol.
-    private var editingEntry: DiaryEntry?
+    private var editingEntry: DiaryEntrySnapshot?
     
-    private let dbService: any DiaryStoring
+    private let diary: any DiaryRepository
     private let mediaPickerService: MediaPickerServiceProtocol
     private let photos: any PhotoStoring
     private let errors: any ErrorReporting
     
-    init(dbService: any DiaryStoring, mediaPickerService: MediaPickerServiceProtocol, photos: any PhotoStoring, errors: any ErrorReporting) {
-        self.dbService = dbService
+    init(diary: any DiaryRepository, mediaPickerService: MediaPickerServiceProtocol, photos: any PhotoStoring, errors: any ErrorReporting) {
+        self.diary = diary
         self.mediaPickerService = mediaPickerService
         self.photos = photos
         self.errors = errors
+    }
+
+    /// Over the SwiftData store — the shape tests use.
+    convenience init(
+        dbService: any DiaryStoring & BloodPressureStoring,
+        mediaPickerService: MediaPickerServiceProtocol,
+        photos: any PhotoStoring,
+        errors: any ErrorReporting
+    ) {
+        self.init(
+            diary: SwiftDataDiaryRepository(store: dbService),
+            mediaPickerService: mediaPickerService,
+            photos: photos,
+            errors: errors
+        )
     }
     
     // MARK: - Tags
@@ -99,7 +114,7 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     
     // MARK: - Editing
     
-    func startEditing(_ entry: DiaryEntry) async {
+    func startEditing(_ entry: DiaryEntrySnapshot) async {
         // `.task` can run again (returning to the screen, a scene change), and a
         // second load would wipe edits the user has already typed.
         guard editingEntry == nil else { return }
@@ -112,7 +127,7 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     /// Loads the entry's photos from disk — here rather than in the view's `init`,
     /// which runs on the main thread and again on every re-creation of the view
     /// struct.
-    private func loadPhotos(for entry: DiaryEntry) async {
+    private func loadPhotos(for entry: DiaryEntrySnapshot) async {
         let ids = entry.photoIds
         guard !ids.isEmpty else { return }
         
@@ -142,9 +157,9 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     func save() -> Bool {
         errors.run { [self] in
             if let editingEntry {
-                try dbService.updateDiaryEntry(editingEntry, with: draft)
+                try diary.updateEntry(id: editingEntry.id, with: draft)
             } else {
-                try dbService.saveDiaryEntry(draft: draft)
+                try diary.saveEntry(draft)
             }
         }
     }
@@ -183,7 +198,7 @@ final class MockDiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     
     func requestImageSelection(source: MediaSource) {}
     func removePhoto(at index: Int) {}
-    func startEditing(_ entry: DiaryEntry) async { draft = DiaryEntryDraft(from: entry) }
+    func startEditing(_ entry: DiaryEntrySnapshot) async { draft = DiaryEntryDraft(from: entry) }
     @discardableResult
     func save() -> Bool { true }
 }

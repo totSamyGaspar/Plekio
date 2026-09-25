@@ -114,7 +114,7 @@ struct DiaryCheckInViewModelTests {
             isQuickLog: true
         )
 
-        await vm.startEditing(quickEntry)
+        await vm.startEditing(DiaryEntrySnapshot(quickEntry))
 
         // The regression this pins down: the flag must survive editing, or the entry
         // becomes a "detailed" one carrying invented numbers.
@@ -147,7 +147,9 @@ struct DiaryCheckInViewModelTests {
             isQuickLog: true
         )
 
-        await vm.startEditing(quickEntry)
+        // The form names the entry by id; the store has to be able to find it.
+        mockDb.diaryEntriesToReturn = [quickEntry]
+        await vm.startEditing(DiaryEntrySnapshot(quickEntry))
         vm.draft.mood = .great
         vm.save()
 
@@ -206,7 +208,7 @@ struct DiaryCheckInViewModelTests {
             photoIds: []
         )
 
-        let draft = DiaryEntryDraft(from: entry)
+        let draft = DiaryEntryDraft(from: DiaryEntrySnapshot(entry))
 
         #expect(draft.energyLevel == 5)
         #expect(draft.discomfortLevel == 0)
@@ -233,7 +235,8 @@ struct DiaryCheckInViewModelTests {
             reflectionNotes: "",
             milestoneTags: []
         )
-        await vm.startEditing(existingEntry)
+        mockDb.diaryEntriesToReturn = [existingEntry]
+        await vm.startEditing(DiaryEntrySnapshot(existingEntry))
         vm.draft.physicalSummary = "Updated summary."
 
         vm.save()

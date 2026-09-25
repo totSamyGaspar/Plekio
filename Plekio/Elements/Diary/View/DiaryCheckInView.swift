@@ -28,9 +28,9 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     /// The entry being edited, or nil when creating a new one. Consumed in
     /// `.task` rather than `init`: SwiftUI re-creates the view struct many
     /// times, so any work done in the initializer runs again each time.
-    private let entryToEdit: DiaryEntry?
+    private let entryToEdit: DiaryEntrySnapshot?
     
-    init(viewModel: @autoclosure @escaping () -> VM, editingEntry: DiaryEntry? = nil) {
+    init(viewModel: @autoclosure @escaping () -> VM, editingEntry: DiaryEntrySnapshot? = nil) {
         self._viewModel = StateObject(wrappedValue: viewModel())
         self.entryToEdit = editingEntry
     }

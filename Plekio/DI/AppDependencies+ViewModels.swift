@@ -53,11 +53,11 @@ extension AppDependencies {
     // MARK: - Diary
 
     func makeDiaryViewModel() -> DiaryViewModel {
-        DiaryViewModel(dbService: database, errors: errorPresenter)
+        DiaryViewModel(diary: diaryRepository, errors: errorPresenter)
     }
 
     func makeDiaryCheckInViewModel() -> DiaryCheckInViewModel {
-        DiaryCheckInViewModel(dbService: database, mediaPickerService: mediaPicker, photos: photoCache, errors: errorPresenter)
+        DiaryCheckInViewModel(diary: diaryRepository, mediaPickerService: mediaPicker, photos: photoCache, errors: errorPresenter)
     }
 
     // MARK: - Settings

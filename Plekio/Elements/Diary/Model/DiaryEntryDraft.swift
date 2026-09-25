@@ -19,7 +19,7 @@ enum DiaryMood: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     
     /// Display label for the mood. `rawValue` is the stored key
-    /// (`DiaryEntry.moodLabel`) and has to stay an unchanging English string —
+    /// (`DiaryEntrySnapshot.moodLabel`) and has to stay an unchanging English string —
     /// translating it would orphan every entry already saved.
     var title: LocalizedStringResource {
         switch self {
@@ -134,7 +134,7 @@ struct DiaryEntryDraft: Identifiable, Equatable {
     // same lazy-write approach as MedicationDraft.medicationImageData.
     var photos: [Data] = []
     // Set by DiaryViewModel.quickLog(mood:) for entries created via the home
-    // screen's one-tap mood chips — see DiaryEntry.isQuickLog for why this
+    // screen's one-tap mood chips — see DiaryEntrySnapshot.isQuickLog for why this
     // matters to stats and display.
     var isQuickLog: Bool = false
     // Tracks whether the user actually added/removed a photo this session —
@@ -172,7 +172,7 @@ extension DiaryEntryDraft {
         }
     }
     
-    init(from entry: DiaryEntry) {
+    init(from entry: DiaryEntrySnapshot) {
         self.init(
             id: entry.id,
             checkInDate: entry.checkInDate,

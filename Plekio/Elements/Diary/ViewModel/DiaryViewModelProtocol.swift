@@ -9,7 +9,7 @@ import Foundation
 
 @MainActor
 protocol DiaryViewModelProtocol: ObservableObject {
-    var entries: [DiaryEntry] { get }
+    var entries: [DiaryEntrySnapshot] { get }
     
     /// Every entry's photos flattened into checkpoints. Recomputed once per data
     /// change rather than on every access from a view.
@@ -30,22 +30,22 @@ protocol DiaryViewModelProtocol: ObservableObject {
     var hasCheckedInToday: Bool { get }
     /// Today's entry, if one has already been logged — backs the home
     /// screen's "today's check-in" summary card.
-    var todaysEntry: DiaryEntry? { get }
+    var todaysEntry: DiaryEntrySnapshot? { get }
     
     /// Blood-pressure measurements, newest first. Kept beside the entries
     /// rather than inside them: pressure is measured as often as the person
     /// likes, while a check-in happens once a day.
-    var bloodPressureReadings: [BloodPressureReading] { get }
+    var bloodPressureReadings: [BloodPressureSnapshot] { get }
     
     func fetchEntries()
-    func deleteEntry(_ entry: DiaryEntry)
+    func deleteEntry(_ entry: DiaryEntrySnapshot)
     
     /// One-tap mood logging from the home screen's quick-pick chips — saves a
     /// minimal entry immediately, as an alternative to the full check-in form.
     func quickLog(mood: DiaryMood)
     
     func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?)
-    func deleteBloodPressureReading(_ reading: BloodPressureReading)
+    func deleteBloodPressureReading(_ reading: BloodPressureSnapshot)
     func deleteAllBloodPressureReadings()
     
     /// Which two photos the comparison screen should open on, given what the

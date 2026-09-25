@@ -10,7 +10,7 @@ import Combine
 
 @MainActor
 final class DiaryViewModel: DiaryViewModelProtocol {
-    @Published var entries: [DiaryEntry] = []
+    @Published var entries: [DiaryEntrySnapshot] = []
     
     /// Every entry's photos as checkpoints, newest first (entries are already
     /// sorted by descending date). Stored rather than computed on the view: a
@@ -18,14 +18,14 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     /// where here it is recomputed once per data change.
     @Published private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
     
-    @Published private(set) var bloodPressureReadings: [BloodPressureReading] = []
+    @Published private(set) var bloodPressureReadings: [BloodPressureSnapshot] = []
     
-    private let dbService: any DiaryStoring & BloodPressureStoring
+    private let diary: any DiaryRepository
     private let errors: any ErrorReporting
     private var cancellables = Set<AnyCancellable>()
     
-    init(dbService: any DiaryStoring & BloodPressureStoring, errors: any ErrorReporting) {
-        self.dbService = dbService
+    init(diary: any DiaryRepository, errors: any ErrorReporting) {
+        self.diary = diary
         self.errors = errors
         fetchEntries()
         
@@ -37,40 +37,45 @@ final class DiaryViewModel: DiaryViewModelProtocol {
             .sink { [weak self] _ in self?.fetchEntries() }
             .store(in: &cancellables)
     }
+
+    /// Over the SwiftData store — the shape tests use.
+    convenience init(dbService: any DiaryStoring & BloodPressureStoring, errors: any ErrorReporting) {
+        self.init(diary: SwiftDataDiaryRepository(store: dbService), errors: errors)
+    }
     
     func fetchEntries() {
-        entries = dbService.fetchAllDiaryEntries()
+        entries = diary.allEntries()
         photoCheckpoints = entries.flatMap { entry in
             entry.photoIds.map { DiaryPhotoCheckpoint(photoId: $0, entry: entry) }
         }
         // Fetched alongside the entries because both answer the same .diary
         // change — a separate path would mean two subscriptions for one screen.
-        bloodPressureReadings = dbService.fetchAllBloodPressureReadings()
+        bloodPressureReadings = diary.allBloodPressureReadings()
     }
     
-    func deleteEntry(_ entry: DiaryEntry) {
-        guard errors.run({ try dbService.deleteDiaryEntry(entry) }) else { return }
+    func deleteEntry(_ entry: DiaryEntrySnapshot) {
+        guard errors.run({ try diary.deleteEntry(id: entry.id) }) else { return }
         fetchEntries()
     }
     
     func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {
         guard PendingBloodPressureReading.save(
             measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse,
-            dbService: dbService, errors: errors
+            diary: diary, errors: errors
         ) else { return }
         fetchEntries()
     }
     
-    func deleteBloodPressureReading(_ reading: BloodPressureReading) {
+    func deleteBloodPressureReading(_ reading: BloodPressureSnapshot) {
         guard errors.run({
-            try dbService.deleteBloodPressureReading(reading)
+            try diary.deleteBloodPressureReading(id: reading.id)
         }) else { return }
         fetchEntries()
     }
     
     func deleteAllBloodPressureReadings() {
         guard errors.run({
-            try dbService.deleteAllBloodPressureReadings()
+            try diary.deleteAllBloodPressureReadings()
         }) else { return }
         fetchEntries()
     }
@@ -83,7 +88,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
             var draft = DiaryEntryDraft(from: existing)
             draft.mood = mood
             guard errors.run({
-                try dbService.updateDiaryEntry(existing, with: draft)
+                try diary.updateEntry(id: existing.id, with: draft)
             }) else { return }
             fetchEntries()
             return
@@ -96,7 +101,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         // entry so stats that average those fields exclude it.
         draft.isQuickLog = true
         
-        guard errors.run({ try dbService.saveDiaryEntry(draft: draft) }) else { return }
+        guard errors.run({ try diary.saveEntry(draft) }) else { return }
         fetchEntries()
     }
     
@@ -104,7 +109,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     
     /// Entries from the last 7 days (today inclusive); falls back to all
     /// entries when nothing was logged in that window.
-    private var recentEntries: [DiaryEntry] {
+    private var recentEntries: [DiaryEntrySnapshot] {
         let startOfToday = Calendar.current.startOfDay(for: Date())
         let cutoff = Calendar.current.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
         let recent = entries.filter { $0.checkInDate >= cutoff }
@@ -117,7 +122,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     /// those specific fields must exclude them or it silently reports
     /// fabricated numbers as real trends. Mood is exempt: quick-logging IS a
     /// genuine mood report, just without the rest of the form.
-    private var recentDetailedEntries: [DiaryEntry] {
+    private var recentDetailedEntries: [DiaryEntrySnapshot] {
         recentEntries.filter { !$0.isQuickLog }
     }
     
@@ -146,7 +151,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         todaysEntry != nil
     }
     
-    var todaysEntry: DiaryEntry? {
+    var todaysEntry: DiaryEntrySnapshot? {
         entries.first { Calendar.current.isDateInToday($0.checkInDate) }
     }
 }
@@ -155,24 +160,24 @@ final class DiaryViewModel: DiaryViewModelProtocol {
 
 #if DEBUG
 final class MockDiaryViewModel: DiaryViewModelProtocol {
-    @Published var entries: [DiaryEntry] = []
+    @Published var entries: [DiaryEntrySnapshot] = []
     @Published private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
-    @Published private(set) var bloodPressureReadings: [BloodPressureReading] = []
+    @Published private(set) var bloodPressureReadings: [BloodPressureSnapshot] = []
     
     var avgMoodScore: Double = 4.0
     var avgEnergyLevel: Double = 3.3
     var totalPhotosLogged: Int = 4
     var avgSleepHours: Double = 7.5
     var hasCheckedInToday: Bool = false
-    var todaysEntry: DiaryEntry?
+    var todaysEntry: DiaryEntrySnapshot?
     
     init() {}
     
     func fetchEntries() {}
-    func deleteEntry(_ entry: DiaryEntry) {}
+    func deleteEntry(_ entry: DiaryEntrySnapshot) {}
     func quickLog(mood: DiaryMood) {}
     func addBloodPressureReading(measuredAt: Date, systolic: Int, diastolic: Int, pulse: Int?) {}
-    func deleteBloodPressureReading(_ reading: BloodPressureReading) {}
+    func deleteBloodPressureReading(_ reading: BloodPressureSnapshot) {}
     func deleteAllBloodPressureReadings() {}
 }
 #endif

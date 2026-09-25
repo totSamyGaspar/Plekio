@@ -11,8 +11,8 @@ import SwiftUI
 /// to sit inline and grow with every measurement, pushing everything below it off
 /// the screen.
 struct BloodPressureHistoryView: View {
-    let readings: [BloodPressureReading]
-    var onDelete: (BloodPressureReading) -> Void
+    let readings: [BloodPressureSnapshot]
+    var onDelete: (BloodPressureSnapshot) -> Void
     var onDeleteAll: () -> Void
     
     @Environment(\.dismiss) private var dismiss
@@ -21,7 +21,7 @@ struct BloodPressureHistoryView: View {
     
     private struct DaySection: Identifiable {
         let id: Date
-        let readings: [BloodPressureReading]
+        let readings: [BloodPressureSnapshot]
     }
     
     /// Newest day first, and newest reading first within the day — the order the
@@ -142,7 +142,7 @@ struct BloodPressureHistoryView: View {
         return named.prefix(1).localizedUppercase + named.dropFirst()
     }
     
-    private func row(_ reading: BloodPressureReading) -> some View {
+    private func row(_ reading: BloodPressureSnapshot) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(reading.formattedPressure)

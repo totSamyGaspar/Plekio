@@ -14,9 +14,9 @@
 import SwiftUI
 
 struct DiaryJournalFeedView: View {
-    let entries: [DiaryEntry]
-    let onEdit: (DiaryEntry) -> Void
-    let onDelete: (DiaryEntry) -> Void
+    let entries: [DiaryEntrySnapshot]
+    let onEdit: (DiaryEntrySnapshot) -> Void
+    let onDelete: (DiaryEntrySnapshot) -> Void
     
     @State private var searchText = ""
     @State private var moodFilter: DiaryMood?
@@ -46,7 +46,7 @@ struct DiaryJournalFeedView: View {
         .padding(.horizontal)
     }
     
-    private var filteredEntries: [DiaryEntry] {
+    private var filteredEntries: [DiaryEntrySnapshot] {
         entries.filter { entry in
             let matchesSearch = searchText.isEmpty
             || entry.physicalSummary.localizedCaseInsensitiveContains(searchText)

@@ -30,16 +30,14 @@ final class BloodPressureReading {
     }
 }
 
+/// The rules live in BloodPressureRules, shared with the entry form; these
+/// names stay for the store and the existing tests.
 extension BloodPressureReading {
-    static let systolicRange = 60...300
-    static let diastolicRange = 30...200
-    static let pulseRange = 30...220
+    static var systolicRange: ClosedRange<Int> { BloodPressureRules.systolicRange }
+    static var diastolicRange: ClosedRange<Int> { BloodPressureRules.diastolicRange }
+    static var pulseRange: ClosedRange<Int> { BloodPressureRules.pulseRange }
 
     static func isOrdered(systolic: Int, diastolic: Int) -> Bool {
-        systolic > diastolic
-    }
-
-    var formattedPressure: String {
-        "\(systolic)/\(diastolic)"
+        BloodPressureRules.isOrdered(systolic: systolic, diastolic: diastolic)
     }
 }

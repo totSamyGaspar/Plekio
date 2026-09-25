@@ -50,6 +50,9 @@ final class AppDependencies {
     /// SwiftData model reaches a screen through it.
     let courseRepository: any CourseRepository
 
+    /// Diary entries and blood-pressure readings as snapshots, by id.
+    let diaryRepository: any DiaryRepository
+
     let doseLogging: any DoseLoggingUseCaseProtocol
     let courseEditing: any CourseEditingUseCaseProtocol
 
@@ -74,6 +77,7 @@ final class AppDependencies {
 
         doseLogging = DoseLoggingUseCase(dbService: database, notificationService: notifications)
         courseRepository = SwiftDataCourseRepository(store: database)
+        diaryRepository = SwiftDataDiaryRepository(store: database)
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications)
         reminderSync = ReminderSyncCoordinator(notificationService: notifications, dbService: database)
     }

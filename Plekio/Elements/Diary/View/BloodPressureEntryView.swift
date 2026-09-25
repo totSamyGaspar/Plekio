@@ -26,10 +26,10 @@ struct BloodPressureEntryView: View {
     /// misread the monitor.
     private var canSave: Bool {
         guard let systolic, let diastolic else { return false }
-        guard BloodPressureReading.systolicRange.contains(systolic),
-              BloodPressureReading.diastolicRange.contains(diastolic) else { return false }
-        if let pulse, !BloodPressureReading.pulseRange.contains(pulse) { return false }
-        return BloodPressureReading.isOrdered(systolic: systolic, diastolic: diastolic)
+        guard BloodPressureRules.systolicRange.contains(systolic),
+              BloodPressureRules.diastolicRange.contains(diastolic) else { return false }
+        if let pulse, !BloodPressureRules.pulseRange.contains(pulse) { return false }
+        return BloodPressureRules.isOrdered(systolic: systolic, diastolic: diastolic)
     }
 
     /// Both numbers in range and still not a reading. Kept apart from `canSave`
@@ -37,7 +37,7 @@ struct BloodPressureEntryView: View {
     /// dims with every field filled in looks broken.
     private var isInverted: Bool {
         guard let systolic, let diastolic else { return false }
-        return !BloodPressureReading.isOrdered(systolic: systolic, diastolic: diastolic)
+        return !BloodPressureRules.isOrdered(systolic: systolic, diastolic: diastolic)
     }
     
     /// A measurement cannot have happened later than now, and the reading is
@@ -74,7 +74,7 @@ struct BloodPressureEntryView: View {
                             text: $systolicText,
                             unit: "mmHg",
                             placeholder: "120",
-                            range: BloodPressureReading.systolicRange,
+                            range: BloodPressureRules.systolicRange,
                             isFlagged: isInverted
                         )
                         numberRow(
@@ -82,7 +82,7 @@ struct BloodPressureEntryView: View {
                             text: $diastolicText,
                             unit: "mmHg",
                             placeholder: "80",
-                            range: BloodPressureReading.diastolicRange,
+                            range: BloodPressureRules.diastolicRange,
                             isFlagged: isInverted
                         )
                         // Optional: not every monitor reports a pulse.
@@ -91,7 +91,7 @@ struct BloodPressureEntryView: View {
                             text: $pulseText,
                             unit: "bpm",
                             placeholder: "70",
-                            range: BloodPressureReading.pulseRange
+                            range: BloodPressureRules.pulseRange
                         )
                     } footer: {
                         // The specific complaint replaces the general hint

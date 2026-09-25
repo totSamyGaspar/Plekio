@@ -174,7 +174,7 @@ struct MainTabView: View {
             BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
                 PendingBloodPressureReading.save(
                     measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse,
-                    dbService: dependencies.database,
+                    diary: dependencies.diaryRepository,
                     errors: errorPresenter
                 )
             }

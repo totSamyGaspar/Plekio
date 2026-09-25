@@ -44,9 +44,9 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     
     @State private var showingCheckIn = false
     @State private var showingBloodPressureEntry = false
-    @State private var entryBeingEdited: DiaryEntry?
+    @State private var entryBeingEdited: DiaryEntrySnapshot?
     @State private var showingDeleteAlert = false
-    @State private var entryToDelete: DiaryEntry?
+    @State private var entryToDelete: DiaryEntrySnapshot?
     
     @State private var selectedSubTab: DiarySubTab = .journalFeed
     @State private var comparisonSelection: [UUID] = []

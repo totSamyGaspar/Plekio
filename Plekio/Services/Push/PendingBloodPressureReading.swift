@@ -18,11 +18,11 @@ enum PendingBloodPressureReading {
         systolic: Int,
         diastolic: Int,
         pulse: Int?,
-        dbService: any BloodPressureStoring,
+        diary: any DiaryRepository,
         errors: any ErrorReporting
     ) -> Bool {
         errors.run {
-            try dbService.saveBloodPressureReading(
+            try diary.saveBloodPressureReading(
                 measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
             )
         }

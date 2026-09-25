@@ -11,13 +11,13 @@
 import SwiftUI
 
 struct DiaryMoodTrendsView: View {
-    let entries: [DiaryEntry]
+    let entries: [DiaryEntrySnapshot]
     let avgEnergyLevel: Double
     let avgSleepHours: Double
     
     /// Most recent entries, oldest first, so the chart reads left-to-right
     /// chronologically.
-    private var moodChartEntries: [DiaryEntry] {
+    private var moodChartEntries: [DiaryEntrySnapshot] {
         Array(entries.prefix(7)).sorted { $0.checkInDate < $1.checkInDate }
     }
     
@@ -78,7 +78,7 @@ struct DiaryMoodTrendsView: View {
     /// doesn't stretch its bars into wide, flattened domes.
     private let moodBarWidth: CGFloat = 40
     
-    private func moodBar(_ entry: DiaryEntry) -> some View {
+    private func moodBar(_ entry: DiaryEntrySnapshot) -> some View {
         let mood = DiaryMood(rawValue: entry.moodLabel)
         let heightFraction = CGFloat(entry.moodScore) / 5.0
         

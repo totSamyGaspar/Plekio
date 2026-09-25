@@ -17,9 +17,9 @@ struct DiaryPhotoCheckpoint: Identifiable {
     /// The photo's id doubles as the checkpoint's id.
     let id: UUID
     let category: String
-    let entry: DiaryEntry
+    let entry: DiaryEntrySnapshot
 
-    init(photoId: UUID, entry: DiaryEntry) {
+    init(photoId: UUID, entry: DiaryEntrySnapshot) {
         self.id = photoId
         self.entry = entry
         // The localized milestone title, not its storage key. Uppercasing and

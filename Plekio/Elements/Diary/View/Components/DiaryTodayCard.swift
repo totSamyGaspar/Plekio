@@ -21,11 +21,11 @@ struct DiaryTodayCard: View {
     }
     
     /// Nil until the user has logged something today.
-    let entry: DiaryEntry?
+    let entry: DiaryEntrySnapshot?
     let quickMoods: [QuickMood]
     
     let onQuickLog: (DiaryMood) -> Void
-    let onEdit: (DiaryEntry) -> Void
+    let onEdit: (DiaryEntrySnapshot) -> Void
     
     var body: some View {
         Group {
@@ -81,7 +81,7 @@ struct DiaryTodayCard: View {
     
     // MARK: - Already logged
     
-    private func logged(_ entry: DiaryEntry) -> some View {
+    private func logged(_ entry: DiaryEntrySnapshot) -> some View {
         let mood = DiaryMood(rawValue: entry.moodLabel)
         let quote = entry.displayCaption
         
@@ -141,7 +141,7 @@ struct DiaryTodayCard: View {
     
     /// Built by concatenation rather than interpolation: each piece is its own
     /// translatable string, and the middle one changes with the kind of entry.
-    private static func summaryLine(_ entry: DiaryEntry) -> Text {
+    private static func summaryLine(_ entry: DiaryEntrySnapshot) -> Text {
         var line = Text("Mood: \(entry.moodTitle)") + Text(verbatim: " • ")
         line = line + (entry.isQuickLog ? Text("Quick log") : Text("Energy: \(entry.energyLevel)/5"))
         

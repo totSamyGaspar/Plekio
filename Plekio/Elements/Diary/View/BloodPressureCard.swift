@@ -16,21 +16,21 @@ import Charts
 /// height whatever it holds — listed here, every new measurement pushes the rest
 /// of the tab further down.
 struct BloodPressureCard: View {
-    let readings: [BloodPressureReading]
+    let readings: [BloodPressureSnapshot]
     var onAdd: () -> Void
-    var onDelete: (BloodPressureReading) -> Void
+    var onDelete: (BloodPressureSnapshot) -> Void
     var onDeleteAll: () -> Void
     
     @State private var isHistoryShown = false
     
     /// Oldest first, so the chart reads left to right.
-    private var chartReadings: [BloodPressureReading] {
+    private var chartReadings: [BloodPressureSnapshot] {
         Array(readings.prefix(14)).sorted { $0.measuredAt < $1.measuredAt }
     }
     
     /// Not `readings.first`: the caller's sort order is its own business, and the
     /// headline number is wrong the moment that assumption stops holding.
-    private var latestReading: BloodPressureReading? {
+    private var latestReading: BloodPressureSnapshot? {
         readings.max { $0.measuredAt < $1.measuredAt }
     }
     

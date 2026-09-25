@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DiaryEntryRowView: View {
-    let entry: DiaryEntry
+    let entry: DiaryEntrySnapshot
     var onEdit: () -> Void
     var onDelete: () -> Void
     
@@ -168,7 +168,7 @@ struct DiaryEntryRowView: View {
 
 #Preview {
     DiaryEntryRowView(
-        entry: DiaryEntry(
+        entry: DiaryEntrySnapshot(
             checkInDate: Date(),
             moodLabel: DiaryMood.great.rawValue,
             moodScore: 5,
