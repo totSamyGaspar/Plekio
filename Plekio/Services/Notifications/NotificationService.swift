@@ -167,9 +167,14 @@ final class NotificationService: NotificationServiceProtocol {
 
     /// Runs inside the rebuild, after the queue was cleared, so it never piles up.
     private func scheduleRefillReminder(activeCourses: [TreatmentCourse]) async {
-        guard let plan = RefillReminder.plan(
-            activeCourses: activeCourses, now: time.now, calendar: time.calendar
-        ) else { return }
+        guard settings.isRefillReminderEnabled,
+              let plan = RefillReminder.plan(
+                activeCourses: activeCourses,
+                minuteOfDay: settings.refillReminderMinuteOfDay,
+                now: time.now,
+                calendar: time.calendar
+              )
+        else { return }
 
         await add(
             [ReminderRequestFactory.refillReminder(plan, calendar: time.calendar)],

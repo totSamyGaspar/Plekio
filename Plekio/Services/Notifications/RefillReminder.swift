@@ -18,8 +18,8 @@ nonisolated enum RefillReminder {
     /// Marks the request in `userInfo`, so a tap can be told apart from dose reminders.
     static let userInfoKey = "refillReminder"
 
-    /// Fires at this hour, at most once a day.
-    static let hour = 10
+    /// 10:00, in minutes past midnight, until the user picks another time.
+    static let defaultMinuteOfDay = 10 * 60
 
     // MARK: - Plan
 
@@ -28,8 +28,13 @@ nonisolated enum RefillReminder {
         let fireDate: Date
     }
 
-    /// Nil when nothing is low.
-    static func plan(activeCourses: [TreatmentCourse], now: Date, calendar: Calendar) -> Plan? {
+    /// Next `minuteOfDay` after `now`, listing what is low; nil when nothing is.
+    static func plan(
+        activeCourses: [TreatmentCourse],
+        minuteOfDay: Int,
+        now: Date,
+        calendar: Calendar
+    ) -> Plan? {
         let names = activeCourses
             .flatMap(\.medications)
             .filter(\.isLowOnStock)
@@ -38,7 +43,7 @@ nonisolated enum RefillReminder {
         guard !names.isEmpty,
               let fireDate = calendar.nextDate(
                 after: now,
-                matching: DateComponents(hour: hour, minute: 0),
+                matching: DateComponents(hour: minuteOfDay / 60, minute: minuteOfDay % 60),
                 matchingPolicy: .nextTime
               )
         else { return nil }

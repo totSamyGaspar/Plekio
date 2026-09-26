@@ -12,7 +12,6 @@ struct DailyReminderRows: View {
     // MARK: - Properties
 
     @Environment(AppDependencies.self) private var dependencies
-    @Environment(\.openURL) private var openURL
 
     /// Shown when the reminder was switched on without notification permission; the switch is already back off.
     @State private var showingPermissionAlert = false
@@ -52,22 +51,13 @@ struct DailyReminderRows: View {
         // On the switch: it is the only row that is always present.
         .onChange(of: isEnabled) { _, _ in apply() }
         .onChange(of: minutesRaw) { _, _ in apply() }
-        .alert("Notifications are off", isPresented: $showingPermissionAlert) {
-            Button("Open Settings") {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    openURL(url)
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("To get this reminder, allow notifications for Plekio in the Settings app.")
-        }
+        .notificationsOffAlert(isPresented: $showingPermissionAlert)
 
         if isEnabled {
             ForEach(Array(minutes.enumerated()), id: \.offset) { index, _ in
                 DatePicker(
                     "Reminder time",
-                    selection: time(at: index),
+                    selection: minute(at: index).timeOfDay,
                     displayedComponents: .hourAndMinute
                 )
                 .foregroundColor(.textPrimary)
@@ -108,21 +98,14 @@ struct DailyReminderRows: View {
 
     // MARK: - Editing
 
-    /// Bridges the Date picker to the stored minutes since midnight.
-    private func time(at index: Int) -> Binding<Date> {
+    /// One stored time, in minutes since midnight.
+    private func minute(at index: Int) -> Binding<Int> {
         Binding(
-            get: {
-                let minute = minutes.indices.contains(index) ? minutes[index] : 0
-                let (hour, minuteOfHour) = DailyReminder.hourAndMinute(from: minute)
-                return Calendar.current.date(
-                    bySettingHour: hour, minute: minuteOfHour, second: 0, of: Date()
-                ) ?? Date()
-            },
+            get: { minutes.indices.contains(index) ? minutes[index] : 0 },
             set: { newValue in
                 var updated = minutes
                 guard updated.indices.contains(index) else { return }
-                let parts = Calendar.current.dateComponents([.hour, .minute], from: newValue)
-                updated[index] = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+                updated[index] = newValue
                 write(updated)
             }
         )

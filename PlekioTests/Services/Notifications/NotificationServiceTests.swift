@@ -349,4 +349,37 @@ struct NotificationServiceTests {
 
         #expect(!center.pending.contains { $0.identifier == RefillReminder.identifier })
     }
+
+    @Test("выключенное в настройках напоминание о запасе не ставится")
+    func refillReminderRespectsTheSwitch() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set(false, forKey: SettingsKey.refillReminderEnabled)
+        let db = database()
+        let med = try #require(db.coursesToReturn.first?.medications.first)
+        med.stockCount = 3
+
+        await service.rescheduleAll(using: db)
+
+        #expect(!center.pending.contains { $0.identifier == RefillReminder.identifier })
+    }
+
+    @Test("напоминание о запасе ставится на время из настроек")
+    func refillReminderUsesTheStoredTime() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set(18 * 60 + 15, forKey: SettingsKey.refillReminderMinuteOfDay)
+        let db = database()
+        let med = try #require(db.coursesToReturn.first?.medications.first)
+        med.stockCount = 3
+
+        await service.rescheduleAll(using: db)
+
+        let request = try #require(center.pending.first { $0.identifier == RefillReminder.identifier })
+        let trigger = try #require(request.trigger as? UNCalendarNotificationTrigger)
+        #expect(trigger.dateComponents.hour == 18)
+        #expect(trigger.dateComponents.minute == 15)
+    }
 }

@@ -36,26 +36,37 @@ struct RefillReminderTests {
 
     @Test("нет лекарств на исходе — нет напоминания")
     func nothingLowMeansNoPlan() {
-        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("А", 30)])], now: date(10, 8), calendar: calendar)
+        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("А", 30)])], minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 8), calendar: calendar)
         #expect(plan == nil)
     }
 
     @Test("в напоминании все лекарства на исходе, включая ровно на пороге")
     func listsEveryLowMedication() {
         let courses = [course(stocks: [("Б", 10), ("В", 30), ("А", 2)])]
-        let plan = RefillReminder.plan(activeCourses: courses, now: date(10, 8), calendar: calendar)
+        let plan = RefillReminder.plan(activeCourses: courses, minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 8), calendar: calendar)
         #expect(plan?.medicationNames == ["А", "Б"])
     }
 
     @Test("срабатывает сегодня в 10:00, если это время ещё не прошло")
     func firesTodayBeforeTheHour() {
-        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("А", 1)])], now: date(10, 8), calendar: calendar)
-        #expect(plan?.fireDate == date(10, RefillReminder.hour))
+        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("А", 1)])], minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 8), calendar: calendar)
+        #expect(plan?.fireDate == date(10, 10))
     }
 
     @Test("после 10:00 переносится на завтра")
     func firesTomorrowAfterTheHour() {
-        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("А", 1)])], now: date(10, 12), calendar: calendar)
-        #expect(plan?.fireDate == date(11, RefillReminder.hour))
+        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("А", 1)])], minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 12), calendar: calendar)
+        #expect(plan?.fireDate == date(11, 10))
+    }
+
+    @Test("срабатывает в выбранное пользователем время")
+    func firesAtTheChosenTime() {
+        let plan = RefillReminder.plan(
+            activeCourses: [course(stocks: [("А", 1)])],
+            minuteOfDay: 19 * 60 + 30,
+            now: date(10, 12),
+            calendar: calendar
+        )
+        #expect(plan?.fireDate == calendar.date(from: DateComponents(year: 2030, month: 6, day: 10, hour: 19, minute: 30)))
     }
 }
