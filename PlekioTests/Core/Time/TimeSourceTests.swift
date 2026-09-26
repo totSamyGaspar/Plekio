@@ -24,13 +24,13 @@ struct TimeSourceTests {
     }
 
     private func dose(at time: Date) -> PillDose {
-        PillDose(medicationId: UUID(), name: "Доза", dosage: 1, formSystemImage: "pills.fill",
+        PillDose(medicationId: UUID(), name: "Dose", dosage: 1, formSystemImage: "pills.fill",
                  time: time, period: .morning)
     }
 
     // MARK: - PillDose
 
-    @Test("доза становится пропущенной ровно после окончания льготного периода")
+    @Test("A dose becomes missed exactly when the grace period ends")
     func missedStartsAfterTheGracePeriod() {
         let pill = dose(at: slot)
         let graceEnd = slot.addingTimeInterval(DoseSchedule.missedGrace)
@@ -39,7 +39,7 @@ struct TimeSourceTests {
         #expect(pill.isMissed(at: graceEnd.addingTimeInterval(1)))
     }
 
-    @Test("вечернюю дозу можно отметить утром того же дня, завтрашнюю — нет")
+    @Test("An evening dose can be logged the same morning, tomorrow's can't")
     func loggableIsTodayOrPast() {
         let morning = calendar.date(from: DateComponents(year: 2030, month: 6, day: 10, hour: 7))!
         let tonight = calendar.date(from: DateComponents(year: 2030, month: 6, day: 10, hour: 21))!
@@ -51,13 +51,13 @@ struct TimeSourceTests {
 
     // MARK: - Storage
 
-    @Test("время приёма записывается по переданным часам, а не по системным")
+    @Test("The take time is written from the injected clock, not the system one")
     func takenAtComesFromTheInjectedClock() throws {
         let clock = FixedTime(slot.addingTimeInterval(15 * 60))
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(), time: clock)
 
-        let course = TreatmentCourse(name: "Курс", startDate: slot, endDate: slot)
-        let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill",
+        let course = TreatmentCourse(name: "Course", startDate: slot, endDate: slot)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill",
                                  dosage: 1, timesOfDay: [slot], frequencyDays: 1)
         course.medications.append(med)
         db.context.insert(course)
@@ -70,13 +70,13 @@ struct TimeSourceTests {
 
     // MARK: - View models
 
-    @Test("курс, закончившийся вчера по переданным часам, уходит в историю")
+    @Test("A course that ended yesterday by the injected clock moves to history")
     func courseListSplitsByTheInjectedDay() {
         let today = slot
         let yesterday = today.addingTimeInterval(-86400)
         let db = MockDatabaseService()
-        let running = TreatmentCourse(name: "Идёт", startDate: yesterday, endDate: today)
-        let finished = TreatmentCourse(name: "Закончился", startDate: yesterday, endDate: yesterday)
+        let running = TreatmentCourse(name: "Running", startDate: yesterday, endDate: today)
+        let finished = TreatmentCourse(name: "Ended", startDate: yesterday, endDate: yesterday)
         db.coursesToReturn = [running, finished]
 
         let vm = CoursesListViewModel(
@@ -87,11 +87,11 @@ struct TimeSourceTests {
             time: FixedTime(today)
         )
 
-        #expect(vm.activeCourses.map(\.name) == ["Идёт"])
-        #expect(vm.historyCourses.map(\.name) == ["Закончился"])
+        #expect(vm.activeCourses.map(\.name) == ["Running"])
+        #expect(vm.historyCourses.map(\.name) == ["Ended"])
     }
 
-    @Test("дашборд открывается на «сегодня» переданных часов")
+    @Test("The dashboard opens on the injected clock's today")
     func dashboardStartsOnTheInjectedDay() {
         let db = MockDatabaseService()
         let vm = DashboardViewModel(

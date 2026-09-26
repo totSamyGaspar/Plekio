@@ -21,7 +21,7 @@ struct RefillReminderTests {
     }
 
     private func course(stocks: [(String, Int)]) -> TreatmentCourse {
-        let course = TreatmentCourse(name: "Курс", startDate: date(1, 0), endDate: date(30, 0))
+        let course = TreatmentCourse(name: "Course", startDate: date(1, 0), endDate: date(30, 0))
         for (name, stock) in stocks {
             course.medications.append(
                 MedicationItem(id: UUID(), name: name, formSystemImage: "pills.fill", dosage: 1,
@@ -34,35 +34,35 @@ struct RefillReminderTests {
 
     // MARK: - Plan
 
-    @Test("нет лекарств на исходе — нет напоминания")
+    @Test("Nothing low, no reminder")
     func nothingLowMeansNoPlan() {
-        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("А", 30)])], minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 8), calendar: calendar)
+        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("A", 30)])], minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 8), calendar: calendar)
         #expect(plan == nil)
     }
 
-    @Test("в напоминании все лекарства на исходе, включая ровно на пороге")
+    @Test("The reminder lists every low medication, including one exactly at the threshold")
     func listsEveryLowMedication() {
-        let courses = [course(stocks: [("Б", 10), ("В", 30), ("А", 2)])]
+        let courses = [course(stocks: [("B", 10), ("C", 30), ("A", 2)])]
         let plan = RefillReminder.plan(activeCourses: courses, minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 8), calendar: calendar)
-        #expect(plan?.medicationNames == ["А", "Б"])
+        #expect(plan?.medicationNames == ["A", "B"])
     }
 
-    @Test("срабатывает сегодня в 10:00, если это время ещё не прошло")
+    @Test("Fires today at 10:00 if that time hasn't passed")
     func firesTodayBeforeTheHour() {
-        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("А", 1)])], minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 8), calendar: calendar)
+        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("A", 1)])], minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 8), calendar: calendar)
         #expect(plan?.fireDate == date(10, 10))
     }
 
-    @Test("после 10:00 переносится на завтра")
+    @Test("After 10:00 it moves to tomorrow")
     func firesTomorrowAfterTheHour() {
-        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("А", 1)])], minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 12), calendar: calendar)
+        let plan = RefillReminder.plan(activeCourses: [course(stocks: [("A", 1)])], minuteOfDay: RefillReminder.defaultMinuteOfDay, now: date(10, 12), calendar: calendar)
         #expect(plan?.fireDate == date(11, 10))
     }
 
-    @Test("срабатывает в выбранное пользователем время")
+    @Test("Fires at the time the user chose")
     func firesAtTheChosenTime() {
         let plan = RefillReminder.plan(
-            activeCourses: [course(stocks: [("А", 1)])],
+            activeCourses: [course(stocks: [("A", 1)])],
             minuteOfDay: 19 * 60 + 30,
             now: date(10, 12),
             calendar: calendar

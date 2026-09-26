@@ -25,13 +25,13 @@ struct BloodPressureLoggingTests {
 
     // MARK: - Rules
 
-    @Test("обычное измерение проходит, пульс необязателен")
+    @Test("A normal reading passes; pulse is optional")
     func ordinaryReadingPasses() {
         #expect(issue(120, 80) == nil)
         #expect(issue(120, 80, pulse: 70) == nil)
     }
 
-    @Test("границы диапазонов включены, за ними — отказ")
+    @Test("Range bounds are inclusive; beyond them is rejected")
     func rangeBoundaries() {
         #expect(issue(60, 30) == nil)
         #expect(issue(300, 200) == nil)
@@ -45,13 +45,13 @@ struct BloodPressureLoggingTests {
         #expect(issue(120, 80, pulse: 220) == nil)
     }
 
-    @Test("перепутанные поля отклоняются, даже когда оба числа в диапазоне")
+    @Test("Swapped fields are rejected even when both numbers are in range")
     func invertedPairIsRefused() {
         #expect(issue(80, 120) == .inverted)
         #expect(issue(90, 90) == .inverted)
     }
 
-    @Test("измерение из будущего отклоняется, «сейчас» — нет")
+    @Test("A reading from the future is rejected; now isn't")
     func futureReadingIsRefused() {
         #expect(issue(120, 80, at: now) == nil)
         #expect(issue(120, 80, at: now.addingTimeInterval(60)) == .inFuture)
@@ -68,7 +68,7 @@ struct BloodPressureLoggingTests {
         return (logging, db, errors)
     }
 
-    @Test("правильное измерение записывается как есть")
+    @Test("A valid reading is written as is")
     func validReadingIsWritten() {
         let (logging, db, errors) = makeLogging()
 
@@ -81,7 +81,7 @@ struct BloodPressureLoggingTests {
         #expect(errors.reported.isEmpty)
     }
 
-    @Test("неправдоподобное измерение не пишется, а причина уходит в ErrorReporting")
+    @Test("An implausible reading isn't written, and the reason goes to ErrorReporting")
     func invalidReadingIsRefusedAndReported() {
         let (logging, db, errors) = makeLogging()
 
@@ -95,7 +95,7 @@ struct BloodPressureLoggingTests {
         }
     }
 
-    @Test("экран дневника сохраняет через те же правила")
+    @Test("The diary screen saves through the same rules")
     func diaryScreenUsesTheSameRules() {
         let db = MockDatabaseService()
         let errors = SpyErrorReporter()

@@ -44,7 +44,7 @@
       </Testables>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-AppleLocale ru_RU"
+            argument = "-AppleLocale uk_UA"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

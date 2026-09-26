@@ -18,7 +18,7 @@ struct StatisticsViewModelTests {
     private func dose(taken: Bool, at time: Date) -> PillDose {
         PillDose(
             medicationId: UUID(),
-            name: "Аспирин",
+            name: "Aspirin",
             dosage: 1,
             formSystemImage: "pills.fill",
             time: time,
@@ -41,7 +41,7 @@ struct StatisticsViewModelTests {
 
     // MARK: - Streak
 
-    @Test("серия обрывается на дне, где принята только часть назначенных доз")
+    @Test("The streak breaks on a day with only some doses taken")
     func testPartiallyTakenDayBreaksStreak() async throws {
         let mockDB = MockDatabaseService()
 
@@ -55,7 +55,7 @@ struct StatisticsViewModelTests {
         #expect(vm.streakDays == 1)
     }
 
-    @Test("день без назначений серию не обрывает")
+    @Test("A day with nothing scheduled doesn't break the streak")
     func testDayWithoutDosesDoesNotBreakStreak() async throws {
         let mockDB = MockDatabaseService()
 
@@ -70,7 +70,7 @@ struct StatisticsViewModelTests {
         #expect(vm.streakDays == 2)
     }
 
-    @Test("полностью отмеченный сегодняшний день сразу даёт серию")
+    @Test("A fully logged today counts toward the streak at once")
     func testFullyLoggedTodayCountsImmediately() async throws {
         let mockDB = MockDatabaseService()
 
@@ -83,7 +83,7 @@ struct StatisticsViewModelTests {
         #expect(vm.streakDays == 1)
     }
 
-    @Test("сегодняшний день продлевает серию, а не начинает её заново")
+    @Test("Today extends the streak instead of restarting it")
     func testTodayExtendsExistingStreak() async throws {
         let mockDB = MockDatabaseService()
 
@@ -97,7 +97,7 @@ struct StatisticsViewModelTests {
         #expect(vm.streakDays == 2)
     }
 
-    @Test("неотмеченный сегодняшний день серию не обрывает — он ещё не закончился")
+    @Test("An unlogged today doesn't break the streak; it isn't over yet")
     func testUnloggedTodayDoesNotBreakStreak() async throws {
         let mockDB = MockDatabaseService()
 
@@ -114,7 +114,7 @@ struct StatisticsViewModelTests {
 
     // MARK: - Today and stock
 
-    @Test("прогресс за сегодня считается по расписанию текущего дня")
+    @Test("Today's progress follows today's schedule")
     func testTodayProgress() async throws {
         let mockDB = MockDatabaseService()
 
@@ -129,28 +129,28 @@ struct StatisticsViewModelTests {
         #expect(vm.progress == 0.75)
     }
 
-    @Test("низкий остаток берётся только из незавершённых курсов")
+    @Test("Low stock comes only from unfinished courses")
     func testLowStockIgnoresFinishedCourses() async throws {
         let mockDB = MockDatabaseService()
 
         let active = TreatmentCourse(
-            name: "Активный",
+            name: "Active",
             startDate: Date().addingTimeInterval(-86400),
             endDate: Date().addingTimeInterval(86400 * 5)
         )
         active.medications.append(
-            MedicationItem(id: UUID(), name: "Магний", formSystemImage: "pills.fill",
+            MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "pills.fill",
                            dosage: 1, timesOfDay: [Date()], frequencyDays: 1,
                            stockCount: 2, lowStockThreshold: 10)
         )
 
         let finished = TreatmentCourse(
-            name: "Завершённый",
+            name: "Finished",
             startDate: Date().addingTimeInterval(-86400 * 30),
             endDate: Date().addingTimeInterval(-86400 * 2)
         )
         finished.medications.append(
-            MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill",
+            MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill",
                            dosage: 1, timesOfDay: [Date()], frequencyDays: 1,
                            stockCount: 1, lowStockThreshold: 10)
         )
@@ -160,20 +160,20 @@ struct StatisticsViewModelTests {
         let vm = StatisticsViewModel(dbService: mockDB, errors: SpyErrorReporter())
         await vm.historyLoad?.value
 
-        #expect(vm.lowStockItems.map(\.name) == ["Магний"])
+        #expect(vm.lowStockItems.map(\.name) == ["Magnesium"])
     }
 
     // MARK: - Refill
 
-    @Test("пополнение запаса находит лекарство по id снимка и пишет в базу")
+    @Test("A refill finds the medication by the snapshot's id and writes to the store")
     func refillWritesThroughTheRepository() throws {
         let mockDB = MockDatabaseService()
         let course = TreatmentCourse(
-            name: "Активный",
+            name: "Active",
             startDate: Date().addingTimeInterval(-86400),
             endDate: Date().addingTimeInterval(86400 * 5)
         )
-        let med = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "pills.fill",
+        let med = MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "pills.fill",
                                  dosage: 1, timesOfDay: [Date()], frequencyDays: 1,
                                  stockCount: 2, lowStockThreshold: 10)
         course.medications.append(med)
@@ -190,14 +190,14 @@ struct StatisticsViewModelTests {
         #expect(errors.reported.isEmpty)
     }
 
-    @Test("неудачное пополнение сообщает об ошибке и не выдаёт себя за успех")
+    @Test("A failed refill reports an error and doesn't pretend to succeed")
     func failedRefillReportsFalse() throws {
         let mockDB = MockDatabaseService()
         let errors = SpyErrorReporter()
         let vm = StatisticsViewModel(dbService: mockDB, errors: errors)
         // Deleted from the store on another screen.
         let gone = MedicationSnapshot(
-            id: UUID(), name: "Магний", formSystemImage: "pills.fill", dosage: 1,
+            id: UUID(), name: "Magnesium", formSystemImage: "pills.fill", dosage: 1,
             timesOfDay: [Date()], frequencyDays: 1, stockCount: 2, lowStockThreshold: 10
         )
 

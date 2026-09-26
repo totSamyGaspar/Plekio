@@ -36,7 +36,7 @@ struct AvatarStoreTests {
 
     // MARK: - Save
 
-    @Test("сохранённая аватарка читается обратно")
+    @Test("A saved avatar reads back")
     func testSaveStoresTheImage() async throws {
         let directory = scratchPath()
         defer { remove(directory) }
@@ -47,7 +47,7 @@ struct AvatarStoreTests {
         #expect(cache.loadDataFromDisk(for: id) != nil)
     }
 
-    @Test("замена аватарки удаляет предыдущий файл")
+    @Test("Replacing the avatar deletes the previous file")
     func testSaveRemovesTheReplacedFile() async throws {
         let directory = scratchPath()
         defer { remove(directory) }
@@ -61,7 +61,7 @@ struct AvatarStoreTests {
         #expect(cache.loadDataFromDisk(for: second) != nil)
     }
 
-    @Test("неудачная запись оставляет старую аватарку на месте")
+    @Test("A failed write leaves the old avatar in place")
     func testFailedSaveKeepsThePreviousFile() async throws {
         let directory = scratchPath()
         defer { remove(directory) }
@@ -82,7 +82,7 @@ struct AvatarStoreTests {
 
     // MARK: - Remove
 
-    @Test("удаление без аватарки ничего не делает")
+    @Test("Deleting without an avatar does nothing")
     func testRemoveWithoutAnAvatarIsHarmless() async throws {
         let directory = scratchPath()
         defer { remove(directory) }

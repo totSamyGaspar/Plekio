@@ -40,10 +40,10 @@ struct NotificationServiceTests {
     /// One medication at 09:00 every day, 10–12 June.
     private func database() -> MockDatabaseService {
         let db = MockDatabaseService()
-        let course = TreatmentCourse(name: "Курс", startDate: date(10, 0), endDate: date(12, 0))
+        let course = TreatmentCourse(name: "Course", startDate: date(10, 0), endDate: date(12, 0))
         let nineOClock = calendar.date(from: DateComponents(year: 2000, month: 1, day: 1, hour: 9))!
         course.medications.append(
-            MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill",
+            MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill",
                            dosage: 1, timesOfDay: [nineOClock], frequencyDays: 1)
         )
         db.coursesToReturn = [course]
@@ -55,7 +55,7 @@ struct NotificationServiceTests {
         return ReminderRequestFactory.doseReminder(
             identifier: identifier,
             medicationIds: ids,
-            medicationNames: ids.map { _ in "Лекарство" },
+            medicationNames: ids.map { _ in "Medication" },
             triggerDate: slot,
             trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         )
@@ -63,7 +63,7 @@ struct NotificationServiceTests {
 
     // MARK: - Rebuilds
 
-    @Test("пересборка кладёт в очередь напоминание на каждый будущий слот")
+    @Test("A rebuild queues a reminder for every future slot")
     func rebuildQueuesEveryFutureSlot() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -74,7 +74,7 @@ struct NotificationServiceTests {
         #expect(center.pending.count == 3)
     }
 
-    @Test("перекрывающиеся пересборки не удваивают напоминания")
+    @Test("Overlapping rebuilds don't duplicate reminders")
     func overlappingRebuildsDoNotDuplicate() async {
         // Interleaved rebuilds would let B's clear land between A's clear and adds.
         let center = FakeNotificationCenterClient()
@@ -94,7 +94,7 @@ struct NotificationServiceTests {
         #expect(center.pending.count == single)
     }
 
-    @Test("отмена лекарства во время пересборки не оставляет дублей")
+    @Test("Cancelling a medication during a rebuild leaves no duplicates")
     func cancellationQueuedWithARebuildLeavesNoDuplicates() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -112,7 +112,7 @@ struct NotificationServiceTests {
 
     // MARK: - Cancellation
 
-    @Test("удалённое лекарство уходит из общего напоминания и с экрана блокировки")
+    @Test("A deleted medication leaves the group reminder and the lock screen")
     func cancellationRegroupsAndClearsDelivered() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -133,7 +133,7 @@ struct NotificationServiceTests {
 
     // MARK: - Delivered cleanup
 
-    @Test("баннер снимается, только когда закрыт весь слот")
+    @Test("The banner is removed only when the whole slot is settled")
     func deliveredBannerLeavesOnlyWhenTheSlotIsSettled() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -152,7 +152,7 @@ struct NotificationServiceTests {
 
     // MARK: - Daily reminders
 
-    @Test("новый список времён заменяет старый целиком")
+    @Test("A new list of times replaces the old one entirely")
     func dailyReminderTimesReplaceTheOldOnes() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -165,7 +165,7 @@ struct NotificationServiceTests {
         #expect(center.pending.filter { ids.contains($0.identifier) }.count == 1)
     }
 
-    @Test("пересборка возвращает включённые ежедневные напоминания")
+    @Test("A rebuild restores enabled daily reminders")
     func rebuildRestoresEnabledDailyReminders() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -180,7 +180,7 @@ struct NotificationServiceTests {
 
     // MARK: - Permission and setup
 
-    @Test("отказ и ошибка разрешения — false, а не исключение")
+    @Test("Denied or failed permission returns false, not an exception")
     func permissionDenialAndErrorAreFalse() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -193,7 +193,7 @@ struct NotificationServiceTests {
         #expect(await service.requestPermission() == false)
     }
 
-    @Test("категории с кнопками регистрируются при создании сервиса")
+    @Test("Categories with buttons are registered when the service is created")
     func categoriesAreRegisteredOnInit() {
         let center = FakeNotificationCenterClient()
         let (_, defaults, suite) = makeService(center)
@@ -205,7 +205,7 @@ struct NotificationServiceTests {
 
     // MARK: - Snooze
 
-    @Test("отложенное напоминание несёт время дозы, и «Принять» по нему находит её")
+    @Test("A snoozed reminder carries the dose's time, so Take finds the dose")
     func snoozeCarriesTheDoseSlot() async throws {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -213,7 +213,7 @@ struct NotificationServiceTests {
         let id = UUID()
         let slot = date(10, 9)
 
-        await service.scheduleSnooze(for: [id.uuidString], names: ["Ибупрофен"], slot: slot)
+        await service.scheduleSnooze(for: [id.uuidString], names: ["Ibuprofen"], slot: slot)
 
         let request = try #require(center.pending.first)
         #expect(ReminderRequestFactory.isSnooze(request.identifier))
@@ -224,7 +224,7 @@ struct NotificationServiceTests {
         #expect(intent == .take(medicationIds: [id], slot: slot))
     }
 
-    @Test("пересборка сохраняет отложенное напоминание, пока доза не отмечена")
+    @Test("A rebuild keeps the snooze while the dose is open")
     func rebuildKeepsSnoozeOfAnOpenDose() async throws {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -238,7 +238,7 @@ struct NotificationServiceTests {
         #expect(center.pending.contains { ReminderRequestFactory.isSnooze($0.identifier) })
     }
 
-    @Test("пересборка снимает отложенное напоминание, если дозу уже приняли")
+    @Test("A rebuild drops the snooze once the dose is taken")
     func rebuildDropsSnoozeOfATakenDose() async throws {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -256,22 +256,22 @@ struct NotificationServiceTests {
         #expect(!center.pending.contains { ReminderRequestFactory.isSnooze($0.identifier) })
     }
 
-    @Test("отложенные напоминания разных слотов не затирают друг друга")
+    @Test("Snoozes of different slots don't overwrite each other")
     func snoozesOfDifferentSlotsCoexist() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
         defer { defaults.removePersistentDomain(forName: suite) }
         let id = UUID().uuidString
 
-        await service.scheduleSnooze(for: [id], names: ["Ибупрофен"], slot: date(10, 9))
-        await service.scheduleSnooze(for: [id], names: ["Ибупрофен"], slot: date(10, 21))
+        await service.scheduleSnooze(for: [id], names: ["Ibuprofen"], slot: date(10, 9))
+        await service.scheduleSnooze(for: [id], names: ["Ibuprofen"], slot: date(10, 21))
 
         #expect(center.pending.filter { ReminderRequestFactory.isSnooze($0.identifier) }.count == 2)
     }
 
     // MARK: - Badge
 
-    @Test("каждое напоминание ставит на иконку число открытых к этому времени доз дня")
+    @Test("Each reminder sets the badge to the day's doses open by its time")
     func eachReminderCarriesTheOpenCountAtItsTime() async throws {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -280,7 +280,7 @@ struct NotificationServiceTests {
         let course = try #require(db.coursesToReturn.first)
         let onePM = calendar.date(from: DateComponents(year: 2000, month: 1, day: 1, hour: 13))!
         course.medications.append(
-            MedicationItem(id: UUID(), name: "Витамин D", formSystemImage: "pills.fill",
+            MedicationItem(id: UUID(), name: "Vitamin D", formSystemImage: "pills.fill",
                            dosage: 1, timesOfDay: [onePM], frequencyDays: 1)
         )
 
@@ -295,7 +295,7 @@ struct NotificationServiceTests {
         #expect(badges[date(11, 9)] == 1)
     }
 
-    @Test("пересборка ставит на иконку число доз, время которых пришло")
+    @Test("A rebuild sets the badge to the doses that are due")
     func rebuildSetsTheLiveBadge() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center, now: date(10, 10))
@@ -306,7 +306,7 @@ struct NotificationServiceTests {
         #expect(center.badgeCount == 1)
     }
 
-    @Test("принятая доза уходит с иконки")
+    @Test("A taken dose leaves the badge")
     func takenDoseLeavesTheBadge() async throws {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center, now: date(10, 10))
@@ -324,7 +324,7 @@ struct NotificationServiceTests {
 
     // MARK: - Refill
 
-    @Test("пересборка ставит одно напоминание о запасе, пока лекарство на исходе")
+    @Test("A rebuild queues one low-stock reminder while a medication is low")
     func rebuildQueuesRefillWhileLow() async throws {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -339,7 +339,7 @@ struct NotificationServiceTests {
         #expect(center.pending.filter { $0.identifier == RefillReminder.identifier }.count == 1)
     }
 
-    @Test("при достаточном запасе напоминания о пополнении нет")
+    @Test("With enough stock there's no refill reminder")
     func noRefillWhenStocked() async {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -350,7 +350,7 @@ struct NotificationServiceTests {
         #expect(!center.pending.contains { $0.identifier == RefillReminder.identifier })
     }
 
-    @Test("выключенное в настройках напоминание о запасе не ставится")
+    @Test("A low-stock reminder switched off in Settings isn't scheduled")
     func refillReminderRespectsTheSwitch() async throws {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)
@@ -365,7 +365,7 @@ struct NotificationServiceTests {
         #expect(!center.pending.contains { $0.identifier == RefillReminder.identifier })
     }
 
-    @Test("напоминание о запасе ставится на время из настроек")
+    @Test("The low-stock reminder uses the time from Settings")
     func refillReminderUsesTheStoredTime() async throws {
         let center = FakeNotificationCenterClient()
         let (service, defaults, suite) = makeService(center)

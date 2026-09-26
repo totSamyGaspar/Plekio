@@ -19,20 +19,20 @@ struct DoseStatusTests {
 
     // MARK: - Moves
 
-    @Test("принять можно и ожидающую, и пропущенную дозу, но не уже принятую")
+    @Test("Both pending and skipped doses can be taken, but not an already taken one")
     func takingOverridesASkipButNotATake() {
         #expect(DoseStatus.pending.taking(at: now, dispensed: 1) == .taken(at: now, dispensed: 1))
         #expect(DoseStatus.skipped(at: now).taking(at: now, dispensed: 1) == .taken(at: now, dispensed: 1))
         #expect(DoseStatus.taken(at: now, dispensed: 1).taking(at: now, dispensed: 1) == nil)
     }
 
-    @Test("принятую дозу пропустить нельзя")
+    @Test("A taken dose can't be skipped")
     func takenDoseCannotBeSkipped() {
         #expect(DoseStatus.pending.skipping(at: now) == .skipped(at: now))
         #expect(DoseStatus.taken(at: now, dispensed: 1).skipping(at: now) == nil)
     }
 
-    @Test("отмена возвращает ровно то, что ушло со склада, и только для принятой")
+    @Test("Undo restores exactly what left the stock, and only for a taken dose")
     func revertingCreditsExactlyWhatWentOut() {
         let reverted = DoseStatus.taken(at: now, dispensed: 0).reverting()
         #expect(reverted?.status == .pending)
@@ -43,14 +43,14 @@ struct DoseStatusTests {
         #expect(DoseStatus.skipped(at: now).reverting() == nil)
     }
 
-    @Test("отменить можно только пропуск")
+    @Test("Only a skip can be undone")
     func unskippingOnlyMovesASkip() {
         #expect(DoseStatus.skipped(at: now).unskipping() == .pending)
         #expect(DoseStatus.pending.unskipping() == nil)
         #expect(DoseStatus.taken(at: now, dispensed: 1).unskipping() == nil)
     }
 
-    @Test("isSettled: принятая и пропущенная — да, ожидающая — нет")
+    @Test("isSettled: taken and skipped yes, pending no")
     func settledCoversTakenAndSkipped() {
         #expect(DoseStatus.taken(at: now, dispensed: 1).isSettled)
         #expect(DoseStatus.skipped(at: now).isSettled)
@@ -59,7 +59,7 @@ struct DoseStatusTests {
 
     // MARK: - Storage
 
-    @Test("DoseLog читает обратно ровно тот статус, что в него записали")
+    @Test("DoseLog reads back exactly the status written to it")
     func doseLogRoundTripsEveryStatus() {
         let log = DoseLog(scheduledTime: now)
         #expect(log.status == .pending)
@@ -70,7 +70,7 @@ struct DoseStatusTests {
         }
     }
 
-    @Test("переход из пропущенной в принятую не оставляет следов пропуска")
+    @Test("Going from skipped to taken leaves no trace of the skip")
     func noFieldSurvivesAChangeOfState() {
         let log = DoseLog(scheduledTime: now, status: .skipped(at: now))
 

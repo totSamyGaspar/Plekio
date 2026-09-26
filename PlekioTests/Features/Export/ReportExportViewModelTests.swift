@@ -19,14 +19,14 @@ struct ReportExportViewModelTests {
     @discardableResult
     private func seed(_ db: DatabaseService) -> TreatmentCourse {
         let course = TreatmentCourse(
-            name: "Курс",
+            name: "Course",
             startDate: testDate(2026, 6, 1),
             endDate: testDate(2026, 6, 10)
         )
         course.medications.append(
             MedicationItem(
                 id: UUID(),
-                name: "Бисопролол",
+                name: "Bisoprolol",
                 formSystemImage: "pills.fill",
                 dosage: 1,
                 timesOfDay: [testDate(2000, 1, 1, 9, 0)],
@@ -40,7 +40,7 @@ struct ReportExportViewModelTests {
 
     // MARK: - Selection
 
-    @Test("экран открывается со всеми курсами, отмеченными к выгрузке")
+    @Test("The screen opens with every course selected for export")
     func testEveryCourseIsSelectedToBeginWith() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seed(db)
@@ -52,7 +52,7 @@ struct ReportExportViewModelTests {
         #expect(viewModel.selection.courseIds == [course.id])
     }
 
-    @Test("без единого выбранного раздела выгружать нечего")
+    @Test("With no section selected there is nothing to export")
     func testNothingToExportWithoutSections() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
@@ -66,7 +66,7 @@ struct ReportExportViewModelTests {
     }
 
     // Otherwise the share button would send a file built before the last change.
-    @Test("любое изменение выбора выбрасывает уже собранный файл")
+    @Test("Any change to the selection discards the already built file")
     func testChangingTheSelectionDiscardsTheDocument() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         seed(db)
@@ -87,7 +87,7 @@ struct ReportExportViewModelTests {
 
     // MARK: - Export
 
-    @Test("выгрузка доходит до файла на диске")
+    @Test("The export reaches a file on disk")
     func testMakeDocumentWritesAFile() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         seed(db)

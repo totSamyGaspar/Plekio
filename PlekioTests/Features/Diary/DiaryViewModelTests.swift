@@ -15,7 +15,7 @@ struct DiaryViewModelTests {
 
     // MARK: - Refresh
 
-    @Test("экран дневника перечитывается на запись дневника и не реагирует на дозы")
+    @Test("The diary screen reloads on diary writes and ignores doses")
     func refreshesOnDiaryWritesOnly() async throws {
         let mockDb = MockDatabaseService()
         let vm = DiaryViewModel(dbService: mockDb, errors: SpyErrorReporter(), debounce: .zero)
@@ -91,7 +91,7 @@ struct DiaryViewModelTests {
         #expect(mockDb.savedDiaryDraft?.isQuickLog == true)
     }
 
-    @Test("quickLog обновляет сегодняшнюю запись, а не создаёт вторую")
+    @Test("quickLog updates today's entry instead of creating a second one")
     func testQuickLogUpdatesTodaysEntryInsteadOfDuplicating() async throws {
         let mockDb = MockDatabaseService()
         let today = makeEntry(daysAgo: 0, moodScore: 3, energyLevel: 3, sleepHours: 7, photoCount: 0)
@@ -124,7 +124,7 @@ struct DiaryViewModelTests {
 
     // MARK: - Comparison pair
 
-    @Test("без выбора сравниваются самое раннее и самое позднее фото")
+    @Test("Without a selection, the earliest and latest photos are compared")
     func testComparisonPairFallsBackToEarliestAndLatest() async throws {
         let mockDb = MockDatabaseService()
         mockDb.diaryEntriesToReturn = [
@@ -141,7 +141,7 @@ struct DiaryViewModelTests {
         #expect(pair.after == byDate.last?.id)
     }
 
-    @Test("два выбранных сравниваются от старого к новому, в каком бы порядке их ни отметили")
+    @Test("Two selected photos compare oldest to newest, whatever order they were ticked in")
     func testComparisonPairOrdersSelectionByDate() async throws {
         let mockDb = MockDatabaseService()
         mockDb.diaryEntriesToReturn = [
@@ -161,7 +161,7 @@ struct DiaryViewModelTests {
         #expect(pair.after == newer)
     }
 
-    @Test("выбор, указывающий на удалённое фото, откатывается к раннему и позднему")
+    @Test("A selection pointing at a deleted photo falls back to earliest and latest")
     func testComparisonPairIgnoresStaleSelection() async throws {
         let mockDb = MockDatabaseService()
         mockDb.diaryEntriesToReturn = [
@@ -177,7 +177,7 @@ struct DiaryViewModelTests {
         #expect(pair.after == byDate.last?.id)
     }
 
-    @Test("сравнивать нечего, пока фото меньше двух")
+    @Test("Nothing to compare with fewer than two photos")
     func testComparisonPairIsNilWithFewerThanTwoPhotos() async throws {
         let mockDb = MockDatabaseService()
         mockDb.diaryEntriesToReturn = [

@@ -24,14 +24,14 @@ struct CourseDetailViewModelTests {
         let endDate = Date().addingTimeInterval(86400 * 7)
 
         let dummyCourse = TreatmentCourse(
-            name: "Антибиотики",
+            name: "Antibiotics",
             startDate: startDate,
             endDate: endDate
         )
 
         let vm = CourseDetailViewModel(course: dummyCourse, dbService: mockDB, notificationService: mockNotifications)
 
-        #expect(vm.courseName == "Антибиотики")
+        #expect(vm.courseName == "Antibiotics")
         #expect(vm.startDate == startDate)
         #expect(vm.endDate == endDate)
         #expect(vm.medications.isEmpty)
@@ -39,20 +39,20 @@ struct CourseDetailViewModelTests {
 
     // MARK: - addNewMedication
 
-    @Test("addNewMedication пишет в базу и сам напоминания не пересобирает")
+    @Test("addNewMedication writes to the store and doesn't rebuild reminders itself")
     func testAddNewMedicationWritesAndLeavesTheRebuildToTheCoordinator() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
-        let course = TreatmentCourse(name: "Витамины", startDate: Date(), endDate: Date().addingTimeInterval(86400 * 30))
+        let course = TreatmentCourse(name: "Vitamins", startDate: Date(), endDate: Date().addingTimeInterval(86400 * 30))
         mockDB.coursesToReturn = [course]
 
         let vm = CourseDetailViewModel(course: course, dbService: mockDB, notificationService: mockNotifications)
-        let draft = MedicationDraft(name: "Витамин D")
+        let draft = MedicationDraft(name: "Vitamin D")
 
         vm.addNewMedication(draft)
 
-        #expect(mockDB.addedMedicationDraft?.name == "Витамин D")
+        #expect(mockDB.addedMedicationDraft?.name == "Vitamin D")
         #expect(mockDB.addedToCourse === course)
         // ReminderSyncCoordinator rebuilds after the `.courses` write; a second rebuild would duplicate it.
         #expect(mockNotifications.scheduleCallCount == 0)
@@ -65,10 +65,10 @@ struct CourseDetailViewModelTests {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
-        let course = TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date().addingTimeInterval(86400 * 10))
+        let course = TreatmentCourse(name: "Course", startDate: Date(), endDate: Date().addingTimeInterval(86400 * 10))
         let med = MedicationItem(
             id: UUID(),
-            name: "Ибупрофен",
+            name: "Ibuprofen",
             formSystemImage: "pills.fill",
             dosage: 1,
             timesOfDay: [Date()],

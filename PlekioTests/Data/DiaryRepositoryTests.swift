@@ -20,14 +20,14 @@ struct DiaryRepositoryTests {
             checkInDate: Date(), moodLabel: DiaryMood.good.rawValue, moodScore: mood,
             physicalSummary: "", energyLevel: 3, discomfortLevel: 0, sleepHours: 7,
             sleepQuality: SleepQuality.good.rawValue, waterGlasses: 4,
-            symptoms: [], reflectionNotes: "Заметка", milestoneTags: [],
+            symptoms: [], reflectionNotes: "Note", milestoneTags: [],
             photoIds: [UUID()], isQuickLog: true
         )
     }
 
     // MARK: - Diary entries
 
-    @Test("снимок записи переносит все поля, включая фото и флаг быстрой записи")
+    @Test("An entry snapshot carries every field, including photos and the quick-entry flag")
     func entrySnapshotCopiesEveryField() throws {
         let db = MockDatabaseService()
         let model = entry()
@@ -38,10 +38,10 @@ struct DiaryRepositoryTests {
         #expect(snapshot.id == model.id)
         #expect(snapshot.photoIds == model.photoIds)
         #expect(snapshot.isQuickLog)
-        #expect(snapshot.displayCaption == "Заметка")
+        #expect(snapshot.displayCaption == "Note")
     }
 
-    @Test("правка и удаление находят запись по id")
+    @Test("Edit and delete find the entry by id")
     func writesFindTheEntryById() throws {
         let db = MockDatabaseService()
         let model = entry()
@@ -49,16 +49,16 @@ struct DiaryRepositoryTests {
         let repository = SwiftDataDiaryRepository(store: db)
 
         var draft = DiaryEntryDraft(from: DiaryEntrySnapshot(model))
-        draft.reflectionNotes = "Новая"
+        draft.reflectionNotes = "New"
         try repository.updateEntry(id: model.id, with: draft)
         try repository.deleteEntry(id: model.id)
 
         #expect(db.updatedDiaryEntry === model)
-        #expect(db.updatedDiaryDraft?.reflectionNotes == "Новая")
+        #expect(db.updatedDiaryDraft?.reflectionNotes == "New")
         #expect(db.deletedDiaryEntry === model)
     }
 
-    @Test("запись по id удалённой записи — ошибка, а не тихий пропуск")
+    @Test("Writing by the id of a deleted entry is an error, not a silent no-op")
     func writeToMissingEntryThrows() {
         let repository = SwiftDataDiaryRepository(store: MockDatabaseService())
 
@@ -72,7 +72,7 @@ struct DiaryRepositoryTests {
 
     // MARK: - Blood pressure
 
-    @Test("давление: снимок и удаление по id")
+    @Test("Blood pressure: snapshot and delete by id")
     func bloodPressureByIdAndSnapshot() throws {
         let db = MockDatabaseService()
         let reading = BloodPressureReading(measuredAt: Date(), systolic: 120, diastolic: 80, pulse: 70)

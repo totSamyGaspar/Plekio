@@ -16,7 +16,7 @@ struct PlekioSchemaTests {
 
     // MARK: - Migration plan
 
-    @Test("план согласован: версии по возрастанию, один шаг между соседними, последняя — текущая")
+    @Test("The plan is consistent: ascending versions, one stage between neighbours, the last is current")
     func planIsConsistent() {
         let schemas = PlekioMigrationPlan.schemas
         let versions = schemas.map { $0.versionIdentifier }
@@ -27,7 +27,7 @@ struct PlekioSchemaTests {
         #expect(ObjectIdentifier(schemas.last!) == ObjectIdentifier(PlekioSchema.Current.self))
     }
 
-    @Test("текущая схема содержит все модели хранилища")
+    @Test("The current schema contains every stored model")
     func currentSchemaHasEveryModel() {
         let names = Set(PlekioSchema.current().entities.map(\.name))
 
@@ -36,7 +36,7 @@ struct PlekioSchemaTests {
 
     // MARK: - Store on disk
 
-    @Test("хранилище на диске открывается заново через план миграций и сохраняет данные")
+    @Test("An on-disk store reopens through the migration plan and keeps its data")
     func storeOnDiskReopensThroughThePlan() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("PlekioSchemaTests-\(UUID().uuidString)", isDirectory: true)
@@ -56,13 +56,13 @@ struct PlekioSchemaTests {
 
         do {
             let container = try open()
-            let course = TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date().addingTimeInterval(86400))
+            let course = TreatmentCourse(name: "Course", startDate: Date(), endDate: Date().addingTimeInterval(86400))
             container.mainContext.insert(course)
             try container.mainContext.save()
         }
 
         let reopened = try open()
         let courses = try reopened.mainContext.fetch(FetchDescriptor<TreatmentCourse>())
-        #expect(courses.map(\.name) == ["Курс"])
+        #expect(courses.map(\.name) == ["Course"])
     }
 }

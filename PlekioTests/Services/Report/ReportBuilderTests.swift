@@ -31,11 +31,11 @@ struct ReportBuilderTests {
         end: Date = testDate(2026, 6, 10),
         frequencyDays: Int = 1
     ) -> TreatmentCourse {
-        let course = TreatmentCourse(name: "Курс", startDate: start, endDate: end)
+        let course = TreatmentCourse(name: "Course", startDate: start, endDate: end)
         course.medications.append(
             MedicationItem(
                 id: UUID(),
-                name: "Ибупрофен",
+                name: "Ibuprofen",
                 formSystemImage: "pills.fill",
                 dosage: 1,
                 timesOfDay: [testDate(2000, 1, 1, 9, 0)],
@@ -60,7 +60,7 @@ struct ReportBuilderTests {
 
     // MARK: - Counting
 
-    @Test("каждый день курса в периоде даёт одну назначенную дозу")
+    @Test("Each course day in the period yields one scheduled dose")
     func testEveryDoseDayIsCounted() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db)
@@ -73,7 +73,7 @@ struct ReportBuilderTests {
         #expect(data.courses[0].adherence.missed == 10)
     }
 
-    @Test("принятые, пропущенные и просроченные дозы различаются")
+    @Test("Taken, skipped and missed doses are told apart")
     func testOutcomesAreToldApart() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db)
@@ -93,7 +93,7 @@ struct ReportBuilderTests {
     }
 
     // A deliberate skip is not adherence: one taken out of three is 33%.
-    @Test("доля соблюдения считается от закрытых доз")
+    @Test("Adherence is computed from settled doses")
     func testRateCountsSettledDosesOnly() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db)
@@ -109,7 +109,7 @@ struct ReportBuilderTests {
         #expect(adherence.rate == 1.0 / 3.0)
     }
 
-    @Test("будущие дозы не считаются пропущенными")
+    @Test("Future doses don't count as missed")
     func testFutureDosesAreUpcomingNotMissed() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db)
@@ -124,7 +124,7 @@ struct ReportBuilderTests {
         #expect(adherence.rate == 0)
     }
 
-    @Test("час после срока доза ещё не просрочена")
+    @Test("An hour after its time a dose isn't missed yet")
     func testTheGracePeriodIsHonoured() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db)
@@ -142,7 +142,7 @@ struct ReportBuilderTests {
 
     // MARK: - Boundaries
 
-    @Test("период обрезается границами курса, а не наоборот")
+    @Test("The period is clipped to the course, not the other way round")
     func testPeriodIsClippedToTheCourse() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db, start: testDate(2026, 6, 5), end: testDate(2026, 6, 7))
@@ -154,7 +154,7 @@ struct ReportBuilderTests {
         #expect(adherence.scheduled == 3)
     }
 
-    @Test("дозы вне периода не попадают в отчёт")
+    @Test("Doses outside the period stay out of the report")
     func testDosesOutsideThePeriodAreLeftOut() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db)
@@ -166,7 +166,7 @@ struct ReportBuilderTests {
         #expect(adherence.scheduled == 3)
     }
 
-    @Test("приём через день даёт дозы только в свои дни")
+    @Test("Every-other-day dosing yields doses only on its days")
     func testFrequencyIsRespected() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db, frequencyDays: 3)
@@ -181,7 +181,7 @@ struct ReportBuilderTests {
 
     // MARK: - Exceptions
 
-    @Test("в список исключений попадают только незакрытые дозы")
+    @Test("Only unsettled doses go into the exceptions list")
     func testExceptionsListOnlyWhatWentWrong() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db, end: testDate(2026, 6, 3))
@@ -201,7 +201,7 @@ struct ReportBuilderTests {
 
     // MARK: - Sections
 
-    @Test("невыбранный раздел не собирается вовсе")
+    @Test("An unselected section isn't built at all")
     func testUnselectedSectionsAreNotBuilt() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db)
@@ -218,7 +218,7 @@ struct ReportBuilderTests {
         #expect(data.pressure.count == 1)
     }
 
-    @Test("показания давления обрезаются по периоду, включая последний день целиком")
+    @Test("Blood-pressure readings are clipped to the period, including the whole last day")
     func testPressureIsClippedToThePeriod() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
@@ -235,7 +235,7 @@ struct ReportBuilderTests {
         #expect(data.pressure.map(\.measuredAt) == [testDate(2026, 6, 2, 23, 50)])
     }
 
-    @Test("фото дневника попадают в отчёт только если их попросили")
+    @Test("Diary photos go into the report only when asked for")
     func testDiaryPhotosFollowTheSelection() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
@@ -258,7 +258,7 @@ struct ReportBuilderTests {
 
     // MARK: - Background Read
 
-    @Test("отчёт, собранный в фоне, совпадает с отчётом с главного потока")
+    @Test("A report built in the background matches one built on the main thread")
     func backgroundReportMatchesMainActorBuild() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = seedCourse(db)

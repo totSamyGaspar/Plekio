@@ -26,7 +26,7 @@ struct ReminderPlannerTests {
         ReminderSnapshot(
             identifier: identifier,
             medicationIds: ids.map(\.uuidString),
-            medicationNames: names ?? ids.indices.map { "Лекарство \($0)" },
+            medicationNames: names ?? ids.indices.map { "Medication \($0)" },
             slotTime: slot?.timeIntervalSince1970,
             trigger: withTrigger
                 ? UNTimeIntervalNotificationTrigger(timeInterval: 3600, repeats: false)
@@ -37,7 +37,7 @@ struct ReminderPlannerTests {
     // MARK: - Cancelling one medication
 
     // Delivered notifications can't be edited, so one naming other medications must stay.
-    @Test("с локскрина снимается только уведомление про одно это лекарство")
+    @Test("Only this medication's notification is removed from the lock screen")
     func testDeliveredIsRemovedOnlyWhenItNamesNothingElse() async throws {
         let target = UUID()
         let other = UUID()
@@ -56,7 +56,7 @@ struct ReminderPlannerTests {
     }
 
     // A pending group can be replaced, so the others sharing its time stay scheduled.
-    @Test("групповое напоминание пересобирается без одного лекарства")
+    @Test("A group reminder is rebuilt without one medication")
     func testPendingGroupIsRegroupedWithoutTheCancelledMedication() async throws {
         let target = UUID()
         let kept = UUID()
@@ -65,7 +65,7 @@ struct ReminderPlannerTests {
         let plan = ReminderPlanner.cancellationPlan(
             forMedication: target,
             pending: [
-                snapshot("group", ids: [target, kept], names: ["Ибупрофен", "Магний"], slot: slot)
+                snapshot("group", ids: [target, kept], names: ["Ibuprofen", "Magnesium"], slot: slot)
             ],
             delivered: []
         )
@@ -77,11 +77,11 @@ struct ReminderPlannerTests {
         // Same identifier, so the replacement takes the original's place.
         #expect(regrouped.identifier == "group")
         #expect(regrouped.medicationIds == [kept.uuidString])
-        #expect(regrouped.medicationNames == ["Магний"])
+        #expect(regrouped.medicationNames == ["Magnesium"])
         #expect(abs(regrouped.triggerDate.timeIntervalSince(slot)) < 1)
     }
 
-    @Test("напоминание про одно только это лекарство просто удаляется")
+    @Test("A reminder for this medication alone is simply removed")
     func testSoleMedicationReminderIsRemovedNotRegrouped() async throws {
         let target = UUID()
 
@@ -95,7 +95,7 @@ struct ReminderPlannerTests {
         #expect(plan.regrouped.isEmpty)
     }
 
-    @Test("чужие напоминания не трогаются вовсе")
+    @Test("Other reminders aren't touched at all")
     func testUnrelatedRemindersAreLeftAlone() async throws {
         let plan = ReminderPlanner.cancellationPlan(
             forMedication: UUID(),
@@ -107,7 +107,7 @@ struct ReminderPlannerTests {
     }
 
     // Requests without names can't have their body rebuilt, so they are only removed.
-    @Test("старое напоминание без имён удаляется, а не пересобирается криво")
+    @Test("An old reminder without names is removed rather than rebuilt wrong")
     func testReminderWithoutNamesIsOnlyRemoved() async throws {
         let target = UUID()
         let kept = UUID()
@@ -126,7 +126,7 @@ struct ReminderPlannerTests {
 
     // MARK: - Clearing the lock screen
 
-    @Test("баннер снимается только когда весь слот закрыт")
+    @Test("The banner is removed only once the whole slot is settled")
     func testDeliveredClearsOnlyAFullySettledSlot() async throws {
         let first = UUID()
         let second = UUID()
@@ -149,7 +149,7 @@ struct ReminderPlannerTests {
         )
     }
 
-    @Test("баннер другого слота не снимается")
+    @Test("Another slot's banner stays")
     func testDeliveredOfAnotherSlotIsLeftAlone() async throws {
         let med = UUID()
         let slot = testDate(2026, 6, 10, 9, 0)
@@ -164,7 +164,7 @@ struct ReminderPlannerTests {
     }
 
     // Slot time round-trips through userInfo as a Double, hence the 1 s tolerance.
-    @Test("дробная разница в доли секунды не мешает опознать слот")
+    @Test("A sub-second difference doesn't prevent matching the slot")
     func testSlotMatchToleratesSubSecondDrift() async throws {
         let med = UUID()
         let slot = testDate(2026, 6, 10, 9, 0)
@@ -178,7 +178,7 @@ struct ReminderPlannerTests {
         #expect(toRemove == ["slot"])
     }
 
-    @Test("напоминание без слота (дневник, давление) не считается дозой")
+    @Test("A reminder without a slot (diary, blood pressure) isn't a dose")
     func testReminderWithoutASlotIsNeverCleared() async throws {
         let med = UUID()
 

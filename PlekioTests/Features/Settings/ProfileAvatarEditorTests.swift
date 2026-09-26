@@ -16,7 +16,7 @@ struct ProfileAvatarEditorTests {
 
     // MARK: - Replace
 
-    @Test("новая аватарка сохраняется, старая удаляется")
+    @Test("A new avatar is saved and the old one deleted")
     func replaceStoresNewAndDeletesOld() async throws {
         let photos = FakePhotoStore()
         let editor = ProfileAvatarEditor(photos: photos)
@@ -28,7 +28,7 @@ struct ProfileAvatarEditorTests {
         #expect(photos.deleted == [first])
     }
 
-    @Test("если записать не удалось — nil, и старая аватарка остаётся")
+    @Test("If the write fails it returns nil and the old avatar stays")
     func failedWriteKeepsTheOldAvatar() async {
         let photos = FakePhotoStore(refusesWrites: true)
         let editor = ProfileAvatarEditor(photos: photos)
@@ -42,7 +42,7 @@ struct ProfileAvatarEditorTests {
 
     // MARK: - Remove
 
-    @Test("удаление стирает файл")
+    @Test("Deleting erases the file")
     func removeDeletesTheFile() async throws {
         let photos = FakePhotoStore()
         let editor = ProfileAvatarEditor(photos: photos)
@@ -56,7 +56,7 @@ struct ProfileAvatarEditorTests {
 
     // MARK: - Concurrency
 
-    @Test("из двух одновременных замен побеждает одна, файл проигравшей не остаётся")
+    @Test("Of two concurrent replacements one wins, and the loser's file doesn't remain")
     func overlappingReplacesLeaveOneFile() async {
         let photos = FakePhotoStore()
         let editor = ProfileAvatarEditor(photos: photos)

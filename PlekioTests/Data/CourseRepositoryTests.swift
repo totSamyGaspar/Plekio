@@ -24,36 +24,36 @@ struct CourseRepositoryTests {
 
     // MARK: - Snapshots
 
-    @Test("снимок копирует курс и сортирует лекарства по имени")
+    @Test("A snapshot copies the course and sorts medications by name")
     func snapshotCopiesAndSortsMedications() throws {
         let db = MockDatabaseService()
-        let course = TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date().addingTimeInterval(86400))
-        course.medications.append(contentsOf: [medication("Магний"), medication("аспирин"), medication("Витамин D")])
+        let course = TreatmentCourse(name: "Course", startDate: Date(), endDate: Date().addingTimeInterval(86400))
+        course.medications.append(contentsOf: [medication("Magnesium"), medication("aspirin"), medication("Vitamin D")])
         db.coursesToReturn = [course]
 
         let snapshot = try #require(SwiftDataCourseRepository(store: db).course(id: course.id))
 
-        #expect(snapshot.name == "Курс")
-        #expect(snapshot.medications.map(\.name) == ["аспирин", "Витамин D", "Магний"])
+        #expect(snapshot.name == "Course")
+        #expect(snapshot.medications.map(\.name) == ["aspirin", "Magnesium", "Vitamin D"])
     }
 
-    @Test("снимок не меняется, когда меняется модель")
+    @Test("A snapshot doesn't change when the model does")
     func snapshotIsAValue() throws {
         let db = MockDatabaseService()
-        let course = TreatmentCourse(name: "До", startDate: Date(), endDate: Date().addingTimeInterval(86400))
+        let course = TreatmentCourse(name: "Before", startDate: Date(), endDate: Date().addingTimeInterval(86400))
         db.coursesToReturn = [course]
         let repository = SwiftDataCourseRepository(store: db)
 
         let snapshot = try #require(repository.course(id: course.id))
-        course.name = "После"
+        course.name = "After"
 
-        #expect(snapshot.name == "До")
-        #expect(repository.course(id: course.id)?.name == "После")
+        #expect(snapshot.name == "Before")
+        #expect(repository.course(id: course.id)?.name == "After")
     }
 
     // MARK: - Writes
 
-    @Test("запись по id удалённой записи — ошибка, а не тихий пропуск")
+    @Test("Writing by the id of a deleted entry is an error, not a silent no-op")
     func writeToMissingRecordThrows() {
         let repository = SwiftDataCourseRepository(store: MockDatabaseService())
 
@@ -65,11 +65,11 @@ struct CourseRepositoryTests {
         }
     }
 
-    @Test("лекарство находится по id через его курс")
+    @Test("A medication is found by id through its course")
     func medicationIsFoundById() throws {
         let db = MockDatabaseService()
-        let course = TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date().addingTimeInterval(86400))
-        let med = medication("Ибупрофен")
+        let course = TreatmentCourse(name: "Course", startDate: Date(), endDate: Date().addingTimeInterval(86400))
+        let med = medication("Ibuprofen")
         course.medications.append(med)
         db.coursesToReturn = [course]
 

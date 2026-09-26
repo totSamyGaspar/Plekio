@@ -18,7 +18,7 @@ struct CourseRowViewModelTests {
 
     private func course(_ db: DatabaseService, named names: [String]) -> TreatmentCourse {
         let course = TreatmentCourse(
-            name: "Курс",
+            name: "Course",
             startDate: testDate(2026, 6, 1),
             endDate: testDate(2026, 6, 10)
         )
@@ -44,20 +44,20 @@ struct CourseRowViewModelTests {
     // MARK: - Medications
 
     // SwiftData to-many relationships are unordered, so the list must be sorted explicitly.
-    @Test("препараты перечислены по алфавиту, а не в порядке связи")
+    @Test("Medications are listed alphabetically, not in relationship order")
     func testMedicationsAreSortedByName() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
-        let course = course(db, named: ["Омепразол", "Аспирин", "Ибупрофен"])
+        let course = course(db, named: ["Omeprazole", "Aspirin", "Ibuprofen"])
 
         let viewModel = CourseRowViewModel(course: CourseSnapshot(course), time: SystemTime())
 
-        #expect(viewModel.medications.map(\.name) == ["Аспирин", "Ибупрофен", "Омепразол"])
+        #expect(viewModel.medications.map(\.name) == ["Aspirin", "Ibuprofen", "Omeprazole"])
     }
 
-    @Test("у каждого препарата в списке есть дозировка")
+    @Test("Every medication in the list has a dosage")
     func testEveryMedicationCarriesItsDosage() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
-        let course = course(db, named: ["Аспирин", "Бисопролол"])
+        let course = course(db, named: ["Aspirin", "Bisoprolol"])
 
         let viewModel = CourseRowViewModel(course: CourseSnapshot(course), time: SystemTime())
 
@@ -65,7 +65,7 @@ struct CourseRowViewModelTests {
         #expect(viewModel.medicationsCount == 2)
     }
 
-    @Test("курс без препаратов даёт пустой список, а не падение")
+    @Test("A course without medications yields an empty list, not a crash")
     func testAnEmptyCourseHasNoMedications() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let course = course(db, named: [])

@@ -18,7 +18,7 @@ struct DoseSheetActionsTests {
     private let slot = Date().addingTimeInterval(-30 * 60)
 
     private func dose(taken: Bool = false) -> PillDose {
-        PillDose(medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+        PillDose(medicationId: UUID(), name: "Ibuprofen", dosage: 1,
                  formSystemImage: "pills.fill", time: slot, period: .morning,
                  status: taken ? .taken(at: slot, dispensed: 1) : .pending)
     }
@@ -41,7 +41,7 @@ struct DoseSheetActionsTests {
 
     // MARK: - Sheet buttons
 
-    @Test("«Принять» записывает открытые дозы и предлагает отмену в общем баннере")
+    @Test("Take logs the open doses and offers undo in the shared banner")
     func takeLogsAndOffersUndo() {
         let h = Harness()
         let open = dose()
@@ -57,7 +57,7 @@ struct DoseSheetActionsTests {
         #expect(h.db.pillsToReturn.first?.isTaken == false)
     }
 
-    @Test("«Пропустить» записывает пропуск и тоже предлагает отмену")
+    @Test("Skip records a skip and also offers undo")
     func skipRecordsAndOffersUndo() {
         let h = Harness()
         let open = dose()
@@ -69,7 +69,7 @@ struct DoseSheetActionsTests {
         #expect(h.undo.current?.kind == .skipped)
     }
 
-    @Test("если писать нечего, баннер не появляется")
+    @Test("With nothing to write, no banner appears")
     func nothingWrittenNoBanner() {
         let h = Harness()
         let taken = dose(taken: true)
@@ -81,7 +81,7 @@ struct DoseSheetActionsTests {
         #expect(h.undo.current == nil)
     }
 
-    @Test("«Отложить» ставит повтор и ничего не пишет")
+    @Test("Snooze schedules a repeat and writes nothing")
     func snoozeSchedulesOnly() async {
         let h = Harness()
         let open = dose()
@@ -106,7 +106,7 @@ struct DoseSheetActionsTests {
         return (DoseSheetActions(doseLogging: logging, notifications: notifications, undo: undo, errors: errors), undo)
     }
 
-    @Test("пропуск пишется в базу и не отменяет уведомления по лекарству")
+    @Test("A skip is written to the store and doesn't cancel the medication's reminders")
     func testSkipRecordsTheDoseWithoutCancellingTheMedication() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
@@ -114,7 +114,7 @@ struct DoseSheetActionsTests {
         let slot = Date().addingTimeInterval(-30 * 60)
         let medId = UUID()
         let pill = PillDose(
-            medicationId: medId, name: "Ибупрофен", dosage: 1,
+            medicationId: medId, name: "Ibuprofen", dosage: 1,
             formSystemImage: "pills.fill", time: slot, period: .morning
         )
         mockDB.pillsToReturn = [pill]
@@ -138,7 +138,7 @@ struct DoseSheetActionsTests {
         #expect(mockNotifications.clearedDeliveredIds == [medId])
     }
 
-    @Test("пропуск слота не трогает уже принятую в нём дозу")
+    @Test("Skipping a slot leaves a dose already taken in it alone")
     func testSkipLeavesAnAlreadyTakenDoseAlone() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
@@ -147,11 +147,11 @@ struct DoseSheetActionsTests {
         let takenId = UUID()
         let openId = UUID()
         let alreadyTaken = PillDose(
-            medicationId: takenId, name: "Ибупрофен", dosage: 1,
+            medicationId: takenId, name: "Ibuprofen", dosage: 1,
             formSystemImage: "pills.fill", time: slot, period: .morning, status: .taken(at: Date(), dispensed: 1)
         )
         let stillOpen = PillDose(
-            medicationId: openId, name: "Магний", dosage: 1,
+            medicationId: openId, name: "Magnesium", dosage: 1,
             formSystemImage: "capsule.fill", time: slot, period: .morning
         )
         mockDB.pillsToReturn = [alreadyTaken, stillOpen]
@@ -171,13 +171,13 @@ struct DoseSheetActionsTests {
         #expect(Set(mockNotifications.clearedDeliveredIds ?? []) == Set([takenId, openId]))
     }
 
-    @Test("повторный пропуск уже пропущенной дозы ничего не пишет")
+    @Test("Skipping an already skipped dose writes nothing")
     func testSkippingAnAlreadySkippedDoseIsANoOp() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
         var pill = PillDose(
-            medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+            medicationId: UUID(), name: "Ibuprofen", dosage: 1,
             formSystemImage: "pills.fill", time: Date().addingTimeInterval(-30 * 60),
             period: .morning
         )
@@ -192,14 +192,14 @@ struct DoseSheetActionsTests {
         #expect(mockNotifications.scheduleCallCount == 0)
     }
 
-    @Test("пропуск можно отменить — доза снова ждёт ответа")
+    @Test("A skip can be undone; the dose is pending again")
     func testSkipCanBeUndone() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
         let slot = Date().addingTimeInterval(-30 * 60)
         let pill = PillDose(
-            medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+            medicationId: UUID(), name: "Ibuprofen", dosage: 1,
             formSystemImage: "pills.fill", time: slot, period: .morning
         )
         mockDB.pillsToReturn = [pill]

@@ -21,13 +21,13 @@ struct DoseBadgeTests {
     }
 
     private func dose(at hour: Int, _ status: DoseStatus = .pending) -> PillDose {
-        PillDose(medicationId: UUID(), name: "Лекарство", dosage: 1, formSystemImage: "pills.fill",
+        PillDose(medicationId: UUID(), name: "Medication", dosage: 1, formSystemImage: "pills.fill",
                  time: date(hour), period: DayPeriod(hour: hour), status: status)
     }
 
     // MARK: - Counting
 
-    @Test("считаются только открытые дозы, время которых пришло")
+    @Test("Only open doses that are due are counted")
     func countsOnlyOpenDueDoses() {
         let pills = [
             dose(at: 8),
@@ -40,12 +40,12 @@ struct DoseBadgeTests {
         #expect(DoseBadge.count(of: pills, at: date(12)) == 2)
     }
 
-    @Test("доза в момент своего времени уже считается")
+    @Test("A dose counts from its own time")
     func doseCountsAtItsOwnTime() {
         #expect(DoseBadge.count(of: [dose(at: 9)], at: date(9)) == 1)
     }
 
-    @Test("без доз — ноль")
+    @Test("No doses means zero")
     func emptyIsZero() {
         #expect(DoseBadge.count(of: [], at: date(12)) == 0)
     }

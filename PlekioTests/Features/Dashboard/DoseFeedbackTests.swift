@@ -23,35 +23,35 @@ struct DoseFeedbackTests {
 
     // MARK: - Feedback
 
-    @Test("отмеченная доза — успех")
+    @Test("A logged dose is a success")
     func takingIsSuccess() {
         let feedback = DoseFeedback.feedback(from: statuses([.pending, .pending]), to: statuses([taken, .pending]))
         #expect(feedback == .success)
     }
 
-    @Test("пропуск — предупреждение")
+    @Test("A skip is a warning")
     func skippingIsWarning() {
         #expect(DoseFeedback.feedback(from: statuses([.pending]), to: statuses([skipped])) == .warning)
     }
 
-    @Test("отмена отметки — лёгкий отклик")
+    @Test("Unlogging gives a light impact")
     func revertingIsLightImpact() {
         #expect(DoseFeedback.feedback(from: statuses([taken]), to: statuses([.pending])) == .impact(weight: .light))
     }
 
-    @Test("если заодно что-то принято, побеждает успех")
+    @Test("If anything was taken as well, success wins")
     func takingWinsOverOtherChanges() {
         let feedback = DoseFeedback.feedback(from: statuses([.pending, taken]), to: statuses([taken, .pending]))
         #expect(feedback == .success)
     }
 
-    @Test("другой набор доз (смена дня) — без отклика")
+    @Test("A different set of doses (another day) gives no feedback")
     func differentDosesAreSilent() {
         let other: DoseFeedback.Statuses = ["another-day": taken]
         #expect(DoseFeedback.feedback(from: statuses([.pending]), to: other) == nil)
     }
 
-    @Test("без изменений — без отклика")
+    @Test("No change, no feedback")
     func noChangeIsSilent() {
         #expect(DoseFeedback.feedback(from: statuses([taken]), to: statuses([taken])) == nil)
     }
