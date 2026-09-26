@@ -45,12 +45,12 @@ struct ReportRendererTests {
         exceptions: [DoseException] = []
     ) -> CourseReport {
         CourseReport(
-            name: "Курс от давления",
+            name: "Blood pressure course",
             startDate: testDate(2026, 6, 1),
             endDate: testDate(2026, 6, 10),
             medications: [
                 MedicationReport(
-                    name: "Бисопролол",
+                    name: "Bisoprolol",
                     dosage: 1,
                     timesOfDay: [testDate(2000, 1, 1, 9, 0)],
                     frequencyDays: 1,
@@ -64,15 +64,15 @@ struct ReportRendererTests {
     private func diaryDay(waterGlasses: Int, isQuickLog: Bool) -> DiaryDay {
         DiaryDay(
             date: testDate(2026, 6, 2, 21, 0),
-            mood: "Хорошее",
+            mood: "Good",
             moodScore: 4,
             energyLevel: 4,
             discomfortLevel: 1,
             sleepHours: 7.5,
             sleepQuality: "good",
             waterGlasses: waterGlasses,
-            symptoms: ["головная боль"],
-            notes: "Самочувствие ровное",
+            symptoms: ["headache"],
+            notes: "Feeling steady",
             photoIds: [],
             isQuickLog: isQuickLog
         )
@@ -80,24 +80,24 @@ struct ReportRendererTests {
 
     // MARK: - Header
 
-    @Test("данные профиля попадают в шапку документа")
+    @Test("Profile details go into the document header")
     func testProfileIsPrintedInTheHeader() async throws {
         let profile = UserProfile(
-            name: "Едуард Гаспарян",
+            name: "Edward Gasparian",
             birthDate: testDate(1990, 6, 15),
-            allergies: "пеніцилін",
-            conditions: "гіпертонія"
+            allergies: "penicillin",
+            conditions: "hypertension"
         )
 
         let text = try text(of: report(profile: profile, courses: [course()]))
 
-        #expect(text.contains("Едуард Гаспарян"))
-        #expect(text.contains("пеніцилін"))
-        #expect(text.contains("гіпертонія"))
+        #expect(text.contains("Edward Gasparian"))
+        #expect(text.contains("penicillin"))
+        #expect(text.contains("hypertension"))
     }
 
     // Empty labels would read as missing data rather than data never asked for.
-    @Test("пустой профиль не печатает подписи без значений")
+    @Test("An empty profile prints no labels without values")
     func testAnEmptyProfilePrintsNoLabels() async throws {
         let text = try text(of: report(courses: [course()]))
 
@@ -107,19 +107,19 @@ struct ReportRendererTests {
 
     // MARK: - Medications
 
-    @Test("препараты и доля соблюдения попадают в отчёт")
+    @Test("Medications and adherence go into the report")
     func testMedicationsAndAdherenceArePrinted() async throws {
         let text = try text(of: report(courses: [course()]))
 
-        #expect(text.contains("Курс от давления"))
-        #expect(text.contains("Бисопролол"))
+        #expect(text.contains("Blood pressure course"))
+        #expect(text.contains("Bisoprolol"))
 
         // 3 taken out of 4 settled.
         #expect(text.contains(0.75.formatted(.percent.precision(.fractionLength(0)))))
     }
 
     // Long courses can carry hundreds of misses; the list is capped to stay readable.
-    @Test("длинный список исключений обрезается и говорит, сколько скрыл")
+    @Test("A long exceptions list is truncated and says how many it hid")
     func testExceptionsAreCapped() async throws {
         let exceptions = (1...20).map {
             DoseException(time: testDate(2026, 6, $0, 9, 0), kind: .missed)
@@ -132,7 +132,7 @@ struct ReportRendererTests {
 
     // MARK: - Blood pressure
 
-    @Test("показания давления попадают в таблицу")
+    @Test("Blood-pressure readings go into the table")
     func testPressureRowsArePrinted() async throws {
         let readings = [
             PressureReading(measuredAt: testDate(2026, 6, 2, 8, 0), systolic: 137, diastolic: 91, pulse: 58)
@@ -146,10 +146,10 @@ struct ReportRendererTests {
 
     // MARK: - Diary
 
-    @Test("быстрая запись не печатает сон и воду, которых никто не вводил")
+    @Test("A quick entry doesn't print sleep and water nobody entered")
     func testQuickLogOmitsMeasuresNobodyEntered() async throws {
         let quick = try text(of: report(diary: [diaryDay(waterGlasses: 42, isQuickLog: true)]))
-        #expect(quick.contains("Хорошее"))
+        #expect(quick.contains("Good"))
         #expect(quick.contains("42") == false)
 
         let full = try text(of: report(diary: [diaryDay(waterGlasses: 42, isQuickLog: false)]))
@@ -158,7 +158,7 @@ struct ReportRendererTests {
 
     // MARK: - Empty
 
-    @Test("отчёт без записей говорит об этом, а не выходит пустой страницей")
+    @Test("A report without entries says so instead of printing a blank page")
     func testAnEmptyReportSaysSo() async throws {
         let text = try text(of: report())
 
@@ -167,7 +167,7 @@ struct ReportRendererTests {
 
     // MARK: - The finished file
 
-    @Test("у файла есть название и оглавление по разделам")
+    @Test("The file has a title and an outline by section")
     func testWrittenFileCarriesTitleAndOutline() async throws {
         let data = report(
             courses: [course()],
@@ -191,7 +191,7 @@ struct ReportRendererTests {
 
     // MARK: - Off the main actor
 
-    @Test("отчёт рисуется и записывается вне главного потока")
+    @Test("The report is drawn and written off the main thread")
     func rendersOffTheMainThread() async throws {
         // Rendering runs detached; the pipeline must not gain a main-actor dependency.
         let data = report()

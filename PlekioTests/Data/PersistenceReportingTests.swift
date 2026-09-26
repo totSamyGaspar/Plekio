@@ -15,7 +15,7 @@ struct PersistenceReportingTests {
 
     // MARK: - Photos
 
-    @Test("фото, не записанное на диск, уходит в ErrorReporting, а не в синглтон")
+    @Test("A photo that failed to write goes to ErrorReporting, not a singleton")
     func unsavedPhotoIsReported() {
         let errors = SpyErrorReporter()
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(refusesWrites: true), errors: errors)
@@ -29,7 +29,7 @@ struct PersistenceReportingTests {
         }
     }
 
-    @Test("успешная запись фото ничего не сообщает и пишет в переданное хранилище")
+    @Test("A successful photo write reports nothing and writes to the injected store")
     func savedPhotoGoesToTheInjectedStore() {
         let errors = SpyErrorReporter()
         let photos = FakePhotoStore()
@@ -44,7 +44,7 @@ struct PersistenceReportingTests {
 
     // MARK: - Read failures
 
-    @Test("сбой чтения сообщается один раз на серию и снова — после успешного чтения")
+    @Test("A read failure is reported once per run, and again after a successful read")
     func readFailureIsReportedOncePerStreak() {
         let errors = SpyErrorReporter()
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: errors)
@@ -65,7 +65,7 @@ struct PersistenceReportingTests {
 
     // MARK: - Presenter
 
-    @Test("алерт о сбое чтения не называется «Couldn't save»")
+    @Test("A read-failure alert isn't titled Couldn't save")
     func presenterTitleFollowsTheKindOfFailure() {
         let presenter = AppErrorPresenter()
 

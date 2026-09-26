@@ -16,7 +16,7 @@ struct AppRouterTests {
 
     // MARK: - Daily reminders
 
-    @Test("напоминание о давлении ведёт в дневник, на вкладку с показаниями")
+    @Test("The blood-pressure reminder opens the diary on the readings tab")
     func testBloodPressureReminderDeepLinksToTrends() {
         let router = AppRouter()
 
@@ -28,7 +28,7 @@ struct AppRouterTests {
         #expect(router.pendingDiarySubTab == .moodTrends)
     }
 
-    @Test("напоминание дневника не переключает подвкладку")
+    @Test("The diary reminder doesn't switch the sub-tab")
     func testDiaryReminderLeavesTheSubTabAlone() {
         let router = AppRouter()
 
@@ -41,7 +41,7 @@ struct AppRouterTests {
 
     // MARK: - Dose reminders
 
-    @Test("пуш о приёме ведёт на сегодняшний экран и переносит слот целиком")
+    @Test("A dose reminder opens Today and carries the whole slot")
     func testDosePushCarriesItsSlot() {
         let router = AppRouter()
         let ids = [UUID(), UUID()]
@@ -56,7 +56,7 @@ struct AppRouterTests {
 
     // MARK: - Consuming
 
-    @Test("ссылка забирается один раз")
+    @Test("A link is consumed once")
     func testDeepLinkIsConsumedOnce() {
         // Both .task and .onChange consume it for one tap; a second read must be nil.
         let router = AppRouter()
@@ -69,7 +69,7 @@ struct AppRouterTests {
         #expect(router.consumePendingDiarySubTab() == nil)
     }
 
-    @Test("без ссылки потребление ничего не возвращает")
+    @Test("Consuming without a link returns nothing")
     func testNothingToConsumeByDefault() {
         let router = AppRouter()
 
@@ -77,7 +77,7 @@ struct AppRouterTests {
         #expect(router.consumePendingDiarySubTab() == nil)
     }
 
-    @Test("новая ссылка заменяет ещё не обработанную")
+    @Test("A new link replaces one not yet handled")
     func testALaterLinkReplacesAnUnconsumedOne() {
         let router = AppRouter()
         router.open(.dailyReminder(.diary))
@@ -91,7 +91,7 @@ struct AppRouterTests {
 
     // MARK: - Sheets
 
-    @Test("dismissSheet закрывает и обычный лист, и полноэкранный")
+    @Test("dismissSheet closes both the sheet and the full-screen cover")
     func testDismissClearsBothPresentations() {
         let router = AppRouter()
         router.present(.diaryCheckIn)
@@ -105,7 +105,7 @@ struct AppRouterTests {
 
     // MARK: - Navigation
 
-    @Test("showCourse открывает курс на вкладке «Курсы» поверх пустого стека")
+    @Test("showCourse opens the course on the Courses tab over an empty stack")
     func testShowCourseOpensItsDetail() {
         let router = AppRouter()
         router.coursesPath.append(Route.courseDetail(courseId: UUID()))

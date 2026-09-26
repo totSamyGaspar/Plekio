@@ -16,13 +16,13 @@ struct ReminderSyncCoordinatorTests {
 
     // MARK: - Sync triggers
 
-    @Test("изменение курсов пересобирает напоминания, и только по активным курсам")
+    @Test("A course change rebuilds reminders, for active courses only")
     func courseChangeRebuildsForActiveCoursesOnly() async {
         let db = MockDatabaseService()
         let notifications = MockNotificationService()
-        let active = TreatmentCourse(name: "Активный", startDate: Date(), endDate: Date().addingTimeInterval(86400 * 5))
+        let active = TreatmentCourse(name: "Active", startDate: Date(), endDate: Date().addingTimeInterval(86400 * 5))
         let expired = TreatmentCourse(
-            name: "Просроченный",
+            name: "Expired",
             startDate: Date().addingTimeInterval(-86400 * 10),
             endDate: Date().addingTimeInterval(-86400)
         )
@@ -44,7 +44,7 @@ struct ReminderSyncCoordinatorTests {
         #expect(notifications.scheduledCourses?.first === active)
     }
 
-    @Test("без изменений координатор ничего не делает")
+    @Test("Without changes the coordinator does nothing")
     func noChangeNoRebuild() async {
         let notifications = MockNotificationService()
         let coordinator = ReminderSyncCoordinator(
@@ -57,7 +57,7 @@ struct ReminderSyncCoordinatorTests {
         #expect(notifications.scheduleCallCount == 0)
     }
 
-    @Test("sync() — ручной запуск, например при возврате в приложение")
+    @Test("sync() runs on demand, e.g. when the app becomes active")
     func manualSyncCanBeAwaited() async {
         let notifications = MockNotificationService()
         let coordinator = ReminderSyncCoordinator(
@@ -73,7 +73,7 @@ struct ReminderSyncCoordinatorTests {
 
     // MARK: - Permission
 
-    @Test("без курсов разрешение на уведомления не спрашивается")
+    @Test("Without courses notification permission isn't requested")
     func noCoursesNoPermissionPrompt() async {
         let notifications = MockNotificationService()
         let coordinator = ReminderSyncCoordinator(
@@ -87,7 +87,7 @@ struct ReminderSyncCoordinatorTests {
         #expect(notifications.requestPermissionCallCount == 0)
     }
 
-    @Test("после появления курса разрешение спрашивается один раз")
+    @Test("Once a course exists, permission is requested once")
     func firstCourseAsksForPermissionOnce() async {
         let db = MockDatabaseService()
         let notifications = MockNotificationService()
@@ -98,7 +98,7 @@ struct ReminderSyncCoordinatorTests {
         )
         await coordinator.sync().value
 
-        db.coursesToReturn = [TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date())]
+        db.coursesToReturn = [TreatmentCourse(name: "Course", startDate: Date(), endDate: Date())]
         await coordinator.sync().value
         await coordinator.sync().value
 

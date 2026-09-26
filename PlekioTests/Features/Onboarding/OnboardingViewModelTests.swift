@@ -24,7 +24,7 @@ struct OnboardingViewModelTests {
 
     // MARK: - Completing
 
-    @Test("новая установка онбординг ещё не видела")
+    @Test("A fresh install hasn't seen onboarding")
     func freshInstallHasNotSeenOnboarding() {
         let (settings, defaults, suite) = makeSettings()
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -32,7 +32,7 @@ struct OnboardingViewModelTests {
         #expect(settings.hasSeenOnboarding == false)
     }
 
-    @Test("завершение онбординга записывает флаг под тем ключом, что читает ContentView")
+    @Test("Finishing onboarding writes the flag under the key ContentView reads")
     func completingWritesTheKeyContentViewReads() {
         let (settings, defaults, suite) = makeSettings()
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -45,7 +45,7 @@ struct OnboardingViewModelTests {
         #expect(defaults.bool(forKey: SettingsKey.hasSeenOnboarding))
     }
 
-    @Test("флаг переживает пересоздание хранилища — то есть перезапуск")
+    @Test("The flag survives recreating the store, i.e. a relaunch")
     func flagSurvivesANewStore() {
         let (settings, defaults, suite) = makeSettings()
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -55,7 +55,7 @@ struct OnboardingViewModelTests {
         #expect(SettingsStore(defaults: defaults).hasSeenOnboarding)
     }
 
-    @Test("пролистывание страниц флаг не ставит — только явное завершение")
+    @Test("Paging doesn't set the flag; only finishing explicitly does")
     func pagingAloneDoesNotComplete() {
         let (settings, defaults, suite) = makeSettings()
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -68,7 +68,7 @@ struct OnboardingViewModelTests {
 
     // MARK: - Pages
 
-    @Test("последней считается только последняя страница")
+    @Test("Only the last page counts as last")
     func isLastPageOnlyOnTheLast() {
         let (settings, defaults, suite) = makeSettings()
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -84,7 +84,7 @@ struct OnboardingViewModelTests {
         #expect(vm.isLastPage)
     }
 
-    @Test("каждая часть продукта показана один раз, отчёт — в конце")
+    @Test("Each part of the product is shown once, the report last")
     func pagesTellTheStoryOnce() {
         let previews = OnboardingViewModel.allPages.map(\.preview)
 
@@ -92,7 +92,7 @@ struct OnboardingViewModelTests {
         #expect(previews.last == .report)
     }
 
-    @Test("id страниц уникальны — на них держится ForEach карусели")
+    @Test("Page ids are unique; the carousel's ForEach depends on them")
     func pageIdsAreUnique() {
         let ids = OnboardingViewModel.allPages.map(\.id)
 

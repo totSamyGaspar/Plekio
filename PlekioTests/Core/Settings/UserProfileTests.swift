@@ -28,10 +28,10 @@ struct UserProfileTests {
     /// Fixed avatar id: a fresh `UUID()` per read would make `filled != filled`.
     private var filled: UserProfile {
         UserProfile(
-            name: "Едуард Гаспарян",
+            name: "Edward Gasparian",
             birthDate: date(1990, 6, 15),
-            allergies: "пеніцилін",
-            conditions: "гіпертонія",
+            allergies: "penicillin",
+            conditions: "hypertension",
             avatarId: UUID(uuidString: "0B1F2C3D-4E5F-6071-8293-A4B5C6D7E8F9")!
         )
     }
@@ -39,7 +39,7 @@ struct UserProfileTests {
     // MARK: - Equality
 
     // Guards against == comparing encoded JSON (unstable) instead of fields.
-    @Test("равенство идёт по полям: профиль равен сам себе")
+    @Test("Equality is field by field: a profile equals itself")
     func testEqualityIsByFields() async throws {
         #expect(UserProfile.empty == UserProfile.empty)
         #expect(UserProfile.empty.isEmpty)
@@ -49,14 +49,14 @@ struct UserProfileTests {
 
     // MARK: - Storage
 
-    @Test("профиль переживает запись в строку и обратно")
+    @Test("A profile round-trips through a string")
     func testRoundTrip() async throws {
         let restored = try #require(StoredProfile(rawValue: StoredProfile(filled).rawValue))
 
         #expect(restored.profile == filled)
     }
 
-    @Test("пустой профиль тоже переживает round-trip")
+    @Test("An empty profile round-trips too")
     func testEmptyRoundTrip() async throws {
         let stored = StoredProfile(.empty)
         let restored = try #require(StoredProfile(rawValue: stored.rawValue))
@@ -64,13 +64,13 @@ struct UserProfileTests {
         #expect(restored.profile.isEmpty)
     }
 
-    @Test("битая строка не декодируется, а не даёт мусорный профиль")
+    @Test("A corrupt string fails to decode instead of producing a garbage profile")
     func testGarbageDecodesToNil() async throws {
         #expect(StoredProfile(rawValue: "")?.profile == nil)
         #expect(StoredProfile(rawValue: "{ not json")?.profile == nil)
     }
 
-    @Test("профиль пишется полями, а не одной строкой")
+    @Test("The profile is stored field by field, not as one string")
     func testStoredAsAnObjectWithKeys() async throws {
         let json = StoredProfile(filled).rawValue
 
@@ -79,17 +79,17 @@ struct UserProfileTests {
         #expect(json.contains("\"birthDate\""))
     }
 
-    @Test("профиль из прошлой версии читается, а не отбрасывается")
+    @Test("A profile from the previous version is read, not discarded")
     func testMissingKeysDecodeToDefaults() async throws {
-        let restored = try #require(StoredProfile(rawValue: #"{"name":"Едуард"}"#)).profile
+        let restored = try #require(StoredProfile(rawValue: #"{"name":"Edward"}"#)).profile
 
-        #expect(restored.name == "Едуард")
+        #expect(restored.name == "Edward")
         #expect(restored.birthDate == nil)
         #expect(restored.allergies.isEmpty)
         #expect(restored.avatarId == nil)
     }
 
-    @Test("прочитанный из defaults профиль совпадает с записанным")
+    @Test("A profile read from defaults matches the one written")
     func testCurrentReadsWhatWasStored() async throws {
         let suite = "UserProfileTests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
@@ -103,7 +103,7 @@ struct UserProfileTests {
     }
 
     @MainActor
-    @Test("SettingsStore читает профиль из своих defaults, а не из .standard")
+    @Test("SettingsStore reads the profile from its own defaults, not .standard")
     func testSettingsStoreUsesItsOwnDefaults() async throws {
         let suite = "UserProfileTests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
@@ -119,14 +119,14 @@ struct UserProfileTests {
 
     // MARK: - Age
 
-    @Test("возраст считается от даты рождения, а не хранится числом")
+    @Test("Age is computed from the birth date, not stored as a number")
     func testAgeAfterBirthdayThisYear() async throws {
         let profile = UserProfile(birthDate: date(1990, 6, 15))
 
         #expect(profile.age(on: date(2026, 9, 14), calendar: calendar) == 36)
     }
 
-    @Test("до дня рождения в этом году возраст на год меньше")
+    @Test("Before this year's birthday the age is one less")
     func testAgeBeforeBirthdayThisYear() async throws {
         let profile = UserProfile(birthDate: date(1990, 6, 15))
 
@@ -134,7 +134,7 @@ struct UserProfileTests {
         #expect(profile.age(on: date(2026, 6, 15), calendar: calendar) == 36)
     }
 
-    @Test("без даты рождения и на дате из будущего возраста нет")
+    @Test("No birth date, or one in the future, means no age")
     func testAgeIsNilWhenUnknown() async throws {
         #expect(UserProfile.empty.age(on: date(2026, 9, 14), calendar: calendar) == nil)
 

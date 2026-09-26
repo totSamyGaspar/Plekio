@@ -23,7 +23,7 @@ struct DoseScheduleTests {
 
     // MARK: - Course window
 
-    @Test("курс активен включительно на обеих границах")
+    @Test("A course is active inclusively on both bounds")
     func testCourseWindowIsInclusive() async throws {
         let start = day(2026, 6, 10)
         let end = day(2026, 6, 12)
@@ -38,7 +38,7 @@ struct DoseScheduleTests {
 
     // MARK: - Frequency
 
-    @Test("ежедневный приём приходится на каждый день")
+    @Test("A daily medication falls on every day")
     func testDailyFrequencyMatchesEveryDay() async throws {
         let start = day(2026, 6, 10)
 
@@ -48,7 +48,7 @@ struct DoseScheduleTests {
         }
     }
 
-    @Test("приём раз в три дня попадает только на свои дни")
+    @Test("Every-three-days dosing falls only on its days")
     func testEveryThirdDay() async throws {
         let start = day(2026, 6, 10)
         let expected = [true, false, false, true, false, false, true]
@@ -63,7 +63,7 @@ struct DoseScheduleTests {
     }
 
     // -3 % 3 == 0 in Swift, so a negative elapsed-day count must be rejected explicitly.
-    @Test("день до начала курса не считается днём приёма")
+    @Test("The day before the course starts isn't a dose day")
     func testDayBeforeTheCourseIsNeverADoseDay() async throws {
         let start = day(2026, 6, 10)
 
@@ -72,7 +72,7 @@ struct DoseScheduleTests {
     }
 
     // Not reachable from the picker, but imported or migrated data can carry it.
-    @Test("нулевая частота не делает каждый день днём приёма")
+    @Test("Zero frequency doesn't make every day a dose day")
     func testZeroFrequencyIsRefused() async throws {
         let start = day(2026, 6, 10)
 
@@ -82,7 +82,7 @@ struct DoseScheduleTests {
 
     // MARK: - Slot identity
 
-    @Test("ключ слота игнорирует секунды, но не минуты")
+    @Test("The slot key ignores seconds but not minutes")
     func testSlotKeyIdentifiesTheOccurrence() async throws {
         let nineOClock = testDate(2026, 6, 10, 9, 0)
         let nineOClockLater = nineOClock.addingTimeInterval(45)
@@ -99,7 +99,7 @@ struct DoseScheduleTests {
     private func medication(times: [Date], frequencyDays: Int = 1) -> MedicationItem {
         MedicationItem(
             id: UUID(),
-            name: "Ибупрофен",
+            name: "Ibuprofen",
             formSystemImage: "pills.fill",
             dosage: 1,
             timesOfDay: times,
@@ -107,7 +107,7 @@ struct DoseScheduleTests {
         )
     }
 
-    @Test("слоты дня — это времена приёма, положенные на этот день")
+    @Test("A day's slots are the dose times placed on that day")
     func testSlotsPlaceTimesOnTheDay() async throws {
         let start = day(2026, 6, 10)
         let med = medication(times: [testDate(2000, 1, 1, 8, 30), testDate(2000, 1, 1, 20, 0)])
@@ -121,7 +121,7 @@ struct DoseScheduleTests {
         #expect(slots.map(\.hour) == [8, 20])
     }
 
-    @Test("вне курса и не в день приёма слотов нет")
+    @Test("Outside the course and on off days there are no slots")
     func testNoSlotsOutsideTheCourseOrOffSchedule() async throws {
         let start = day(2026, 6, 10)
         let med = medication(times: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 3)
@@ -140,7 +140,7 @@ struct DoseScheduleTests {
 
     // MARK: - Logs
 
-    @Test("закрытыми считаются и принятые, и пропущенные слоты")
+    @Test("Both taken and skipped slots count as settled")
     func testSettledSlotsCoverTakenAndSkipped() async throws {
         let med = medication(times: [testDate(2000, 1, 1, 9, 0)])
 
@@ -156,7 +156,7 @@ struct DoseScheduleTests {
         #expect(!settled.contains(DoseSchedule.slotKey(untouched.scheduledTime, calendar: calendar)))
     }
 
-    @Test("индекс логов берёт только нужный день")
+    @Test("The log index takes only the requested day")
     func testLogsBySlotIsScopedToOneDay() async throws {
         let med = medication(times: [testDate(2000, 1, 1, 9, 0)])
 
@@ -172,7 +172,7 @@ struct DoseScheduleTests {
 
     // MARK: - Periods of the day
 
-    @Test("границы утра, дня и вечера")
+    @Test("Morning, afternoon and evening boundaries")
     func testDayPeriodBoundaries() async throws {
         #expect(DayPeriod(hour: 0) == .morning)
         #expect(DayPeriod(hour: 11) == .morning)
@@ -185,10 +185,10 @@ struct DoseScheduleTests {
     // MARK: - Screen and notifications agree
 
     // If these diverge, a dose shows on screen but never rings, or the reverse.
-    @Test("список на день и расписание уведомлений дают одни и те же слоты")
+    @Test("The day list and the reminder schedule yield the same slots")
     func testScreenAndNotificationsSeeTheSameSlots() async throws {
         let start = day(2026, 6, 10)
-        let course = TreatmentCourse(name: "Курс", startDate: start, endDate: start)
+        let course = TreatmentCourse(name: "Course", startDate: start, endDate: start)
 
         let med = medication(times: [testDate(2000, 1, 1, 9, 0), testDate(2000, 1, 1, 21, 0)])
         course.medications.append(med)

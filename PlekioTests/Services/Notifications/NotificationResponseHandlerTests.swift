@@ -17,7 +17,7 @@ struct NotificationResponseHandlerTests {
 
     private let slot = Date(timeIntervalSince1970: 1_780_000_000)
 
-    private func payload(_ ids: [UUID], names: [String] = ["Ибупрофен"]) -> [AnyHashable: Any] {
+    private func payload(_ ids: [UUID], names: [String] = ["Ibuprofen"]) -> [AnyHashable: Any] {
         ReminderPayload.userInfo(
             medicationIds: ids.map(\.uuidString),
             medicationNames: names,
@@ -26,7 +26,7 @@ struct NotificationResponseHandlerTests {
     }
 
     private func dose(_ id: UUID) -> PillDose {
-        PillDose(medicationId: id, name: "Ибупрофен", dosage: 1,
+        PillDose(medicationId: id, name: "Ibuprofen", dosage: 1,
                  formSystemImage: "pills.fill", time: slot, period: .morning)
     }
 
@@ -49,7 +49,7 @@ struct NotificationResponseHandlerTests {
 
     // MARK: - Parsing
 
-    @Test("каждая кнопка напоминания о дозе разбирается в своё намерение")
+    @Test("Each dose reminder button parses into its own intent")
     func parsesEachDoseAction() {
         let id = UUID()
         let info = payload([id])
@@ -59,13 +59,13 @@ struct NotificationResponseHandlerTests {
         #expect(NotificationIntent.parse(userInfo: info, actionIdentifier: NotificationAction.skip)
                 == .skip(medicationIds: [id], slot: slot))
         #expect(NotificationIntent.parse(userInfo: info, actionIdentifier: NotificationAction.snooze)
-                == .snooze(medicationIds: [id.uuidString], names: ["Ибупрофен"], slot: slot))
+                == .snooze(medicationIds: [id.uuidString], names: ["Ibuprofen"], slot: slot))
         // A plain tap on the body carries the system's default identifier.
         #expect(NotificationIntent.parse(userInfo: info, actionIdentifier: "com.apple.UNNotificationDefaultActionIdentifier")
                 == .openDoseReminder(medicationIds: [id], slot: slot))
     }
 
-    @Test("ежедневное напоминание узнаётся раньше, чем проверка на id лекарств")
+    @Test("A daily reminder is recognised before the medication id check")
     func parsesDailyReminderWithoutMedicationIds() {
         let info: [AnyHashable: Any] = [DailyReminder.userInfoKey: DailyReminder.bloodPressure.rawValue]
 
@@ -73,7 +73,7 @@ struct NotificationResponseHandlerTests {
                 == .openDailyReminder(.bloodPressure))
     }
 
-    @Test("напоминание без лекарств или без времени игнорируется")
+    @Test("A reminder without medications or time is ignored")
     func dropsMalformedPayloads() {
         let noIds = ReminderPayload.userInfo(medicationIds: [], medicationNames: [], triggerDate: slot)
         let noTime: [AnyHashable: Any] = [ReminderPayload.medicationIdsKey: [UUID().uuidString]]
@@ -85,7 +85,7 @@ struct NotificationResponseHandlerTests {
 
     // MARK: - Handling
 
-    @Test("«Принять» записывает дозу в фоне и дожидается перепланировки, не открывая экран")
+    @Test("Take logs the dose in the background and awaits the rebuild without opening a screen")
     func takeLogsAndWaitsForReminders() async {
         let h = Harness()
         let id = UUID()
@@ -101,7 +101,7 @@ struct NotificationResponseHandlerTests {
         #expect(h.router.pendingDeepLink == nil)
     }
 
-    @Test("повторное «Принять» ничего не пишет")
+    @Test("A second Take writes nothing")
     func takeTwiceWritesOnce() async {
         let h = Harness()
         let id = UUID()
@@ -113,7 +113,7 @@ struct NotificationResponseHandlerTests {
         #expect(h.db.markedTakenSlots.count == 1)
     }
 
-    @Test("«Пропустить» записывает пропуск, а не просто закрывает баннер")
+    @Test("Skip records a skip rather than just dismissing the banner")
     func skipRecordsTheSkip() async {
         let h = Harness()
         let id = UUID()
@@ -125,12 +125,12 @@ struct NotificationResponseHandlerTests {
         #expect(h.notifications.scheduleCallCount == 1)
     }
 
-    @Test("«Отложить» ставит повтор и ничего не пишет в базу")
+    @Test("Snooze schedules a repeat and writes nothing to the store")
     func snoozeSchedulesOnly() async {
         let h = Harness()
         let id = UUID().uuidString
 
-        await h.handler.handle(.snooze(medicationIds: [id], names: ["Ибупрофен"], slot: slot))
+        await h.handler.handle(.snooze(medicationIds: [id], names: ["Ibuprofen"], slot: slot))
 
         #expect(h.notifications.snoozedMedicationIds == [id])
         #expect(h.notifications.snoozedSlot == slot)
@@ -138,7 +138,7 @@ struct NotificationResponseHandlerTests {
         #expect(h.db.skippedSlots.isEmpty)
     }
 
-    @Test("тап по напоминанию открывает окно дозы через роутер")
+    @Test("Tapping a reminder opens the dose sheet through the router")
     func tapOpensTheDoseModal() async {
         let h = Harness()
         let id = UUID()
@@ -149,7 +149,7 @@ struct NotificationResponseHandlerTests {
         #expect(h.db.markedTakenSlots.isEmpty)
     }
 
-    @Test("тап по ежедневному напоминанию ведёт в дневник")
+    @Test("Tapping a daily reminder opens the diary")
     func dailyReminderOpensDiary() async {
         let h = Harness()
 
@@ -159,7 +159,7 @@ struct NotificationResponseHandlerTests {
         #expect(h.router.pendingDeepLink == .dailyReminder(.diary))
     }
 
-    @Test("ошибка записи уходит в ErrorReporting, перепланировки нет")
+    @Test("A write error goes to ErrorReporting and nothing is rebuilt")
     func failedWriteIsReported() async {
         let h = Harness()
         let id = UUID()
@@ -174,7 +174,7 @@ struct NotificationResponseHandlerTests {
 
     // MARK: - Refill
 
-    @Test("нажатие на напоминание о запасе открывает «Сегодня»")
+    @Test("Tapping the low-stock reminder opens Today")
     func refillReminderOpensToday() async {
         let info: [AnyHashable: Any] = [RefillReminder.userInfoKey: true]
         let intent = NotificationIntent.parse(userInfo: info, actionIdentifier: "any")

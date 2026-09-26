@@ -15,17 +15,17 @@ struct NewTreatmentViewModelTests {
 
     // MARK: - Saving
 
-    @Test("saveCourse сохраняет курс через базу")
+    @Test("saveCourse saves the course through the store")
     func testSaveCourseDelegatesToTheDatabase() async throws {
         let mockDB = MockDatabaseService()
 
         let vm = NewTreatmentViewModel(courseEditing: CourseEditingUseCase(dbService: mockDB, notificationService: MockNotificationService()), errors: SpyErrorReporter())
-        vm.courseName = "Витамины"
-        vm.addMedication(MedicationDraft(name: "Витамин D"))
+        vm.courseName = "Vitamins"
+        vm.addMedication(MedicationDraft(name: "Vitamin D"))
 
         #expect(vm.saveCourse() == true)
         #expect(mockDB.didCallSaveCourse == true)
-        #expect(mockDB.savedCourseName == "Витамины")
+        #expect(mockDB.savedCourseName == "Vitamins")
     }
 
     // MARK: - Validation
@@ -40,10 +40,10 @@ struct NewTreatmentViewModelTests {
         vm.courseName = "   "
         #expect(vm.isSaveEnabled == false)
 
-        vm.courseName = "Курс"
+        vm.courseName = "Course"
         #expect(vm.isSaveEnabled == false)
 
-        vm.addMedication(MedicationDraft(name: "Аспирин"))
+        vm.addMedication(MedicationDraft(name: "Aspirin"))
         #expect(vm.isSaveEnabled == true)
 
         vm.deleteMedication(at: IndexSet(integer: 0))

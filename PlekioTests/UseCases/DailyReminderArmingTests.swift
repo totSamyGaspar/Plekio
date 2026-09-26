@@ -15,7 +15,7 @@ struct DailyReminderArmingTests {
 
     // MARK: - Arming
 
-    @Test("включение с разрешением ставит напоминание в очередь")
+    @Test("Enabling with permission queues the reminder")
     func enablingWithPermissionArms() async {
         let notifications = MockNotificationService()
         let arming = DailyReminderArming(notifications: notifications)
@@ -26,7 +26,7 @@ struct DailyReminderArmingTests {
         #expect(notifications.scheduledReminders[.diary] == [21 * 60])
     }
 
-    @Test("отказ в разрешении — явный результат, а не тихий выход")
+    @Test("Permission denied is an explicit result, not a silent exit")
     func deniedPermissionIsReported() async {
         let notifications = MockNotificationService()
         notifications.permissionGranted = false
@@ -42,7 +42,7 @@ struct DailyReminderArmingTests {
 
     // MARK: - Disarming
 
-    @Test("выключение снимает напоминание и разрешения не спрашивает")
+    @Test("Disabling removes the reminder and doesn't ask for permission")
     func disablingCancelsWithoutAsking() async {
         let notifications = MockNotificationService()
         let arming = DailyReminderArming(notifications: notifications)

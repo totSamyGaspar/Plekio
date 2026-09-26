@@ -19,11 +19,11 @@ struct CourseEditingUseCaseTests {
 
     // MARK: - Editing details
 
-    @Test("правка без изменений ничего не пишет")
+    @Test("An edit without changes writes nothing")
     func updateDetailsWithoutChangesIsANoOp() throws {
         let db = MockDatabaseService()
         let useCase = CourseEditingUseCase(dbService: db, notificationService: MockNotificationService())
-        let course = TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
+        let course = TreatmentCourse(name: "Course", startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
 
         let wrote = try useCase.updateDetails(of: CourseSnapshot(course), name: course.name, startDate: course.startDate, endDate: course.endDate)
 
@@ -31,33 +31,33 @@ struct CourseEditingUseCaseTests {
         #expect(db.didCallUpdateCourseDetails == false)
     }
 
-    @Test("правка с изменением пишет")
+    @Test("An edit with changes writes")
     func updateDetailsWithChangeWrites() throws {
         let db = MockDatabaseService()
         let useCase = CourseEditingUseCase(dbService: db, notificationService: MockNotificationService())
-        let course = TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
+        let course = TreatmentCourse(name: "Course", startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
 
         db.coursesToReturn = [course]
 
-        let wrote = try useCase.updateDetails(of: CourseSnapshot(course), name: "Новое имя", startDate: course.startDate, endDate: course.endDate)
+        let wrote = try useCase.updateDetails(of: CourseSnapshot(course), name: "New name", startDate: course.startDate, endDate: course.endDate)
 
         #expect(wrote == true)
-        #expect(db.updatedCourseName == "Новое имя")
+        #expect(db.updatedCourseName == "New name")
     }
 
     // MARK: - Repeating
 
-    @Test("повтор отклоняется, пока копия курса ещё идёт — даже переименованная")
+    @Test("Repeating is refused while a copy is still running, even a renamed one")
     func repeatIsRefusedWhileACopyIsRunning() throws {
         let db = MockDatabaseService()
         let useCase = CourseEditingUseCase(dbService: db, notificationService: MockNotificationService())
         let original = TreatmentCourse(
-            name: "Антибиотики",
+            name: "Antibiotics",
             startDate: Date().addingTimeInterval(-20 * day),
             endDate: Date().addingTimeInterval(-10 * day)
         )
         let runningCopy = TreatmentCourse(
-            name: "Другое имя",
+            name: "Other name",
             startDate: Date(),
             endDate: Date().addingTimeInterval(5 * day),
             repeatedFromId: original.id
@@ -70,12 +70,12 @@ struct CourseEditingUseCaseTests {
         #expect(db.duplicatedCourse == nil)
     }
 
-    @Test("завершённый курс без активной копии повторяется")
+    @Test("A finished course without an active copy can be repeated")
     func finishedCourseCanBeRepeated() throws {
         let db = MockDatabaseService()
         let useCase = CourseEditingUseCase(dbService: db, notificationService: MockNotificationService())
         let original = TreatmentCourse(
-            name: "Антибиотики",
+            name: "Antibiotics",
             startDate: Date().addingTimeInterval(-20 * day),
             endDate: Date().addingTimeInterval(-10 * day)
         )
@@ -89,15 +89,15 @@ struct CourseEditingUseCaseTests {
 
     // MARK: - Deleting
 
-    @Test("удаление курса снимает показанные напоминания всех его лекарств")
+    @Test("Deleting a course removes delivered reminders for all its medications")
     func deletingACourseClearsItsDeliveredReminders() async throws {
         let db = MockDatabaseService()
         let notifications = MockNotificationService()
         let useCase = CourseEditingUseCase(dbService: db, notificationService: notifications)
-        let course = TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
+        let course = TreatmentCourse(name: "Course", startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
         let meds = (0..<2).map { index in
             MedicationItem(
-                id: UUID(), name: "Лекарство \(index)", formSystemImage: "pills.fill",
+                id: UUID(), name: "Medication \(index)", formSystemImage: "pills.fill",
                 dosage: 1, timesOfDay: [Date()], frequencyDays: 1
             )
         }
@@ -115,7 +115,7 @@ struct CourseEditingUseCaseTests {
 
     // MARK: - Activity
 
-    @Test("курс, который заканчивается сегодня, ещё активен весь день")
+    @Test("A course ending today stays active all day")
     func courseEndingTodayIsActive() {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())

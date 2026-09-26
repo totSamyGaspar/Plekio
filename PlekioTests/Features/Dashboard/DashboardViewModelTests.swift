@@ -21,12 +21,12 @@ struct DashboardViewModelTests {
         let mockNotifications = MockNotificationService()
 
         let activeCourse = TreatmentCourse(
-            name: "Активный",
+            name: "Active",
             startDate: Date().addingTimeInterval(-86400),
             endDate: Date().addingTimeInterval(86400 * 5)
         )
         let expiredCourse = TreatmentCourse(
-            name: "Просроченный",
+            name: "Expired",
             startDate: Date().addingTimeInterval(-86400 * 30),
             endDate: Date().addingTimeInterval(-86400)
         )
@@ -35,7 +35,7 @@ struct DashboardViewModelTests {
         let medId = UUID()
         let pill = PillDose(
             medicationId: medId,
-            name: "Ибупрофен",
+            name: "Ibuprofen",
             dosage: 1,
             formSystemImage: "pills.fill",
             time: Date(),
@@ -63,16 +63,16 @@ struct DashboardViewModelTests {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
-        let morning = PillDose(medicationId: UUID(), name: "Утро", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .morning)
-        let noon = PillDose(medicationId: UUID(), name: "День", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .noon)
-        let evening = PillDose(medicationId: UUID(), name: "Вечер", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .evening)
+        let morning = PillDose(medicationId: UUID(), name: "Morning", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .morning)
+        let noon = PillDose(medicationId: UUID(), name: "Afternoon", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .noon)
+        let evening = PillDose(medicationId: UUID(), name: "Evening", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .evening)
         mockDB.pillsToReturn = [morning, noon, evening]
 
         let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
 
-        #expect(vm.morningPills.map(\.name) == ["Утро"])
-        #expect(vm.noonPills.map(\.name) == ["День"])
-        #expect(vm.eveningPills.map(\.name) == ["Вечер"])
+        #expect(vm.morningPills.map(\.name) == ["Morning"])
+        #expect(vm.noonPills.map(\.name) == ["Afternoon"])
+        #expect(vm.eveningPills.map(\.name) == ["Evening"])
         #expect(vm.isEmpty == false)
     }
 
@@ -89,7 +89,7 @@ struct DashboardViewModelTests {
 
     // MARK: - Weekly statistics
 
-    @Test("недельное среднее считается по дням с назначениями, а не всегда по семи")
+    @Test("The weekly average counts days with doses, not always seven")
     func testRecentAverageIgnoresDaysWithoutDoses() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
@@ -100,8 +100,8 @@ struct DashboardViewModelTests {
         for offset in 0...2 {
             let day = calendar.date(byAdding: .day, value: -offset, to: startOfToday)!
             mockDB.pillsByDay[day] = [
-                PillDose(medicationId: UUID(), name: "Аспирин", dosage: 1, formSystemImage: "pills.fill", time: day.addingTimeInterval(9 * 3600), period: .morning, status: .taken(at: Date(), dispensed: 1)),
-                PillDose(medicationId: UUID(), name: "Магний", dosage: 1, formSystemImage: "capsule.fill", time: day.addingTimeInterval(20 * 3600), period: .evening, status: .taken(at: Date(), dispensed: 1)),
+                PillDose(medicationId: UUID(), name: "Aspirin", dosage: 1, formSystemImage: "pills.fill", time: day.addingTimeInterval(9 * 3600), period: .morning, status: .taken(at: Date(), dispensed: 1)),
+                PillDose(medicationId: UUID(), name: "Magnesium", dosage: 1, formSystemImage: "capsule.fill", time: day.addingTimeInterval(20 * 3600), period: .evening, status: .taken(at: Date(), dispensed: 1)),
             ]
         }
 
@@ -113,7 +113,7 @@ struct DashboardViewModelTests {
         #expect(vm.weeklyDays.count == 7)
     }
 
-    @Test("без назначений вообще недельное среднее равно нулю, а не NaN")
+    @Test("With nothing scheduled the weekly average is zero, not NaN")
     func testRecentAverageWithNoDosesAtAll() async throws {
         let mockDB = MockDatabaseService()
         mockDB.pillsToReturn = []
@@ -127,7 +127,7 @@ struct DashboardViewModelTests {
 
     // MARK: - Back-dated logging and delivered notifications
 
-    @Test("отметка дозы просит убрать показанное уведомление для её слота")
+    @Test("Logging a dose asks to remove the delivered notification for its slot")
     func testTogglingLoggedDoseClearsDeliveredNotification() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
@@ -136,8 +136,8 @@ struct DashboardViewModelTests {
         let slot = Date().addingTimeInterval(-2 * 3600)
         let firstId = UUID()
         let secondId = UUID()
-        let first = PillDose(medicationId: firstId, name: "Ибупрофен", dosage: 1, formSystemImage: "pills.fill", time: slot, period: .morning)
-        let second = PillDose(medicationId: secondId, name: "Магний", dosage: 1, formSystemImage: "capsule.fill", time: slot, period: .morning)
+        let first = PillDose(medicationId: firstId, name: "Ibuprofen", dosage: 1, formSystemImage: "pills.fill", time: slot, period: .morning)
+        let second = PillDose(medicationId: secondId, name: "Magnesium", dosage: 1, formSystemImage: "capsule.fill", time: slot, period: .morning)
         mockDB.pillsToReturn = [first, second]
 
         let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)
@@ -152,13 +152,13 @@ struct DashboardViewModelTests {
         #expect(Set(mockNotifications.clearedDeliveredIds ?? []) == Set([firstId, secondId]))
     }
 
-    @Test("снятие отметки уведомления не трогает")
+    @Test("Unlogging leaves notifications alone")
     func testUntogglingDoesNotClearDelivered() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
 
         let pill = PillDose(
-            medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+            medicationId: UUID(), name: "Ibuprofen", dosage: 1,
             formSystemImage: "pills.fill", time: Date().addingTimeInterval(-2 * 3600),
             period: .morning
         )
@@ -177,7 +177,7 @@ struct DashboardViewModelTests {
 
     // MARK: - Bulk logging a slot
 
-    @Test("логирование слота не снимает отметку с уже принятой дозы")
+    @Test("Logging a slot doesn't untick an already taken dose")
     func testLogDosesLeavesAlreadyTakenDoseAlone() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
@@ -186,11 +186,11 @@ struct DashboardViewModelTests {
         let takenId = UUID()
         let pendingId = UUID()
         let alreadyTaken = PillDose(
-            medicationId: takenId, name: "Ибупрофен", dosage: 1,
+            medicationId: takenId, name: "Ibuprofen", dosage: 1,
             formSystemImage: "pills.fill", time: slot, period: .morning, status: .taken(at: Date(), dispensed: 1)
         )
         let stillPending = PillDose(
-            medicationId: pendingId, name: "Магний", dosage: 1,
+            medicationId: pendingId, name: "Magnesium", dosage: 1,
             formSystemImage: "capsule.fill", time: slot, period: .morning
         )
         mockDB.pillsToReturn = [alreadyTaken, stillPending]
@@ -211,7 +211,7 @@ struct DashboardViewModelTests {
         #expect(vm.undoableAction?.doses.map(\.medicationId) == [pendingId])
     }
 
-    @Test("логирование слота — одна транзакция и одна перепланировка")
+    @Test("Logging a slot is one transaction and one rebuild")
     func testLogDosesWritesTheWholeSlotInOneTransaction() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
@@ -219,7 +219,7 @@ struct DashboardViewModelTests {
         let slot = Date().addingTimeInterval(-30 * 60)
         let pills = (0..<3).map { index in
             PillDose(
-                medicationId: UUID(), name: "Доза \(index)", dosage: 1,
+                medicationId: UUID(), name: "Dose \(index)", dosage: 1,
                 formSystemImage: "pills.fill", time: slot, period: .noon
             )
         }
@@ -240,7 +240,7 @@ struct DashboardViewModelTests {
         #expect(mockNotifications.scheduleCallCount == 1)
     }
 
-    @Test("подтверждённая просроченная доза всё равно логируется")
+    @Test("A confirmed missed dose is still logged")
     func testLogDosesWritesADoseThatWentMissed() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
@@ -248,7 +248,7 @@ struct DashboardViewModelTests {
         // Past the one-hour grace period: a confirmed dose is logged even if missed.
         let slot = Date().addingTimeInterval(-3 * 3600)
         let pill = PillDose(
-            medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+            medicationId: UUID(), name: "Ibuprofen", dosage: 1,
             formSystemImage: "pills.fill", time: slot, period: .morning
         )
         #expect(pill.isMissed)
@@ -262,7 +262,7 @@ struct DashboardViewModelTests {
         #expect(vm.morningPills.first?.isTaken == true)
     }
 
-    @Test("полностью принятый слот не пишет ничего")
+    @Test("A fully taken slot writes nothing")
     func testLogDosesOnFullyTakenSlotIsANoOp() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
@@ -270,7 +270,7 @@ struct DashboardViewModelTests {
         let slot = Date().addingTimeInterval(-30 * 60)
         let pills = (0..<2).map { index in
             PillDose(
-                medicationId: UUID(), name: "Доза \(index)", dosage: 1,
+                medicationId: UUID(), name: "Dose \(index)", dosage: 1,
                 formSystemImage: "pills.fill", time: slot, period: .evening, status: .taken(at: Date(), dispensed: 1)
             )
         }
@@ -287,7 +287,7 @@ struct DashboardViewModelTests {
 
     // MARK: - Undo
 
-    @Test("отмена массового логирования — тоже одна транзакция, и только по принятым")
+    @Test("Undoing a bulk log is also one transaction, for taken doses only")
     func testUndoBulkLogRevertsTheSlotInOneTransaction() async throws {
         let mockDB = MockDatabaseService()
         let mockNotifications = MockNotificationService()
@@ -295,7 +295,7 @@ struct DashboardViewModelTests {
         let slot = Date().addingTimeInterval(-30 * 60)
         let pills = (0..<3).map { index in
             PillDose(
-                medicationId: UUID(), name: "Доза \(index)", dosage: 1,
+                medicationId: UUID(), name: "Dose \(index)", dosage: 1,
                 formSystemImage: "pills.fill", time: slot, period: .morning
             )
         }
@@ -321,11 +321,11 @@ struct DashboardViewModelTests {
         #expect(vm.undoableAction == nil)
     }
 
-    @Test("одиночная галочка баннер отмены не открывает")
+    @Test("A single checkmark doesn't open the undo banner")
     func testSingleToggleOpensNoUndoWindow() async throws {
         let mockDB = MockDatabaseService()
         let pill = PillDose(
-            medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+            medicationId: UUID(), name: "Ibuprofen", dosage: 1,
             formSystemImage: "pills.fill", time: Date(), period: .morning
         )
         mockDB.pillsToReturn = [pill]
@@ -338,10 +338,10 @@ struct DashboardViewModelTests {
 
     // MARK: - Card menu and empty state
 
-    @Test("пропуск из меню карточки пишет пропуск и предлагает отмену")
+    @Test("Skip from the card menu records a skip and offers undo")
     func testSkipDoseOffersUndo() async throws {
         let mockDB = MockDatabaseService()
-        let pill = PillDose(medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+        let pill = PillDose(medicationId: UUID(), name: "Ibuprofen", dosage: 1,
                             formSystemImage: "pills.fill", time: Date(), period: .morning)
         mockDB.pillsToReturn = [pill]
         let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
@@ -353,13 +353,13 @@ struct DashboardViewModelTests {
         #expect(vm.morningPills.first?.isSkipped == true)
     }
 
-    @Test("hasCourses следит за появлением первого курса")
+    @Test("hasCourses follows the first course being created")
     func testHasCoursesFollowsCourseWrites() async throws {
         let mockDB = MockDatabaseService()
         let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
         #expect(vm.hasCourses == false)
 
-        mockDB.coursesToReturn = [TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date())]
+        mockDB.coursesToReturn = [TreatmentCourse(name: "Course", startDate: Date(), endDate: Date())]
         mockDB.changes.send([.courses])
 
         #expect(vm.hasCourses == true)

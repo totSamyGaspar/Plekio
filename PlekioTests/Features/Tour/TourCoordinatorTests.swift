@@ -35,7 +35,7 @@ struct TourCoordinatorTests {
 
     // MARK: - Starting
 
-    @Test("без курсов тур начинается на «Сегодня»")
+    @Test("Without courses the tour starts on Today")
     func startsOnTodayWithoutCourses() {
         let h = Harness()
         h.router.selectedTab = .settings
@@ -46,7 +46,7 @@ struct TourCoordinatorTests {
         #expect(h.router.selectedTab == .today)
     }
 
-    @Test("если курсы уже есть, тур не показывается и отмечается пройденным")
+    @Test("With existing courses the tour isn't shown and is marked done")
     func skippedWhenCoursesExist() {
         let h = Harness()
 
@@ -57,7 +57,7 @@ struct TourCoordinatorTests {
         #expect(h.finishCount == 1)
     }
 
-    @Test("пройденный тур не показывается снова, но подсказки разблокируются")
+    @Test("A finished tour isn't shown again, but tips unlock")
     func finishedTourNeverRestarts() {
         let h = Harness()
         h.settings.hasCompletedTour = true
@@ -70,7 +70,7 @@ struct TourCoordinatorTests {
 
     // MARK: - Flow
 
-    @Test("«Далее» ведёт на Курсы к кнопке +, а шаг ждёт создания курса")
+    @Test("Next goes to Courses and the + button, and the step waits for a course")
     func nextLeadsToCoursesAndWaits() {
         let h = Harness()
         h.tour.startIfNeeded(hasCourses: false)
@@ -84,7 +84,7 @@ struct TourCoordinatorTests {
         #expect(h.tour.step == .createCourse)
     }
 
-    @Test("созданный курс возвращает на «Сегодня», последний шаг завершает тур")
+    @Test("A created course returns to Today, and the last step ends the tour")
     func courseCreatedThenFinish() {
         let h = Harness()
         h.tour.startIfNeeded(hasCourses: false)
@@ -100,7 +100,7 @@ struct TourCoordinatorTests {
         #expect(h.finishCount == 1)
     }
 
-    @Test("создание курса вне тура ничего не меняет")
+    @Test("Creating a course outside the tour changes nothing")
     func courseCreatedOutsideTheTourIsIgnored() {
         let h = Harness()
         h.tour.courseCreated()
@@ -108,7 +108,7 @@ struct TourCoordinatorTests {
         #expect(!h.settings.hasCompletedTour)
     }
 
-    @Test("«Пропустить» завершает тур с любого шага")
+    @Test("Skip ends the tour from any step")
     func skipFinishes() {
         let h = Harness()
         h.tour.startIfNeeded(hasCourses: false)
@@ -120,7 +120,7 @@ struct TourCoordinatorTests {
         #expect(h.settings.hasCompletedTour)
     }
 
-    @Test("подсветка — рамка цели текущего шага")
+    @Test("The highlight is the current step's target frame")
     func highlightedFrameFollowsTheStep() {
         let h = Harness()
         let frame = CGRect(x: 300, y: 60, width: 44, height: 44)

@@ -42,7 +42,7 @@ struct AddMedicationViewModelTests {
         #expect(vm.draft.photoModified == true)
     }
 
-    @Test("attachPhoto кладёт в черновик сжатый JPEG и помечает фото изменённым")
+    @Test("attachPhoto puts a compressed JPEG into the draft and marks photos modified")
     func attachPhotoEncodesIntoTheDraft() async throws {
         let vm = AddMedicationViewModel(photos: FakePhotoStore())
         let image = TestImages.solid()
@@ -55,7 +55,7 @@ struct AddMedicationViewModelTests {
         #expect(vm.draft.photoModified == true)
     }
 
-    @Test("фото, которое нельзя закодировать, не прикрепляется")
+    @Test("A photo that can't be encoded isn't attached")
     func unencodableImageIsNotAttached() async {
         let vm = AddMedicationViewModel(photos: FakePhotoStore())
 

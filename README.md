@@ -39,7 +39,7 @@ Run all tests with **⌘U**. The suite uses Swift Testing.
 The **Plekio** scheme pins the test environment so date and locale assertions don't depend on the machine:
 
 - `TZ=Europe/Berlin`
-- `-AppleLocale ua_UA`
+- `-AppleLocale uk_UA`
 
 Test names are in English; assertions and code are in English.
 

@@ -27,7 +27,7 @@ struct DiaryCheckInViewModelTests {
         #expect(vm.selectedImages.isEmpty)
     }
 
-    @Test("attachPhoto добавляет фото к записи, removePhoto убирает его")
+    @Test("attachPhoto adds a photo to the entry, removePhoto removes it")
     func attachThenRemovePhoto() async {
         let vm = DiaryCheckInViewModel(dbService: MockDatabaseService(), photos: FakePhotoStore(), errors: SpyErrorReporter())
 
@@ -106,7 +106,7 @@ struct DiaryCheckInViewModelTests {
         #expect(mockDb.updatedDiaryEntry == nil)
     }
 
-    @Test("startEditing переносит ВСЕ поля записи в черновик, включая isQuickLog")
+    @Test("startEditing copies EVERY entry field into the draft, including isQuickLog")
     func testStartEditingCopiesEveryField() async throws {
         let mockDb = MockDatabaseService()
         let vm = DiaryCheckInViewModel(dbService: mockDb, photos: FakePhotoStore(), errors: SpyErrorReporter())
@@ -139,7 +139,7 @@ struct DiaryCheckInViewModelTests {
         #expect(vm.draft.photosModified == false)
     }
 
-    @Test("правка быстрой записи сохраняет её быстрой")
+    @Test("Editing a quick entry keeps it quick")
     func testEditingQuickLogKeepsFlagOnSave() async throws {
         let mockDb = MockDatabaseService()
         let vm = DiaryCheckInViewModel(dbService: mockDb, photos: FakePhotoStore(), errors: SpyErrorReporter())
@@ -170,7 +170,7 @@ struct DiaryCheckInViewModelTests {
 
     // MARK: - Draft bounds
 
-    @Test("черновик держит числовые поля в допустимых границах")
+    @Test("The draft keeps numeric fields within their bounds")
     func testDraftClampsNumericFields() async throws {
         var draft = DiaryEntryDraft()
 
@@ -195,7 +195,7 @@ struct DiaryCheckInViewModelTests {
         #expect(draft.discomfortLevel == 10)
     }
 
-    @Test("значения из хранилища тоже попадают в границы")
+    @Test("Stored values are clamped too")
     func testDraftClampsValuesLoadedFromStorage() async throws {
         // didSet does not run in init(from:), so it must clamp stored values itself.
         let entry = DiaryEntry(
@@ -256,7 +256,7 @@ struct DiaryCheckInViewModelTests {
 
     // MARK: - Date
 
-    @Test("запись в будущем не сохраняется и показывает ошибку")
+    @Test("An entry in the future isn't saved and shows an error")
     func futureEntryIsRejected() {
         let now = Date(timeIntervalSince1970: 1_900_000_000)
         let db = MockDatabaseService()
@@ -269,7 +269,7 @@ struct DiaryCheckInViewModelTests {
         #expect(errors.reported.count == 1)
     }
 
-    @Test("запись на текущий момент сохраняется")
+    @Test("An entry at the current moment is saved")
     func entryAtNowIsSaved() {
         let now = Date(timeIntervalSince1970: 1_900_000_000)
         let db = MockDatabaseService()

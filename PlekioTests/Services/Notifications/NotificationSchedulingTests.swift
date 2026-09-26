@@ -18,10 +18,10 @@ struct NotificationSchedulingTests {
     @Test("Multiple medications with the same time are grouped into one slot")
     func testGroupsMedicationsWithSameTime() async throws {
         let anchor = testDate(2026, 6, 15)
-        let course = TreatmentCourse(name: "Утренний набор", startDate: anchor, endDate: anchor)
+        let course = TreatmentCourse(name: "Morning set", startDate: anchor, endDate: anchor)
 
-        let medA = MedicationItem(id: UUID(), name: "Омега-3", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
-        let medB = MedicationItem(id: UUID(), name: "Витамин Д", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let medA = MedicationItem(id: UUID(), name: "Omega-3", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let medB = MedicationItem(id: UUID(), name: "Vitamin D", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(contentsOf: [medA, medB])
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
@@ -29,16 +29,16 @@ struct NotificationSchedulingTests {
         #expect(map.count == 1)
         let entries = map.values.first
         #expect(entries?.count == 2)
-        #expect(Set(entries?.map { $0.medication.name } ?? []) == ["Омега-3", "Витамин Д"])
+        #expect(Set(entries?.map { $0.medication.name } ?? []) == ["Omega-3", "Vitamin D"])
     }
 
     @Test("A dose already marked as taken is excluded from the push schedule")
     func testSkipsAlreadyTakenDose() async throws {
         let anchor = testDate(2026, 6, 15)
         let doseTime = testDate(2000, 1, 1, 9, 0)
-        let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: anchor)
+        let course = TreatmentCourse(name: "Course", startDate: anchor, endDate: anchor)
 
-        let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
         let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), status: .taken(at: testDate(2026, 6, 15, 9, 0), dispensed: 1))
         med.logs.append(log)
         course.medications.append(med)
@@ -52,9 +52,9 @@ struct NotificationSchedulingTests {
     func testDoesNotSkipUntakenDose() async throws {
         let anchor = testDate(2026, 6, 15)
         let doseTime = testDate(2000, 1, 1, 9, 0)
-        let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: anchor)
+        let course = TreatmentCourse(name: "Course", startDate: anchor, endDate: anchor)
 
-        let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
         course.medications.append(med)
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
@@ -67,11 +67,11 @@ struct NotificationSchedulingTests {
         // One-day course, so only the 23:00 slot remains.
         let now = testDate(2026, 6, 15, 22, 0)
         let dayStart = testDate(2026, 6, 15)
-        let course = TreatmentCourse(name: "Курс", startDate: dayStart, endDate: dayStart)
+        let course = TreatmentCourse(name: "Course", startDate: dayStart, endDate: dayStart)
 
         let med = MedicationItem(
             id: UUID(),
-            name: "Магний",
+            name: "Magnesium",
             formSystemImage: "pills.fill",
             dosage: 1,
             timesOfDay: [testDate(2000, 1, 1, 9, 0), testDate(2000, 1, 1, 23, 0)],
@@ -89,9 +89,9 @@ struct NotificationSchedulingTests {
     @Test("A course that fits in the budget is covered to its last day")
     func testCoversWholeCourseWhenItFits() async throws {
         let anchor = testDate(2026, 6, 15)
-        let course = TreatmentCourse(name: "Долгий курс", startDate: anchor, endDate: addingDays(30, to: anchor))
+        let course = TreatmentCourse(name: "Long course", startDate: anchor, endDate: addingDays(30, to: anchor))
 
-        let med = MedicationItem(id: UUID(), name: "Витамин C", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Vitamin C", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(med)
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
@@ -104,9 +104,9 @@ struct NotificationSchedulingTests {
     @Test("A course longer than the budget is covered as far as the budget reaches")
     func testStopsAtTheBudget() async throws {
         let anchor = testDate(2026, 6, 15)
-        let course = TreatmentCourse(name: "Годовой курс", startDate: anchor, endDate: addingDays(365, to: anchor))
+        let course = TreatmentCourse(name: "Year-long course", startDate: anchor, endDate: addingDays(365, to: anchor))
 
-        let med = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(med)
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current, slotBudget: 10)
@@ -120,11 +120,11 @@ struct NotificationSchedulingTests {
     func testDoesNotSplitADay() async throws {
         // 3 doses/day, budget 10: three whole days (9 slots), never a partial fourth.
         let anchor = testDate(2026, 6, 15)
-        let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: addingDays(30, to: anchor))
+        let course = TreatmentCourse(name: "Course", startDate: anchor, endDate: addingDays(30, to: anchor))
 
         let med = MedicationItem(
             id: UUID(),
-            name: "Ибупрофен",
+            name: "Ibuprofen",
             formSystemImage: "pills.fill",
             dosage: 1,
             timesOfDay: [testDate(2000, 1, 1, 9, 0), testDate(2000, 1, 1, 14, 0), testDate(2000, 1, 1, 20, 0)],
@@ -142,11 +142,11 @@ struct NotificationSchedulingTests {
     func testFirstDayIsNeverDroppedForBeingTooBig() async throws {
         // Better to cover day one and stop; scheduleNotifications trims by time.
         let anchor = testDate(2026, 6, 15)
-        let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: addingDays(10, to: anchor))
+        let course = TreatmentCourse(name: "Course", startDate: anchor, endDate: addingDays(10, to: anchor))
 
         let med = MedicationItem(
             id: UUID(),
-            name: "Капли",
+            name: "Drops",
             formSystemImage: "drop.fill",
             dosage: 1,
             timesOfDay: [
@@ -168,9 +168,9 @@ struct NotificationSchedulingTests {
         // Dose days are start + k*3, so from day 2 the next dose is tomorrow.
         let start = testDate(2026, 6, 15)
         let now = testDate(2026, 6, 17)
-        let course = TreatmentCourse(name: "Через два дня", startDate: start, endDate: addingDays(30, to: start))
+        let course = TreatmentCourse(name: "Every third day", startDate: start, endDate: addingDays(30, to: start))
 
-        let med = MedicationItem(id: UUID(), name: "Витамин D", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 3)
+        let med = MedicationItem(id: UUID(), name: "Vitamin D", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 3)
         course.medications.append(med)
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: now, calendar: .current, slotBudget: 3)
@@ -185,12 +185,12 @@ struct NotificationSchedulingTests {
 
     // MARK: - Skipped doses
 
-    @Test("намеренно пропущенная доза не попадает в расписание")
+    @Test("A deliberately skipped dose stays out of the schedule")
     func testSkipsDeliberatelySkippedDose() async throws {
         let anchor = testDate(2026, 6, 15)
-        let course = TreatmentCourse(name: "Курс", startDate: anchor, endDate: anchor)
+        let course = TreatmentCourse(name: "Course", startDate: anchor, endDate: anchor)
 
-        let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), status: .skipped(at: anchor))
         med.logs.append(log)
         course.medications.append(med)
@@ -200,16 +200,16 @@ struct NotificationSchedulingTests {
         #expect(map.isEmpty)
     }
 
-    @Test("пропуск одной дозы не уносит остальные дни курса")
+    @Test("Skipping one dose doesn't take the course's other days with it")
     func testSkippingOneOccurrenceLeavesTheRestOfTheCourse() async throws {
         let anchor = testDate(2026, 6, 15)
         let course = TreatmentCourse(
-            name: "Курс",
+            name: "Course",
             startDate: anchor,
             endDate: testDate(2026, 6, 17)
         )
 
-        let med = MedicationItem(id: UUID(), name: "Ибупрофен", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         let skipped = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), status: .skipped(at: anchor))
         med.logs.append(skipped)
         course.medications.append(med)

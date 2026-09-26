@@ -16,13 +16,13 @@ struct DoseUndoCenterTests {
     // MARK: - Helpers
 
     private func pill(at slot: Date) -> PillDose {
-        PillDose(medicationId: UUID(), name: "Ибупрофен", dosage: 1, formSystemImage: "pills.fill",
+        PillDose(medicationId: UUID(), name: "Ibuprofen", dosage: 1, formSystemImage: "pills.fill",
                  time: slot, period: .morning)
     }
 
     // MARK: - Offering and undoing
 
-    @Test("нечего отменять — окно не открывается")
+    @Test("Nothing to undo, no window opens")
     func nilUndoOffersNothing() {
         let db = MockDatabaseService()
         let center = DoseUndoCenter(
@@ -35,7 +35,7 @@ struct DoseUndoCenterTests {
         #expect(center.current == nil)
     }
 
-    @Test("отмена выполняет обратную команду и закрывает окно")
+    @Test("Undo runs the inverse command and closes the window")
     func undoRunsTheInverseAndCloses() throws {
         let db = MockDatabaseService()
         let slot = Date().addingTimeInterval(-30 * 60)
@@ -54,7 +54,7 @@ struct DoseUndoCenterTests {
 
     // MARK: - Dashboard banner
 
-    @Test("«Принять» из окна пуша видно в баннере дашборда")
+    @Test("Take from the reminder sheet shows in the dashboard's banner")
     func notificationActionReachesTheDashboardBanner() throws {
         // The notification modal lives in MainTabView, but its undo must reach the dashboard.
         let db = MockDatabaseService()

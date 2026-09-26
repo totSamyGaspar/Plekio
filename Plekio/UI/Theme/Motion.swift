@@ -11,7 +11,8 @@ import SwiftUI
 
 /// The app's animation curves. Use them through `motion(_:value:)` / `withMotion`,
 /// which drop the movement when Reduce Motion is on.
-enum Motion {
+/// `nonisolated`: the curves are default arguments, which are evaluated outside the main actor.
+nonisolated enum Motion {
     /// Banners, toasts, overlays and selection changes.
     static let standard = Animation.spring(response: 0.35, dampingFraction: 0.85)
     /// Direct feedback on a tap: checkmarks, mood cards.

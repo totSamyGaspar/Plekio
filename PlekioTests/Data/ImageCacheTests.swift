@@ -30,7 +30,7 @@ struct ImageCacheTests {
 
     // MARK: - Save and delete
 
-    @Test("сохранение в существующую папку удаётся, и байты читаются обратно")
+    @Test("Saving into an existing folder works and the bytes read back")
     func testSaveAndReadBack() async throws {
         let directory = scratchPath()
         defer { remove(directory) }
@@ -43,7 +43,7 @@ struct ImageCacheTests {
     }
 
     // A missing directory must be recreated on save, not break every later save.
-    @Test("пропавшая папка воссоздаётся, а не ломает сохранение навсегда")
+    @Test("A missing folder is recreated instead of breaking saving for good")
     func testSaveRecreatesAMissingDirectory() async throws {
         let directory = scratchPath()
         defer { remove(directory) }
@@ -59,7 +59,7 @@ struct ImageCacheTests {
     }
 
     // A plain file where the directory belongs fails both the write and the recreate.
-    @Test("неустранимая ошибка записи возвращает false, а не молчит")
+    @Test("An unrecoverable write error returns false instead of staying silent")
     func testSaveReportsAnUnrecoverableFailure() async throws {
         // A file path, not a directory one: Data.write refuses a URL ending in a separator.
         let directory = FileManager.default.temporaryDirectory
@@ -73,7 +73,7 @@ struct ImageCacheTests {
         #expect(cache.saveToDisk(samplePhoto, for: UUID()) == false)
     }
 
-    @Test("удаление убирает файл с диска")
+    @Test("Deleting removes the file from disk")
     func testDeleteRemovesTheFile() async throws {
         let directory = scratchPath()
         defer { remove(directory) }
@@ -112,7 +112,7 @@ struct ImageCacheTests {
     }
 
     // A camera frame is 4032px and up; nothing in the app draws above 1400.
-    @Test("большое фото ужимается при сохранении")
+    @Test("A large photo is downscaled when saved")
     func testOversizedPhotoIsDownscaledOnSave() async throws {
         let directory = scratchPath()
         defer { remove(directory) }
@@ -123,7 +123,7 @@ struct ImageCacheTests {
         #expect(max(size.width, size.height) <= 2048)
     }
 
-    @Test("фото в пределах лимита сохраняется как есть")
+    @Test("A photo within the limit is saved as is")
     func testPhotoWithinTheCapIsStoredUnchanged() async throws {
         let directory = scratchPath()
         defer { remove(directory) }
@@ -137,7 +137,7 @@ struct ImageCacheTests {
         #expect(cache.loadDataFromDisk(for: id) == original)
     }
 
-    @Test("размер на диске — сумма сохранённых файлов")
+    @Test("Size on disk is the sum of saved files")
     func testDiskUsageSumsStoredFiles() async throws {
         let directory = scratchPath()
         defer { remove(directory) }

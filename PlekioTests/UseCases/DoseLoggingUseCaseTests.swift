@@ -20,14 +20,14 @@ struct DoseLoggingUseCaseTests {
             : skipped ? .skipped(at: slot)
             : .pending
         return PillDose(
-            medicationId: UUID(), name: "Доза", dosage: 1,
+            medicationId: UUID(), name: "Dose", dosage: 1,
             formSystemImage: "pills.fill", time: slot, period: .morning, status: status
         )
     }
 
     // MARK: - Logging
 
-    @Test("markTaken пишет только открытые дозы, а outcome позволяет дождаться напоминаний")
+    @Test("markTaken writes only open doses, and the outcome lets callers await reminders")
     func markTakenWritesOnlyOpenDoses() async throws {
         let db = MockDatabaseService()
         let notifications = MockNotificationService()
@@ -48,7 +48,7 @@ struct DoseLoggingUseCaseTests {
         #expect(Set(notifications.clearedDeliveredIds ?? []) == Set([taken.medicationId, open.medicationId]))
     }
 
-    @Test("когда писать нечего — ни записи, ни перепланировки")
+    @Test("With nothing to write, there's no write and no rebuild")
     func nothingToWriteStartsNothing() throws {
         let db = MockDatabaseService()
         let notifications = MockNotificationService()
@@ -65,7 +65,7 @@ struct DoseLoggingUseCaseTests {
         #expect(db.markedTakenSlots.isEmpty && db.skippedSlots.isEmpty)
     }
 
-    @Test("revertTaken сверяется с базой, а не с переданными дозами")
+    @Test("revertTaken checks the store, not the doses passed in")
     func revertTakenReadsCurrentState() async throws {
         let db = MockDatabaseService()
         let notifications = MockNotificationService()
@@ -87,7 +87,7 @@ struct DoseLoggingUseCaseTests {
         #expect(notifications.clearDeliveredCallCount == 0)
     }
 
-    @Test("openDoses находит слот с допуском в секунду и пропускает принятые")
+    @Test("openDoses finds the slot within a one-second tolerance and skips taken doses")
     func openDosesMatchesSlotWithTolerance() {
         let db = MockDatabaseService()
         let slot = Date().addingTimeInterval(-30 * 60)
@@ -108,7 +108,7 @@ struct DoseLoggingUseCaseTests {
 
     // MARK: - Commands and undo
 
-    @Test("у каждой команды есть обратная, и обратная к обратной — она сама")
+    @Test("Every command has an inverse, and the inverse of the inverse is itself")
     func everyCommandHasAnInverse() {
         let doses = [dose(at: Date())]
         for command in [DoseCommand.take(doses), .skip(doses), .revertTake(doses), .revertSkip(doses)] {
@@ -117,7 +117,7 @@ struct DoseLoggingUseCaseTests {
         }
     }
 
-    @Test("пропуск возвращает команду отмены, и она возвращает дозу в «ожидает»")
+    @Test("A skip returns an undo command that puts the dose back to pending")
     func skipHandsBackItsUndo() throws {
         let db = MockDatabaseService()
         let slot = Date().addingTimeInterval(-30 * 60)
@@ -137,7 +137,7 @@ struct DoseLoggingUseCaseTests {
         #expect(reverted.undo == .skip(reverted.written))
     }
 
-    @Test("отмена судит по базе: доза, принятая после пропуска, так и остаётся принятой")
+    @Test("Undo goes by the store: a dose taken after a skip stays taken")
     func undoOfASkipLeavesALaterTakeAlone() throws {
         let db = MockDatabaseService()
         let slot = Date().addingTimeInterval(-30 * 60)
@@ -156,7 +156,7 @@ struct DoseLoggingUseCaseTests {
         #expect(db.pillsToReturn.first?.isTaken == true)
     }
 
-    @Test("когда писать нечего, отменять тоже нечего")
+    @Test("With nothing to write, there's nothing to undo")
     func nothingWrittenMeansNoUndo() throws {
         let db = MockDatabaseService()
         let taken = dose(at: Date(), taken: true)

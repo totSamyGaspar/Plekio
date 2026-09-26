@@ -13,12 +13,12 @@ import Testing
 @Suite("Blood pressure ordering")
 struct BloodPressureReadingTests {
 
-    @Test("Нормальний вимір приймається")
+    @Test("A normal reading is accepted")
     func testOrdinaryReadingIsOrdered() {
         #expect(BloodPressureReading.isOrdered(systolic: 120, diastolic: 80))
     }
 
-    @Test("Перевернута пара відхиляється, хоча обидва числа в діапазоні")
+    @Test("An inverted pair is rejected even though both numbers are in range")
     func testInvertedPairIsRejected() {
         // Each value is within its own range; only the pair check rejects it.
         #expect(BloodPressureReading.systolicRange.contains(120))
@@ -26,12 +26,12 @@ struct BloodPressureReadingTests {
         #expect(BloodPressureReading.isOrdered(systolic: 120, diastolic: 199) == false)
     }
 
-    @Test("Однакові значення — не вимір")
+    @Test("Equal values are not a reading")
     func testEqualValuesAreRejected() {
         #expect(BloodPressureReading.isOrdered(systolic: 90, diastolic: 90) == false)
     }
 
-    @Test("Вузький пульсовий тиск приймається")
+    @Test("A narrow pulse pressure is accepted")
     func testNarrowPulsePressureIsKept() {
         // Rare but real, and clinically important; must not be refused.
         #expect(BloodPressureReading.isOrdered(systolic: 95, diastolic: 90))

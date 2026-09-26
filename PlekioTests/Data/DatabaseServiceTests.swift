@@ -21,10 +21,10 @@ struct DatabaseServiceTests {
     func testFetchPillsSplitsByPeriod() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
-        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
         let med = MedicationItem(
             id: UUID(),
-            name: "Ибупрофен",
+            name: "Ibuprofen",
             formSystemImage: "pills.fill",
             dosage: 2,
             timesOfDay: [
@@ -44,7 +44,7 @@ struct DatabaseServiceTests {
 
         #expect(pills.count == 3)
         #expect(pills.map(\.period) == [.morning, .noon, .evening])
-        #expect(pills.allSatisfy { $0.name == "Ибупрофен" && $0.dosage == 2 })
+        #expect(pills.allSatisfy { $0.name == "Ibuprofen" && $0.dosage == 2 })
     }
 
     // MARK: - fetchPills: dosing interval (frequencyDays)
@@ -54,10 +54,10 @@ struct DatabaseServiceTests {
         let db = DatabaseService(inMemoryForTesting: true)
 
         let courseStart = testDate(2026, 6, 1)
-        let course = TreatmentCourse(name: "Курс раз в 3 дня", startDate: courseStart, endDate: testDate(2026, 6, 30))
+        let course = TreatmentCourse(name: "Every-3-days course", startDate: courseStart, endDate: testDate(2026, 6, 30))
         let med = MedicationItem(
             id: UUID(),
-            name: "Витамин B12",
+            name: "Vitamin B12",
             formSystemImage: "pills.fill",
             dosage: 1,
             timesOfDay: [testDate(2000, 1, 1, 9, 0)],
@@ -82,10 +82,10 @@ struct DatabaseServiceTests {
     func testTogglePillTracksStockAndLog() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
-        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
         let med = MedicationItem(
             id: UUID(),
-            name: "Аспирин",
+            name: "Aspirin",
             formSystemImage: "pills.fill",
             dosage: 2,
             timesOfDay: [testDate(2000, 1, 1, 9, 0)],
@@ -110,7 +110,7 @@ struct DatabaseServiceTests {
         #expect(med.stockCount == 30)
     }
 
-    @Test("сдвиг времени приёма переносит сегодняшние отметки")
+    @Test("Moving a dose time carries today's logs along")
     func testChangingScheduleMovesExistingLogs() async throws {
         // "Today" is the day of the log: today's logs follow the dose to its new time.
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
@@ -132,7 +132,7 @@ struct DatabaseServiceTests {
         #expect(Calendar.current.component(.hour, from: try #require(pills.first).time) == 11)
     }
 
-    @Test("изменение расписания не переписывает прошлые дни")
+    @Test("A schedule change doesn't rewrite past days")
     func testChangingScheduleKeepsThePast() async throws {
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
                                  time: FixedTime(testDate(2026, 6, 10, 12, 0)))
@@ -156,7 +156,7 @@ struct DatabaseServiceTests {
         #expect(med.scheduleRevisions.count == 1)
     }
 
-    @Test("правка расписания дважды за день не плодит ревизий и держит исходное прошлое")
+    @Test("Editing the schedule twice in a day adds no revisions and keeps the original past")
     func testEditingTwiceTodayKeepsOneRevision() async throws {
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
                                  time: FixedTime(testDate(2026, 6, 10, 12, 0)))
@@ -173,7 +173,7 @@ struct DatabaseServiceTests {
         #expect(past.map { Calendar.current.component(.hour, from: $0.time) } == [9])
     }
 
-    @Test("смена частоты не меняет прошлую статистику")
+    @Test("Changing the frequency doesn't change past statistics")
     func testChangingFrequencyKeepsPastDoseDays() async throws {
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
                                  time: FixedTime(testDate(2026, 6, 10, 12, 0)))
@@ -188,7 +188,7 @@ struct DatabaseServiceTests {
         #expect(pastDays.allSatisfy { db.fetchPills(for: $0).count == 1 })
     }
 
-    @Test("смена дозировки не меняет дозировку прошлых дней")
+    @Test("Changing the dosage doesn't change past days' dosage")
     func testChangingDosageKeepsThePast() async throws {
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
                                  time: FixedTime(testDate(2026, 6, 10, 12, 0)))
@@ -202,7 +202,7 @@ struct DatabaseServiceTests {
         #expect(db.fetchPills(for: testDate(2026, 6, 10)).first?.dosage == 1)
     }
 
-    @Test("лекарство, добавленное в идущий курс, не даёт пропусков за дни до добавления")
+    @Test("A medication added to a running course has no missed doses before it was added")
     func testMedicationAddedMidCourseStartsToday() async throws {
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
                                  time: FixedTime(testDate(2026, 6, 10, 12, 0)))
@@ -210,14 +210,14 @@ struct DatabaseServiceTests {
         let owner = try #require(course)
 
         var draft = MedicationDraft()
-        draft.name = "Магний"
+        draft.name = "Magnesium"
         draft.timesOfDay = [testDate(2000, 1, 1, 20, 0)]
         draft.frequencyDays = 1
         try db.addMedication(draft: draft, to: owner)
 
         let names: (Date) -> [String] = { day in db.fetchPills(for: day).map(\.name) }
-        #expect(!names(testDate(2026, 6, 9)).contains("Магний"))
-        #expect(names(testDate(2026, 6, 10)).contains("Магний"))
+        #expect(!names(testDate(2026, 6, 9)).contains("Magnesium"))
+        #expect(names(testDate(2026, 6, 10)).contains("Magnesium"))
     }
 
     // MARK: - refillStock
@@ -228,7 +228,7 @@ struct DatabaseServiceTests {
 
         let med = MedicationItem(
             id: UUID(),
-            name: "Магний",
+            name: "Magnesium",
             formSystemImage: "pills.fill",
             dosage: 1,
             timesOfDay: [testDate(2000, 1, 1, 9, 0)],
@@ -248,10 +248,10 @@ struct DatabaseServiceTests {
     func testUpdateMedicationPersistsPhotoToDisk() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
-        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
         let med = MedicationItem(
             id: UUID(),
-            name: "Омега-3",
+            name: "Omega-3",
             formSystemImage: "pills.fill",
             dosage: 1,
             timesOfDay: [testDate(2000, 1, 1, 9, 0)],
@@ -264,7 +264,7 @@ struct DatabaseServiceTests {
         try? db.context.save()
 
         var draftWithPhoto = MedicationDraft()
-        draftWithPhoto.name = "Омега-3"
+        draftWithPhoto.name = "Omega-3"
         let fakeJPEGBytes = Data([0xFF, 0xD8, 0xFF, 0x00, 0x01, 0x02])
         draftWithPhoto.medicationImageData = fakeJPEGBytes
         draftWithPhoto.photoModified = true
@@ -274,13 +274,13 @@ struct DatabaseServiceTests {
 
         // No photoModified: keep the file even though the draft has no bytes (preload may be pending).
         var renameOnly = MedicationDraft()
-        renameOnly.name = "Омега-3 форте"
+        renameOnly.name = "Omega-3 Forte"
         try db.updateMedication(med, with: renameOnly)
         #expect(db.photos.loadDataFromDisk(for: med.id) == fakeJPEGBytes)
 
         // photoModified with no bytes deletes the file.
         var draftWithoutPhoto = MedicationDraft()
-        draftWithoutPhoto.name = "Омега-3"
+        draftWithoutPhoto.name = "Omega-3"
         draftWithoutPhoto.photoModified = true
         try db.updateMedication(med, with: draftWithoutPhoto)
         #expect(db.photos.loadDataFromDisk(for: med.id) == nil)
@@ -294,7 +294,7 @@ struct DatabaseServiceTests {
 
         let med = MedicationItem(
             id: UUID(),
-            name: "Кальций",
+            name: "Calcium",
             formSystemImage: "pills.fill",
             dosage: 1,
             timesOfDay: [testDate(2000, 1, 1, 9, 0)],
@@ -312,7 +312,7 @@ struct DatabaseServiceTests {
     func testDeleteCourseRemovesAllMedicationPhotoFiles() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
-        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
         let medA = MedicationItem(id: UUID(), name: "A", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         let medB = MedicationItem(id: UUID(), name: "B", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
         course.medications.append(contentsOf: [medA, medB])
@@ -400,7 +400,7 @@ struct DatabaseServiceTests {
 
     }
 
-    @Test("при добавлении фото нетронутые сохраняют свои id и файлы")
+    @Test("When a photo is added, untouched ones keep their ids and files")
     func updateKeepsUnchangedPhotoIds() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         var original = DiaryEntryDraft()
@@ -419,12 +419,12 @@ struct DatabaseServiceTests {
         #expect(db.photos.loadDataFromDisk(for: keptId) == Data([0x01]))
     }
 
-    @Test("если новое фото не записалось, запись не меняется и старые фото на месте")
+    @Test("If a new photo fails to write, the entry is unchanged and old photos stay")
     func failedPhotoWriteKeepsTheOldEntry() async throws {
         let store = FakePhotoStore()
         let db = DatabaseService(inMemoryForTesting: true, photos: store, errors: SpyErrorReporter())
         var original = DiaryEntryDraft()
-        original.physicalSummary = "До"
+        original.physicalSummary = "Before"
         original.photos = [Data([0x01])]
         try db.saveDiaryEntry(draft: original)
         let saved = try #require(db.fetchAllDiaryEntries().first)
@@ -432,19 +432,19 @@ struct DatabaseServiceTests {
 
         store.refusesWrites = true
         var edited = DiaryEntryDraft()
-        edited.physicalSummary = "После"
+        edited.physicalSummary = "After"
         edited.photos = [Data([0x02])]
         edited.photosModified = true
 
         #expect(throws: DatabaseError.self) { try db.updateDiaryEntry(saved, with: edited) }
 
         #expect(saved.photoIds == oldIds)
-        #expect(saved.physicalSummary == "До")
+        #expect(saved.physicalSummary == "Before")
         #expect(store.deleted.isEmpty)
         #expect(store.saved[oldIds[0]] == Data([0x01]))
     }
 
-    @Test("новая запись с незаписанным фото не сохраняется вовсе")
+    @Test("A new entry with an unwritten photo isn't saved at all")
     func failedPhotoWriteRefusesANewEntry() async throws {
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(refusesWrites: true), errors: SpyErrorReporter())
         var draft = DiaryEntryDraft()
@@ -481,7 +481,7 @@ struct DatabaseServiceTests {
 
     }
 
-    @Test("удаление всего дневника стирает записи и их фото, но не давление")
+    @Test("Deleting the whole diary erases entries and their photos, but not blood pressure")
     func deleteAllDiaryEntriesKeepsBloodPressure() async throws {
         let store = FakePhotoStore()
         let db = DatabaseService(inMemoryForTesting: true, photos: store, errors: SpyErrorReporter())
@@ -526,10 +526,10 @@ struct DatabaseServiceTests {
         stockCount: Int = 30,
         dosage: Int = 2
     ) -> MedicationItem {
-        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
         let med = MedicationItem(
             id: UUID(),
-            name: "Аспирин",
+            name: "Aspirin",
             formSystemImage: "pills.fill",
             dosage: dosage,
             timesOfDay: [testDate(2000, 1, 1, 9, 0)],
@@ -545,7 +545,7 @@ struct DatabaseServiceTests {
 
     // MARK: - Cache invalidation
 
-    @Test("togglePill сбрасывает кэш целиком, а не только день слота")
+    @Test("togglePill clears the whole cache, not just the slot's day")
     func testTogglePillInvalidatesCacheForAllDays() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = makeCourseWithMed(db)
@@ -560,7 +560,7 @@ struct DatabaseServiceTests {
         #expect(db.fetchPills(for: otherDay).first?.stockCount == 28)
     }
 
-    @Test("любая запись сбрасывает кэш, не только отметка дозы")
+    @Test("Any write clears the cache, not just logging a dose")
     func testAnyWriteInvalidatesTheCache() async throws {
         // Every write goes through commit(), which resets the cache — refill included.
         let db = DatabaseService(inMemoryForTesting: true)
@@ -575,7 +575,7 @@ struct DatabaseServiceTests {
 
     // MARK: - Change payload
 
-    @Test("подписчик просыпается только на интересующие его области")
+    @Test("A subscriber wakes only for the areas it cares about")
     func testChangeFeedMatching() {
         let feed = DatabaseChangeFeed()
         var heard: [String] = []
@@ -600,7 +600,7 @@ struct DatabaseServiceTests {
         #expect(Set(heard) == ["dashboard", "diary", "photo"])
     }
 
-    @Test("запись объявляется в ленте своей базы, а не всем базам процесса")
+    @Test("A write is announced on its own store's feed, not every store in the process")
     func testCommitAnnouncesOnItsOwnFeedOnly() throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let other = DatabaseService(inMemoryForTesting: true)
@@ -620,7 +620,7 @@ struct DatabaseServiceTests {
 
     // MARK: - togglePill: stock floor and back-dated logging
 
-    @Test("остаток не уходит в минус")
+    @Test("Stock never goes negative")
     func testStockNeverGoesNegative() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = makeCourseWithMed(db, stockCount: 1, dosage: 2)
@@ -631,7 +631,7 @@ struct DatabaseServiceTests {
         #expect(med.logs.first?.status.isTaken == true)
     }
 
-    @Test("доза прошедшего дня отмечается, actualTakeTime позже запланированного")
+    @Test("A past day's dose is logged with actualTakeTime after the scheduled time")
     func testLateLoggingRecordsActualTime() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = makeCourseWithMed(db)
@@ -655,10 +655,10 @@ struct DatabaseServiceTests {
 
     /// One medication with the given stock and dosage in an in-memory store.
     private func medication(stock: Int, dosage: Int, in db: DatabaseService) -> MedicationItem {
-        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
         let med = MedicationItem(
             id: UUID(),
-            name: "Аспирин",
+            name: "Aspirin",
             formSystemImage: "pills.fill",
             dosage: dosage,
             timesOfDay: [testDate(2000, 1, 1, 9, 0)],
@@ -672,7 +672,7 @@ struct DatabaseServiceTests {
         return med
     }
 
-    @Test("отмена отметки при пустом остатке не создаёт таблетки")
+    @Test("Unlogging with empty stock doesn't create pills")
     func testUndoAtZeroStockInventsNothing() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = medication(stock: 0, dosage: 2, in: db)
@@ -687,7 +687,7 @@ struct DatabaseServiceTests {
         #expect(med.logs.first?.status.dispensed == nil)
     }
 
-    @Test("частичный остаток: возвращается ровно столько, сколько списалось")
+    @Test("Partial stock: exactly what was deducted is restored")
     func testUndoReturnsExactlyWhatWasDispensed() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = medication(stock: 1, dosage: 2, in: db)
@@ -701,7 +701,7 @@ struct DatabaseServiceTests {
         #expect(med.stockCount == 1)
     }
 
-    @Test("обычный случай не изменился: списалось и вернулось по полной дозе")
+    @Test("The usual case is unchanged: the full dose is deducted and restored")
     func testFullDoseRoundTripIsUnchanged() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = medication(stock: 10, dosage: 2, in: db)
@@ -715,7 +715,7 @@ struct DatabaseServiceTests {
         #expect(med.stockCount == 10)
     }
 
-    @Test("смена дозировки после приёма не меняет возвращаемое количество")
+    @Test("Changing the dosage after a log doesn't change the amount restored")
     func testUndoIgnoresADosageChangedAfterTheFact() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = medication(stock: 10, dosage: 2, in: db)
@@ -732,7 +732,7 @@ struct DatabaseServiceTests {
         #expect(med.stockCount == 10)
     }
 
-    @Test("пропуск дозы остаток не трогает")
+    @Test("Skipping a dose leaves stock alone")
     func testSkipLeavesStockAlone() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = medication(stock: 10, dosage: 2, in: db)
@@ -747,7 +747,7 @@ struct DatabaseServiceTests {
         #expect(med.logs.first?.status.dispensed == nil)
     }
 
-    @Test("передумал после пропуска: доза списывается как обычно")
+    @Test("Changing your mind after a skip deducts the dose as usual")
     func testTakingAfterASkipDeductsStock() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = medication(stock: 10, dosage: 2, in: db)
@@ -764,14 +764,14 @@ struct DatabaseServiceTests {
 
     // MARK: - Bulk logging
 
-    @Test("markDosesTaken пишет весь слот и не трогает уже принятую дозу")
+    @Test("markDosesTaken writes the whole slot and leaves an already taken dose alone")
     func testMarkDosesTakenIsIdempotentPerDose() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
-        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
         let times = [testDate(2000, 1, 1, 9, 0)]
-        let first = MedicationItem(id: UUID(), name: "Аспирин", formSystemImage: "pills.fill", dosage: 2, timesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
-        let second = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "capsule.fill", dosage: 1, timesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
+        let first = MedicationItem(id: UUID(), name: "Aspirin", formSystemImage: "pills.fill", dosage: 2, timesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
+        let second = MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "capsule.fill", dosage: 1, timesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
         course.medications.append(contentsOf: [first, second])
         db.context.insert(course)
         try? db.context.save()
@@ -793,7 +793,7 @@ struct DatabaseServiceTests {
         #expect(second.stockCount == 9)
     }
 
-    @Test("markDosesTaken по уже закрытому слоту ничего не пишет")
+    @Test("markDosesTaken on a settled slot writes nothing")
     func testMarkDosesTakenOnAClosedSlotIsANoOp() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = medication(stock: 10, dosage: 2, in: db)
@@ -808,7 +808,7 @@ struct DatabaseServiceTests {
         #expect(med.stockCount == 8)
     }
 
-    @Test("markDosesTaken поверх пропуска снимает пропуск и списывает остаток")
+    @Test("markDosesTaken over a skip clears the skip and deducts stock")
     func testMarkDosesTakenClearsASkip() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = medication(stock: 10, dosage: 2, in: db)
@@ -823,14 +823,14 @@ struct DatabaseServiceTests {
         #expect(med.stockCount == 8)
     }
 
-    @Test("unmarkDosesTaken возвращает списанное и не логирует непринятое")
+    @Test("unmarkDosesTaken restores deducted stock and doesn't log untaken doses")
     func testUnmarkDosesTakenOnlyReversesWhatWasLogged() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
 
-        let course = TreatmentCourse(name: "Курс", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
+        let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
         let times = [testDate(2000, 1, 1, 9, 0)]
-        let logged = MedicationItem(id: UUID(), name: "Аспирин", formSystemImage: "pills.fill", dosage: 2, timesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
-        let untouched = MedicationItem(id: UUID(), name: "Магний", formSystemImage: "capsule.fill", dosage: 1, timesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
+        let logged = MedicationItem(id: UUID(), name: "Aspirin", formSystemImage: "pills.fill", dosage: 2, timesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
+        let untouched = MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "capsule.fill", dosage: 1, timesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
         course.medications.append(contentsOf: [logged, untouched])
         db.context.insert(course)
         try? db.context.save()
@@ -851,7 +851,7 @@ struct DatabaseServiceTests {
 
     // MARK: - Background History
 
-    @Test("история доз, прочитанная в фоне, совпадает с чтением на главном потоке")
+    @Test("Dose history read in the background matches a main-thread read")
     func backgroundHistoryMatchesMainActorRead() async throws {
         let db = DatabaseService(inMemoryForTesting: true)
         let med = makeCourseWithMed(db)
