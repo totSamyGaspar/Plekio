@@ -72,6 +72,7 @@ struct WeeklyAdherenceView: View {
                     .scaledFont(size: 40, relativeTo: .largeTitle, weight: .bold, design: .serif)
                     .foregroundColor(.textPrimary)
                     .italic()
+                    .animatedNumber(Double(recentAverage))
 
                 Text("recent average")
                     .font(.subheadline)

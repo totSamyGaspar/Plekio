@@ -55,6 +55,7 @@ struct UpNextHeroCard: View {
                         Image(systemName: pill.isTaken ? "checkmark.circle.fill" : "circle.dotted.circle")
                             .scaledFont(size: 18, relativeTo: .headline, weight: .bold)
                             .foregroundColor(pill.isTaken ? .white.opacity(0.6) : .white)
+                            .animatedSymbol(pill.isTaken)
 
                         Text(pill.name)
                             .font(.system(size: pills.count > 1 ? 20 : 32, weight: .heavy, design: .serif))
@@ -70,6 +71,7 @@ struct UpNextHeroCard: View {
             Text("\(takenCount) of \(totalCount) doses logged")
                 .font(.subheadline)
                 .foregroundColor(.white.opacity(0.85))
+                .animatedNumber(Double(takenCount))
 
             Divider().background(Color.white.opacity(0.3))
 

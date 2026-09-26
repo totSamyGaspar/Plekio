@@ -143,6 +143,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                         .font(.headline.weight(.bold))
                         .foregroundColor(.textPrimary)
                         .multilineTextAlignment(.center)
+                        .animatedNumber(Double(viewModel.streakDays))
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)

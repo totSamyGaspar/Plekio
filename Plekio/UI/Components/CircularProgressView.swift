@@ -37,6 +37,7 @@ struct CircularProgressView: View {
                 Text(min(max(progress, 0), 1), format: .percent.precision(.fractionLength(0)))
                     .scaledFont(size: 15, relativeTo: .subheadline, weight: .semibold, design: .serif)
                     .foregroundColor(.textPrimary)
+                    .animatedNumber(progress)
             }
         }
         .padding(20)

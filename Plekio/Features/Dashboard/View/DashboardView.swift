@@ -141,6 +141,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             Text("\(takenCount) of \(totalCount) doses logged")
                 .font(.subheadline)
                 .foregroundColor(.accentPrimary)
+                .animatedNumber(Double(takenCount))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
