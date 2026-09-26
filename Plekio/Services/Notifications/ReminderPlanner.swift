@@ -15,8 +15,8 @@ enum ReminderPlanner {
     // MARK: - Limits
 
     /// Requests the dose schedule may occupy: iOS caps pending at 64, and daily reminders
-    /// (up to four) and snoozes need headroom. `nonisolated`: used as a default argument.
-    nonisolated static let maxScheduled = 56
+    /// (up to four), the refill reminder and snoozes need headroom. `nonisolated`: used as a default argument.
+    nonisolated static let maxScheduled = 55
 
     /// Hard stop for the day walk, so a rare frequency or corrupt end date cannot spin.
     nonisolated static let maxHorizonDays = 365

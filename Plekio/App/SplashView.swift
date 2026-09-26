@@ -75,7 +75,7 @@ struct SplashView: View {
                     self.logoOpacity = 1.0
                 }
 
-                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                withMotion(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
                     self.isPulsing = true
                 }
 

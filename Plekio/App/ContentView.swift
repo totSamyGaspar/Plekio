@@ -33,10 +33,6 @@ struct ContentView: View {
             if hasSeenOnboarding {
                 MainTabView()
                     .transition(.opacity)
-                    .onAppear {
-                        let notifService = dependencies.notifications
-                        Task { await notifService.requestPermission() }
-                    }
             } else {
                 OnboardingView(viewModel: dependencies.makeOnboardingViewModel())
                     .transition(.opacity)

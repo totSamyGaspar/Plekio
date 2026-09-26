@@ -8,7 +8,8 @@
 import Combine
 import Foundation
 
-/// Rebuilds the reminder queue whenever courses change.
+/// Rebuilds the reminder queue whenever courses change, and asks for notification
+/// permission once there is a course to remind about, not at first launch.
 @MainActor
 final class ReminderSyncCoordinator {
 
@@ -20,6 +21,9 @@ final class ReminderSyncCoordinator {
 
     /// The most recent rebuild started, for awaiting a settled queue.
     private(set) var lastSync: Task<Void, Never>?
+
+    /// Once per launch; iOS itself shows the prompt only the first time.
+    private var didAskForPermission = false
 
     // MARK: - Init
 
@@ -54,10 +58,23 @@ final class ReminderSyncCoordinator {
     /// Rebuilds the queue now; also called on app activation since the window moves with time.
     @discardableResult
     func sync() -> Task<Void, Never> {
+        askForPermissionIfNeeded()
+
         let task = Task { [notificationService, dbService] in
             await notificationService.rescheduleAll(using: dbService)
         }
         lastSync = task
         return task
+    }
+
+    // MARK: - Permission
+
+    /// Not awaited by the rebuild: the prompt may stay up, and the queue must not wait for it.
+    private func askForPermissionIfNeeded() {
+        guard !didAskForPermission, !dbService.fetchAllCourses().isEmpty else { return }
+        didAskForPermission = true
+        Task { [notificationService] in
+            await notificationService.requestPermission()
+        }
     }
 }

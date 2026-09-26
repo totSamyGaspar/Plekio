@@ -16,6 +16,8 @@ nonisolated enum SettingsKey {
     static let hasCompletedTour = "hasCompletedTour"
     static let appTheme = "appTheme"
     static let userProfile = "userProfile"
+    static let refillReminderEnabled = "refillReminderEnabled"
+    static let refillReminderMinuteOfDay = "refillReminderMinuteOfDay"
     // Per-reminder keys ("<reminder>ReminderEnabled", ...) live in DailyReminder.
 }
 
@@ -54,6 +56,20 @@ final class SettingsStore {
     var userProfile: UserProfile {
         get { UserProfile.current(in: defaults) }
         set { defaults.set(StoredProfile(newValue).rawValue, forKey: SettingsKey.userProfile) }
+    }
+
+    // MARK: - Refill reminder
+
+    /// On unless switched off: running out of a medication is worth a nudge by default.
+    var isRefillReminderEnabled: Bool {
+        defaults.object(forKey: SettingsKey.refillReminderEnabled) as? Bool ?? true
+    }
+
+    var refillReminderMinuteOfDay: Int {
+        guard let stored = defaults.object(forKey: SettingsKey.refillReminderMinuteOfDay) as? Int else {
+            return RefillReminder.defaultMinuteOfDay
+        }
+        return DailyReminder.clamp(stored)
     }
 
     // MARK: - Daily reminders

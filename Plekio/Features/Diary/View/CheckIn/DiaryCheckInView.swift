@@ -134,6 +134,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
     // MARK: - Date / Time
 
+    /// Both pickers stop at now: an entry records what already happened.
     private var dateTimeSection: some View {
         HStack(alignment: .center, spacing: 12) {
             DiaryLabeledField(title: "CHECK-IN DATE") {
@@ -143,7 +144,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 ) { showingDatePicker = true }
                     .popover(isPresented: $showingDatePicker) {
                         // Explicit width: the graphical picker collapses to a narrow column in a popover.
-                        DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .date)
+                        DatePicker("", selection: $viewModel.draft.checkInDate, in: ...Date(), displayedComponents: .date)
                             .datePickerStyle(.graphical)
                             .labelsHidden()
                             .frame(width: 320)
@@ -158,7 +159,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     label: "TIME"
                 ) { showingTimePicker = true }
                     .popover(isPresented: $showingTimePicker) {
-                        DatePicker("", selection: $viewModel.draft.checkInDate, displayedComponents: .hourAndMinute)
+                        DatePicker("", selection: $viewModel.draft.checkInDate, in: ...Date(), displayedComponents: .hourAndMinute)
                             .datePickerStyle(.wheel)
                             .labelsHidden()
                             .padding()

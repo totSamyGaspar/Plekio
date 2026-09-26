@@ -34,6 +34,7 @@ struct DiaryMoodGrid: View {
                     card(for: mood)
                 }
             }
+            .sensoryFeedback(.selection, trigger: selection)
         }
     }
 
@@ -42,7 +43,7 @@ struct DiaryMoodGrid: View {
     private func card(for mood: DiaryMood) -> some View {
         let isSelected = selection == mood
         return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            withMotion(Motion.bouncy) {
                 selection = mood
             }
         } label: {

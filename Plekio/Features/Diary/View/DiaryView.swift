@@ -43,6 +43,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     @State private var entryToDelete: DiaryEntrySnapshot?
 
     @State private var selectedSubTab: DiarySubTab = .journalFeed
+    @Namespace private var subTabSelection
     @State private var comparisonSelection: [UUID] = []
     @State private var comparisonPayload: DiaryComparisonPayload?
     @State private var inspectingPhoto: DiaryPhotoInspection?
@@ -147,7 +148,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
 
     private func applyPendingSubTab() {
         guard let tab = router.consumePendingDiarySubTab() else { return }
-        withAnimation { selectedSubTab = tab }
+        withMotion { selectedSubTab = tab }
     }
 
     // MARK: - Blood Pressure
@@ -169,7 +170,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         HStack(spacing: 6) {
             ForEach(DiarySubTab.allCases) { tab in
                 Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { selectedSubTab = tab }
+                    withMotion { selectedSubTab = tab }
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: tab.icon).font(.caption)
@@ -187,14 +188,19 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)
-                    .background(selectedSubTab == tab ? Color.appSurface : Color.clear)
-                    .cornerRadius(12)
+                    .selectionAnchor(tab, in: subTabSelection)
                 }
                 .buttonStyle(.plain)
                 .expandTouchTarget(vertical: 4, horizontal: 0)
                 .accessibilityAddTraits(selectedSubTab == tab ? .isSelected : [])
             }
         }
+        .selectionIndicator(
+            following: selectedSubTab,
+            in: subTabSelection,
+            shape: RoundedRectangle(cornerRadius: 12),
+            fill: .appSurface
+        )
         .padding(4)
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.textPrimary.opacity(0.08), lineWidth: 1))
         .cornerRadius(14)

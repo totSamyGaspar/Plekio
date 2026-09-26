@@ -27,6 +27,8 @@ protocol NotificationCenterClient {
 
     /// Clears every pending request; returns only once the removal has actually happened.
     func removeAllPending() async
+
+    func setBadgeCount(_ count: Int) async
 }
 
 // MARK: - SystemNotificationCenterClient
@@ -73,5 +75,13 @@ struct SystemNotificationCenterClient: NotificationCenterClient {
         // The removal is async; the centre runs calls in order, so this read waits for it.
         // Scheduling while it is in flight would wipe the rebuild that follows.
         _ = await center.pendingNotificationRequests()
+    }
+
+    func setBadgeCount(_ count: Int) async {
+        do {
+            try await center.setBadgeCount(count)
+        } catch {
+            AppLog.notifications.error("Badge update failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 }

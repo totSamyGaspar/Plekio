@@ -59,7 +59,7 @@ struct DiaryTodayCard: View {
             HStack(spacing: 10) {
                 ForEach(quickMoods) { item in
                     Button {
-                        withAnimation { onQuickLog(item.mood) }
+                        withMotion { onQuickLog(item.mood) }
                     } label: {
                         VStack(spacing: 4) {
                             Text(verbatim: item.emoji)

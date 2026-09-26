@@ -60,6 +60,7 @@ struct SettingsView: View {
                         ForEach(DailyReminder.allCases) { reminder in
                             DailyReminderRows(reminder)
                         }
+                        RefillReminderRows()
                     }
                     .listRowBackground(Color.appSurface)
 

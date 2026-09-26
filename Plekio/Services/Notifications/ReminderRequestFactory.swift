@@ -25,7 +25,8 @@ enum ReminderRequestFactory {
         medicationIds: [String],
         medicationNames: [String],
         triggerDate: Date,
-        trigger: UNNotificationTrigger
+        trigger: UNNotificationTrigger,
+        badge: Int? = nil
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
         // Localized now; safe because the schedule is rebuilt on every scene activation.
@@ -35,6 +36,8 @@ enum ReminderRequestFactory {
         content.body = String(localized: "Time to take: \(names)")
         content.sound = .default
         content.categoryIdentifier = doseCategoryIdentifier
+        // Nil leaves the icon as it is (snoozes, regrouped reminders).
+        content.badge = badge.map { NSNumber(value: $0) }
         content.userInfo = ReminderPayload.userInfo(
             medicationIds: medicationIds,
             medicationNames: medicationNames,
@@ -48,7 +51,8 @@ enum ReminderRequestFactory {
         medicationIds: [String],
         medicationNames: [String],
         triggerDate: Date,
-        calendar: Calendar
+        calendar: Calendar,
+        badge: Int? = nil
     ) -> UNNotificationRequest {
         let components = calendar.dateComponents(
             [.year, .month, .day, .hour, .minute], from: triggerDate
@@ -58,7 +62,8 @@ enum ReminderRequestFactory {
             medicationIds: medicationIds,
             medicationNames: medicationNames,
             triggerDate: triggerDate,
-            trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false),
+            badge: badge
         )
     }
 
@@ -88,6 +93,25 @@ enum ReminderRequestFactory {
             medicationNames: names,
             triggerDate: slot,
             trigger: UNTimeIntervalNotificationTrigger(timeInterval: snoozeInterval, repeats: false)
+        )
+    }
+
+    // MARK: - Refill Reminder
+
+    /// No category: a tap just opens Today, where the low-stock card has the refill button.
+    static func refillReminder(_ plan: RefillReminder.Plan, calendar: Calendar) -> UNNotificationRequest {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Running low on medication")
+        let names = plan.medicationNames.formatted(.list(type: .and))
+        content.body = String(localized: "Time to refill: \(names)")
+        content.sound = .default
+        content.userInfo = [RefillReminder.userInfoKey: true]
+
+        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: plan.fireDate)
+        return UNNotificationRequest(
+            identifier: RefillReminder.identifier,
+            content: content,
+            trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         )
     }
 
@@ -126,10 +150,11 @@ enum ReminderRequestFactory {
         let doseCategory = UNNotificationCategory(
             identifier: doseCategoryIdentifier,
             actions: [
+                // Logged in the background, straight from the lock screen.
                 UNNotificationAction(
                     identifier: NotificationAction.take,
                     title: String(localized: "Take Now"),
-                    options: .foreground
+                    options: []
                 ),
                 UNNotificationAction(
                     identifier: NotificationAction.snooze,

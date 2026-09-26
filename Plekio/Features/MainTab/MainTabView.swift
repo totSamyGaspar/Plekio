@@ -47,7 +47,10 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $router.selectedTab) {
             NavigationStack {
-                DashboardView(viewModel: dependencies.makeDashboardViewModel())
+                DashboardView(
+                    viewModel: dependencies.makeDashboardViewModel(),
+                    statistics: dependencies.makeStatisticsViewModel()
+                )
             }
             .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
             .tag(AppTab.today)
@@ -84,9 +87,7 @@ struct MainTabView: View {
         .fullScreenCover(item: $router.activeFullScreen) { sheet in
             sheetContent(for: sheet)
         }
-        .onChange(of: router.selectedTab) { _, _ in
-            UISelectionFeedbackGenerator().selectionChanged()
-        }
+        .sensoryFeedback(.selection, trigger: router.selectedTab)
         // .task catches a link set before cold start, onChange later ones. The delay
         // is required: SwiftUI drops a fullScreenCover requested mid-transition.
         .task {

@@ -144,7 +144,7 @@ struct BloodPressureEntryView: View {
             Spacer(minLength: 0)
 
             Button {
-                withAnimation(.snappy) { isCalendarShown.toggle() }
+                withMotion(.snappy) { isCalendarShown.toggle() }
             } label: {
                 Text(measuredAt.formatted(.dateTime.day().month(.abbreviated)))
                     .font(.subheadline.weight(.medium))

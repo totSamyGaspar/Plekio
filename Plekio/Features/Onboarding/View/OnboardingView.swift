@@ -36,7 +36,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
                     .transition(.move(edge: .leading).combined(with: .opacity))
             }
         }
-        .animation(.easeInOut(duration: 0.35), value: isCollectingProfile)
+        .motion(.easeInOut(duration: 0.35), value: isCollectingProfile)
     }
 
     // MARK: - Subviews
@@ -68,7 +68,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
                     .frame(width: index == viewModel.currentPage ? 22 : 7, height: 7)
             }
         }
-        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: viewModel.currentPage)
+        .motion(.spring(response: 0.3, dampingFraction: 0.85), value: viewModel.currentPage)
         .accessibilityHidden(true)
     }
 
@@ -79,7 +79,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
                 if viewModel.isLastPage {
                     isCollectingProfile = true
                 } else {
-                    withAnimation { viewModel.currentPage += 1 }
+                    withMotion { viewModel.currentPage += 1 }
                 }
             } label: {
                 Text("Continue")

@@ -64,6 +64,19 @@ extension View {
                     .id(toast.id)
             }
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: center.current)
+        .motion(Motion.standard, value: center.current)
+        .sensoryFeedback(trigger: center.current) { _, new in new?.style.feedback }
+    }
+}
+
+// MARK: - Toast.Style+Feedback
+
+extension Toast.Style {
+
+    var feedback: SensoryFeedback {
+        switch self {
+        case .success: return .success
+        case .info: return .warning
+        }
     }
 }

@@ -335,4 +335,33 @@ struct DashboardViewModelTests {
 
         #expect(vm.undoableAction == nil)
     }
+
+    // MARK: - Card menu and empty state
+
+    @Test("пропуск из меню карточки пишет пропуск и предлагает отмену")
+    func testSkipDoseOffersUndo() async throws {
+        let mockDB = MockDatabaseService()
+        let pill = PillDose(medicationId: UUID(), name: "Ибупрофен", dosage: 1,
+                            formSystemImage: "pills.fill", time: Date(), period: .morning)
+        mockDB.pillsToReturn = [pill]
+        let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
+
+        vm.skipDose(id: pill.id)
+
+        #expect(mockDB.skippedSlots.first?.medicationIds == [pill.medicationId])
+        #expect(vm.undoableAction?.kind == .skipped)
+        #expect(vm.morningPills.first?.isSkipped == true)
+    }
+
+    @Test("hasCourses следит за появлением первого курса")
+    func testHasCoursesFollowsCourseWrites() async throws {
+        let mockDB = MockDatabaseService()
+        let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
+        #expect(vm.hasCourses == false)
+
+        mockDB.coursesToReturn = [TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date())]
+        mockDB.changes.send([.courses])
+
+        #expect(vm.hasCourses == true)
+    }
 }

@@ -22,7 +22,7 @@ struct LinearProgressBar: View {
                 Capsule()
                     .fill(Color.accentPrimary)
                     .frame(width: geo.size.width * CGFloat(min(progress, 1.0)), height: 8)
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: progress)
+                    .motion(Motion.progress, value: progress)
                     .shadow(color: Color.accentPrimary.opacity(0.4), radius: 4, x: 0, y: 0)
             }
         }

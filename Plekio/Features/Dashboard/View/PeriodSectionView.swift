@@ -13,8 +13,7 @@ struct PeriodSectionView: View {
 
     let title: LocalizedStringResource
     let pills: [PillDose]
-    let onTogglePill: (PillDose.ID) -> Void
-    let onPillTap: (PillDose) -> Void
+    let onAction: (DoseCardAction, PillDose) -> Void
 
     private var timeString: String {
         guard let first = pills.first?.time else { return "" }
@@ -37,27 +36,13 @@ struct PeriodSectionView: View {
             }
 
             ForEach(pills) { pill in
-                MedicationCardView(
-                    pill: pill,
-                    onToggle: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            onTogglePill(pill.id)
-                            hapticFeedback()
-                        }
-                    },
-                    onTapCard: {
-                        onPillTap(pill)
+                MedicationCardView(pill: pill) { action in
+                    withMotion(Motion.bouncy) {
+                        onAction(action, pill)
                     }
-                )
+                }
             }
         }
         .padding(.horizontal)
-    }
-
-    // MARK: - Helpers
-
-    private func hapticFeedback() {
-        let impact = UIImpactFeedbackGenerator(style: .medium)
-        impact.impactOccurred()
     }
 }

@@ -7,7 +7,6 @@
 
 import Foundation
 import Observation
-import UIKit
 
 // MARK: - Toast
 
@@ -61,9 +60,6 @@ final class ToastCenter {
 
     func show(_ toast: Toast) {
         current = toast
-
-        let feedback = UINotificationFeedbackGenerator()
-        feedback.notificationOccurred(toast.style == .success ? .success : .warning)
 
         hideTask?.cancel()
         hideTask = Task { [weak self] in

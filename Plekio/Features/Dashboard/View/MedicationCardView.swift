@@ -13,8 +13,7 @@ struct MedicationCardView: View {
     // MARK: - Properties
 
     let pill: PillDose
-    let onToggle: () -> Void
-    let onTapCard: () -> Void
+    let onAction: (DoseCardAction) -> Void
 
     let appSurface = Color.appSurface
 
@@ -32,7 +31,7 @@ struct MedicationCardView: View {
 
     private var isLowStock: Bool {
         guard let stock = pill.stockCount else { return false }
-        return stock <= pill.lowStockThreshold
+        return StockRules.isLow(stock: stock, threshold: pill.lowStockThreshold)
     }
 
     /// Dosage and remaining stock as one run of text.
@@ -44,7 +43,7 @@ struct MedicationCardView: View {
 
         return dosage
         + Text(verbatim: "  ·  ").foregroundStyle(Color.textPrimary.opacity(0.3))
-        + Text("Stock: \(stock) remaining")
+        + Text("Stock: \(stock)")
             .foregroundStyle(isLowStock ? Color.warningAmber : Color.textPrimary.opacity(0.7))
     }
 
@@ -83,6 +82,7 @@ struct MedicationCardView: View {
                 HStack(spacing: 6) {
                     dosageAndStock
                         .font(.caption)
+                        .animatedNumber(Double(pill.stockCount ?? 0))
 
                     if isLowStock {
                         Text("LOW")
@@ -108,9 +108,11 @@ struct MedicationCardView: View {
                 .fill(appSurface)
         }
         .overlay { stateCloth }
+        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onTapGesture {
-            if pill.isLoggable && !isSettled && !pill.isMissed { onTapCard() }
+            if pill.isLoggable && !isSettled && !pill.isMissed { onAction(.open) }
         }
+        .contextMenu { contextMenuItems }
     }
 
     // MARK: - Subviews
@@ -135,47 +137,40 @@ struct MedicationCardView: View {
         }
     }
 
-    @ViewBuilder
+    /// One button for every state, so the symbol can morph between them.
+    /// Skipped and missed doses stay loggable; a logged one can be undone.
     private var statusIndicator: some View {
-        if pill.isTaken {
-            Button(action: onToggle) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.title)
-                    .foregroundColor(.accentPrimary)
-            }
-            .buttonStyle(.plain)
-            .expandTouchTarget(8)
-            .disabled(!pill.isLoggable)
-            .accessibilityLabel("Undo logging \(pill.name)")
-        } else if pill.isSkipped {
-            // Logging a skipped dose clears the skip.
-            Button(action: onToggle) {
-                Image(systemName: "checkmark.circle")
-                    .font(.title)
-                    .foregroundColor(.textTertiary)
-            }
-            .buttonStyle(.plain)
-            .expandTouchTarget(8)
-            .disabled(!pill.isLoggable)
-            .accessibilityLabel("Log \(pill.name)")
-        } else if pill.isLoggable {
-            Button(action: onToggle) {
-                Image(systemName: "checkmark.circle")
-                    .font(.title)
-                    .foregroundColor(pill.isMissed ? .warningAccent : .textTertiary)
-            }
-            .buttonStyle(.plain)
-            .expandTouchTarget(8)
-            .accessibilityLabel(
-                pill.isMissed
-                ? "Log the missed dose of \(pill.name)"
-                : "Log \(pill.name)"
-            )
-        } else {
-            Image(systemName: "checkmark.circle")
+        Button { onAction(.toggle) } label: {
+            Image(systemName: pill.isTaken ? "checkmark.circle.fill" : "checkmark.circle")
                 .font(.title)
-                .foregroundColor(.textPrimary.opacity(0.1))
+                .foregroundColor(checkmarkTint)
+                .animatedSymbol(pill.isTaken)
         }
+        .buttonStyle(.plain)
+        .expandTouchTarget(8)
+        .disabled(!pill.isLoggable)
+        .accessibilityLabel(checkmarkLabel)
+    }
+
+    @ViewBuilder
+    private var contextMenuItems: some View {
+        ForEach(DoseCardAction.menu(for: pill), id: \.self) { action in
+            Button { onAction(action) } label: {
+                Label(action.title(for: pill), systemImage: action.systemImage(for: pill))
+            }
+        }
+    }
+
+        private var checkmarkTint: Color {
+        if pill.isTaken { return .accentPrimary }
+        if !pill.isLoggable { return .textPrimary.opacity(0.1) }
+        return pill.isMissed ? .warningAccent : .textTertiary
+    }
+
+    private var checkmarkLabel: Text {
+        if pill.isTaken { return Text("Undo logging \(pill.name)") }
+        if pill.isMissed { return Text("Log the missed dose of \(pill.name)") }
+        return Text("Log \(pill.name)")
     }
 }
 
@@ -197,8 +192,7 @@ struct MedicationCardView: View {
                     stockCount: 9,
                     lowStockThreshold: 10
                 ),
-                onToggle: { print("Toggle tapped") },
-                onTapCard: { print("Card tapped") }
+                onAction: { print("Action: \($0)") }
             )
 
             MedicationCardView(
@@ -213,8 +207,7 @@ struct MedicationCardView: View {
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),
-                onToggle: { print("Toggle tapped") },
-                onTapCard: { print("Card tapped") }
+                onAction: { print("Action: \($0)") }
             )
 
             MedicationCardView(
@@ -229,8 +222,7 @@ struct MedicationCardView: View {
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),
-                onToggle: { print("Un-skip tapped") },
-                onTapCard: { print("Card tapped") }
+                onAction: { print("Action: \($0)") }
             )
 
             MedicationCardView(
@@ -244,8 +236,7 @@ struct MedicationCardView: View {
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),
-                onToggle: { print("Late log tapped") },
-                onTapCard: { print("Card tapped") }
+                onAction: { print("Action: \($0)") }
             )
         }
         .padding()

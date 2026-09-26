@@ -13,6 +13,7 @@ final class MockNotificationService: NotificationServiceProtocol {
     // MARK: - Spies and stubs
 
     var didCallRequestPermission = false
+    var requestPermissionCallCount = 0
     var scheduledCourses: [TreatmentCourse]?
     var cancelledMedicationIds: [UUID] = []
     var snoozedMedicationIds: [String]?
@@ -33,6 +34,7 @@ final class MockNotificationService: NotificationServiceProtocol {
     @discardableResult
     func requestPermission() async -> Bool {
         didCallRequestPermission = true
+        requestPermissionCallCount += 1
         return permissionGranted
     }
 

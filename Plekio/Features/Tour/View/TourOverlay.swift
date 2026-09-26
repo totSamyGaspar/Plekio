@@ -49,8 +49,8 @@ struct TourOverlay: View {
                 .transition(.opacity)
             }
         }
-        .animation(.spring(response: 0.45, dampingFraction: 0.85), value: tour.step)
-        .animation(.spring(response: 0.45, dampingFraction: 0.85), value: tour.highlightedFrame)
+        .motion(Motion.standard, value: tour.step)
+        .motion(Motion.standard, value: tour.highlightedFrame)
     }
 
     // MARK: - Card

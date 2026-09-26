@@ -22,6 +22,9 @@ struct WeeklyAdherenceView: View {
 
     let appSurface = Color.appSurface
 
+    /// Bars grow from zero the first time the card is shown.
+    @State private var hasAppeared = false
+
     // MARK: - Body
 
     var body: some View {
@@ -47,7 +50,7 @@ struct WeeklyAdherenceView: View {
                                     .fill(Color.textPrimary.opacity(0.05))
                                 TopRoundedBar()
                                     .fill(Color.accentPrimary)
-                                    .frame(height: geo.size.height * min(max(percent, 0), 1))
+                                    .frame(height: geo.size.height * (hasAppeared ? min(max(percent, 0), 1) : 0))
                                     .shadow(color: Color.accentPrimary.opacity(0.3), radius: 5, x: 0, y: -5)
                             }
                         }
@@ -63,6 +66,10 @@ struct WeeklyAdherenceView: View {
                     .accessibilityValue(Text(percent, format: .percent.precision(.fractionLength(0))))
                 }
             }
+            .motion(Motion.progress, value: percentages)
+            .onAppear {
+                withMotion(Motion.progress) { hasAppeared = true }
+            }
 
             Divider().background(Color.textPrimary.opacity(0.2))
 
@@ -72,6 +79,7 @@ struct WeeklyAdherenceView: View {
                     .scaledFont(size: 40, relativeTo: .largeTitle, weight: .bold, design: .serif)
                     .foregroundColor(.textPrimary)
                     .italic()
+                    .animatedNumber(Double(recentAverage))
 
                 Text("recent average")
                     .font(.subheadline)
