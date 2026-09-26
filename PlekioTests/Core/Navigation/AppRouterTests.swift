@@ -8,6 +8,7 @@
 import Testing
 import Foundation
 @testable import Plekio
+import SwiftUI
 
 @MainActor
 @Suite("AppRouter Tests")

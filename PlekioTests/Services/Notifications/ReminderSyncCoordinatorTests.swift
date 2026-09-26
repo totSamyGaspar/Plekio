@@ -70,4 +70,39 @@ struct ReminderSyncCoordinatorTests {
 
         #expect(notifications.scheduleCallCount == 1)
     }
+
+    // MARK: - Permission
+
+    @Test("без курсов разрешение на уведомления не спрашивается")
+    func noCoursesNoPermissionPrompt() async {
+        let notifications = MockNotificationService()
+        let coordinator = ReminderSyncCoordinator(
+            notificationService: notifications,
+            dbService: MockDatabaseService(),
+            changes: Empty<Void, Never>().eraseToAnyPublisher()
+        )
+
+        await coordinator.sync().value
+
+        #expect(notifications.requestPermissionCallCount == 0)
+    }
+
+    @Test("после появления курса разрешение спрашивается один раз")
+    func firstCourseAsksForPermissionOnce() async {
+        let db = MockDatabaseService()
+        let notifications = MockNotificationService()
+        let coordinator = ReminderSyncCoordinator(
+            notificationService: notifications,
+            dbService: db,
+            changes: Empty<Void, Never>().eraseToAnyPublisher()
+        )
+        await coordinator.sync().value
+
+        db.coursesToReturn = [TreatmentCourse(name: "Курс", startDate: Date(), endDate: Date())]
+        await coordinator.sync().value
+        await coordinator.sync().value
+
+        #expect(await waitUntil { notifications.requestPermissionCallCount == 1 })
+        #expect(notifications.requestPermissionCallCount == 1)
+    }
 }
