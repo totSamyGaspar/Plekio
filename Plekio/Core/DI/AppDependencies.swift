@@ -30,6 +30,8 @@ final class AppDependencies {
     let errorPresenter: AppErrorPresenter
     /// Short confirmations and hints, shown over every screen.
     let toasts = ToastCenter()
+    /// The first-run tour; unlocks the contextual tips when it's over.
+    let tour: TourCoordinator
 
     /// The store file, for the storage-usage row in Settings. Nil in previews.
     let storeURL: URL?
@@ -95,6 +97,7 @@ final class AppDependencies {
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)
         reminderSync = ReminderSyncCoordinator(notificationService: notifications, dbService: database)
         router = AppRouter()
+        tour = TourCoordinator(settings: settings, router: router, onFinish: { PlekioTips.tourFinished = true })
         notificationResponses = NotificationResponseHandler(
             doseLogging: doseLogging,
             notifications: notifications,

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 
 /// The diary's title block with Compare and Add Entry actions.
 struct DiaryHeaderView: View {
@@ -18,6 +19,8 @@ struct DiaryHeaderView: View {
     let transitionNamespace: Namespace.ID
 
     let onCompare: () -> Void
+
+    private let compareTip = CompareProgressTip()
     let onAddEntry: () -> Void
 
     // MARK: - Body
@@ -40,7 +43,10 @@ struct DiaryHeaderView: View {
                 .foregroundColor(.textSecondary)
 
             HStack(spacing: 12) {
-                Button(action: onCompare) {
+                Button {
+                    compareTip.invalidate(reason: .actionPerformed)
+                    onCompare()
+                } label: {
                     Label("Compare Progress", systemImage: "arrow.triangle.2.circlepath")
                         .labelStyle(.centered)
                         .font(.subheadline.weight(.bold))
@@ -53,6 +59,7 @@ struct DiaryHeaderView: View {
                 }
                 .buttonStyle(.plain)
                 .matchedTransitionSource(id: compareSourceID, in: transitionNamespace)
+                .popoverTip(compareTip, arrowEdge: .top)
 
                 Button(action: onAddEntry) {
                     Label("Add New Entry", systemImage: "plus")
