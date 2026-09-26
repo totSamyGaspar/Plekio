@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct DashboardView<VM: DashboardViewModelProtocol>: View {
 
@@ -17,6 +18,12 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
 
     /// Scales with the wordmark's text style under Dynamic Type.
     @ScaledMetric(relativeTo: .largeTitle) private var logoSize: CGFloat = 34
+
+    private let checkmarkTip = DoseCheckmarkTip()
+
+    private var hasPills: Bool {
+        !(viewModel.morningPills.isEmpty && viewModel.noonPills.isEmpty && viewModel.eveningPills.isEmpty)
+    }
 
     // MARK: - Init
 
@@ -44,6 +51,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                         ) {
                             viewModel.logDoses(upNextPills)
                         }
+                        .tourTarget(.upNextCard)
                         .zIndex(1)
                         .transition(
                             .asymmetric(
@@ -204,6 +212,11 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             .padding(.horizontal)
             .padding(.top, 16)
 
+            if hasPills {
+                TipView(checkmarkTip)
+                    .padding(.horizontal)
+            }
+
             periodSection(pills: viewModel.morningPills, title: DayPeriod.morning.title)
             periodSection(pills: viewModel.noonPills, title: DayPeriod.noon.title)
             periodSection(pills: viewModel.eveningPills, title: DayPeriod.evening.title)
@@ -224,6 +237,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     private func handle(_ action: DoseCardAction, for pill: PillDose, in section: [PillDose]) {
         switch action {
         case .toggle:
+            checkmarkTip.invalidate(reason: .actionPerformed)
             viewModel.togglePill(id: pill.id)
         case .open:
             presentTakeSheet(for: section.filter { $0.time == pill.time && $0.status == .pending })

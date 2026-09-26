@@ -90,8 +90,10 @@ struct MainTabView: View {
         .task {
             try? await Task.sleep(for: .seconds(RootTransition.presentationDelay))
             consumeDeepLink()
+            startTourIfNeeded()
         }
         .onChange(of: router.pendingDeepLink) { _, _ in consumeDeepLink() }
+        .overlay { TourOverlay(tour: dependencies.tour) }
         .toastOverlay(dependencies.toasts)
         .alert(
             Text(errorPresenter.title),
@@ -105,6 +107,14 @@ struct MainTabView: View {
         } message: { text in
             Text(text)
         }
+    }
+
+    // MARK: - Tour
+
+    /// Not over a reminder that just opened something: that is what the user came for.
+    private func startTourIfNeeded() {
+        guard router.activeSheet == nil, router.activeFullScreen == nil else { return }
+        dependencies.tour.startIfNeeded(hasCourses: !dependencies.courseRepository.allCourses().isEmpty)
     }
 
     // MARK: - Deep Links

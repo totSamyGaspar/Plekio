@@ -13,6 +13,7 @@ import Foundation
 /// silently resets that setting for every user.
 nonisolated enum SettingsKey {
     static let hasSeenOnboarding = "hasSeenOnboarding"
+    static let hasCompletedTour = "hasCompletedTour"
     static let appTheme = "appTheme"
     static let userProfile = "userProfile"
     // Per-reminder keys ("<reminder>ReminderEnabled", ...) live in DailyReminder.
@@ -39,6 +40,12 @@ final class SettingsStore {
     var hasSeenOnboarding: Bool {
         get { defaults.bool(forKey: SettingsKey.hasSeenOnboarding) }
         set { defaults.set(newValue, forKey: SettingsKey.hasSeenOnboarding) }
+    }
+
+    /// The first-run tour was finished or skipped; it never shows again.
+    var hasCompletedTour: Bool {
+        get { defaults.bool(forKey: SettingsKey.hasCompletedTour) }
+        set { defaults.set(newValue, forKey: SettingsKey.hasCompletedTour) }
     }
 
     // MARK: - Profile

@@ -4,6 +4,183 @@
     "" : {
 
     },
+    "%lld of %lld" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld von %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld sur %2$lld"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld di %2$lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld/%2$lld"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$lld ішінен %1$lld"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld din %2$lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld из %2$lld"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld з %2$lld"
+          }
+        }
+      }
+    },
+    "A report for your doctor" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Bericht für deinen Arzt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un informe para tu médico"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un rapport pour votre médecin"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un referto per il tuo medico"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "医師向けのレポート"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дәрігерге арналған есеп"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un raport pentru medicul dvs."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отчёт для врача"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звіт для лікаря"
+          }
+        }
+      }
+    },
+    "Add photos to your entries, then tick two in the gallery to see them side by side." : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge deinen Einträgen Fotos hinzu und markiere dann zwei in der Galerie, um sie nebeneinander zu sehen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade fotos a tus entradas y marca dos en la galería para verlas una junto a otra."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoutez des photos à vos entrées, puis cochez-en deux dans la galerie pour les voir côte à côte."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi foto alle voci, poi selezionane due nella galleria per vederle affiancate."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録に写真を追加し、ギャラリーで2枚選ぶと並べて比較できます。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жазбаларға фото қосып, қатар көру үшін галереядан екеуін белгілеңіз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adăugați fotografii la înregistrări, apoi bifați două în galerie pentru a le vedea alăturat."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавляйте фото к записям, а затем отметьте два в галерее, чтобы увидеть их рядом."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додавайте фото до записів, а потім позначте два в галереї, щоб побачити їх поруч."
+          }
+        }
+      }
+    },
     "Add your first course to see your doses here" : {
       "localizations" : {
         "de" : {
@@ -58,6 +235,124 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Додайте перший курс, щоб тут з’явилися прийоми"
+          }
+        }
+      }
+    },
+    "Build a PDF with doses, well-being and blood pressure for any period." : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erstelle ein PDF mit Dosen, Befinden und Blutdruck für einen beliebigen Zeitraum."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea un PDF con dosis, bienestar y presión arterial de cualquier periodo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créez un PDF avec les prises, le bien-être et la tension sur la période de votre choix."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea un PDF con dosi, benessere e pressione per qualsiasi periodo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "任意の期間の服用・体調・血圧をまとめたPDFを作成できます。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кез келген кезеңге дозалар, көңіл күй және қан қысымы бар PDF жасаңыз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creați un PDF cu dozele, starea și tensiunea pentru orice perioadă."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Соберите PDF с дозами, самочувствием и давлением за любой период."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зберіть PDF із дозами, самопочуттям і тиском за будь-який період."
+          }
+        }
+      }
+    },
+    "Compare progress photos" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortschrittsfotos vergleichen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compara fotos de progreso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparez les photos de progrès"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confronta le foto dei progressi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進捗写真を比較"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прогресс фотоларын салыстырыңыз"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparați fotografiile de progres"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сравнивайте фото прогресса"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порівнюйте фото прогресу"
           }
         }
       }
@@ -120,6 +415,183 @@
         }
       }
     },
+    "Create your first course" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erstelle deinen ersten Kurs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea tu primer tratamiento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créez votre premier traitement"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea la tua prima terapia"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初のコースを作成"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Алғашқы курсты жасаңыз"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creați primul tratament"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создайте первый курс"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Створіть перший курс"
+          }
+        }
+      }
+    },
+    "Finished courses live in History" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beendete Kurse findest du im Verlauf"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los tratamientos terminados están en Historial"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les traitements terminés sont dans l'Historique"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le terapie concluse sono nella Cronologia"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了したコースは履歴にあります"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Аяқталған курстар Тарихта"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tratamentele încheiate sunt în Istoric"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершённые курсы — в Истории"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершені курси — в Історії"
+          }
+        }
+      }
+    },
+    "Got it" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verstanden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entendido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compris"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ho capito"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "了解"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Түсінікті"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am înțeles"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Понятно"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зрозуміло"
+          }
+        }
+      }
+    },
     "Log dose" : {
       "localizations" : {
         "de" : {
@@ -178,6 +650,183 @@
         }
       }
     },
+    "Log your doses" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosen erfassen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra tus dosis"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notez vos prises"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra le dosi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服用を記録"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозаларды белгілеңіз"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Înregistrați dozele"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отмечайте дозы"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відмічайте дози"
+          }
+        }
+      }
+    },
+    "Logged by mistake? Tap the check to undo it. Skipped or missed a dose? Tap the circle to log it." : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versehentlich eingetragen? Tippe auf das Häkchen, um es rückgängig zu machen. Dosis übersprungen oder verpasst? Tippe auf den Kreis, um sie einzutragen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Registrada por error? Toca la marca para deshacerlo. ¿Omitiste o olvidaste una dosis? Toca el círculo para registrarla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrée par erreur ? Touchez la coche pour annuler. Prise sautée ou manquée ? Touchez le cercle pour l’enregistrer."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrata per errore? Tocca la spunta per annullare. Hai saltato o dimenticato una dose? Tocca il cerchio per registrarla."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "間違えて記録した場合は、チェックをタップして取り消せます。スキップや飲み忘れた服用は、丸をタップして記録できます。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Қателесіп белгіледіңіз бе? Болдырмау үшін құсбелгіні түртіңіз. Дозаны өткізіп алдыңыз ба немесе ұмыттыңыз ба? Белгілеу үшін шеңберді түртіңіз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ai marcat-o din greșeală? Atinge bifa pentru a anula. Ai sărit sau ai uitat o doză? Atinge cercul pentru a o înregistra."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отметили по ошибке? Нажмите на галочку, чтобы отменить. Пропустили приём? Нажмите на кружок, чтобы отметить его."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позначили помилково? Торкніться галочки, щоб скасувати. Пропустили прийом? Торкніться кружечка, щоб позначити його."
+          }
+        }
+      }
+    },
+    "Next" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siguiente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivant"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avanti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次へ"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Келесі"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Înainte"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Далее"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Далі"
+          }
+        }
+      }
+    },
     "Open course" : {
       "localizations" : {
         "de" : {
@@ -232,6 +881,65 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Відкрити курс"
+          }
+        }
+      }
+    },
+    "Open History and tap Repeat to start the same treatment again with new dates." : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne den Verlauf und tippe auf Wiederholen, um dieselbe Behandlung mit neuen Daten zu starten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Historial y toca Repetir para empezar el mismo tratamiento con nuevas fechas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrez l'Historique et touchez Répéter pour relancer le même traitement à de nouvelles dates."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri la Cronologia e tocca Ripeti per riprendere la stessa terapia con nuove date."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "履歴を開いて「繰り返す」をタップすると、同じコースを新しい日程で始められます。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тарихты ашып, дәл сол емді жаңа күндермен бастау үшін «Қайталау» түймесін басыңыз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deschideți Istoricul și atingeți Repetă pentru a relua același tratament cu date noi."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откройте Историю и нажмите «Повторить», чтобы начать тот же курс с новыми датами."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрийте Історію й натисніть «Повторити», щоб почати той самий курс із новими датами."
           }
         }
       }
@@ -352,6 +1060,301 @@
         }
       }
     },
+    "Start with a course" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginne mit einem Kurs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza con un tratamiento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencez par un traitement"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inizia con una terapia"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まずはコースから"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Курстан бастаңыз"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Începeți cu un tratament"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начните с курса"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Почніть з курсу"
+          }
+        }
+      }
+    },
+    "Tap + and enter the name, dates and medications. The tour continues once it's saved." : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf + und gib Name, Zeitraum und Medikamente ein. Nach dem Speichern geht die Tour weiter."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca + e indica el nombre, las fechas y los medicamentos. El recorrido continuará al guardarlo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez + et indiquez le nom, les dates et les médicaments. La visite reprend une fois enregistré."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocca + e inserisci nome, date e farmaci. Il tour prosegue dopo il salvataggio."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "＋をタップして、名前・期間・薬を入力してください。保存するとツアーが続きます。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ түймесін басып, атауын, күндерін және дәрілерін енгізіңіз. Сақтағаннан кейін тур жалғасады."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atingeți + și introduceți numele, datele și medicamentele. Turul continuă după salvare."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите + и укажите название, даты и лекарства. Тур продолжится, когда курс будет сохранён."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натисніть + і вкажіть назву, дати й ліки. Тур продовжиться, щойно курс буде збережено."
+          }
+        }
+      }
+    },
+    "Tap the circle to change a dose" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf den Kreis, um eine Dosis zu ändern"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca el círculo para cambiar una dosis"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez le cercle pour modifier une prise"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocca il cerchio per modificare una dose"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "丸をタップして服用を変更"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозаны өзгерту үшін шеңберді түртіңіз"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atinge cercul pentru a modifica o doză"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите на кружок, чтобы изменить приём"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Торкніться кружечка, щоб змінити прийом"
+          }
+        }
+      }
+    },
+    "Tap the highlighted button" : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf die markierte Taste"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca el botón resaltado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez le bouton en surbrillance"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocca il pulsante evidenziato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "強調されたボタンをタップ"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Белгіленген түймені басыңыз"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atingeți butonul evidențiat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите на выделенную кнопку"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натисніть виділену кнопку"
+          }
+        }
+      }
+    },
+    "Tap to log everything due now, or tick doses one by one. Made a mistake? Undo from the banner at the bottom." : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe, um alles Fällige zu erfassen, oder hake Dosen einzeln ab. Vertippt? Unten im Banner rückgängig machen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca para registrar todo lo pendiente o marca las dosis una a una. ¿Te equivocaste? Deshazlo desde el aviso inferior."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez pour tout noter d'un coup, ou cochez les prises une par une. Une erreur ? Annulez depuis la bannière en bas."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocca per registrare tutto ciò che è previsto ora, o spunta le dosi una alla volta. Errore? Annulla dal banner in basso."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップすると今の分をまとめて記録できます。1回ずつチェックすることも。間違えたら下のバナーで取り消せます。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Қазіргінің бәрін бірден белгілеу үшін басыңыз немесе дозаларды бір-бірден белгілеңіз. Қателестіңіз бе? Төмендегі баннерден болдырмаңыз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atingeți pentru a înregistra tot ce e de luat acum sau bifați dozele pe rând. V-ați greșit? Anulați din bannerul de jos."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите, чтобы отметить всё сразу, или отмечайте дозы по одной. Ошиблись? Отмените в плашке внизу."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натисніть, щоб відмітити все одразу, або відмічайте дози по одній. Помилилися? Скасуйте в плашці внизу."
+          }
+        }
+      }
+    },
     "Time to refill: %@" : {
       "localizations" : {
         "de" : {
@@ -464,6 +1467,65 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Скасувати позначку"
+          }
+        }
+      }
+    },
+    "Your doses for each day will appear here. First, add the treatment you're on." : {
+      "comment" : "First-run tour or a one-time tip.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hier erscheinen deine Dosen für jeden Tag. Füge zuerst deine aktuelle Behandlung hinzu."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aquí aparecerán tus dosis de cada día. Primero, añade el tratamiento que sigues."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos prises de chaque jour apparaîtront ici. Ajoutez d'abord votre traitement en cours."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui compariranno le dosi di ogni giorno. Per prima cosa, aggiungi la terapia che segui."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ここに毎日の服用予定が表示されます。まず、今のコースを追加しましょう。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мұнда әр күнгі дозаларыңыз көрсетіледі. Алдымен қазіргі емдеу курсын қосыңыз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aici vor apărea dozele pentru fiecare zi. Mai întâi, adăugați tratamentul pe care îl urmați."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здесь будут ваши дозы на каждый день. Сначала добавьте курс, который вы принимаете."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тут з'являтимуться ваші дози на кожен день. Спершу додайте курс, який ви приймаєте."
           }
         }
       }
