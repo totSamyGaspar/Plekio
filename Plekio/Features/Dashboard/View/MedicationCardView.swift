@@ -43,7 +43,7 @@ struct MedicationCardView: View {
 
         return dosage
         + Text(verbatim: "  ·  ").foregroundStyle(Color.textPrimary.opacity(0.3))
-        + Text("Stock: \(stock) remaining")
+        + Text("Stock: \(stock)")
             .foregroundStyle(isLowStock ? Color.warningAmber : Color.textPrimary.opacity(0.7))
     }
 
