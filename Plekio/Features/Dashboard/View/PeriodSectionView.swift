@@ -37,7 +37,7 @@ struct PeriodSectionView: View {
 
             ForEach(pills) { pill in
                 MedicationCardView(pill: pill) { action in
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    withMotion(Motion.bouncy) {
                         onAction(action, pill)
                     }
                 }

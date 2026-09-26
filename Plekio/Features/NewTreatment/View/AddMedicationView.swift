@@ -71,7 +71,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
 
                                     if viewModel.selectedImage != nil {
                                         Button(role: .destructive) {
-                                            withAnimation {
+                                            withMotion {
                                                 viewModel.removeImage()
                                             }
                                         } label: {

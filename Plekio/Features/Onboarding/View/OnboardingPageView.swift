@@ -59,7 +59,7 @@ struct OnboardingPageView: View {
         }
         .accessibilityElement(children: .combine)
         .onAppear {
-            withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+            withMotion(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
                 isGlowing = true
             }
         }

@@ -32,7 +32,7 @@ private struct AnimatedNumber: ViewModifier {
         content
             .contentTransition(reduceMotion ? .identity : .numericText(value: value))
             // Own animation: the change may arrive outside any animated transaction (e.g. a DB reload).
-            .animation(reduceMotion ? nil : .snappy, value: value)
+            .motion(.snappy, value: value)
     }
 }
 

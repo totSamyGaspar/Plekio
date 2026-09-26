@@ -63,7 +63,7 @@ struct UpNextHeroCard: View {
                             .opacity(pill.isTaken ? 0.6 : 1.0)
                             .lineLimit(1)
                     }
-                    .animation(.easeInOut(duration: 0.3), value: pill.isTaken)
+                    .motion(.easeInOut(duration: 0.3), value: pill.isTaken)
                 }
             }
             .foregroundColor(.white)
@@ -109,6 +109,6 @@ private struct PressableButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
-            .animation(.spring(response: 0.2, dampingFraction: 0.5), value: configuration.isPressed)
+            .motion(.spring(response: 0.2, dampingFraction: 0.5), value: configuration.isPressed)
     }
 }

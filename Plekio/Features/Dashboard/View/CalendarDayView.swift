@@ -13,6 +13,8 @@ struct CalendarDayView: View {
 
     let date: Date
     let isSelected: Bool
+    /// Shared by the week's cells so the highlight slides between them.
+    let selection: Namespace.ID
 
     /// Fixed (but scaled) width so one- and two-digit days line up.
     @ScaledMetric(relativeTo: .title3) private var cellWidth: CGFloat = 56
@@ -34,8 +36,11 @@ struct CalendarDayView: View {
         }
         .padding(.vertical, 12)
         .frame(width: cellWidth)
-        .background(isSelected ? Color.accentPrimary : Color.textPrimary.opacity(0.05))
-        .cornerRadius(16)
+        .background(
+            isSelected ? Color.clear : Color.textPrimary.opacity(0.05),
+            in: RoundedRectangle(cornerRadius: 16)
+        )
+        .selectionAnchor(date, in: selection)
         // Tapped via onTapGesture, so the button trait is added manually.
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
@@ -45,10 +50,14 @@ struct CalendarDayView: View {
 // MARK: - Preview
 
 #Preview {
+    @Previewable @Namespace var selection
+    let today = Calendar.current.startOfDay(for: Date())
+    let tomorrow = today.addingTimeInterval(86_400)
     HStack {
-        CalendarDayView(date: Date(), isSelected: true)
-        CalendarDayView(date: Date(), isSelected: false)
+        CalendarDayView(date: today, isSelected: true, selection: selection)
+        CalendarDayView(date: tomorrow, isSelected: false, selection: selection)
     }
+    .selectionIndicator(following: today, in: selection, shape: RoundedRectangle(cornerRadius: 16), fill: .accentPrimary)
     .padding()
     .background(Color(UIColor.systemGroupedBackground))
 }

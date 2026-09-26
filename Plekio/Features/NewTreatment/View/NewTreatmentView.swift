@@ -100,7 +100,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
             .appTheme()
             .sheet(isPresented: $showingAddMedication) {
                 AddMedicationView(viewModel: dependencies.makeAddMedicationViewModel()) { draft in
-                    withAnimation { viewModel.addMedication(draft) }
+                    withMotion { viewModel.addMedication(draft) }
                     showingAddMedication = false
                 }
                 .presentationDetents([.large])

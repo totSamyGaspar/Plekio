@@ -106,7 +106,7 @@ struct DiaryPhotosCard: View {
             .accessibilityLabel("Diary photo")
             .overlay(alignment: .topTrailing) {
                 Button {
-                    withAnimation { onRemove(index) }
+                    withMotion { onRemove(index) }
                 } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 11, weight: .bold))

@@ -19,6 +19,8 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     /// Scales with the wordmark's text style under Dynamic Type.
     @ScaledMetric(relativeTo: .largeTitle) private var logoSize: CGFloat = 34
 
+    @Namespace private var daySelection
+
     private let checkmarkTip = DoseCheckmarkTip()
 
     private var hasPills: Bool {
@@ -75,7 +77,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                     StatisticsView(viewModel: dependencies.makeStatisticsViewModel())
                 }
                 .padding(.bottom, 100)
-                .animation(.spring(response: 0.6, dampingFraction: 0.8), value: allTakenStates)
+                .motion(Motion.progress, value: allTakenStates)
             }
         }
         .overlay(alignment: .bottom) {
@@ -93,7 +95,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.undoableAction)
+        .motion(Motion.standard, value: viewModel.undoableAction)
         .doseFeedback(for: allPills)
         .toolbar(.hidden, for: .navigationBar)
     }
@@ -155,19 +157,31 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         .padding(.horizontal, 20)
     }
 
+    /// The week cell matching the selected day; nil once the week has moved past it.
+    private var selectedWeekDate: Date? {
+        viewModel.weekDates.first { Calendar.current.isDate($0, inSameDayAs: viewModel.selectedDate) }
+    }
+
     private var calendarSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
                 ForEach(viewModel.weekDates, id: \.self) { date in
                     CalendarDayView(
                         date: date,
-                        isSelected: Calendar.current.isDate(date, inSameDayAs: viewModel.selectedDate)
+                        isSelected: Calendar.current.isDate(date, inSameDayAs: viewModel.selectedDate),
+                        selection: daySelection
                     )
                     .onTapGesture {
-                        withAnimation { viewModel.selectedDate = date }
+                        withMotion { viewModel.selectedDate = date }
                     }
                 }
             }
+            .selectionIndicator(
+                following: selectedWeekDate,
+                in: daySelection,
+                shape: RoundedRectangle(cornerRadius: 16),
+                fill: .accentPrimary
+            )
             .padding(.horizontal)
         }
         .sensoryFeedback(.selection, trigger: viewModel.selectedDate)

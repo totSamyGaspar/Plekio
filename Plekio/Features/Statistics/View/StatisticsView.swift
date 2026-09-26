@@ -68,7 +68,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
 
             Button("Add") {
                 if let amount = Int(refillAmountText), amount > 0 {
-                    let saved = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    let saved = withMotion(Motion.standard) {
                         viewModel.refill(medication: med, amount: amount)
                     }
                     // A failed save shows the error alert; no success toast on top.

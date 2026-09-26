@@ -30,7 +30,7 @@ struct CircularProgressView: View {
                 .trim(from: 0.0, to: CGFloat(min(progress, 1.0)))
                 .stroke(ringGradient, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-                .animation(.spring(response: 0.8, dampingFraction: 0.7), value: progress)
+                .motion(Motion.progress, value: progress)
 
             // .percent format so the sign's placement follows the locale.
             VStack(spacing: 2) {
@@ -40,6 +40,7 @@ struct CircularProgressView: View {
                     .animatedNumber(progress)
             }
         }
+        .completionPulse(progress >= 1)
         .padding(20)
     }
 }
