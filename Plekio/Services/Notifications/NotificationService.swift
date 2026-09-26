@@ -82,6 +82,10 @@ final class NotificationService: NotificationServiceProtocol {
             let courses = self.activeCourses(from: dbService, on: self.time.now, calendar: self.time.calendar)
             await self.clearForRebuild(activeCourses: courses)
             await self.scheduleNotifications(activeCourses: courses)
+            // Every dose write, course change and app activation ends up here.
+            await self.center.setBadgeCount(
+                DoseBadge.count(courses: courses, at: self.time.now, calendar: self.time.calendar)
+            )
         }
     }
 
@@ -128,18 +132,18 @@ final class NotificationService: NotificationServiceProtocol {
         // Soonest first, so the iOS limit drops the furthest reminders.
         let sortedEntries = scheduleMap.sorted { $0.key < $1.key }
 
-        // Build all requests before any await, while the SwiftData objects are in hand.
-        var requests: [UNNotificationRequest] = []
-        for (triggerDate, medsAtTime) in sortedEntries {
-            guard requests.count < ReminderPlanner.maxScheduled else { break }
+        let scheduled = sortedEntries.prefix(ReminderPlanner.maxScheduled)
+        // Each reminder sets the icon to what will be open when it fires.
+        let badges = DoseBadge.counts(at: scheduled.map(\.key), courses: activeCourses, calendar: calendar)
 
-            requests.append(
-                ReminderRequestFactory.doseReminder(
-                    medicationIds: medsAtTime.map { $0.medication.id.uuidString },
-                    medicationNames: medsAtTime.map { $0.medication.name },
-                    triggerDate: triggerDate,
-                    calendar: calendar
-                )
+        // Build all requests before any await, while the SwiftData objects are in hand.
+        let requests = scheduled.map { triggerDate, medsAtTime in
+            ReminderRequestFactory.doseReminder(
+                medicationIds: medsAtTime.map { $0.medication.id.uuidString },
+                medicationNames: medsAtTime.map { $0.medication.name },
+                triggerDate: triggerDate,
+                calendar: calendar,
+                badge: badges[triggerDate]
             )
         }
 

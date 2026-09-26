@@ -86,6 +86,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.undoableAction)
+        .doseFeedback(for: allPills)
         .toolbar(.hidden, for: .navigationBar)
     }
 
@@ -160,6 +161,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
             }
             .padding(.horizontal)
         }
+        .sensoryFeedback(.selection, trigger: viewModel.selectedDate)
     }
 
     private var timelineSection: some View {

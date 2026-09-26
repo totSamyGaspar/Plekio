@@ -17,6 +17,7 @@ final class FakeNotificationCenterClient: NotificationCenterClient {
     var pending: [UNNotificationRequest] = []
     var delivered: [UNNotificationRequest] = []
     private(set) var registeredCategories: Set<UNNotificationCategory> = []
+    private(set) var badgeCount: Int?
 
     var grantsAuthorization = true
     var authorizationError: Error?
@@ -60,5 +61,9 @@ final class FakeNotificationCenterClient: NotificationCenterClient {
     func removeAllPending() async {
         pending.removeAll()
         await Task.yield()
+    }
+
+    func setBadgeCount(_ count: Int) async {
+        badgeCount = count
     }
 }

@@ -34,6 +34,7 @@ struct DiaryMoodGrid: View {
                     card(for: mood)
                 }
             }
+            .sensoryFeedback(.selection, trigger: selection)
         }
     }
 

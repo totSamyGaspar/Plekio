@@ -89,7 +89,6 @@ final class NotificationResponseHandler {
 
         case .take(let ids, let slot):
             await write(ids, slot) { try self.doseLogging.markTaken($0) }
-            router.selectedTab = .today
 
         case .skip(let ids, let slot):
             await write(ids, slot) { try self.doseLogging.markSkipped($0) }

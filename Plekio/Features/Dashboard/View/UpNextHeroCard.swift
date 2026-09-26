@@ -82,10 +82,7 @@ struct UpNextHeroCard: View {
 
                 Spacer()
 
-                Button {
-                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    onLogNow()
-                } label: {
+                Button(action: onLogNow) {
                     Text(pills.count > 1 ? "LOG ALL" : "LOG NOW")
                         .font(.subheadline.weight(.heavy))
                         .foregroundColor(Color(red: 0.05, green: 0.3, blue: 0.2))

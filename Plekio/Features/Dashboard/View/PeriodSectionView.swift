@@ -42,7 +42,6 @@ struct PeriodSectionView: View {
                     onToggle: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                             onTogglePill(pill.id)
-                            hapticFeedback()
                         }
                     },
                     onTapCard: {
@@ -52,12 +51,5 @@ struct PeriodSectionView: View {
             }
         }
         .padding(.horizontal)
-    }
-
-    // MARK: - Helpers
-
-    private func hapticFeedback() {
-        let impact = UIImpactFeedbackGenerator(style: .medium)
-        impact.impactOccurred()
     }
 }

@@ -22,14 +22,17 @@ struct NotificationServiceTests {
         calendar.date(from: DateComponents(year: 2030, month: 6, day: day, hour: hour, minute: minute))!
     }
 
-    /// Service over the fake centre with isolated settings; clock pinned to 10 June 2030, 08:00.
-    private func makeService(_ center: FakeNotificationCenterClient) -> (NotificationService, UserDefaults, String) {
+    /// Service over the fake centre with isolated settings; clock pinned to 10 June 2030, 08:00 by default.
+    private func makeService(
+        _ center: FakeNotificationCenterClient,
+        now: Date? = nil
+    ) -> (NotificationService, UserDefaults, String) {
         let suite = "PlekioTests.NotificationService.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         let service = NotificationService(
             center: center,
             settings: SettingsStore(defaults: defaults),
-            time: FixedTime(date(10, 8))
+            time: FixedTime(now ?? date(10, 8))
         )
         return (service, defaults, suite)
     }
@@ -264,5 +267,58 @@ struct NotificationServiceTests {
         await service.scheduleSnooze(for: [id], names: ["Ибупрофен"], slot: date(10, 21))
 
         #expect(center.pending.filter { ReminderRequestFactory.isSnooze($0.identifier) }.count == 2)
+    }
+
+    // MARK: - Badge
+
+    @Test("каждое напоминание ставит на иконку число открытых к этому времени доз дня")
+    func eachReminderCarriesTheOpenCountAtItsTime() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = database()
+        let course = try #require(db.coursesToReturn.first)
+        let onePM = calendar.date(from: DateComponents(year: 2000, month: 1, day: 1, hour: 13))!
+        course.medications.append(
+            MedicationItem(id: UUID(), name: "Витамин D", formSystemImage: "pills.fill",
+                           dosage: 1, timesOfDay: [onePM], frequencyDays: 1)
+        )
+
+        await service.rescheduleAll(using: db)
+
+        let badges = Dictionary(uniqueKeysWithValues: center.pending.compactMap { request -> (Date, Int)? in
+            guard let slot = ReminderPayload.slotTime(in: request.content.userInfo) else { return nil }
+            return (Date(timeIntervalSince1970: slot), request.content.badge?.intValue ?? -1)
+        })
+        #expect(badges[date(10, 9)] == 1)
+        #expect(badges[date(10, 13)] == 2)
+        #expect(badges[date(11, 9)] == 1)
+    }
+
+    @Test("пересборка ставит на иконку число доз, время которых пришло")
+    func rebuildSetsTheLiveBadge() async {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center, now: date(10, 10))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        await service.rescheduleAll(using: database())
+
+        #expect(center.badgeCount == 1)
+    }
+
+    @Test("принятая доза уходит с иконки")
+    func takenDoseLeavesTheBadge() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center, now: date(10, 10))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = database()
+        let med = try #require(db.coursesToReturn.first?.medications.first)
+        let log = DoseLog(scheduledTime: date(10, 9), status: .taken(at: date(10, 9), dispensed: 1))
+        log.medication = med
+        med.logs.append(log)
+
+        await service.rescheduleAll(using: db)
+
+        #expect(center.badgeCount == 0)
     }
 }

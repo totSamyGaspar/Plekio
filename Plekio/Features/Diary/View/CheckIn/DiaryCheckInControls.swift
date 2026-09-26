@@ -86,6 +86,7 @@ struct DiarySliderRow: View {
             }
             Slider(value: $value, in: range, step: 1)
                 .tint(tint)
+                .sensoryFeedback(.selection, trigger: value)
             HStack {
                 // Three labels share one row; some translations need two lines.
                 Text(minLabel).font(.caption2).foregroundColor(.textSecondary)
@@ -128,6 +129,7 @@ struct DiaryTagChip: View {
             .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: isSelected)
     }
 }
 
