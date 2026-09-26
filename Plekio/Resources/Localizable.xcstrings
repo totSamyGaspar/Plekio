@@ -63,6 +63,64 @@
         }
       }
     },
+    "A diary entry can't be dated in the future." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Tagebucheintrag kann nicht in der Zukunft liegen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una entrada del diario no puede tener fecha futura."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une entrée du journal ne peut pas être datée dans le futur."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una voce del diario non può avere una data futura."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日記の記録を未来の日付にすることはできません。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Күнделік жазбасы болашақ күнмен белгіленбейді."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O intrare în jurnal nu poate avea o dată din viitor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запись в дневнике не может быть датирована будущим."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запис у щоденнику не може бути датований майбутнім."
+          }
+        }
+      }
+    },
     "A report for your doctor" : {
       "comment" : "First-run tour or a one-time tip.",
       "localizations" : {

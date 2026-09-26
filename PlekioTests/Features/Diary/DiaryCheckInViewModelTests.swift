@@ -253,4 +253,30 @@ struct DiaryCheckInViewModelTests {
         #expect(mockDb.updatedDiaryDraft?.physicalSummary == "Updated summary.")
         #expect(mockDb.savedDiaryDraft == nil)
     }
+
+    // MARK: - Date
+
+    @Test("запись в будущем не сохраняется и показывает ошибку")
+    func futureEntryIsRejected() {
+        let now = Date(timeIntervalSince1970: 1_900_000_000)
+        let db = MockDatabaseService()
+        let errors = SpyErrorReporter()
+        let vm = DiaryCheckInViewModel(dbService: db, photos: FakePhotoStore(), errors: errors, time: FixedTime(now))
+        vm.draft.checkInDate = now.addingTimeInterval(3600)
+
+        #expect(vm.save() == false)
+        #expect(db.savedDiaryDraft == nil)
+        #expect(errors.reported.count == 1)
+    }
+
+    @Test("запись на текущий момент сохраняется")
+    func entryAtNowIsSaved() {
+        let now = Date(timeIntervalSince1970: 1_900_000_000)
+        let db = MockDatabaseService()
+        let vm = DiaryCheckInViewModel(dbService: db, photos: FakePhotoStore(), errors: SpyErrorReporter(), time: FixedTime(now))
+        vm.draft.checkInDate = now
+
+        #expect(vm.save() == true)
+        #expect(db.savedDiaryDraft != nil)
+    }
 }

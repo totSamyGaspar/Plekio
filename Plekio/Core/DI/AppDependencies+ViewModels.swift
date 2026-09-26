@@ -50,7 +50,7 @@ extension AppDependencies {
     }
 
     func makeDiaryCheckInViewModel() -> DiaryCheckInViewModel {
-        DiaryCheckInViewModel(diary: diaryRepository, photos: photoCache, errors: errorPresenter)
+        DiaryCheckInViewModel(diary: diaryRepository, photos: photoCache, errors: errorPresenter, time: time)
     }
 
     // MARK: - Settings

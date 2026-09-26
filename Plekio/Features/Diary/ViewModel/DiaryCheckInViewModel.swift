@@ -24,25 +24,29 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     private let diary: any DiaryRepository
     private let photos: any PhotoStoring
     private let errors: any ErrorReporting
+    private let time: any TimeSource
 
     // MARK: - Init
 
-    init(diary: any DiaryRepository, photos: any PhotoStoring, errors: any ErrorReporting) {
+    init(diary: any DiaryRepository, photos: any PhotoStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
         self.diary = diary
         self.photos = photos
         self.errors = errors
+        self.time = time
     }
 
     /// Over the SwiftData store — the shape tests use.
     convenience init(
         dbService: any DiaryStoring & BloodPressureStoring,
         photos: any PhotoStoring,
-        errors: any ErrorReporting
+        errors: any ErrorReporting,
+        time: any TimeSource = SystemTime()
     ) {
         self.init(
             diary: SwiftDataDiaryRepository(store: dbService),
             photos: photos,
-            errors: errors
+            errors: errors,
+            time: time
         )
     }
 
@@ -138,13 +142,28 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
     /// Returns `false` when the save failed, so the view stays open and input isn't lost.
     @discardableResult
     func save() -> Bool {
-        errors.run { [self] in
+        // The pickers stop at now; this guards every other way a draft could get here.
+        guard draft.checkInDate <= time.now else {
+            errors.report(DiaryEntryError.inFuture)
+            return false
+        }
+        return errors.run { [self] in
             if let editingEntry {
                 try diary.updateEntry(id: editingEntry.id, with: draft)
             } else {
                 try diary.saveEntry(draft)
             }
         }
+    }
+}
+
+// MARK: - DiaryEntryError
+
+enum DiaryEntryError: LocalizedError {
+    case inFuture
+
+    var errorDescription: String? {
+        String(localized: "A diary entry can't be dated in the future.")
     }
 }
 
