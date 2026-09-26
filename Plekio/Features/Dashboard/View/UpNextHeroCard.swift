@@ -5,7 +5,7 @@
 //  Created by Edward Gasparian on 19.06.2026.
 //
 
-import  SwiftUI
+import SwiftUI
 
 struct UpNextHeroCard: View {
 
@@ -17,38 +17,10 @@ struct UpNextHeroCard: View {
     let totalCount: Int
     var onLogNow: () -> Void
 
-    /// Time-of-day gradient based on the current hour.
-    private var gradientColors: [Color] {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 5..<12:  return [Color.heroMorningStart, Color.heroMorningEnd]
-        case 12..<18: return [Color.heroNoonStart, Color.heroNoonEnd]
-        default:      return [Color.heroEveningStart, Color.heroEveningEnd]
-        }
-    }
-
     // MARK: - Body
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .center, spacing: 12) {
-                Text("UP NEXT TODAY")
-                    .font(.caption.weight(.heavy))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(Color.black.opacity(0.15))
-                    .cornerRadius(20)
-                    .foregroundColor(.white)
-
-                Spacer(minLength: 0)
-
-                Text(selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
-                    .font(.subheadline.weight(.bold))
-                    .foregroundColor(.white.opacity(0.9))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.trailing)
-            }
-
+        HeroCard(title: "UP NEXT TODAY", date: selectedDate) {
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(pills) { pill in
                     HStack(spacing: 12) {
@@ -96,10 +68,6 @@ struct UpNextHeroCard: View {
                 .buttonStyle(PressableButtonStyle())
             }
         }
-        .padding(24)
-        .background(LinearGradient(colors: gradientColors, startPoint: .topLeading, endPoint: .bottomTrailing))
-        .cornerRadius(32)
-        .padding(.horizontal)
     }
 }
 

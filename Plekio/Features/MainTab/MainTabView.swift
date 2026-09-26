@@ -47,7 +47,10 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $router.selectedTab) {
             NavigationStack {
-                DashboardView(viewModel: dependencies.makeDashboardViewModel())
+                DashboardView(
+                    viewModel: dependencies.makeDashboardViewModel(),
+                    statistics: dependencies.makeStatisticsViewModel()
+                )
             }
             .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
             .tag(AppTab.today)

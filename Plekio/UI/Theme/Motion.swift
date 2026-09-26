@@ -18,6 +18,8 @@ enum Motion {
     static let bouncy = Animation.spring(response: 0.3, dampingFraction: 0.65)
     /// Progress rings, bars and lists settling after data changes.
     static let progress = Animation.spring(response: 0.7, dampingFraction: 0.78)
+    /// A card turning over.
+    static let flip = Animation.spring(response: 0.75, dampingFraction: 0.82)
 }
 
 /// `withAnimation` that honours Reduce Motion.

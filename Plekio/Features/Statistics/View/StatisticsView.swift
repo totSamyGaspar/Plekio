@@ -13,7 +13,10 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
     // MARK: - Properties
 
     @Environment(AppDependencies.self) private var dependencies
-    @StateObject private var viewModel: VM
+    /// Owned by the screen that embeds it: Today's hero card reads the same numbers.
+    @ObservedObject var viewModel: VM
+    /// Off while the hero card shows the same summary.
+    let showsAdherence: Bool
 
     @State private var showingRefillAlert = false
     @State private var refillAmountText = ""
@@ -21,8 +24,9 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
 
     // MARK: - Init
 
-    init(viewModel: @autoclosure @escaping () -> VM) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
+    init(viewModel: VM, showsAdherence: Bool = true) {
+        self.viewModel = viewModel
+        self.showsAdherence = showsAdherence
     }
 
     // MARK: - Body
@@ -56,8 +60,10 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
             }
             .padding(.top, 20)
 
-            adherenceTargetSection
-                .padding(.horizontal)
+            if showsAdherence {
+                adherenceTargetSection
+                    .padding(.horizontal)
+            }
 
         }
         .alert("Refill Stock", isPresented: $showingRefillAlert, presenting: selectedMedForRefill) { med in
@@ -132,24 +138,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 .tracking(1.5)
                 .padding(.top, 24)
 
-            HStack(alignment: .center, spacing: 16) {
-                CircularProgressView(progress: viewModel.progress)
-                    .frame(height: 100)
-
-                VStack(spacing: 10) {
-                    Text(verbatim: "🔥")
-                        .font(.headline.weight(.bold))
-                    Text("\(viewModel.streakDays) days streak!")
-                        .font(.headline.weight(.bold))
-                        .foregroundColor(.textPrimary)
-                        .multilineTextAlignment(.center)
-                        .animatedNumber(Double(viewModel.streakDays))
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .background(Color.textPrimary.opacity(0.15))
-                .cornerRadius(20)
-            }
+            AdherenceSummaryView(progress: viewModel.progress, streakDays: viewModel.streakDays)
         }
         .frame(maxWidth: .infinity)
         .background(Color.appSurface)

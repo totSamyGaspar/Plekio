@@ -8,12 +8,13 @@
 import SwiftUI
 import TipKit
 
-struct DashboardView<VM: DashboardViewModelProtocol>: View {
+struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelProtocol>: View {
 
     // MARK: - Properties
 
-    @Environment(AppDependencies.self) private var dependencies
     @StateObject private var viewModel: VM
+    /// Shared by the statistics section and the finished-day hero card.
+    @StateObject private var statistics: Stats
     @EnvironmentObject private var router: AppRouter
 
     /// Scales with the wordmark's text style under Dynamic Type.
@@ -29,8 +30,9 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
 
     // MARK: - Init
 
-    init(viewModel: @autoclosure @escaping () -> VM) {
+    init(viewModel: @autoclosure @escaping () -> VM, statistics: @autoclosure @escaping () -> Stats) {
         self._viewModel = StateObject(wrappedValue: viewModel())
+        self._statistics = StateObject(wrappedValue: statistics())
     }
 
     // MARK: - Body
@@ -38,31 +40,25 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             Color.appBackground.ignoresSafeArea()
-            let allTakenStates = (viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills).map { $0.isTaken }
+            // Statuses, not just "taken": a skip can also finish the day and swap the hero card.
+            let allStatuses = allPills.map(\.status)
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     headerSection
 
-                    if let upNextPills {
-                        UpNextHeroCard(
-                            pills: upNextPills,
-                            selectedDate: viewModel.selectedDate,
-                            takenCount: takenCount,
-                            totalCount: totalCount
-                        ) {
-                            viewModel.logDoses(upNextPills)
-                        }
-                        .tourTarget(.upNextCard)
-                        .zIndex(1)
-                        .transition(
-                            .asymmetric(
-                                insertion: .move(edge: .bottom).combined(with: .opacity),
-                                removal: .opacity
-                                    .combined(with: .scale(scale: 0.8))
-                                    .combined(with: .offset(y: -40))
+                    if let heroPills {
+                        heroCard(front: heroPills)
+                            .tourTarget(.upNextCard)
+                            .zIndex(1)
+                            .transition(
+                                .asymmetric(
+                                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                                    removal: .opacity
+                                        .combined(with: .scale(scale: 0.8))
+                                        .combined(with: .offset(y: -40))
+                                )
                             )
-                        )
                     } else {
                         dateSummaryLine
                     }
@@ -74,10 +70,10 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                     } else {
                         timelineSection
                     }
-                    StatisticsView(viewModel: dependencies.makeStatisticsViewModel())
+                    StatisticsView(viewModel: statistics, showsAdherence: !isDayComplete)
                 }
                 .padding(.bottom, 100)
-                .motion(Motion.progress, value: allTakenStates)
+                .motion(Motion.progress, value: allStatuses)
             }
         }
         .overlay(alignment: .bottom) {
@@ -128,6 +124,21 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
 
     /// Next pending slot today; nil hides the hero card. Missed doses are excluded
     /// so the hero can't bypass MedicationCardView's missed-dose lock.
+    /// Today, and every dose is taken or skipped: the hero card turns into the day's summary.
+    private var isDayComplete: Bool {
+        Calendar.current.isDateInToday(viewModel.selectedDate)
+            && !allPills.isEmpty
+            && allPills.allSatisfy(\.status.isSettled)
+    }
+
+    /// What the hero's front shows: the next slot, or once the day is done, the last one,
+    /// which is what the card was showing just before it turns over.
+    private var heroPills: [PillDose]? {
+        if let upNextPills { return upNextPills }
+        guard isDayComplete, let last = allPills.map(\.time).max() else { return nil }
+        return allPills.filter { Calendar.current.isDate($0.time, equalTo: last, toGranularity: .minute) }
+    }
+
     private var upNextPills: [PillDose]? {
         guard Calendar.current.isDateInToday(viewModel.selectedDate) else { return nil }
         guard let earliest = allPills
@@ -140,6 +151,28 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     }
 
     // MARK: - Sections
+
+    /// "Up next" on the front; turns over to the day's summary once every dose is settled.
+    private func heroCard(front pills: [PillDose]) -> some View {
+        FlipCard(isFlipped: isDayComplete) {
+            UpNextHeroCard(
+                pills: pills,
+                selectedDate: viewModel.selectedDate,
+                takenCount: takenCount,
+                totalCount: totalCount
+            ) {
+                viewModel.logDoses(pills)
+            }
+        } back: {
+            DayCompleteHeroCard(
+                date: viewModel.selectedDate,
+                takenCount: takenCount,
+                totalCount: totalCount,
+                streakDays: statistics.streakDays,
+                isShown: isDayComplete
+            )
+        }
+    }
 
     /// Shown instead of the hero card; describes the selected day, not today.
     private var dateSummaryLine: some View {
@@ -273,7 +306,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
 // MARK: - Preview
 
 #Preview {
-    DashboardView(viewModel: MockDashboardViewModel())
+    DashboardView(viewModel: MockDashboardViewModel(), statistics: MockStatisticsViewModel())
         .environmentObject(AppRouter())
         .environment(AppDependencies.preview)
         .appTheme()
