@@ -40,6 +40,14 @@ final class AppRouter: ObservableObject {
         activeFullScreen = nil
     }
 
+    // MARK: - Navigation
+
+    /// Opens a course's detail on the Courses tab, replacing whatever was pushed there.
+    func showCourse(id: UUID) {
+        selectedTab = .courses
+        coursesPath = NavigationPath([Route.courseDetail(courseId: id)])
+    }
+
     // MARK: - Deep links
 
     /// Switches to the link's tab and parks it for the screen that presents it.

@@ -24,6 +24,7 @@ final class MockDashboardViewModel: DashboardViewModelProtocol {
     var eveningPills: [PillDose] = []
 
     var isEmpty: Bool = false
+    var hasCourses: Bool = true
 
     @Published var weeklyPercentages: [Double] = [1.0, 1.0, 1.0, 0.6, 1.0, 0.7, 1.0]
     @Published var weeklyDays: [String] = ["Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu"]
@@ -37,6 +38,7 @@ final class MockDashboardViewModel: DashboardViewModelProtocol {
 
     func togglePill(id: PillDose.ID) {}
     func logDoses(_ doses: [PillDose]) {}
+    func skipDose(id: PillDose.ID) {}
     func undoLastAction() {}
     func dismissUndo() {}
 }

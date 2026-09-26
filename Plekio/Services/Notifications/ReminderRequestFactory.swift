@@ -96,6 +96,25 @@ enum ReminderRequestFactory {
         )
     }
 
+    // MARK: - Refill Reminder
+
+    /// No category: a tap just opens Today, where the low-stock card has the refill button.
+    static func refillReminder(_ plan: RefillReminder.Plan, calendar: Calendar) -> UNNotificationRequest {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Running low on medication")
+        let names = plan.medicationNames.formatted(.list(type: .and))
+        content.body = String(localized: "Time to refill: \(names)")
+        content.sound = .default
+        content.userInfo = [RefillReminder.userInfoKey: true]
+
+        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: plan.fireDate)
+        return UNNotificationRequest(
+            identifier: RefillReminder.identifier,
+            content: content,
+            trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        )
+    }
+
     // MARK: - Daily Reminders
 
     /// Repeating, so each time costs exactly one of iOS's 64 pending slots.

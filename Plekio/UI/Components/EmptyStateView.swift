@@ -8,9 +8,17 @@
 import SwiftUI
 
 struct EmptyStateView: View {
+
+    // MARK: - Properties
+
     let icon: String
     let title: LocalizedStringKey
     var verticalPadding: CGFloat = 50
+    /// Optional call to action under the title.
+    var actionTitle: LocalizedStringKey?
+    var action: (() -> Void)?
+
+    // MARK: - Body
 
     var body: some View {
         VStack(spacing: 14) {
@@ -22,6 +30,19 @@ struct EmptyStateView: View {
                 .font(.headline)
                 .foregroundColor(.textSecondary)
                 .multilineTextAlignment(.center)
+
+            if let actionTitle, let action {
+                Button(action: action) {
+                    Label(actionTitle, systemImage: "plus")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundColor(.onAccent)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(Capsule().fill(Color.accentPrimary))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 6)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, verticalPadding)

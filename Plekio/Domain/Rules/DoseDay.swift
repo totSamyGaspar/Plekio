@@ -46,7 +46,8 @@ nonisolated enum DoseDay {
                             period: DayPeriod(hour: slot.hour),
                             status: log?.status ?? .pending,
                             stockCount: med.stockCount,
-                            lowStockThreshold: med.lowStockThreshold
+                            lowStockThreshold: med.lowStockThreshold,
+                            courseId: course.id
                         )
                     )
                 }

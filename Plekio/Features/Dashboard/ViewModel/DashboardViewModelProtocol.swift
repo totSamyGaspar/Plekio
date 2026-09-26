@@ -22,11 +22,14 @@ protocol DashboardViewModelProtocol: ObservableObject {
     var recentAverage: Int { get }
 
     var isEmpty: Bool { get }
+    /// False until the first course exists; the empty day then offers to create one.
+    var hasCourses: Bool { get }
 
     var undoableAction: UndoableDoseAction? { get }
 
     func togglePill(id: PillDose.ID)
     func logDoses(_ doses: [PillDose])
+    func skipDose(id: PillDose.ID)
     func undoLastAction()
     func dismissUndo()
 }

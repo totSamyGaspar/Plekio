@@ -321,4 +321,32 @@ struct NotificationServiceTests {
 
         #expect(center.badgeCount == 0)
     }
+
+    // MARK: - Refill
+
+    @Test("пересборка ставит одно напоминание о запасе, пока лекарство на исходе")
+    func rebuildQueuesRefillWhileLow() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = database()
+        let med = try #require(db.coursesToReturn.first?.medications.first)
+        med.stockCount = 3
+
+        await service.rescheduleAll(using: db)
+        await service.rescheduleAll(using: db)
+
+        #expect(center.pending.filter { $0.identifier == RefillReminder.identifier }.count == 1)
+    }
+
+    @Test("при достаточном запасе напоминания о пополнении нет")
+    func noRefillWhenStocked() async {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        await service.rescheduleAll(using: database())
+
+        #expect(!center.pending.contains { $0.identifier == RefillReminder.identifier })
+    }
 }

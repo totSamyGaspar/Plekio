@@ -101,4 +101,17 @@ struct AppRouterTests {
         #expect(router.activeSheet == nil)
         #expect(router.activeFullScreen == nil)
     }
+
+    // MARK: - Navigation
+
+    @Test("showCourse открывает курс на вкладке «Курсы» поверх пустого стека")
+    func testShowCourseOpensItsDetail() {
+        let router = AppRouter()
+        router.coursesPath.append(Route.courseDetail(courseId: UUID()))
+
+        router.showCourse(id: UUID())
+
+        #expect(router.selectedTab == .courses)
+        #expect(router.coursesPath.count == 1)
+    }
 }

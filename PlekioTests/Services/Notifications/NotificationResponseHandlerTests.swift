@@ -171,4 +171,19 @@ struct NotificationResponseHandlerTests {
         #expect(h.errors.reported.count == 1)
         #expect(h.notifications.scheduleCallCount == 0)
     }
+
+    // MARK: - Refill
+
+    @Test("нажатие на напоминание о запасе открывает «Сегодня»")
+    func refillReminderOpensToday() async {
+        let info: [AnyHashable: Any] = [RefillReminder.userInfoKey: true]
+        let intent = NotificationIntent.parse(userInfo: info, actionIdentifier: "any")
+        #expect(intent == .openRefill)
+
+        let h = Harness()
+        h.router.selectedTab = .settings
+        await h.handler.handle(.openRefill)
+
+        #expect(h.router.selectedTab == .today)
+    }
 }

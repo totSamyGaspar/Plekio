@@ -82,6 +82,7 @@ final class NotificationService: NotificationServiceProtocol {
             let courses = self.activeCourses(from: dbService, on: self.time.now, calendar: self.time.calendar)
             await self.clearForRebuild(activeCourses: courses)
             await self.scheduleNotifications(activeCourses: courses)
+            await self.scheduleRefillReminder(activeCourses: courses)
             // Every dose write, course change and app activation ends up here.
             await self.center.setBadgeCount(
                 DoseBadge.count(courses: courses, at: self.time.now, calendar: self.time.calendar)
@@ -160,6 +161,20 @@ final class NotificationService: NotificationServiceProtocol {
 
         await add(requests, failureMessage: "Failed to schedule")
         AppLog.notifications.debug("Grouped and scheduled notifications: \(requests.count)")
+    }
+
+    // MARK: - Refill
+
+    /// Runs inside the rebuild, after the queue was cleared, so it never piles up.
+    private func scheduleRefillReminder(activeCourses: [TreatmentCourse]) async {
+        guard let plan = RefillReminder.plan(
+            activeCourses: activeCourses, now: time.now, calendar: time.calendar
+        ) else { return }
+
+        await add(
+            [ReminderRequestFactory.refillReminder(plan, calendar: time.calendar)],
+            failureMessage: "Refill reminder failed"
+        )
     }
 
     // MARK: - Snooze

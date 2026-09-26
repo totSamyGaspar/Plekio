@@ -60,7 +60,7 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
                     calendarSection.padding(.top, 8)
 
                     if viewModel.isEmpty {
-                        EmptyStateView(icon: "pills", title: "Nothing for today", verticalPadding: 60)
+                        emptyDay
                     } else {
                         timelineSection
                     }
@@ -165,6 +165,22 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
         .sensoryFeedback(.selection, trigger: viewModel.selectedDate)
     }
 
+    /// Before the first course, the empty day offers to create one.
+    @ViewBuilder
+    private var emptyDay: some View {
+        if viewModel.hasCourses {
+            EmptyStateView(icon: "pills", title: "Nothing for today", verticalPadding: 60)
+        } else {
+            EmptyStateView(
+                icon: "pills",
+                title: "Add your first course to see your doses here",
+                verticalPadding: 60,
+                actionTitle: "Create a course",
+                action: { router.present(.newTreatment) }
+            )
+        }
+    }
+
     private var timelineSection: some View {
         LazyVStack(spacing: 20) {
             WeeklyAdherenceView(
@@ -197,20 +213,27 @@ struct DashboardView<VM: DashboardViewModelProtocol>: View {
     @ViewBuilder
     private func periodSection(pills: [PillDose], title: LocalizedStringResource) -> some View {
         if !pills.isEmpty {
-            PeriodSectionView(
-                title: title,
-                pills: pills,
-                onTogglePill: { id in viewModel.togglePill(id: id) },
-                onPillTap: { pill in
-                    presentTakeSheet(
-                        for: pills.filter { $0.time == pill.time && $0.status == .pending }
-                    )
-                }
-            )
+            PeriodSectionView(title: title, pills: pills) { action, pill in
+                handle(action, for: pill, in: pills)
+            }
         }
     }
 
     // MARK: - Actions
+
+    private func handle(_ action: DoseCardAction, for pill: PillDose, in section: [PillDose]) {
+        switch action {
+        case .toggle:
+            viewModel.togglePill(id: pill.id)
+        case .open:
+            presentTakeSheet(for: section.filter { $0.time == pill.time && $0.status == .pending })
+        case .skip:
+            viewModel.skipDose(id: pill.id)
+        case .showCourse:
+            guard let courseId = pill.courseId else { return }
+            router.showCourse(id: courseId)
+        }
+    }
 
     private func presentTakeSheet(for doses: [PillDose]) {
         guard !doses.isEmpty else { return }

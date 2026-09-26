@@ -13,8 +13,7 @@ struct MedicationCardView: View {
     // MARK: - Properties
 
     let pill: PillDose
-    let onToggle: () -> Void
-    let onTapCard: () -> Void
+    let onAction: (DoseCardAction) -> Void
 
     let appSurface = Color.appSurface
 
@@ -32,7 +31,7 @@ struct MedicationCardView: View {
 
     private var isLowStock: Bool {
         guard let stock = pill.stockCount else { return false }
-        return stock <= pill.lowStockThreshold
+        return StockRules.isLow(stock: stock, threshold: pill.lowStockThreshold)
     }
 
     /// Dosage and remaining stock as one run of text.
@@ -109,9 +108,11 @@ struct MedicationCardView: View {
                 .fill(appSurface)
         }
         .overlay { stateCloth }
+        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onTapGesture {
-            if pill.isLoggable && !isSettled && !pill.isMissed { onTapCard() }
+            if pill.isLoggable && !isSettled && !pill.isMissed { onAction(.open) }
         }
+        .contextMenu { contextMenuItems }
     }
 
     // MARK: - Subviews
@@ -139,7 +140,7 @@ struct MedicationCardView: View {
     /// One button for every state, so the symbol can morph between them.
     /// Skipped and missed doses stay loggable; a logged one can be undone.
     private var statusIndicator: some View {
-        Button(action: onToggle) {
+        Button { onAction(.toggle) } label: {
             Image(systemName: pill.isTaken ? "checkmark.circle.fill" : "checkmark.circle")
                 .font(.title)
                 .foregroundColor(checkmarkTint)
@@ -151,7 +152,16 @@ struct MedicationCardView: View {
         .accessibilityLabel(checkmarkLabel)
     }
 
-    private var checkmarkTint: Color {
+    @ViewBuilder
+    private var contextMenuItems: some View {
+        ForEach(DoseCardAction.menu(for: pill), id: \.self) { action in
+            Button { onAction(action) } label: {
+                Label(action.title(for: pill), systemImage: action.systemImage(for: pill))
+            }
+        }
+    }
+
+        private var checkmarkTint: Color {
         if pill.isTaken { return .accentPrimary }
         if !pill.isLoggable { return .textPrimary.opacity(0.1) }
         return pill.isMissed ? .warningAccent : .textTertiary
@@ -182,8 +192,7 @@ struct MedicationCardView: View {
                     stockCount: 9,
                     lowStockThreshold: 10
                 ),
-                onToggle: { print("Toggle tapped") },
-                onTapCard: { print("Card tapped") }
+                onAction: { print("Action: \($0)") }
             )
 
             MedicationCardView(
@@ -198,8 +207,7 @@ struct MedicationCardView: View {
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),
-                onToggle: { print("Toggle tapped") },
-                onTapCard: { print("Card tapped") }
+                onAction: { print("Action: \($0)") }
             )
 
             MedicationCardView(
@@ -214,8 +222,7 @@ struct MedicationCardView: View {
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),
-                onToggle: { print("Un-skip tapped") },
-                onTapCard: { print("Card tapped") }
+                onAction: { print("Action: \($0)") }
             )
 
             MedicationCardView(
@@ -229,8 +236,7 @@ struct MedicationCardView: View {
                     stockCount: 25,
                     lowStockThreshold: 10
                 ),
-                onToggle: { print("Late log tapped") },
-                onTapCard: { print("Card tapped") }
+                onAction: { print("Action: \($0)") }
             )
         }
         .padding()

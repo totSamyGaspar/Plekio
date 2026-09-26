@@ -13,6 +13,8 @@ import Foundation
 enum NotificationIntent: Equatable {
     /// A tap on a daily (diary / blood pressure) reminder.
     case openDailyReminder(DailyReminder)
+    /// A tap on the low-stock reminder: Today shows the refill card.
+    case openRefill
     /// "Take Now": log the slot without showing a screen.
     case take(medicationIds: [UUID], slot: Date)
     /// "Skip": recorded so the next rebuild does not bring the reminder back.
@@ -26,7 +28,10 @@ enum NotificationIntent: Equatable {
 
     /// Nil for a payload that names nothing to act on (malformed or from an older build).
     static func parse(userInfo: [AnyHashable: Any], actionIdentifier: String) -> NotificationIntent? {
-        // Checked first: daily reminders carry no medication ids.
+        // Checked first: daily and refill reminders carry no medication ids.
+        if userInfo[RefillReminder.userInfoKey] != nil {
+            return .openRefill
+        }
         if let kind = userInfo[DailyReminder.userInfoKey] as? String,
            let reminder = DailyReminder(rawValue: kind) {
             return .openDailyReminder(reminder)
@@ -86,6 +91,9 @@ final class NotificationResponseHandler {
         case .openDailyReminder(let reminder):
             // On a cold launch the router parks the link until the UI is up.
             router.open(.dailyReminder(reminder))
+
+        case .openRefill:
+            router.selectedTab = .today
 
         case .take(let ids, let slot):
             await write(ids, slot) { try self.doseLogging.markTaken($0) }

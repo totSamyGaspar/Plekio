@@ -19,7 +19,7 @@ nonisolated struct MedicationSnapshot: Identifiable, Hashable, Sendable {
     let stockCount: Int
     let lowStockThreshold: Int
 
-    var isLowOnStock: Bool { stockCount <= lowStockThreshold }
+    var isLowOnStock: Bool { StockRules.isLow(stock: stockCount, threshold: lowStockThreshold) }
 }
 
 // MARK: - CourseSnapshot

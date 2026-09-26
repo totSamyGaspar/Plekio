@@ -21,6 +21,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         }
     }
     @Published private var allPills: [PillDose] = []
+    @Published private(set) var hasCourses = true
     @Published var weeklyPercentages: [Double] = Array(repeating: 0.0, count: 7)
     @Published var weeklyDays: [String] = []
     @Published var recentAverage: Int = 0
@@ -29,7 +30,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     var undoableAction: UndoableDoseAction? { undoCenter.current }
 
     /// Read-only; all dose writes go through `doseLogging`.
-    private let dbService: any DoseStoring
+    private let dbService: any CourseStoring & DoseStoring
     private let doseLogging: DoseLoggingUseCaseProtocol
     private let errors: any ErrorReporting
     private let time: any TimeSource
@@ -45,7 +46,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     // MARK: - Init
 
     init(
-        dbService: any DoseStoring & DatabaseChangeSource,
+        dbService: any CourseStoring & DoseStoring & DatabaseChangeSource,
         doseLogging: DoseLoggingUseCaseProtocol,
         errors: any ErrorReporting,
         time: any TimeSource = SystemTime(),
@@ -59,12 +60,18 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         self.undoCenter = undoCenter ?? DoseUndoCenter(doseLogging: doseLogging, errors: errors, time: time)
         self.selectedDate = time.now
         fetchData()
+        refreshHasCourses()
 
         dbService.changes.publisher(for: [.courses, .doses])
             .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.fetchData()
             }
+            .store(in: &cancellables)
+
+        // Separate from fetchData: that one is served from the day cache, this needs a course read.
+        dbService.changes.publisher(for: [.courses])
+            .sink { [weak self] _ in self?.refreshHasCourses() }
             .store(in: &cancellables)
     }
 
@@ -103,6 +110,11 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         calculateWeeklyStats()
     }
 
+    private func refreshHasCourses() {
+        let exists = !dbService.fetchAllCourses().isEmpty
+        if hasCourses != exists { hasCourses = exists }
+    }
+
     // MARK: - Actions
 
     func togglePill(id: PillDose.ID) {
@@ -121,6 +133,17 @@ final class DashboardViewModel: DashboardViewModelProtocol {
 
         fetchData()
         startUndoWindow(.logged, undo: outcome.undo)
+    }
+
+    /// A deliberate skip from the card's menu; undoable like "Log all".
+    func skipDose(id: PillDose.ID) {
+        guard let pill = allPills.first(where: { $0.id == id }),
+              let outcome = errors.attempt({ try doseLogging.markSkipped([pill]) }),
+              outcome.didWrite
+        else { return }
+
+        fetchData()
+        startUndoWindow(.skipped, undo: outcome.undo)
     }
 
     /// The use case checks current storage, so doses changed since aren't flipped back.
