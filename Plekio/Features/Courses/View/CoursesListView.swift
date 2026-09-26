@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
 
@@ -19,6 +20,8 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
     @State private var showingDeleteAlert = false
     @State private var courseToDelete: CourseSnapshot?
     @State private var courseToRepeat: CourseSnapshot?
+
+    private let repeatTip = RepeatCourseTip()
 
     // MARK: - Init
 
@@ -40,6 +43,10 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                     Text("History").tag(1)
                 }
                 .pickerStyle(.segmented)
+                .popoverTip(viewModel.historyCourses.isEmpty ? nil : repeatTip, arrowEdge: .top)
+                .onChange(of: selectedSegment) { _, segment in
+                    if segment == 1 { repeatTip.invalidate(reason: .actionPerformed) }
+                }
                 .padding()
                 .background(Color.appBackground)
 
@@ -137,6 +144,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("New Course")
+            .tourTarget(.newCourseButton)
             .padding(.top, 6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -89,6 +89,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                     Button("Save") {
                         guard viewModel.saveCourse() else { return }
                         dependencies.toasts.show(.success("Course created"))
+                        dependencies.tour.courseCreated()
                         dismiss()
                     }
                     .font(.headline)

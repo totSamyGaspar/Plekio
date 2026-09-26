@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct SettingsView: View {
 
@@ -63,6 +64,7 @@ struct SettingsView: View {
                     .listRowBackground(Color.appSurface)
 
                     Section(header: Text("Export").foregroundColor(.textSecondary)) {
+                        TipView(DoctorReportTip())
                         NavigationLink {
                             ReportExportView(viewModel: dependencies.makeReportExportViewModel())
                         } label: {
