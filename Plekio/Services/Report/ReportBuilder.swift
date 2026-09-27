@@ -99,10 +99,11 @@ nonisolated struct ReportAssembler {
             .filter { ids.contains($0.id) }
             .sorted { $0.startDate < $1.startDate }
             .map { course in
-                CourseReport(
+                let dates = CourseRules.dates(of: course, on: lastDay)
+                return CourseReport(
                     name: course.name,
-                    startDate: course.startDate,
-                    endDate: course.endDate,
+                    startDate: dates.startDate,
+                    endDate: dates.endDate,
                     medications: course.medications
                         .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
                         .map { report(for: $0, in: course, from: from, throughDay: lastDay) }
@@ -116,8 +117,13 @@ nonisolated struct ReportAssembler {
         from: Date,
         throughDay lastDay: Date
     ) -> MedicationReport {
-        let courseStart = calendar.startOfDay(for: course.startDate)
-        let courseEnd = calendar.startOfDay(for: course.endDate)
+        // Revisions may include days outside the course's current dates.
+        let courseStart = calendar.startOfDay(for:
+            course.dateRevisions.reduce(course.startDate) { min($0, $1.startDate) }
+        )
+        let courseEnd = calendar.startOfDay(for:
+            course.dateRevisions.reduce(course.endDate) { max($0, $1.endDate) }
+        )
         let logs = logsBySlot(of: medication)
 
         var adherence = Adherence.none
@@ -127,8 +133,7 @@ nonisolated struct ReportAssembler {
         for day in days(from: max(from, courseStart), through: min(lastDay, courseEnd)) {
             let slots = DoseSchedule.slots(
                 for: medication,
-                courseStartDay: courseStart,
-                courseEndDay: courseEnd,
+                in: course,
                 on: day,
                 calendar: calendar
             )
@@ -150,7 +155,8 @@ nonisolated struct ReportAssembler {
         }
 
         // The schedule as it stood at the end of the period, not as it is today.
-        let shown = DoseSchedule.schedule(of: medication, on: min(lastDay, courseEnd))
+        let dates = CourseRules.dates(of: course, on: lastDay)
+        let shown = DoseSchedule.schedule(of: medication, on: min(lastDay, calendar.startOfDay(for: dates.endDate)))
 
         return MedicationReport(
             name: medication.name,

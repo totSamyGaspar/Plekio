@@ -35,6 +35,7 @@ nonisolated enum SchemaV1: VersionedSchema {
     static var models: [any PersistentModel.Type] {
         [
             TreatmentCourse.self,
+            CourseDateRevision.self,
             MedicationItem.self,
             DoseLog.self,
             ScheduleRevision.self,

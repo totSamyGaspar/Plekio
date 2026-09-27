@@ -152,7 +152,9 @@ extension DatabaseService: CourseStoring {
                 || oldFrequency != medication.frequencyDays
                 || oldDosage != medication.dosage else { return }
 
-        guard let course = medication.course, calendar.startOfDay(for: course.startDate) < today else { return }
+        guard let course = medication.course else { return }
+        let earliestStart = course.dateRevisions.reduce(course.startDate) { min($0, $1.startDate) }
+        guard calendar.startOfDay(for: earliestStart) < today else { return }
         // Edited again today: the revision already holds what applied before today.
         guard !medication.scheduleRevisions.contains(where: { $0.validUntil == today }) else { return }
 
@@ -237,6 +239,18 @@ extension DatabaseService: CourseStoring {
     }
 
     func updateCourseDetails(course: TreatmentCourse, name: String, startDate: Date, endDate: Date) throws {
+        let calendar = time.calendar
+        let today = calendar.startOfDay(for: time.now)
+        let datesChanged = !calendar.isDate(course.startDate, inSameDayAs: startDate)
+            || !calendar.isDate(course.endDate, inSameDayAs: endDate)
+        // Preserve even an empty past (e.g. a future course moved into the past).
+        // Repeated edits today must keep the dates that applied before the first edit.
+        if datesChanged, !course.dateRevisions.contains(where: { $0.validUntil == today }) {
+            let revision = CourseDateRevision(
+                validUntil: today, startDate: course.startDate, endDate: course.endDate
+            )
+            course.dateRevisions.append(revision)
+        }
         course.name = name
         course.startDate = startDate
         course.endDate = endDate
@@ -247,7 +261,8 @@ extension DatabaseService: CourseStoring {
     func addMedication(draft: MedicationDraft, to course: TreatmentCourse) throws {
         let calendar = time.calendar
         let today = calendar.startOfDay(for: time.now)
-        let courseStarted = calendar.startOfDay(for: course.startDate) < today
+        let earliestStart = course.dateRevisions.reduce(course.startDate) { min($0, $1.startDate) }
+        let courseStarted = calendar.startOfDay(for: earliestStart) < today
 
         let med = MedicationItem(
             id: draft.id,

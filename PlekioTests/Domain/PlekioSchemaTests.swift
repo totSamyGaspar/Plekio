@@ -31,7 +31,7 @@ struct PlekioSchemaTests {
     func currentSchemaHasEveryModel() {
         let names = Set(PlekioSchema.current().entities.map(\.name))
 
-        #expect(names == ["TreatmentCourse", "MedicationItem", "DoseLog", "ScheduleRevision", "DiaryEntry", "BloodPressureReading"])
+        #expect(names == ["TreatmentCourse", "CourseDateRevision", "MedicationItem", "DoseLog", "ScheduleRevision", "DiaryEntry", "BloodPressureReading"])
     }
 
     // MARK: - Store on disk
@@ -57,6 +57,11 @@ struct PlekioSchemaTests {
         do {
             let container = try open()
             let course = TreatmentCourse(name: "Course", startDate: Date(), endDate: Date().addingTimeInterval(86400))
+            course.dateRevisions.append(CourseDateRevision(
+                validUntil: Date(timeIntervalSince1970: 200),
+                startDate: Date(timeIntervalSince1970: 100),
+                endDate: Date(timeIntervalSince1970: 150)
+            ))
             container.mainContext.insert(course)
             try container.mainContext.save()
         }
@@ -64,5 +69,10 @@ struct PlekioSchemaTests {
         let reopened = try open()
         let courses = try reopened.mainContext.fetch(FetchDescriptor<TreatmentCourse>())
         #expect(courses.map(\.name) == ["Course"])
+        let revision = try #require(courses.first?.dateRevisions.first)
+        #expect(revision.validUntil == Date(timeIntervalSince1970: 200))
+        #expect(revision.startDate == Date(timeIntervalSince1970: 100))
+        #expect(revision.endDate == Date(timeIntervalSince1970: 150))
+        #expect(revision.course?.id == courses.first?.id)
     }
 }

@@ -95,9 +95,17 @@ final class AppDependencies {
         diaryRepository = SwiftDataDiaryRepository(store: database)
         bloodPressureLogging = BloodPressureLogging(diary: diaryRepository, errors: errorPresenter, time: time)
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)
-        reminderSync = ReminderSyncCoordinator(notificationService: notifications, dbService: database)
+        let reminderSync = ReminderSyncCoordinator(
+            notificationService: notifications,
+            dbService: database,
+            canRequestPermission: { settings.hasCompletedTour }
+        )
+        self.reminderSync = reminderSync
         router = AppRouter()
-        tour = TourCoordinator(settings: settings, router: router, onFinish: { PlekioTips.tourFinished = true })
+        tour = TourCoordinator(settings: settings, router: router, onFinish: {
+            PlekioTips.tourFinished = true
+            reminderSync.sync()
+        })
         notificationResponses = NotificationResponseHandler(
             doseLogging: doseLogging,
             notifications: notifications,

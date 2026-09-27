@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 /// Rebuilds the reminder queue whenever courses change, and asks for notification
-/// permission once there is a course to remind about, not at first launch.
+/// permission once a course exists and the first-run tour has finished or been skipped.
 @MainActor
 final class ReminderSyncCoordinator {
 
@@ -17,10 +17,12 @@ final class ReminderSyncCoordinator {
 
     private let notificationService: NotificationServiceProtocol
     private let dbService: any CourseStoring
+    private let canRequestPermission: () -> Bool
     private var cancellables = Set<AnyCancellable>()
 
     /// The most recent rebuild started, for awaiting a settled queue.
     private(set) var lastSync: Task<Void, Never>?
+    private(set) var lastPermissionRequest: Task<Void, Never>?
 
     /// Once per launch; iOS itself shows the prompt only the first time.
     private var didAskForPermission = false
@@ -31,10 +33,12 @@ final class ReminderSyncCoordinator {
     init(
         notificationService: NotificationServiceProtocol,
         dbService: any CourseStoring,
-        changes: AnyPublisher<Void, Never>
+        changes: AnyPublisher<Void, Never>,
+        canRequestPermission: @escaping () -> Bool = { false }
     ) {
         self.notificationService = notificationService
         self.dbService = dbService
+        self.canRequestPermission = canRequestPermission
 
         changes
             .sink { [weak self] in self?.sync() }
@@ -42,14 +46,19 @@ final class ReminderSyncCoordinator {
     }
 
     /// Follows course writes from the store, debounced so a burst costs one rebuild.
-    convenience init(notificationService: NotificationServiceProtocol, dbService: any CourseStoring & DatabaseChangeSource) {
+    convenience init(
+        notificationService: NotificationServiceProtocol,
+        dbService: any CourseStoring & DatabaseChangeSource,
+        canRequestPermission: @escaping () -> Bool
+    ) {
         self.init(
             notificationService: notificationService,
             dbService: dbService,
             changes: dbService.changes
                 .publisher(for: [.courses])
                 .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
-                .eraseToAnyPublisher()
+                .eraseToAnyPublisher(),
+            canRequestPermission: canRequestPermission
         )
     }
 
@@ -71,10 +80,13 @@ final class ReminderSyncCoordinator {
 
     /// Not awaited by the rebuild: the prompt may stay up, and the queue must not wait for it.
     private func askForPermissionIfNeeded() {
-        guard !didAskForPermission, !dbService.fetchAllCourses().isEmpty else { return }
+        guard !didAskForPermission, canRequestPermission(), !dbService.fetchAllCourses().isEmpty else { return }
         didAskForPermission = true
-        Task { [notificationService] in
-            await notificationService.requestPermission()
+        lastPermissionRequest = Task { [weak self, notificationService] in
+            if await notificationService.requestPermission() {
+                // The first rebuild may have run before permission was granted.
+                _ = self?.sync()
+            }
         }
     }
 }

@@ -45,6 +45,12 @@ Test names are in English; assertions and code are in English.
 
 ## Architecture
 
+Course date edits apply from the start of the edit day. Earlier days retain their
+original course bounds and every-N-days anchor, including days with no doses.
+Changing dates repeatedly in one day preserves the state before the first edit.
+Snoozes are checked against the original dose's schedule, even if its course has
+since finished; removing that slot cancels its snooze on the next rebuild.
+
 SwiftUI views over MVVM, with a small domain layer and a single composition root.
 
 ```

@@ -200,27 +200,27 @@ enum ReminderPlanner {
 
     // MARK: - Snoozes
 
-    /// Pending snoozes to keep across a rebuild: those with at least one dose still
-    /// unanswered. Medications no longer in an active course don't count.
+    /// Keep a snooze only while its original slot still has an open dose.
+    /// Include finished courses: the last dose can be snoozed past midnight.
     static func snoozesToKeep(
         pending: [ReminderSnapshot],
-        activeCourses: [TreatmentCourse],
+        courses: [TreatmentCourse],
         calendar: Calendar
     ) -> Set<String> {
-        let medications = Dictionary(
-            activeCourses.flatMap(\.medications).map { ($0.id.uuidString, $0) },
-            uniquingKeysWith: { first, _ in first }
-        )
+        var pillsByDay: [Date: [PillDose]] = [:]
 
         return Set(pending.compactMap { reminder in
             guard ReminderRequestFactory.isSnooze(reminder.identifier),
                   let slotTime = reminder.slotTime else { return nil }
             let slot = Date(timeIntervalSince1970: slotTime)
+            let day = calendar.startOfDay(for: slot)
+            let pills = pillsByDay[day] ?? DoseDay.pills(of: courses, on: day, calendar: calendar)
+            pillsByDay[day] = pills
 
-            let stillOpen = reminder.medicationIds.contains { id in
-                guard let medication = medications[id] else { return false }
-                let status = DoseSchedule.log(of: medication, at: slot, calendar: calendar)?.status ?? .pending
-                return !status.isSettled
+            let stillOpen = pills.contains { pill in
+                reminder.medicationIds.contains(pill.medicationId.uuidString)
+                    && abs(pill.time.timeIntervalSince(slot)) < 1
+                    && !pill.status.isSettled
             }
             return stillOpen ? reminder.identifier : nil
         })

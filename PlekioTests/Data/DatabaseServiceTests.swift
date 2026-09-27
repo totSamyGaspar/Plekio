@@ -222,6 +222,109 @@ struct DatabaseServiceTests {
 
     // MARK: - refillStock
 
+    @Test("Moving the course start keeps past doses, logs and the old frequency anchor")
+    func courseStartEditKeepsHistory() throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12)))
+        let med = makeCourseWithMed(db)
+        let course = try #require(med.course)
+        med.frequencyDays = 2
+        try db.context.save()
+        try db.markDosesTaken(medicationIds: [med.id], scheduledTime: testDate(2026, 6, 9, 9))
+        let days = (1...9).map { testDate(2026, 6, $0) }
+        let before = db.fetchPills(onDays: days)
+
+        try db.updateCourseDetails(course: course, name: course.name,
+                                   startDate: testDate(2026, 6, 12), endDate: course.endDate)
+
+        #expect(db.fetchPills(onDays: days) == before)
+        #expect(db.fetchPills(for: testDate(2026, 6, 10)).isEmpty)
+        #expect(db.fetchPills(for: testDate(2026, 6, 12)).count == 1)
+        #expect(db.fetchPills(for: testDate(2026, 6, 13)).isEmpty)
+    }
+
+    @Test("Shortening or extending a course cannot erase or invent doses before today")
+    func courseEndEditKeepsHistory() throws {
+        let clock = FixedTime(testDate(2026, 6, 10, 12))
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(), time: clock)
+        let course = try #require(makeCourseWithMed(db).course)
+        let days = (1...9).map { testDate(2026, 6, $0) }
+        let before = db.fetchPills(onDays: days)
+        try db.updateCourseDetails(course: course, name: course.name,
+                                   startDate: course.startDate, endDate: testDate(2026, 6, 5))
+        #expect(db.fetchPills(onDays: days) == before)
+        #expect(db.fetchPills(for: testDate(2026, 6, 10)).isEmpty)
+
+        clock.now = testDate(2026, 6, 12, 12)
+        try db.updateCourseDetails(course: course, name: course.name,
+                                   startDate: course.startDate, endDate: testDate(2026, 6, 30))
+        #expect(db.fetchPills(onDays: days) == before)
+        #expect(db.fetchPills(for: testDate(2026, 6, 11)).isEmpty)
+        #expect(db.fetchPills(for: testDate(2026, 6, 12)).count == 1)
+        #expect(course.dateRevisions.count == 2)
+    }
+
+    @Test("Repeated date edits today keep the first history; name-only edits create no revision")
+    func repeatedCourseDateEditsKeepOriginalHistory() throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12)))
+        let course = try #require(makeCourseWithMed(db).course)
+        try db.updateCourseDetails(course: course, name: "Renamed", startDate: course.startDate, endDate: course.endDate)
+        #expect(course.dateRevisions.isEmpty)
+        for start in [12, 15] {
+            try db.updateCourseDetails(course: course, name: course.name,
+                                       startDate: testDate(2026, 6, start), endDate: course.endDate)
+        }
+        #expect(course.dateRevisions.count == 1)
+        #expect(db.fetchPills(for: testDate(2026, 6, 2)).count == 1)
+        #expect(db.fetchPills(for: testDate(2026, 6, 12)).isEmpty)
+    }
+
+    @Test("Moving a future course backwards does not invent missed doses")
+    func movingFutureCourseBackKeepsEmptyPast() throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12)))
+        let course = try #require(makeCourseWithMed(db).course)
+        course.startDate = testDate(2026, 6, 20)
+        try db.context.save()
+        try db.updateCourseDetails(course: course, name: course.name,
+                                   startDate: testDate(2026, 6, 1), endDate: course.endDate)
+        #expect(db.fetchPills(for: testDate(2026, 6, 9)).isEmpty)
+        #expect(db.fetchPills(for: testDate(2026, 6, 10)).count == 1)
+    }
+
+    @Test("Medication edits after postponing a course still preserve its past schedule")
+    func medicationEditAfterCoursePostponementKeepsPast() throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12)))
+        let med = makeCourseWithMed(db)
+        let course = try #require(med.course)
+        try db.updateCourseDetails(course: course, name: course.name,
+                                   startDate: testDate(2026, 6, 20), endDate: course.endDate)
+        var draft = MedicationDraft(from: MedicationSnapshot(med))
+        draft.timesOfDay = [testDate(2000, 1, 1, 11)]
+        draft.dosage = 1
+        try db.updateMedication(med, with: draft)
+        let yesterday = try #require(db.fetchPills(for: testDate(2026, 6, 9)).first)
+        #expect(yesterday.time == testDate(2026, 6, 9, 9))
+        #expect(yesterday.dosage == 2)
+    }
+
+    @Test("A medication added after postponing a course does not appear in its old history")
+    func newMedicationAfterCoursePostponementHasNoPast() throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12)))
+        let course = try #require(makeCourseWithMed(db).course)
+        try db.updateCourseDetails(course: course, name: course.name,
+                                   startDate: testDate(2026, 6, 20), endDate: course.endDate)
+        var draft = MedicationDraft()
+        draft.name = "New medication"
+        draft.timesOfDay = [testDate(2000, 1, 1, 11)]
+        try db.addMedication(draft: draft, to: course)
+        #expect(!db.fetchPills(for: testDate(2026, 6, 9)).contains { $0.medicationId == draft.id })
+        #expect(db.fetchPills(for: testDate(2026, 6, 20)).contains { $0.medicationId == draft.id })
+    }
+
     @Test("refillStock increases stockCount by the given amount")
     func testRefillStock() async throws {
         let db = DatabaseService(inMemoryForTesting: true)

@@ -87,7 +87,24 @@ nonisolated enum DoseSchedule {
         return max(courseStartDay, calendar.startOfDay(for: own))
     }
 
-    /// Every slot a medication has on `day`, given its course.
+    /// Resolves both course-date and medication revisions for the requested day.
+    static func slots(
+        for medication: MedicationItem,
+        in course: TreatmentCourse,
+        on day: Date,
+        calendar: Calendar
+    ) -> [Slot] {
+        let dates = CourseRules.dates(of: course, on: day)
+        return slots(
+            for: medication,
+            courseStartDay: calendar.startOfDay(for: dates.startDate),
+            courseEndDay: calendar.startOfDay(for: dates.endDate),
+            on: day,
+            calendar: calendar
+        )
+    }
+
+    /// Every slot a medication has on `day`, given the course dates in force then.
     static func slots(
         for medication: MedicationItem,
         courseStartDay: Date,
