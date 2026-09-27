@@ -27,7 +27,7 @@ struct PlekioApp: App {
 
     var body: some Scene {
         WindowGroup {
-            SplashView()
+            AppLockRootView()
                 .environmentObject(appDelegate.dependencies.router)
                 .environment(appDelegate.dependencies)
                 .environment(\.imageLoader, appDelegate.dependencies.photoCache)

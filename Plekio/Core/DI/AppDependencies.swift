@@ -25,6 +25,7 @@ final class AppDependencies {
 
     /// The root points `@AppStorage` at the same defaults domain.
     let settings: SettingsStore
+    let appLock: AppLock
 
     /// Handed out as `any ErrorReporting`; only MainTabView needs the concrete type.
     let errorPresenter: AppErrorPresenter
@@ -84,6 +85,7 @@ final class AppDependencies {
         self.notifications = notifications
         self.photoCache = photoCache
         self.settings = settings
+        appLock = AppLock(settings: settings, authenticator: DeviceAuthenticator())
         self.errorPresenter = errorPresenter
         self.storeURL = storeURL
 

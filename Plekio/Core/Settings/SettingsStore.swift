@@ -12,6 +12,7 @@ import Foundation
 /// Every UserDefaults key the app writes. The strings are storage: changing one
 /// silently resets that setting for every user.
 nonisolated enum SettingsKey {
+    static let appLockEnabled = "appLockEnabled"
     static let hasSeenOnboarding = "hasSeenOnboarding"
     static let hasCompletedTour = "hasCompletedTour"
     static let appTheme = "appTheme"
@@ -48,6 +49,11 @@ final class SettingsStore {
     var hasCompletedTour: Bool {
         get { defaults.bool(forKey: SettingsKey.hasCompletedTour) }
         set { defaults.set(newValue, forKey: SettingsKey.hasCompletedTour) }
+    }
+
+    var isAppLockEnabled: Bool {
+        get { defaults.bool(forKey: SettingsKey.appLockEnabled) }
+        set { defaults.set(newValue, forKey: SettingsKey.appLockEnabled) }
     }
 
     // MARK: - Profile
