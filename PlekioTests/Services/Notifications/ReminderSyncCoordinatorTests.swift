@@ -94,7 +94,8 @@ struct ReminderSyncCoordinatorTests {
         let coordinator = ReminderSyncCoordinator(
             notificationService: notifications,
             dbService: db,
-            changes: Empty<Void, Never>().eraseToAnyPublisher()
+            changes: Empty<Void, Never>().eraseToAnyPublisher(),
+            canRequestPermission: { true }
         )
         await coordinator.sync().value
 
