@@ -79,8 +79,9 @@ final class NotificationService: NotificationServiceProtocol {
     func rescheduleAll(using dbService: any CourseStoring) async {
         await serialized { [weak self] in
             guard let self else { return }
-            let courses = self.activeCourses(from: dbService, on: self.time.now, calendar: self.time.calendar)
-            await self.clearForRebuild(activeCourses: courses)
+            let allCourses = dbService.fetchAllCourses()
+            let courses = allCourses.filter { $0.isActive(on: self.time.now, calendar: self.time.calendar) }
+            await self.clearForRebuild(courses: allCourses)
             await self.scheduleNotifications(activeCourses: courses)
             await self.scheduleRefillReminder(activeCourses: courses)
             // Every dose write, course change and app activation ends up here.
@@ -104,9 +105,9 @@ final class NotificationService: NotificationServiceProtocol {
 
     /// Clears the queue except snoozes whose doses are still open: the user was
     /// promised those. Snoozes of doses logged since are dropped with the rest.
-    private func clearForRebuild(activeCourses: [TreatmentCourse]) async {
+    private func clearForRebuild(courses: [TreatmentCourse]) async {
         let pending = await center.pendingReminders()
-        let keep = ReminderPlanner.snoozesToKeep(pending: pending, activeCourses: activeCourses, calendar: time.calendar)
+        let keep = ReminderPlanner.snoozesToKeep(pending: pending, courses: courses, calendar: time.calendar)
 
         center.removePending(identifiers: pending.map(\.identifier).filter { !keep.contains($0) })
         // The centre runs calls in order, so this read waits for the removal.

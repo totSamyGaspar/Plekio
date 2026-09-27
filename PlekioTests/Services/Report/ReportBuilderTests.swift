@@ -60,6 +60,27 @@ struct ReportBuilderTests {
 
     // MARK: - Counting
 
+    @Test("Past report dates and adherence survive changes to the course bounds")
+    func historicalReportSurvivesCourseDateEdits() throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12)))
+        let course = seedCourse(db)
+        log(course, at: testDate(2026, 6, 2, 9), taken: true)
+        try db.context.save()
+        let period = selection(course, from: testDate(2026, 6, 1), to: testDate(2026, 6, 9))
+        let before = builder(db, now: afterwards).build(period)
+
+        try db.updateCourseDetails(course: course, name: course.name,
+                                   startDate: testDate(2026, 6, 4), endDate: testDate(2026, 6, 5))
+
+        #expect(builder(db, now: afterwards).build(period) == before)
+        let spanning = builder(db, now: afterwards).build(
+            selection(course, from: testDate(2026, 6, 1), to: testDate(2026, 6, 12))
+        )
+        #expect(spanning.courses[0].adherence.scheduled == 9)
+        #expect(spanning.courses[0].adherence.taken == 1)
+    }
+
     @Test("Each course day in the period yields one scheduled dose")
     func testEveryDoseDayIsCounted() async throws {
         let db = DatabaseService(inMemoryForTesting: true)

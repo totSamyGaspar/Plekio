@@ -18,14 +18,10 @@ nonisolated enum DoseDay {
         var pills: [PillDose] = []
 
         for course in courses {
-            let courseStart = calendar.startOfDay(for: course.startDate)
-            let courseEnd = calendar.startOfDay(for: course.endDate)
-
             for med in course.medications {
                 let slots = DoseSchedule.slots(
                     for: med,
-                    courseStartDay: courseStart,
-                    courseEndDay: courseEnd,
+                    in: course,
                     on: day,
                     calendar: calendar
                 )

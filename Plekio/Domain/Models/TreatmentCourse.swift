@@ -26,6 +26,9 @@ nonisolated final class TreatmentCourse {
     @Relationship(deleteRule: .cascade, inverse: \MedicationItem.course)
     var medications: [MedicationItem]
 
+    @Relationship(deleteRule: .cascade, inverse: \CourseDateRevision.course)
+    var dateRevisions: [CourseDateRevision] = []
+
     // MARK: - Init
 
     init(name: String, startDate: Date, endDate: Date, repeatedFromId: UUID? = nil) {

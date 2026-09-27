@@ -271,6 +271,85 @@ struct NotificationServiceTests {
 
     // MARK: - Badge
 
+    @Test("The final dose's snooze survives a rebuild after the course ends at midnight")
+    func finalSnoozeSurvivesMidnight() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center, now: date(13, 0, 1))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = database()
+        let course = try #require(db.coursesToReturn.first)
+        let med = try #require(course.medications.first)
+        let slot = date(12, 23, 55)
+        med.timesOfDay = [slot]
+
+        await service.scheduleSnooze(for: [med.id.uuidString], names: [med.name], slot: slot)
+        let request = try #require(center.pending.first)
+        await service.rescheduleAll(using: db)
+
+        #expect(center.pending.map(\.identifier) == [request.identifier])
+        #expect(center.pending.first === request) // Preserved, never re-added with a fresh countdown.
+        #expect(DoseDay.pills(of: [course], on: date(12, 0), calendar: calendar).first?.time == slot)
+    }
+
+    @Test("A snooze is removed when its time, frequency or course bounds no longer contain the slot")
+    func rebuildDropsRemovedSlots() async throws {
+        for change in 0..<3 {
+            let center = FakeNotificationCenterClient()
+            let (service, defaults, suite) = makeService(center, now: date(11, 9, 1))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let db = database()
+            let course = try #require(db.coursesToReturn.first)
+            let med = try #require(course.medications.first)
+            let slot = date(11, 9)
+            await service.scheduleSnooze(for: [med.id.uuidString], names: [med.name], slot: slot)
+
+            switch change {
+            case 0: med.timesOfDay = [date(11, 11)]
+            case 1: med.frequencyDays = 2 // June 10 and 12, not 11.
+            default: course.startDate = date(12, 0)
+            }
+            await service.rescheduleAll(using: db)
+
+            #expect(!center.pending.contains { ReminderRequestFactory.isSnooze($0.identifier) })
+        }
+    }
+
+    @Test("Settled or deleted doses do not keep snoozes from a finished course")
+    func finishedCourseSnoozeStillNeedsAnOpenDose() async throws {
+        for change in 0..<3 {
+            let center = FakeNotificationCenterClient()
+            let (service, defaults, suite) = makeService(center, now: date(13, 0, 1))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let db = database()
+            let course = try #require(db.coursesToReturn.first)
+            let med = try #require(course.medications.first)
+            let slot = date(12, 23, 55)
+            med.timesOfDay = [slot]
+            await service.scheduleSnooze(for: [med.id.uuidString], names: [med.name], slot: slot)
+
+            switch change {
+            case 0: med.logs.append(DoseLog(scheduledTime: slot, status: .taken(at: slot, dispensed: 1)))
+            case 1: med.logs.append(DoseLog(scheduledTime: slot, status: .skipped(at: slot)))
+            default: db.coursesToReturn = []
+            }
+            await service.rescheduleAll(using: db)
+            #expect(!center.pending.contains { ReminderRequestFactory.isSnooze($0.identifier) })
+        }
+    }
+
+    @Test("A group snooze stays while any original dose still exists and is open")
+    func groupSnoozeKeepsItsRemainingDose() async throws {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = database()
+        let med = try #require(db.coursesToReturn.first?.medications.first)
+        await service.scheduleSnooze(for: [med.id.uuidString, UUID().uuidString],
+                                     names: [med.name, "Removed"], slot: date(10, 9))
+        await service.rescheduleAll(using: db)
+        #expect(center.pending.filter { ReminderRequestFactory.isSnooze($0.identifier) }.count == 1)
+    }
+
     @Test("Each reminder sets the badge to the day's doses open by its time")
     func eachReminderCarriesTheOpenCountAtItsTime() async throws {
         let center = FakeNotificationCenterClient()
