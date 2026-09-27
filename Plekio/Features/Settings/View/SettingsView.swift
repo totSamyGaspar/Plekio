@@ -55,6 +55,8 @@ struct SettingsView: View {
                     }
                     .listRowBackground(Color.appSurface)
 
+                    AppLockSettingsSection()
+
                     Section(header: Text("Reminders").foregroundColor(.textSecondary)) {
 
                         ForEach(DailyReminder.allCases) { reminder in
