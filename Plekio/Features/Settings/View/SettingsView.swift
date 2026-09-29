@@ -95,6 +95,8 @@ struct SettingsView: View {
                             Text("Edward Gasparian")
                                 .foregroundColor(.textSecondary)
                         }
+
+                        FeedbackButton()
                     }
                     .listRowBackground(Color.appSurface)
 
