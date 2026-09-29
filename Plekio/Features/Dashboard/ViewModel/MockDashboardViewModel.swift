@@ -18,7 +18,7 @@ final class MockDashboardViewModel: DashboardViewModelProtocol {
     var weekDates: [Date] = [Date()]
 
     var morningPills: [PillDose] = [
-        PillDose(medicationId: UUID(), name: "Vitamin D", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .morning)
+        PillDose(medicationId: UUID(), name: "Vitamin D", dosage: 1, form: .pill, time: Date(), period: .morning)
     ]
     var noonPills: [PillDose] = []
     var eveningPills: [PillDose] = []

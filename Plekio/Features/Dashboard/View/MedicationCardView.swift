@@ -54,7 +54,7 @@ struct MedicationCardView: View {
             MedicationPhotoView(medicationId: pill.medicationId, size: 48, cornerRadius: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12).fill(Color.iconTile)
-                    Image(systemName: pill.formSystemImage)
+                    Image(systemName: pill.form.systemImage)
                         .font(.title2)
                         .foregroundColor(.accentPrimary)
                 }
@@ -186,7 +186,7 @@ struct MedicationCardView: View {
                     medicationId: UUID(),
                     name: "Sertraline",
                     dosage: 1,
-                    formSystemImage: "pills.fill",
+                    form: .pill,
                     time: Date(),
                     period: .morning,
                     stockCount: 9,
@@ -200,7 +200,7 @@ struct MedicationCardView: View {
                     medicationId: UUID(),
                     name: "Vitamin D",
                     dosage: 1,
-                    formSystemImage: "capsule.fill",
+                    form: .capsule,
                     time: Date().addingTimeInterval(3600),
                     period: .morning,
                     status: .taken(at: Date(), dispensed: 1),
@@ -215,7 +215,7 @@ struct MedicationCardView: View {
                     medicationId: UUID(),
                     name: "Folic Acid",
                     dosage: 1,
-                    formSystemImage: "pills.fill",
+                    form: .pill,
                     time: Date().addingTimeInterval(-3600),
                     period: .morning,
                     status: .skipped(at: Date()),
@@ -230,7 +230,7 @@ struct MedicationCardView: View {
                     medicationId: UUID(),
                     name: "Magnesium",
                     dosage: 2,
-                    formSystemImage: "capsule.fill",
+                    form: .capsule,
                     time: Date().addingTimeInterval(-7200),
                     period: .morning,
                     stockCount: 25,

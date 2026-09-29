@@ -54,28 +54,11 @@ struct DailyReminderRows: View {
         .notificationsOffAlert(isPresented: $showingPermissionAlert)
 
         if isEnabled {
-            ForEach(Array(minutes.enumerated()), id: \.offset) { index, _ in
-                DatePicker(
-                    "Reminder time",
-                    selection: minute(at: index).timeOfDay,
-                    displayedComponents: .hourAndMinute
-                )
-                .foregroundColor(.textPrimary)
-            }
-            .onDelete { offsets in
-                // Never delete the last time; switching off is how a reminder goes away.
-                guard minutes.count > offsets.count else { return }
-                var updated = minutes
-                updated.remove(atOffsets: offsets)
-                write(updated)
-            }
-
-            if minutes.count < reminder.maxTimes {
-                Button(action: addTime) {
-                    Label("Add time", systemImage: "plus.circle.fill")
-                        .foregroundColor(.accentPrimary)
-                }
-            }
+            // Switching off, not deleting the last time, is how a reminder goes away.
+            TimeOfDayRows(
+                minutes: Binding(get: { minutes }, set: { minutesRaw = DailyReminder.raw(from: $0) }),
+                maxCount: reminder.maxTimes
+            ) { _ in Text("Reminder time") }
         }
     }
 
@@ -94,30 +77,5 @@ struct DailyReminderRows: View {
             isEnabled = false
             showingPermissionAlert = true
         }
-    }
-
-    // MARK: - Editing
-
-    /// One stored time, in minutes since midnight.
-    private func minute(at index: Int) -> Binding<Int> {
-        Binding(
-            get: { minutes.indices.contains(index) ? minutes[index] : 0 },
-            set: { newValue in
-                var updated = minutes
-                guard updated.indices.contains(index) else { return }
-                updated[index] = newValue
-                write(updated)
-            }
-        )
-    }
-
-    /// Adds a time four hours after the last one, wrapping past midnight.
-    private func addTime() {
-        let last = minutes.last ?? reminder.defaultMinutesOfDay.first ?? 0
-        write(minutes + [(last + 4 * 60) % (24 * 60)])
-    }
-
-    private func write(_ updated: [Int]) {
-        minutesRaw = DailyReminder.raw(from: updated)
     }
 }

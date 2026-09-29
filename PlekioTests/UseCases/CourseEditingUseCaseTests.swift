@@ -97,8 +97,8 @@ struct CourseEditingUseCaseTests {
         let course = TreatmentCourse(name: "Course", startDate: Date(), endDate: Date().addingTimeInterval(7 * day))
         let meds = (0..<2).map { index in
             MedicationItem(
-                id: UUID(), name: "Medication \(index)", formSystemImage: "pills.fill",
-                dosage: 1, timesOfDay: [Date()], frequencyDays: 1
+                id: UUID(), name: "Medication \(index)", form: .pill,
+                dosage: 1, minutesOfDay: [minuteOfDay(Date())], frequencyDays: 1
             )
         }
         course.medications.append(contentsOf: meds)

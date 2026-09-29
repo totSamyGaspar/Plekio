@@ -79,15 +79,15 @@ struct DailyReminderTests {
 
     @Test("Minutes past midnight split into hours and minutes, clamped at the ends")
     func testHourAndMinute() async throws {
-        let morning = DailyReminder.hourAndMinute(from: 9 * 60 + 5)
+        let morning = MinuteOfDay.hourAndMinute(9 * 60 + 5)
         #expect(morning.hour == 9)
         #expect(morning.minute == 5)
 
-        let underflow = DailyReminder.hourAndMinute(from: -1)
+        let underflow = MinuteOfDay.hourAndMinute(-1)
         #expect(underflow.hour == 0)
         #expect(underflow.minute == 0)
 
-        let overflow = DailyReminder.hourAndMinute(from: 24 * 60)
+        let overflow = MinuteOfDay.hourAndMinute(24 * 60)
         #expect(overflow.hour == 23)
         #expect(overflow.minute == 59)
     }

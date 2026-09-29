@@ -42,7 +42,7 @@ nonisolated struct MedicationReport: Equatable {
 
     let name: String
     let dosage: Int
-    let timesOfDay: [Date]
+    let minutesOfDay: [Int]
     let frequencyDays: Int
     let adherence: Adherence
 

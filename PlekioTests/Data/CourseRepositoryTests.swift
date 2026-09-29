@@ -17,8 +17,8 @@ struct CourseRepositoryTests {
 
     private func medication(_ name: String) -> MedicationItem {
         MedicationItem(
-            id: UUID(), name: name, formSystemImage: "pills.fill",
-            dosage: 1, timesOfDay: [Date()], frequencyDays: 1
+            id: UUID(), name: name, form: .pill,
+            dosage: 1, minutesOfDay: [minuteOfDay(Date())], frequencyDays: 1
         )
     }
 

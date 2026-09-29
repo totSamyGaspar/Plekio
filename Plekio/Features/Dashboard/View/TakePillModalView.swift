@@ -137,7 +137,7 @@ struct TakePillModalView: View {
                                         RoundedRectangle(cornerRadius: 16)
                                             .fill(Color.accentPrimary.opacity(0.1))
                                             .frame(width: 50, height: 50)
-                                        Image(systemName: pill.formSystemImage)
+                                        Image(systemName: pill.form.systemImage)
                                             .font(.title2)
                                             .foregroundColor(.accentPrimary)
                                     }
@@ -236,8 +236,8 @@ struct ActionButton: View {
 #Preview {
     TakePillModalView(
         pills: [
-            PillDose(medicationId: UUID(), name: "Sertraline", dosage: 1, formSystemImage: "pills.fill", time: Date(), period: .morning, stockCount: 10, lowStockThreshold: 5),
-            PillDose(medicationId: UUID(), name: "Vitamin D", dosage: 1, formSystemImage: "capsule.fill", time: Date(), period: .morning, stockCount: 10, lowStockThreshold: 5)
+            PillDose(medicationId: UUID(), name: "Sertraline", dosage: 1, form: .pill, time: Date(), period: .morning, stockCount: 10, lowStockThreshold: 5),
+            PillDose(medicationId: UUID(), name: "Vitamin D", dosage: 1, form: .capsule, time: Date(), period: .morning, stockCount: 10, lowStockThreshold: 5)
         ],
         onTake: {}, onSkip: {}, onSnooze: {}
     )

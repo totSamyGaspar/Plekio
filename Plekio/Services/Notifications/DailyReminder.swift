@@ -51,26 +51,17 @@ enum DailyReminder: String, CaseIterable, Identifiable, Sendable {
     // MARK: - Raw Times
 
     /// Parses the comma-separated list, clamped to the day and capped at `limit`.
-    /// Not sorted: keeps row order stable while editing. `nonisolated` for `map(clamp)`.
+    /// Not sorted: keeps row order stable while editing.
     nonisolated static func minutes(fromRaw raw: String, limit: Int) -> [Int] {
         raw.split(separator: ",")
             .compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }
-            .map(clamp)
+            .map(MinuteOfDay.clamp)
             .prefix(limit)
             .map { $0 }
     }
 
     nonisolated static func raw(from minutes: [Int]) -> String {
         minutes.map(String.init).joined(separator: ",")
-    }
-
-    nonisolated static func clamp(_ minuteOfDay: Int) -> Int {
-        min(max(minuteOfDay, 0), 24 * 60 - 1)
-    }
-
-    nonisolated static func hourAndMinute(from minuteOfDay: Int) -> (hour: Int, minute: Int) {
-        let clamped = clamp(minuteOfDay)
-        return (clamped / 60, clamped % 60)
     }
 
     // MARK: - Notification Identity

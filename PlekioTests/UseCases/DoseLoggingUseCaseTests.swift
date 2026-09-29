@@ -21,7 +21,7 @@ struct DoseLoggingUseCaseTests {
             : .pending
         return PillDose(
             medicationId: UUID(), name: "Dose", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning, status: status
+            form: .pill, time: slot, period: .morning, status: status
         )
     }
 

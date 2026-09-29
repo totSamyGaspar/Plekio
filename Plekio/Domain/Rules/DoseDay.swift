@@ -37,7 +37,7 @@ nonisolated enum DoseDay {
                             medicationId: med.id,
                             name: med.name,
                             dosage: DoseSchedule.schedule(of: med, on: day).dosage,
-                            formSystemImage: med.formSystemImage,
+                            form: med.form,
                             time: slot.date,
                             period: DayPeriod(hour: slot.hour),
                             status: log?.status ?? .pending,

@@ -12,9 +12,9 @@ import Foundation
 nonisolated struct MedicationSnapshot: Identifiable, Hashable, Sendable {
     let id: UUID
     let name: String
-    let formSystemImage: String
+    let form: MedicationForm
     let dosage: Int
-    let timesOfDay: [Date]
+    let minutesOfDay: [Int]
     let frequencyDays: Int
     let stockCount: Int
     let lowStockThreshold: Int
@@ -61,9 +61,9 @@ extension MedicationSnapshot {
         self.init(
             id: model.id,
             name: model.name,
-            formSystemImage: model.formSystemImage,
+            form: model.form,
             dosage: model.dosage,
-            timesOfDay: model.timesOfDay,
+            minutesOfDay: model.minutesOfDay,
             frequencyDays: model.frequencyDays,
             stockCount: model.stockCount,
             lowStockThreshold: model.lowStockThreshold

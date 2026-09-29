@@ -24,8 +24,8 @@ struct RefillReminderTests {
         let course = TreatmentCourse(name: "Course", startDate: date(1, 0), endDate: date(30, 0))
         for (name, stock) in stocks {
             course.medications.append(
-                MedicationItem(id: UUID(), name: name, formSystemImage: "pills.fill", dosage: 1,
-                               timesOfDay: [date(1, 9)], frequencyDays: 1,
+                MedicationItem(id: UUID(), name: name, form: .pill, dosage: 1,
+                               minutesOfDay: [minuteOfDay(date(1, 9))], frequencyDays: 1,
                                stockCount: stock, lowStockThreshold: 10)
             )
         }

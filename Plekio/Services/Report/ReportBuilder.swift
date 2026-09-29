@@ -161,7 +161,7 @@ nonisolated struct ReportAssembler {
         return MedicationReport(
             name: medication.name,
             dosage: shown.dosage,
-            timesOfDay: shown.timesOfDay,
+            minutesOfDay: shown.minutesOfDay,
             frequencyDays: shown.frequencyDays,
             adherence: adherence,
             exceptions: exceptions.sorted { $0.time < $1.time }

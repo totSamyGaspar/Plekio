@@ -48,14 +48,6 @@ nonisolated enum DoseSchedule {
         return elapsed >= 0 && elapsed.isMultiple(of: frequencyDays)
     }
 
-    /// Times of day as (hour, minute); the day part of `timesOfDay` is meaningless.
-    static func timesOfDay(_ times: [Date], calendar: Calendar) -> [(hour: Int, minute: Int)] {
-        times.map { time in
-            let parts = calendar.dateComponents([.hour, .minute], from: time)
-            return (parts.hour ?? 0, parts.minute ?? 0)
-        }
-    }
-
     /// Nil when the time does not exist that day (skipped by a DST transition).
     static func slotDate(hour: Int, minute: Int, on day: Date, calendar: Calendar) -> Date? {
         calendar.date(bySettingHour: hour, minute: minute, second: 0, of: day)
@@ -63,7 +55,7 @@ nonisolated enum DoseSchedule {
 
     /// A medication's schedule as of one day.
     struct Schedule: Equatable {
-        let timesOfDay: [Date]
+        let minutesOfDay: [Int]
         let frequencyDays: Int
         let dosage: Int
     }
@@ -75,9 +67,9 @@ nonisolated enum DoseSchedule {
             .filter { $0.validUntil > day }
             .min { $0.validUntil < $1.validUntil }
         if let revision {
-            return Schedule(timesOfDay: revision.timesOfDay, frequencyDays: revision.frequencyDays, dosage: revision.dosage)
+            return Schedule(minutesOfDay: revision.minutesOfDay, frequencyDays: revision.frequencyDays, dosage: revision.dosage)
         }
-        return Schedule(timesOfDay: medication.timesOfDay, frequencyDays: medication.frequencyDays, dosage: medication.dosage)
+        return Schedule(minutesOfDay: medication.minutesOfDay, frequencyDays: medication.frequencyDays, dosage: medication.dosage)
     }
 
     /// The first day a medication is taken: its own start when added mid-course,
@@ -124,7 +116,7 @@ nonisolated enum DoseSchedule {
               )
         else { return [] }
 
-        return timesOfDay(schedule.timesOfDay, calendar: calendar).compactMap { time in
+        return schedule.minutesOfDay.map(MinuteOfDay.hourAndMinute).compactMap { time in
             slotDate(hour: time.hour, minute: time.minute, on: day, calendar: calendar)
                 .map { Slot(hour: time.hour, minute: time.minute, date: $0) }
         }

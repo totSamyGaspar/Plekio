@@ -19,7 +19,7 @@ struct MedicationRowView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.accentPrimary.opacity(0.12))
-                    Image(systemName: med.formSystemImage)
+                    Image(systemName: med.form.systemImage)
                         .scaledFont(size: 20, relativeTo: .title3)
                         .foregroundColor(.accentPrimary)
                 }

@@ -25,12 +25,12 @@ struct DatabaseServiceTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Ibuprofen",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 2,
-            timesOfDay: [
-                testDate(2000, 1, 1, 8, 0),   // morning
-                testDate(2000, 1, 1, 14, 0),  // noon
-                testDate(2000, 1, 1, 20, 0),  // evening
+            minutesOfDay: [
+                8 * 60,   // morning
+                14 * 60,  // noon
+                20 * 60,  // evening
             ],
             frequencyDays: 1,
             stockCount: 30,
@@ -58,9 +58,9 @@ struct DatabaseServiceTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Vitamin B12",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 1,
-            timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+            minutesOfDay: [9 * 60],
             frequencyDays: 3,
             stockCount: 10,
             lowStockThreshold: 3
@@ -86,9 +86,9 @@ struct DatabaseServiceTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Aspirin",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 2,
-            timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+            minutesOfDay: [9 * 60],
             frequencyDays: 1,
             stockCount: 30,
             lowStockThreshold: 10
@@ -123,7 +123,7 @@ struct DatabaseServiceTests {
 
         // Existing logs must follow the dose to its new time.
         var draft = MedicationDraft(from: MedicationSnapshot(med))
-        draft.timesOfDay = [testDate(2000, 1, 1, 11, 0)]
+        draft.minutesOfDay = [11 * 60]
         try db.updateMedication(med, with: draft)
 
         let pills = db.fetchPills(for: day)
@@ -141,7 +141,7 @@ struct DatabaseServiceTests {
         try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 9, 9, 0))
 
         var draft = MedicationDraft(from: MedicationSnapshot(med))
-        draft.timesOfDay = [testDate(2000, 1, 1, 11, 0), testDate(2000, 1, 1, 21, 0)]
+        draft.minutesOfDay = [11 * 60, 21 * 60]
         try db.updateMedication(med, with: draft)
 
         // Yesterday: still one dose at 9:00, still taken.
@@ -163,9 +163,9 @@ struct DatabaseServiceTests {
         let med = makeCourseWithMed(db)
 
         var draft = MedicationDraft(from: MedicationSnapshot(med))
-        draft.timesOfDay = [testDate(2000, 1, 1, 11, 0)]
+        draft.minutesOfDay = [11 * 60]
         try db.updateMedication(med, with: draft)
-        draft.timesOfDay = [testDate(2000, 1, 1, 13, 0)]
+        draft.minutesOfDay = [13 * 60]
         try db.updateMedication(med, with: draft)
 
         #expect(med.scheduleRevisions.count == 1)
@@ -211,7 +211,7 @@ struct DatabaseServiceTests {
 
         var draft = MedicationDraft()
         draft.name = "Magnesium"
-        draft.timesOfDay = [testDate(2000, 1, 1, 20, 0)]
+        draft.minutesOfDay = [20 * 60]
         draft.frequencyDays = 1
         try db.addMedication(draft: draft, to: owner)
 
@@ -302,7 +302,7 @@ struct DatabaseServiceTests {
         try db.updateCourseDetails(course: course, name: course.name,
                                    startDate: testDate(2026, 6, 20), endDate: course.endDate)
         var draft = MedicationDraft(from: MedicationSnapshot(med))
-        draft.timesOfDay = [testDate(2000, 1, 1, 11)]
+        draft.minutesOfDay = [11 * 60]
         draft.dosage = 1
         try db.updateMedication(med, with: draft)
         let yesterday = try #require(db.fetchPills(for: testDate(2026, 6, 9)).first)
@@ -319,7 +319,7 @@ struct DatabaseServiceTests {
                                    startDate: testDate(2026, 6, 20), endDate: course.endDate)
         var draft = MedicationDraft()
         draft.name = "New medication"
-        draft.timesOfDay = [testDate(2000, 1, 1, 11)]
+        draft.minutesOfDay = [11 * 60]
         try db.addMedication(draft: draft, to: course)
         #expect(!db.fetchPills(for: testDate(2026, 6, 9)).contains { $0.medicationId == draft.id })
         #expect(db.fetchPills(for: testDate(2026, 6, 20)).contains { $0.medicationId == draft.id })
@@ -332,9 +332,9 @@ struct DatabaseServiceTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Magnesium",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 1,
-            timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+            minutesOfDay: [9 * 60],
             frequencyDays: 1,
             stockCount: 5,
             lowStockThreshold: 10
@@ -355,9 +355,9 @@ struct DatabaseServiceTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Omega-3",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 1,
-            timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+            minutesOfDay: [9 * 60],
             frequencyDays: 1,
             stockCount: 10,
             lowStockThreshold: 3
@@ -398,9 +398,9 @@ struct DatabaseServiceTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Calcium",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 1,
-            timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+            minutesOfDay: [9 * 60],
             frequencyDays: 1
         )
         db.photos.saveToDisk(Data([0x01]), for: med.id)
@@ -416,8 +416,8 @@ struct DatabaseServiceTests {
         let db = DatabaseService(inMemoryForTesting: true)
 
         let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
-        let medA = MedicationItem(id: UUID(), name: "A", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
-        let medB = MedicationItem(id: UUID(), name: "B", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let medA = MedicationItem(id: UUID(), name: "A", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
+        let medB = MedicationItem(id: UUID(), name: "B", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
         course.medications.append(contentsOf: [medA, medB])
         db.context.insert(course)
         try? db.context.save()
@@ -633,9 +633,9 @@ struct DatabaseServiceTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Aspirin",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: dosage,
-            timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+            minutesOfDay: [9 * 60],
             frequencyDays: 1,
             stockCount: stockCount,
             lowStockThreshold: 10
@@ -762,9 +762,9 @@ struct DatabaseServiceTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Aspirin",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: dosage,
-            timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+            minutesOfDay: [9 * 60],
             frequencyDays: 1,
             stockCount: stock,
             lowStockThreshold: 10
@@ -872,9 +872,9 @@ struct DatabaseServiceTests {
         let db = DatabaseService(inMemoryForTesting: true)
 
         let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
-        let times = [testDate(2000, 1, 1, 9, 0)]
-        let first = MedicationItem(id: UUID(), name: "Aspirin", formSystemImage: "pills.fill", dosage: 2, timesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
-        let second = MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "capsule.fill", dosage: 1, timesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
+        let times = [9 * 60]
+        let first = MedicationItem(id: UUID(), name: "Aspirin", form: .pill, dosage: 2, minutesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
+        let second = MedicationItem(id: UUID(), name: "Magnesium", form: .capsule, dosage: 1, minutesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
         course.medications.append(contentsOf: [first, second])
         db.context.insert(course)
         try? db.context.save()
@@ -931,9 +931,9 @@ struct DatabaseServiceTests {
         let db = DatabaseService(inMemoryForTesting: true)
 
         let course = TreatmentCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30))
-        let times = [testDate(2000, 1, 1, 9, 0)]
-        let logged = MedicationItem(id: UUID(), name: "Aspirin", formSystemImage: "pills.fill", dosage: 2, timesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
-        let untouched = MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "capsule.fill", dosage: 1, timesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
+        let times = [9 * 60]
+        let logged = MedicationItem(id: UUID(), name: "Aspirin", form: .pill, dosage: 2, minutesOfDay: times, frequencyDays: 1, stockCount: 30, lowStockThreshold: 10)
+        let untouched = MedicationItem(id: UUID(), name: "Magnesium", form: .capsule, dosage: 1, minutesOfDay: times, frequencyDays: 1, stockCount: 10, lowStockThreshold: 5)
         course.medications.append(contentsOf: [logged, untouched])
         db.context.insert(course)
         try? db.context.save()

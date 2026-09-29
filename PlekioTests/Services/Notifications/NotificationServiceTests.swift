@@ -43,8 +43,8 @@ struct NotificationServiceTests {
         let course = TreatmentCourse(name: "Course", startDate: date(10, 0), endDate: date(12, 0))
         let nineOClock = calendar.date(from: DateComponents(year: 2000, month: 1, day: 1, hour: 9))!
         course.medications.append(
-            MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill",
-                           dosage: 1, timesOfDay: [nineOClock], frequencyDays: 1)
+            MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill,
+                           dosage: 1, minutesOfDay: [minuteOfDay(nineOClock)], frequencyDays: 1)
         )
         db.coursesToReturn = [course]
         return db
@@ -280,7 +280,7 @@ struct NotificationServiceTests {
         let course = try #require(db.coursesToReturn.first)
         let med = try #require(course.medications.first)
         let slot = date(12, 23, 55)
-        med.timesOfDay = [slot]
+        med.minutesOfDay = [minuteOfDay(slot)]
 
         await service.scheduleSnooze(for: [med.id.uuidString], names: [med.name], slot: slot)
         let request = try #require(center.pending.first)
@@ -304,7 +304,7 @@ struct NotificationServiceTests {
             await service.scheduleSnooze(for: [med.id.uuidString], names: [med.name], slot: slot)
 
             switch change {
-            case 0: med.timesOfDay = [date(11, 11)]
+            case 0: med.minutesOfDay = [minuteOfDay(date(11, 11))]
             case 1: med.frequencyDays = 2 // June 10 and 12, not 11.
             default: course.startDate = date(12, 0)
             }
@@ -324,7 +324,7 @@ struct NotificationServiceTests {
             let course = try #require(db.coursesToReturn.first)
             let med = try #require(course.medications.first)
             let slot = date(12, 23, 55)
-            med.timesOfDay = [slot]
+            med.minutesOfDay = [minuteOfDay(slot)]
             await service.scheduleSnooze(for: [med.id.uuidString], names: [med.name], slot: slot)
 
             switch change {
@@ -359,8 +359,8 @@ struct NotificationServiceTests {
         let course = try #require(db.coursesToReturn.first)
         let onePM = calendar.date(from: DateComponents(year: 2000, month: 1, day: 1, hour: 13))!
         course.medications.append(
-            MedicationItem(id: UUID(), name: "Vitamin D", formSystemImage: "pills.fill",
-                           dosage: 1, timesOfDay: [onePM], frequencyDays: 1)
+            MedicationItem(id: UUID(), name: "Vitamin D", form: .pill,
+                           dosage: 1, minutesOfDay: [minuteOfDay(onePM)], frequencyDays: 1)
         )
 
         await service.rescheduleAll(using: db)

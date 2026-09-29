@@ -65,7 +65,7 @@ enum ReminderPlanner {
                     ),
                     endDay: calendar.startOfDay(for: course.endDate),
                     frequencyDays: med.frequencyDays,
-                    times: DoseSchedule.timesOfDay(med.timesOfDay, calendar: calendar),
+                    times: med.minutesOfDay.map(MinuteOfDay.hourAndMinute),
                     // Skipped counts as settled, or the rebuild would bring it back.
                     settledSlots: DoseSchedule.settledSlots(of: med, calendar: calendar)
                 )

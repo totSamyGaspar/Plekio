@@ -39,7 +39,7 @@ struct CourseRowViewModel {
         self.medications = course.medications
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
             .map {
-                Medication(id: $0.id, name: $0.name, dosage: $0.dosage, systemImage: $0.formSystemImage)
+                Medication(id: $0.id, name: $0.name, dosage: $0.dosage, systemImage: $0.form.systemImage)
             }
 
         let rangeStart = course.startDate

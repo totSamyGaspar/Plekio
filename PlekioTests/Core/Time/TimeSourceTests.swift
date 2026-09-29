@@ -24,7 +24,7 @@ struct TimeSourceTests {
     }
 
     private func dose(at time: Date) -> PillDose {
-        PillDose(medicationId: UUID(), name: "Dose", dosage: 1, formSystemImage: "pills.fill",
+        PillDose(medicationId: UUID(), name: "Dose", dosage: 1, form: .pill,
                  time: time, period: .morning)
     }
 
@@ -57,8 +57,8 @@ struct TimeSourceTests {
         let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(), time: clock)
 
         let course = TreatmentCourse(name: "Course", startDate: slot, endDate: slot)
-        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill",
-                                 dosage: 1, timesOfDay: [slot], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill,
+                                 dosage: 1, minutesOfDay: [minuteOfDay(slot)], frequencyDays: 1)
         course.medications.append(med)
         db.context.insert(course)
         try db.context.save()

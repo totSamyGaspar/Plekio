@@ -34,7 +34,7 @@ nonisolated struct PillDose: Identifiable, Equatable, Sendable {
     let medicationId: UUID
     let name: String
     let dosage: Int
-    let formSystemImage: String
+    let form: MedicationForm
     let time: Date
     let period: DayPeriod
     var status: DoseStatus = .pending

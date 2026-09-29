@@ -19,9 +19,11 @@ nonisolated extension SchemaV1 {
         // No image property on purpose: photos live on disk keyed by `id`.
         @Attribute(.unique) var id: UUID
         var name: String
-        var formSystemImage: String
+        /// A `MedicationForm` raw value; read through `form`.
+        var formRaw: String
         var dosage: Int
-        var timesOfDay: [Date]
+        /// Wall-clock dose times, see `MinuteOfDay`.
+        var minutesOfDay: [Int]
         var frequencyDays: Int
         var course: TreatmentCourse?
         /// First day it's taken, when added to a course already running; nil means from the course start.
@@ -41,9 +43,9 @@ nonisolated extension SchemaV1 {
         init(
             id: UUID,
             name: String,
-            formSystemImage: String,
+            form: MedicationForm,
             dosage: Int,
-            timesOfDay: [Date],
+            minutesOfDay: [Int],
             frequencyDays: Int,
             stockCount: Int = 30,
             lowStockThreshold: Int = 10,
@@ -51,15 +53,21 @@ nonisolated extension SchemaV1 {
         ) {
             self.id = id
             self.name = name
-            self.formSystemImage = formSystemImage
+            self.formRaw = form.rawValue
             self.dosage = dosage
-            self.timesOfDay = timesOfDay
+            self.minutesOfDay = minutesOfDay
             self.frequencyDays = frequencyDays
             self.logs = []
             self.scheduleRevisions = []
             self.stockCount = stockCount
             self.lowStockThreshold = lowStockThreshold
             self.startDate = startDate
+        }
+
+        /// An unknown raw value (from a newer version) reads as a pill instead of failing.
+        var form: MedicationForm {
+            get { MedicationForm(rawValue: formRaw) ?? .pill }
+            set { formRaw = newValue.rawValue }
         }
     }
 }
