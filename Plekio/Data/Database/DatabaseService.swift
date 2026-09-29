@@ -33,8 +33,8 @@ final class DatabaseService {
     // MARK: - Init
 
     /// The on-disk store, built once by `AppDependencies.live()`.
-    init(photos: any PhotoStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
-        persistence = PersistenceController(photos: photos, errors: errors)
+    init(storeURL: URL, photos: any PhotoStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
+        persistence = PersistenceController(storeURL: storeURL, photos: photos, errors: errors)
         self.time = time
     }
 

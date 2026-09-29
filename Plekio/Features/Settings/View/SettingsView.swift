@@ -84,7 +84,7 @@ struct SettingsView: View {
                             Text("Version")
                                 .foregroundColor(.textPrimary)
                             Spacer()
-                            Text("1.0.0")
+                            Text(verbatim: AppBrand.version)
                                 .foregroundColor(.textSecondary)
                         }
 
