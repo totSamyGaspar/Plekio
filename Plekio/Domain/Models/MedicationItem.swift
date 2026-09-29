@@ -8,55 +8,58 @@
 import Foundation
 import SwiftData
 
-/// `nonisolated`: BackgroundReader reads it on a background context.
-@Model
-nonisolated final class MedicationItem {
+nonisolated extension SchemaV1 {
 
-    // MARK: - Properties
+    /// `nonisolated`: BackgroundReader reads it on a background context.
+    @Model
+    nonisolated final class MedicationItem {
 
-    // No image property on purpose: photos live on disk keyed by `id`.
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var formSystemImage: String
-    var dosage: Int
-    var timesOfDay: [Date]
-    var frequencyDays: Int
-    var course: TreatmentCourse?
-    /// First day it's taken, when added to a course already running; nil means from the course start.
-    var startDate: Date?
-    var stockCount: Int
-    var lowStockThreshold: Int
+        // MARK: - Properties
 
-    @Relationship(deleteRule: .cascade, inverse: \DoseLog.medication)
-    var logs: [DoseLog]
+        // No image property on purpose: photos live on disk keyed by `id`.
+        @Attribute(.unique) var id: UUID
+        var name: String
+        var formSystemImage: String
+        var dosage: Int
+        var timesOfDay: [Date]
+        var frequencyDays: Int
+        var course: TreatmentCourse?
+        /// First day it's taken, when added to a course already running; nil means from the course start.
+        var startDate: Date?
+        var stockCount: Int
+        var lowStockThreshold: Int
 
-    /// Earlier schedules, so a change doesn't rewrite past days.
-    @Relationship(deleteRule: .cascade, inverse: \ScheduleRevision.medication)
-    var scheduleRevisions: [ScheduleRevision]
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.DoseLog.medication)
+        var logs: [DoseLog]
 
-    // MARK: - Init
+        /// Earlier schedules, so a change doesn't rewrite past days.
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.ScheduleRevision.medication)
+        var scheduleRevisions: [ScheduleRevision]
 
-    init(
-        id: UUID,
-        name: String,
-        formSystemImage: String,
-        dosage: Int,
-        timesOfDay: [Date],
-        frequencyDays: Int,
-        stockCount: Int = 30,
-        lowStockThreshold: Int = 10,
-        startDate: Date? = nil
-    ) {
-        self.id = id
-        self.name = name
-        self.formSystemImage = formSystemImage
-        self.dosage = dosage
-        self.timesOfDay = timesOfDay
-        self.frequencyDays = frequencyDays
-        self.logs = []
-        self.scheduleRevisions = []
-        self.stockCount = stockCount
-        self.lowStockThreshold = lowStockThreshold
-        self.startDate = startDate
+        // MARK: - Init
+
+        init(
+            id: UUID,
+            name: String,
+            formSystemImage: String,
+            dosage: Int,
+            timesOfDay: [Date],
+            frequencyDays: Int,
+            stockCount: Int = 30,
+            lowStockThreshold: Int = 10,
+            startDate: Date? = nil
+        ) {
+            self.id = id
+            self.name = name
+            self.formSystemImage = formSystemImage
+            self.dosage = dosage
+            self.timesOfDay = timesOfDay
+            self.frequencyDays = frequencyDays
+            self.logs = []
+            self.scheduleRevisions = []
+            self.stockCount = stockCount
+            self.lowStockThreshold = lowStockThreshold
+            self.startDate = startDate
+        }
     }
 }

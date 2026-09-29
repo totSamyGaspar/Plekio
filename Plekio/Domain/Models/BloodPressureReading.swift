@@ -10,33 +10,36 @@ import SwiftData
 
 // MARK: - BloodPressureReading
 
-/// `nonisolated`: BackgroundReader reads it on a background context.
-@Model
-nonisolated final class BloodPressureReading {
+nonisolated extension SchemaV1 {
 
-    // MARK: - Properties
+    /// `nonisolated`: BackgroundReader reads it on a background context.
+    @Model
+    nonisolated final class BloodPressureReading {
 
-    @Attribute(.unique) var id: UUID
+        // MARK: - Properties
 
-    var measuredAt: Date
-    var systolic: Int
-    var diastolic: Int
-    var pulse: Int?
+        @Attribute(.unique) var id: UUID
 
-    // MARK: - Init
+        var measuredAt: Date
+        var systolic: Int
+        var diastolic: Int
+        var pulse: Int?
 
-    init(
-        id: UUID = UUID(),
-        measuredAt: Date,
-        systolic: Int,
-        diastolic: Int,
-        pulse: Int? = nil
-    ) {
-        self.id = id
-        self.measuredAt = measuredAt
-        self.systolic = systolic
-        self.diastolic = diastolic
-        self.pulse = pulse
+        // MARK: - Init
+
+        init(
+            id: UUID = UUID(),
+            measuredAt: Date,
+            systolic: Int,
+            diastolic: Int,
+            pulse: Int? = nil
+        ) {
+            self.id = id
+            self.measuredAt = measuredAt
+            self.systolic = systolic
+            self.diastolic = diastolic
+            self.pulse = pulse
+        }
     }
 }
 
