@@ -34,6 +34,13 @@ struct PlekioSchemaTests {
         #expect(names == ["TreatmentCourse", "CourseDateRevision", "MedicationItem", "DoseLog", "ScheduleRevision", "DiaryEntry", "BloodPressureReading"])
     }
 
+    @Test("Every model is declared inside its schema version, so a later version can't change it")
+    func modelsAreNestedInTheirVersion() {
+        for model in SchemaV1.models {
+            #expect(String(reflecting: model).hasPrefix("Plekio.SchemaV1."))
+        }
+    }
+
     // MARK: - Store on disk
 
     @Test("An on-disk store reopens through the migration plan and keeps its data")

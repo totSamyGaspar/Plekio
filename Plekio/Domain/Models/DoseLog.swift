@@ -8,66 +8,69 @@
 import Foundation
 import SwiftData
 
-/// `nonisolated`: BackgroundReader reads it on a background context.
-@Model
-nonisolated final class DoseLog {
+nonisolated extension SchemaV1 {
 
-    // MARK: - Properties
+    /// `nonisolated`: BackgroundReader reads it on a background context.
+    @Model
+    nonisolated final class DoseLog {
 
-    @Attribute(.unique) var id: UUID
-    var scheduledTime: Date
+        // MARK: - Properties
 
-    // MARK: - Storage Behind Status
+        @Attribute(.unique) var id: UUID
+        var scheduledTime: Date
 
-    // Schema columns; written only together by `status`'s setter, so invalid
-    // combinations never reach the store.
-    private var isTaken: Bool
-    private var actualTakeTime: Date?
-    private var skippedAt: Date?
-    private var dispensedQuantity: Int?
+        // MARK: - Storage Behind Status
 
-    var medication: MedicationItem?
+        // Schema columns; written only together by `status`'s setter, so invalid
+        // combinations never reach the store.
+        private var isTaken: Bool
+        private var actualTakeTime: Date?
+        private var skippedAt: Date?
+        private var dispensedQuantity: Int?
 
-    // MARK: - Init
+        var medication: MedicationItem?
 
-    init(scheduledTime: Date, status: DoseStatus = .pending) {
-        self.id = UUID()
-        self.scheduledTime = scheduledTime
-        self.isTaken = false
-        self.status = status
-    }
+        // MARK: - Init
 
-    // MARK: - Status
-
-    /// The only way to read or change the dose's state.
-    var status: DoseStatus {
-        get {
-            if isTaken {
-                // Scheduled time is only a fallback for a record missing its take time.
-                return .taken(at: actualTakeTime ?? scheduledTime, dispensed: dispensedQuantity)
-            }
-            if let skippedAt {
-                return .skipped(at: skippedAt)
-            }
-            return .pending
+        init(scheduledTime: Date, status: DoseStatus = .pending) {
+            self.id = UUID()
+            self.scheduledTime = scheduledTime
+            self.isTaken = false
+            self.status = status
         }
-        set {
-            switch newValue {
-            case .pending:
-                isTaken = false
-                actualTakeTime = nil
-                skippedAt = nil
-                dispensedQuantity = nil
-            case .taken(let at, let dispensed):
-                isTaken = true
-                actualTakeTime = at
-                skippedAt = nil
-                dispensedQuantity = dispensed
-            case .skipped(let at):
-                isTaken = false
-                actualTakeTime = nil
-                skippedAt = at
-                dispensedQuantity = nil
+
+        // MARK: - Status
+
+        /// The only way to read or change the dose's state.
+        var status: DoseStatus {
+            get {
+                if isTaken {
+                    // Scheduled time is only a fallback for a record missing its take time.
+                    return .taken(at: actualTakeTime ?? scheduledTime, dispensed: dispensedQuantity)
+                }
+                if let skippedAt {
+                    return .skipped(at: skippedAt)
+                }
+                return .pending
+            }
+            set {
+                switch newValue {
+                case .pending:
+                    isTaken = false
+                    actualTakeTime = nil
+                    skippedAt = nil
+                    dispensedQuantity = nil
+                case .taken(let at, let dispensed):
+                    isTaken = true
+                    actualTakeTime = at
+                    skippedAt = nil
+                    dispensedQuantity = dispensed
+                case .skipped(let at):
+                    isTaken = false
+                    actualTakeTime = nil
+                    skippedAt = at
+                    dispensedQuantity = nil
+                }
             }
         }
     }

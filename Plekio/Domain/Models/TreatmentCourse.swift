@@ -8,39 +8,42 @@
 import Foundation
 import SwiftData
 
-/// `nonisolated`: BackgroundReader reads it on a background context.
-@Model
-nonisolated final class TreatmentCourse {
+nonisolated extension SchemaV1 {
 
-    // MARK: - Properties
+    /// `nonisolated`: BackgroundReader reads it on a background context.
+    @Model
+    nonisolated final class TreatmentCourse {
 
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var startDate: Date
-    var endDate: Date
+        // MARK: - Properties
 
-    /// Id of the FIRST course in the "Repeat" chain (not the parent), nil for originals.
-    var repeatedFromId: UUID?
+        @Attribute(.unique) var id: UUID
+        var name: String
+        var startDate: Date
+        var endDate: Date
 
-    @Relationship(deleteRule: .cascade, inverse: \MedicationItem.course)
-    var medications: [MedicationItem]
+        /// Id of the FIRST course in the "Repeat" chain (not the parent), nil for originals.
+        var repeatedFromId: UUID?
 
-    @Relationship(deleteRule: .cascade, inverse: \CourseDateRevision.course)
-    var dateRevisions: [CourseDateRevision] = []
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.MedicationItem.course)
+        var medications: [MedicationItem]
 
-    // MARK: - Init
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.CourseDateRevision.course)
+        var dateRevisions: [CourseDateRevision] = []
 
-    init(name: String, startDate: Date, endDate: Date, repeatedFromId: UUID? = nil) {
-        self.id = UUID()
-        self.name = name
-        self.startDate = startDate
-        self.endDate = endDate
-        self.repeatedFromId = repeatedFromId
-        self.medications = []
+        // MARK: - Init
+
+        init(name: String, startDate: Date, endDate: Date, repeatedFromId: UUID? = nil) {
+            self.id = UUID()
+            self.name = name
+            self.startDate = startDate
+            self.endDate = endDate
+            self.repeatedFromId = repeatedFromId
+            self.medications = []
+        }
+
+        // MARK: - Lineage
+
+        /// The chain this course belongs to: the original course's id.
+        var repeatLineageId: UUID { repeatedFromId ?? id }
     }
-
-    // MARK: - Lineage
-
-    /// The chain this course belongs to: the original course's id.
-    var repeatLineageId: UUID { repeatedFromId ?? id }
 }
