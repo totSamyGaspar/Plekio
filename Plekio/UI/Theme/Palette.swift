@@ -11,7 +11,8 @@ import UIKit
 // MARK: - Helpers
 
 /// A `Color` resolving per theme; optional variants for Increase Contrast.
-private func adaptive(
+/// `nonisolated`: SwiftUI resolves the colour on its render thread, not the main actor.
+nonisolated private func adaptive(
     light: UIColor,
     dark: UIColor,
     lightIncreased: UIColor? = nil,
@@ -26,7 +27,7 @@ private func adaptive(
     })
 }
 
-private func rgb(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> UIColor {
+nonisolated private func rgb(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> UIColor {
     UIColor(red: red, green: green, blue: blue, alpha: 1)
 }
 
@@ -34,7 +35,7 @@ private func rgb(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> UIColor {
 
 extension UITraitCollection {
 
-    /// For resolving a system colour to its dark-theme value; also used by AppAppearance.
+    /// For resolving a system colour to its dark-theme value.
     static let darkAppearance = UITraitCollection(userInterfaceStyle: .dark)
 }
 
