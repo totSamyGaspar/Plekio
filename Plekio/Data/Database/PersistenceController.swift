@@ -182,7 +182,7 @@ final class PersistenceController {
 // MARK: - DatabaseError
 
 /// Storage failures with user-readable text instead of SwiftData's raw description.
-enum DatabaseError: LocalizedError, AlertTitled {
+nonisolated enum DatabaseError: LocalizedError, AlertTitled {
     /// Running from memory; reported once at launch.
     case storageUnavailable(underlying: Error)
 
@@ -204,7 +204,7 @@ enum DatabaseError: LocalizedError, AlertTitled {
 
     // MARK: - LocalizedError
 
-    var errorDescription: String? {
+    nonisolated var errorDescription: String? {
         switch self {
         case .storageUnavailable:
             return String(localized: "Storage on this device is unavailable. The app is running in temporary mode — entries will not survive a restart.")

@@ -20,7 +20,6 @@ nonisolated final class TreatmentCourse {
     var endDate: Date
 
     /// Id of the FIRST course in the "Repeat" chain (not the parent), nil for originals.
-    /// Optional so existing stores migrate without a version plan.
     var repeatedFromId: UUID?
 
     @Relationship(deleteRule: .cascade, inverse: \MedicationItem.course)
