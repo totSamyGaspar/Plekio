@@ -44,13 +44,13 @@ final class PersistenceController {
 
     // MARK: - Init
 
-    init(photos: any PhotoStoring, errors: any ErrorReporting) {
+    init(storeURL: URL, photos: any PhotoStoring, errors: any ErrorReporting) {
         self.photos = photos
         self.errors = errors
         let schema = Self.makeSchema()
 
         do {
-            let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            let config = ModelConfiguration(schema: schema, url: storeURL)
             // Migration plan, so older stores are upgraded instead of refused.
             container = try ModelContainer(for: schema, migrationPlan: PlekioMigrationPlan.self, configurations: [config])
         } catch {
@@ -59,7 +59,7 @@ final class PersistenceController {
 
             let fallback = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
             guard let memoryContainer = try? ModelContainer(for: schema, configurations: [fallback]) else {
-                fatalError("🚨 SwiftData is unavailable even in memory: \(error)")
+                fatalError("SwiftData is unavailable even in memory: \(error)")
             }
 
             container = memoryContainer

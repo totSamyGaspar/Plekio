@@ -123,8 +123,14 @@ final class AppDependencies {
         // Created first: the store may report an in-memory fallback while being built.
         let errorPresenter = AppErrorPresenter()
         let time = SystemTime()
-        let photoCache = ImageCache.shared
-        let database = DatabaseService(photos: photoCache, errors: errorPresenter, time: time)
+        let location = StorageLocation.appGroup()
+        let photoCache = ImageCache(directory: location.photosDirectory)
+        let database = DatabaseService(
+            storeURL: location.storeURL,
+            photos: photoCache,
+            errors: errorPresenter,
+            time: time
+        )
         let settings = SettingsStore(defaults: .standard)
 
         return AppDependencies(
@@ -144,10 +150,12 @@ final class AppDependencies {
         let errorPresenter = AppErrorPresenter()
         // Separate defaults domain so previews never change the app's settings.
         let settings = SettingsStore(defaults: UserDefaults(suiteName: "PlekioPreviews") ?? .standard)
+        // Its own folder, so previews never see or write the user's photos.
+        let photos = ImageCache(directory: FileManager.default.temporaryDirectory.appending(path: "PlekioPreviewPhotos"))
         return AppDependencies(
-            database: DatabaseService(inMemoryForTesting: true, photos: ImageCache.shared, errors: errorPresenter),
+            database: DatabaseService(inMemoryForTesting: true, photos: photos, errors: errorPresenter),
             notifications: NotificationService(settings: settings, time: SystemTime()),
-            photoCache: ImageCache.shared,
+            photoCache: photos,
             settings: settings,
             errorPresenter: errorPresenter
         )

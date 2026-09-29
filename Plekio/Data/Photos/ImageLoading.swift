@@ -19,8 +19,12 @@ extension ImageCache: ImageLoading {}
 // MARK: - Environment
 
 private nonisolated struct ImageLoaderKey: EnvironmentKey {
-    /// The shared cache, so previews outside the app root still find photos.
-    static let defaultValue: any ImageLoading = ImageCache.shared
+    /// Loads nothing; the root injects the app's cache.
+    static let defaultValue: any ImageLoading = NoImages()
+}
+
+private nonisolated struct NoImages: ImageLoading {
+    func image(for id: UUID, targetPointSize: CGFloat?) async -> UIImage? { nil }
 }
 
 extension EnvironmentValues {

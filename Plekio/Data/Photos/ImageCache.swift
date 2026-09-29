@@ -17,7 +17,6 @@ nonisolated final class ImageCache: @unchecked Sendable {
 
     // MARK: - Properties
 
-    static let shared = ImageCache(directory: ImageCache.defaultDirectory())
     private let cache = NSCache<NSString, UIImage>()
 
     /// Ids whose file is not on disk, so scrolling rows don't re-hit the disk.
@@ -37,17 +36,9 @@ nonisolated final class ImageCache: @unchecked Sendable {
     /// Worst-case screen scale, as a constant so this stays off the main actor.
     private static let assumedScreenScale: CGFloat = 3
 
-    /// Photos live in Application Support, not in SwiftData, so fetches never load image data.
-    private static func defaultDirectory() -> URL {
-        let fileManager = FileManager.default
-        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? fileManager.temporaryDirectory
-        return appSupport.appendingPathComponent("MedicationImages", isDirectory: true)
-    }
-
     // MARK: - Init
 
-    /// Production uses `shared`; tests pass a temporary folder.
+    /// Built once by `AppDependencies`; tests and previews pass a temporary folder.
     init(directory: URL) {
         cache.countLimit = 100
         // countLimit doesn't bound bytes; cost is decoded bytes, so this is a real ceiling.
