@@ -20,7 +20,7 @@ struct StatisticsViewModelTests {
             medicationId: UUID(),
             name: "Aspirin",
             dosage: 1,
-            formSystemImage: "pills.fill",
+            form: .pill,
             time: time,
             period: .morning,
             status: taken ? .taken(at: time, dispensed: 1) : .pending,
@@ -139,8 +139,8 @@ struct StatisticsViewModelTests {
             endDate: Date().addingTimeInterval(86400 * 5)
         )
         active.medications.append(
-            MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "pills.fill",
-                           dosage: 1, timesOfDay: [Date()], frequencyDays: 1,
+            MedicationItem(id: UUID(), name: "Magnesium", form: .pill,
+                           dosage: 1, minutesOfDay: [minuteOfDay(Date())], frequencyDays: 1,
                            stockCount: 2, lowStockThreshold: 10)
         )
 
@@ -150,8 +150,8 @@ struct StatisticsViewModelTests {
             endDate: Date().addingTimeInterval(-86400 * 2)
         )
         finished.medications.append(
-            MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill",
-                           dosage: 1, timesOfDay: [Date()], frequencyDays: 1,
+            MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill,
+                           dosage: 1, minutesOfDay: [minuteOfDay(Date())], frequencyDays: 1,
                            stockCount: 1, lowStockThreshold: 10)
         )
 
@@ -173,8 +173,8 @@ struct StatisticsViewModelTests {
             startDate: Date().addingTimeInterval(-86400),
             endDate: Date().addingTimeInterval(86400 * 5)
         )
-        let med = MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "pills.fill",
-                                 dosage: 1, timesOfDay: [Date()], frequencyDays: 1,
+        let med = MedicationItem(id: UUID(), name: "Magnesium", form: .pill,
+                                 dosage: 1, minutesOfDay: [minuteOfDay(Date())], frequencyDays: 1,
                                  stockCount: 2, lowStockThreshold: 10)
         course.medications.append(med)
         mockDB.coursesToReturn = [course]
@@ -197,8 +197,8 @@ struct StatisticsViewModelTests {
         let vm = StatisticsViewModel(dbService: mockDB, errors: errors)
         // Deleted from the store on another screen.
         let gone = MedicationSnapshot(
-            id: UUID(), name: "Magnesium", formSystemImage: "pills.fill", dosage: 1,
-            timesOfDay: [Date()], frequencyDays: 1, stockCount: 2, lowStockThreshold: 10
+            id: UUID(), name: "Magnesium", form: .pill, dosage: 1,
+            minutesOfDay: [minuteOfDay(Date())], frequencyDays: 1, stockCount: 2, lowStockThreshold: 10
         )
 
         let saved = vm.refill(medication: gone, amount: 30)

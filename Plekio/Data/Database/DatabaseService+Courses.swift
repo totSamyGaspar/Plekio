@@ -33,9 +33,9 @@ extension DatabaseService: CourseStoring {
             let med = MedicationItem(
                 id: draft.id,
                 name: draft.name,
-                formSystemImage: draft.formSystemImage,
+                form: draft.form,
                 dosage: draft.dosage,
-                timesOfDay: draft.timesOfDay,
+                minutesOfDay: draft.minutesOfDay,
                 frequencyDays: draft.frequencyDays,
                 stockCount: draft.stockCount,
                 lowStockThreshold: draft.lowStockThreshold
@@ -71,9 +71,9 @@ extension DatabaseService: CourseStoring {
             let med = MedicationItem(
                 id: copyId,
                 name: source.name,
-                formSystemImage: source.formSystemImage,
+                form: source.form,
                 dosage: source.dosage,
-                timesOfDay: source.timesOfDay,
+                minutesOfDay: source.minutesOfDay,
                 frequencyDays: source.frequencyDays,
                 stockCount: source.stockCount,
                 lowStockThreshold: source.lowStockThreshold
@@ -101,20 +101,20 @@ extension DatabaseService: CourseStoring {
 
     func updateMedication(_ medication: MedicationItem, with draft: MedicationDraft) throws {
         // Captured first: the old schedule is kept for past days, and today's logs remapped.
-        let previousTimes = medication.timesOfDay
+        let previousTimes = medication.minutesOfDay
         let previousFrequency = medication.frequencyDays
         let previousDosage = medication.dosage
 
         medication.name = draft.name
-        medication.formSystemImage = draft.formSystemImage
+        medication.form = draft.form
         medication.dosage = draft.dosage
         medication.stockCount = draft.stockCount
         medication.lowStockThreshold = draft.lowStockThreshold
         medication.frequencyDays = draft.frequencyDays
-        medication.timesOfDay = draft.timesOfDay
+        medication.minutesOfDay = draft.minutesOfDay
 
         recordRevision(of: medication, times: previousTimes, frequencyDays: previousFrequency, dosage: previousDosage)
-        remapLogs(of: medication, from: previousTimes, to: draft.timesOfDay)
+        remapLogs(of: medication, from: previousTimes, to: draft.minutesOfDay)
 
         // Touch disk only after commit and only if the photo was modified: an
         // untouched draft may be empty just because the preload hasn't finished.
@@ -138,17 +138,14 @@ extension DatabaseService: CourseStoring {
     /// hasn't started or the schedule didn't change.
     private func recordRevision(
         of medication: MedicationItem,
-        times oldTimes: [Date],
+        times oldTimes: [Int],
         frequencyDays oldFrequency: Int,
         dosage oldDosage: Int
     ) {
         let calendar = time.calendar
         let today = calendar.startOfDay(for: time.now)
 
-        func minutes(_ times: [Date]) -> [Int] {
-            times.map { calendar.component(.hour, from: $0) * 60 + calendar.component(.minute, from: $0) }
-        }
-        guard minutes(oldTimes) != minutes(medication.timesOfDay)
+        guard oldTimes != medication.minutesOfDay
                 || oldFrequency != medication.frequencyDays
                 || oldDosage != medication.dosage else { return }
 
@@ -159,7 +156,7 @@ extension DatabaseService: CourseStoring {
         guard !medication.scheduleRevisions.contains(where: { $0.validUntil == today }) else { return }
 
         let revision = ScheduleRevision(
-            validUntil: today, timesOfDay: oldTimes, frequencyDays: oldFrequency, dosage: oldDosage
+            validUntil: today, minutesOfDay: oldTimes, frequencyDays: oldFrequency, dosage: oldDosage
         )
         revision.medication = medication
         medication.scheduleRevisions.append(revision)
@@ -167,17 +164,10 @@ extension DatabaseService: CourseStoring {
 
     /// Moves today's and later logs onto the new times by position; past logs keep
     /// their times (the old schedule still applies to past days).
-    private func remapLogs(of medication: MedicationItem, from oldTimes: [Date], to newTimes: [Date]) {
+    private func remapLogs(of medication: MedicationItem, from oldSlots: [Int], to newSlots: [Int]) {
         let calendar = time.calendar
         let today = calendar.startOfDay(for: time.now)
 
-        // Minutes from midnight: an Int, since arrays of tuples have no `!=`.
-        func slot(_ date: Date) -> Int {
-            calendar.component(.hour, from: date) * 60 + calendar.component(.minute, from: date)
-        }
-
-        let oldSlots = oldTimes.map(slot)
-        let newSlots = newTimes.map(slot)
         guard oldSlots != newSlots else { return }
 
         // Collected first: mutating in place could swap two slots.
@@ -188,13 +178,10 @@ extension DatabaseService: CourseStoring {
             let newSlot = newSlots[index]
             guard oldSlot != newSlot else { continue }
 
-            for log in medication.logs where log.scheduledTime >= today && slot(log.scheduledTime) == oldSlot {
-                if let moved = calendar.date(
-                    bySettingHour: newSlot / 60,
-                    minute: newSlot % 60,
-                    second: 0,
-                    of: log.scheduledTime
-                ) {
+            let (hour, minute) = MinuteOfDay.hourAndMinute(newSlot)
+            for log in medication.logs
+            where log.scheduledTime >= today && MinuteOfDay.of(log.scheduledTime, calendar: calendar) == oldSlot {
+                if let moved = DoseSchedule.slotDate(hour: hour, minute: minute, on: log.scheduledTime, calendar: calendar) {
                     moves.append((log, moved))
                 }
             }
@@ -267,9 +254,9 @@ extension DatabaseService: CourseStoring {
         let med = MedicationItem(
             id: draft.id,
             name: draft.name,
-            formSystemImage: draft.formSystemImage,
+            form: draft.form,
             dosage: draft.dosage,
-            timesOfDay: draft.timesOfDay,
+            minutesOfDay: draft.minutesOfDay,
             frequencyDays: draft.frequencyDays,
             stockCount: draft.stockCount,
             lowStockThreshold: draft.lowStockThreshold,

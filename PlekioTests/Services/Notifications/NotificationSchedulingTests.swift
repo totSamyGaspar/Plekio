@@ -20,8 +20,8 @@ struct NotificationSchedulingTests {
         let anchor = testDate(2026, 6, 15)
         let course = TreatmentCourse(name: "Morning set", startDate: anchor, endDate: anchor)
 
-        let medA = MedicationItem(id: UUID(), name: "Omega-3", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
-        let medB = MedicationItem(id: UUID(), name: "Vitamin D", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let medA = MedicationItem(id: UUID(), name: "Omega-3", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
+        let medB = MedicationItem(id: UUID(), name: "Vitamin D", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
         course.medications.append(contentsOf: [medA, medB])
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
@@ -35,10 +35,9 @@ struct NotificationSchedulingTests {
     @Test("A dose already marked as taken is excluded from the push schedule")
     func testSkipsAlreadyTakenDose() async throws {
         let anchor = testDate(2026, 6, 15)
-        let doseTime = testDate(2000, 1, 1, 9, 0)
         let course = TreatmentCourse(name: "Course", startDate: anchor, endDate: anchor)
 
-        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
         let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), status: .taken(at: testDate(2026, 6, 15, 9, 0), dispensed: 1))
         med.logs.append(log)
         course.medications.append(med)
@@ -51,10 +50,9 @@ struct NotificationSchedulingTests {
     @Test("A dose with the same time that is NOT marked is scheduled normally")
     func testDoesNotSkipUntakenDose() async throws {
         let anchor = testDate(2026, 6, 15)
-        let doseTime = testDate(2000, 1, 1, 9, 0)
         let course = TreatmentCourse(name: "Course", startDate: anchor, endDate: anchor)
 
-        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [doseTime], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
         course.medications.append(med)
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
@@ -72,9 +70,9 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Magnesium",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 1,
-            timesOfDay: [testDate(2000, 1, 1, 9, 0), testDate(2000, 1, 1, 23, 0)],
+            minutesOfDay: [9 * 60, 23 * 60],
             frequencyDays: 1
         )
         course.medications.append(med)
@@ -91,7 +89,7 @@ struct NotificationSchedulingTests {
         let anchor = testDate(2026, 6, 15)
         let course = TreatmentCourse(name: "Long course", startDate: anchor, endDate: addingDays(30, to: anchor))
 
-        let med = MedicationItem(id: UUID(), name: "Vitamin C", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Vitamin C", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
         course.medications.append(med)
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current)
@@ -106,7 +104,7 @@ struct NotificationSchedulingTests {
         let anchor = testDate(2026, 6, 15)
         let course = TreatmentCourse(name: "Year-long course", startDate: anchor, endDate: addingDays(365, to: anchor))
 
-        let med = MedicationItem(id: UUID(), name: "Magnesium", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Magnesium", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
         course.medications.append(med)
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: anchor, calendar: .current, slotBudget: 10)
@@ -125,9 +123,9 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Ibuprofen",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 1,
-            timesOfDay: [testDate(2000, 1, 1, 9, 0), testDate(2000, 1, 1, 14, 0), testDate(2000, 1, 1, 20, 0)],
+            minutesOfDay: [9 * 60, 14 * 60, 20 * 60],
             frequencyDays: 1
         )
         course.medications.append(med)
@@ -147,11 +145,11 @@ struct NotificationSchedulingTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Drops",
-            formSystemImage: "drop.fill",
+            form: .drops,
             dosage: 1,
-            timesOfDay: [
-                testDate(2000, 1, 1, 8, 0), testDate(2000, 1, 1, 11, 0), testDate(2000, 1, 1, 14, 0),
-                testDate(2000, 1, 1, 17, 0), testDate(2000, 1, 1, 20, 0),
+            minutesOfDay: [
+                8 * 60, 11 * 60, 14 * 60,
+                17 * 60, 20 * 60,
             ],
             frequencyDays: 1
         )
@@ -170,7 +168,7 @@ struct NotificationSchedulingTests {
         let now = testDate(2026, 6, 17)
         let course = TreatmentCourse(name: "Every third day", startDate: start, endDate: addingDays(30, to: start))
 
-        let med = MedicationItem(id: UUID(), name: "Vitamin D", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 3)
+        let med = MedicationItem(id: UUID(), name: "Vitamin D", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 3)
         course.medications.append(med)
 
         let map = ReminderPlanner.buildScheduleMap(activeCourses: [course], now: now, calendar: .current, slotBudget: 3)
@@ -190,7 +188,7 @@ struct NotificationSchedulingTests {
         let anchor = testDate(2026, 6, 15)
         let course = TreatmentCourse(name: "Course", startDate: anchor, endDate: anchor)
 
-        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
         let log = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), status: .skipped(at: anchor))
         med.logs.append(log)
         course.medications.append(med)
@@ -209,7 +207,7 @@ struct NotificationSchedulingTests {
             endDate: testDate(2026, 6, 17)
         )
 
-        let med = MedicationItem(id: UUID(), name: "Ibuprofen", formSystemImage: "pills.fill", dosage: 1, timesOfDay: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 1)
+        let med = MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
         let skipped = DoseLog(scheduledTime: testDate(2026, 6, 15, 9, 0), status: .skipped(at: anchor))
         med.logs.append(skipped)
         course.medications.append(med)

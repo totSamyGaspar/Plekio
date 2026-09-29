@@ -6,6 +6,7 @@
 //
 
 import Foundation
+@testable import Plekio
 
 // MARK: - Date builders
 
@@ -19,6 +20,11 @@ func testDate(_ year: Int, _ month: Int, _ day: Int, _ hour: Int = 0, _ minute: 
     comps.minute = minute
     comps.second = 0
     return Calendar.current.date(from: comps)!
+}
+
+/// The wall-clock time of `date` in the current calendar, for a dose time.
+func minuteOfDay(_ date: Date) -> Int {
+    MinuteOfDay.of(date, calendar: .current)
 }
 
 func addingDays(_ days: Int, to date: Date) -> Date {

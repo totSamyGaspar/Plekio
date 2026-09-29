@@ -21,7 +21,7 @@ struct DoseBadgeTests {
     }
 
     private func dose(at hour: Int, _ status: DoseStatus = .pending) -> PillDose {
-        PillDose(medicationId: UUID(), name: "Medication", dosage: 1, formSystemImage: "pills.fill",
+        PillDose(medicationId: UUID(), name: "Medication", dosage: 1, form: .pill,
                  time: date(hour), period: DayPeriod(hour: hour), status: status)
     }
 

@@ -27,7 +27,7 @@ struct NotificationResponseHandlerTests {
 
     private func dose(_ id: UUID) -> PillDose {
         PillDose(medicationId: id, name: "Ibuprofen", dosage: 1,
-                 formSystemImage: "pills.fill", time: slot, period: .morning)
+                 form: .pill, time: slot, period: .morning)
     }
 
     @MainActor

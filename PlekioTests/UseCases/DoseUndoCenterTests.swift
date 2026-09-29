@@ -16,7 +16,7 @@ struct DoseUndoCenterTests {
     // MARK: - Helpers
 
     private func pill(at slot: Date) -> PillDose {
-        PillDose(medicationId: UUID(), name: "Ibuprofen", dosage: 1, formSystemImage: "pills.fill",
+        PillDose(medicationId: UUID(), name: "Ibuprofen", dosage: 1, form: .pill,
                  time: slot, period: .morning)
     }
 

@@ -75,7 +75,7 @@ final class SettingsStore {
         guard let stored = defaults.object(forKey: SettingsKey.refillReminderMinuteOfDay) as? Int else {
             return RefillReminder.defaultMinuteOfDay
         }
-        return DailyReminder.clamp(stored)
+        return MinuteOfDay.clamp(stored)
     }
 
     // MARK: - Daily reminders
@@ -92,7 +92,7 @@ final class SettingsStore {
         }
 
         if let legacy = defaults.object(forKey: reminder.legacyMinuteOfDayKey) as? Int {
-            return [DailyReminder.clamp(legacy)]
+            return [MinuteOfDay.clamp(legacy)]
         }
 
         return reminder.defaultMinutesOfDay

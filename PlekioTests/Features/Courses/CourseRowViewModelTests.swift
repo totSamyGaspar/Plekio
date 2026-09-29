@@ -28,9 +28,9 @@ struct CourseRowViewModelTests {
                 MedicationItem(
                     id: UUID(),
                     name: name,
-                    formSystemImage: "pills.fill",
+                    form: .pill,
                     dosage: index + 1,
-                    timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+                    minutesOfDay: [9 * 60],
                     frequencyDays: 1
                 )
             )

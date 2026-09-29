@@ -23,7 +23,7 @@ nonisolated extension SchemaV1 {
 
         /// Start of the first day this schedule no longer applies to (exclusive end).
         var validUntil: Date
-        var timesOfDay: [Date]
+        var minutesOfDay: [Int]
         var frequencyDays: Int
         var dosage: Int
 
@@ -31,9 +31,9 @@ nonisolated extension SchemaV1 {
 
         // MARK: - Init
 
-        init(validUntil: Date, timesOfDay: [Date], frequencyDays: Int, dosage: Int) {
+        init(validUntil: Date, minutesOfDay: [Int], frequencyDays: Int, dosage: Int) {
             self.validUntil = validUntil
-            self.timesOfDay = timesOfDay
+            self.minutesOfDay = minutesOfDay
             self.frequencyDays = frequencyDays
             self.dosage = dosage
         }

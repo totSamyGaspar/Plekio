@@ -123,7 +123,7 @@ enum ReminderRequestFactory {
         minuteOfDay: Int,
         index: Int
     ) -> UNNotificationRequest {
-        let (hour, minute) = DailyReminder.hourAndMinute(from: minuteOfDay)
+        let (hour, minute) = MinuteOfDay.hourAndMinute(minuteOfDay)
         var components = DateComponents()
         components.hour = hour
         components.minute = minute

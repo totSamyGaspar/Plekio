@@ -51,13 +51,13 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                     Section(header: Text("Medications").foregroundColor(.textSecondary)) {
                         ForEach(viewModel.medications) { med in
                             HStack {
-                                Image(systemName: med.formSystemImage)
+                                Image(systemName: med.form.systemImage)
                                     .foregroundColor(.accentPrimary)
                                     .frame(width: 30)
                                 Text(med.name).foregroundColor(.textPrimary)
                                 Spacer()
                                 // Separate strings: each plural is declined independently in ru/uk.
-                                (Text("\(med.dosage) pcs") + Text(verbatim: ", ") + Text("\(med.timesOfDay.count) times/day"))
+                                (Text("\(med.dosage) pcs") + Text(verbatim: ", ") + Text("\(med.minutesOfDay.count) times/day"))
                                     .font(.caption)
                                     .foregroundColor(.textSecondary)
                             }

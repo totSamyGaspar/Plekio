@@ -18,7 +18,7 @@ struct DoseCardActionTests {
     private let now = Date(timeIntervalSince1970: 1_900_000_000)
 
     private func dose(_ status: DoseStatus = .pending, offset: TimeInterval = -600, courseId: UUID? = UUID()) -> PillDose {
-        PillDose(medicationId: UUID(), name: "Medication", dosage: 1, formSystemImage: "pills.fill",
+        PillDose(medicationId: UUID(), name: "Medication", dosage: 1, form: .pill,
                  time: now.addingTimeInterval(offset), period: .morning, status: status, courseId: courseId)
     }
 

@@ -31,15 +31,6 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
         self.onSave = onSave
     }
 
-    // MARK: - Constants
-
-    let forms = [
-        ("pills.fill", "Pill"),
-        ("capsule.fill", "Capsule"),
-        ("drop.fill", "Drops"),
-        ("syringe.fill", "Injection")
-    ]
-
     // MARK: - Body
 
     var body: some View {
@@ -91,10 +82,10 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                         TextField("Name (e.g., Ibuprofen)", text: $viewModel.draft.name)
                             .foregroundColor(.textPrimary)
 
-                        Picker("Form", selection: $viewModel.draft.formSystemImage) {
-                            ForEach(forms, id: \.0) { form in
-                                Image(systemName: form.0)
-                                    .tag(form.0)
+                        Picker("Form", selection: $viewModel.draft.form) {
+                            ForEach(MedicationForm.allCases, id: \.self) { form in
+                                Image(systemName: form.systemImage)
+                                    .tag(form)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -154,35 +145,8 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     .listRowBackground(Color.appSurface)
 
                     Section(header: Text("Intake Time").foregroundColor(.textSecondary)) {
-                        // The array changes on screen, so iterate it (not 0..<count)
-                        // and bounds-check each access against stale indices.
-                        ForEach(Array(viewModel.draft.timesOfDay.enumerated()), id: \.offset) { index, _ in
-                            DatePicker("Dose \(index + 1)", selection: Binding(
-                                get: {
-                                    viewModel.draft.timesOfDay.indices.contains(index)
-                                    ? viewModel.draft.timesOfDay[index]
-                                    : Date()
-                                },
-                                set: {
-                                    guard viewModel.draft.timesOfDay.indices.contains(index) else { return }
-                                    viewModel.draft.timesOfDay[index] = $0
-                                }
-                            ), displayedComponents: .hourAndMinute)
-                            .foregroundColor(.textPrimary)
-                        }
-                        .onDelete { offsets in
-                            // Keep at least one time, or the medication is never scheduled.
-                            guard viewModel.draft.timesOfDay.count > offsets.count else { return }
-                            viewModel.draft.timesOfDay.remove(atOffsets: offsets)
-                        }
-
-                        Button(action: {
-                            let lastTime = viewModel.draft.timesOfDay.last ?? Date()
-                            let newTime = Calendar.current.date(byAdding: .hour, value: 4, to: lastTime) ?? Date()
-                            viewModel.draft.timesOfDay.append(newTime)
-                        }) {
-                            Label("Add time", systemImage: "plus.circle.fill")
-                                .foregroundColor(.accentPrimary)
+                        TimeOfDayRows(minutes: $viewModel.draft.minutesOfDay) { index in
+                            Text("Dose \(index + 1)")
                         }
                     }
                     .listRowBackground(Color.appSurface)

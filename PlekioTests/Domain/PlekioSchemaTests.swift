@@ -41,6 +41,14 @@ struct PlekioSchemaTests {
         }
     }
 
+    @Test("An unknown stored form reads as a pill instead of failing")
+    func unknownFormFallsBackToPill() {
+        let medication = MedicationItem(id: UUID(), name: "Med", form: .capsule, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
+        medication.formRaw = "patch"
+
+        #expect(medication.form == .pill)
+    }
+
     // MARK: - Store on disk
 
     @Test("An on-disk store reopens through the migration plan and keeps its data")

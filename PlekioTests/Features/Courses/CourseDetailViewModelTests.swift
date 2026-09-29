@@ -69,9 +69,9 @@ struct CourseDetailViewModelTests {
         let med = MedicationItem(
             id: UUID(),
             name: "Ibuprofen",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 1,
-            timesOfDay: [Date()],
+            minutesOfDay: [minuteOfDay(Date())],
             frequencyDays: 1
         )
         course.medications.append(med)

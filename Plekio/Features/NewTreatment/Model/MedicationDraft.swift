@@ -10,9 +10,9 @@ import SwiftUI
 struct MedicationDraft: Identifiable, Equatable {
     var id = UUID()
     var name: String = ""
-    var formSystemImage: String = "pills.fill"
+    var form: MedicationForm = .pill
     var dosage: Int = 1
-    var timesOfDay: [Date] = [Date()]
+    var minutesOfDay: [Int] = [MinuteOfDay.of(Date(), calendar: .current)]
     var frequencyDays: Int = 1
     var medicationImageData: Data? = nil
     /// Whether the user changed the photo. A nil `medicationImageData` may just mean
@@ -32,9 +32,9 @@ extension MedicationDraft {
         self.init(
             id: medication.id,
             name: medication.name,
-            formSystemImage: medication.formSystemImage,
+            form: medication.form,
             dosage: medication.dosage,
-            timesOfDay: medication.timesOfDay,
+            minutesOfDay: medication.minutesOfDay,
             frequencyDays: medication.frequencyDays,
             medicationImageData: nil,
             photoModified: false,

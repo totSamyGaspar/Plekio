@@ -52,7 +52,7 @@ struct ReportRendererTests {
                 MedicationReport(
                     name: "Bisoprolol",
                     dosage: 1,
-                    timesOfDay: [testDate(2000, 1, 1, 9, 0)],
+                    minutesOfDay: [9 * 60],
                     frequencyDays: 1,
                     adherence: adherence,
                     exceptions: exceptions

@@ -19,7 +19,7 @@ struct DoseSheetActionsTests {
 
     private func dose(taken: Bool = false) -> PillDose {
         PillDose(medicationId: UUID(), name: "Ibuprofen", dosage: 1,
-                 formSystemImage: "pills.fill", time: slot, period: .morning,
+                 form: .pill, time: slot, period: .morning,
                  status: taken ? .taken(at: slot, dispensed: 1) : .pending)
     }
 
@@ -115,7 +115,7 @@ struct DoseSheetActionsTests {
         let medId = UUID()
         let pill = PillDose(
             medicationId: medId, name: "Ibuprofen", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning
+            form: .pill, time: slot, period: .morning
         )
         mockDB.pillsToReturn = [pill]
 
@@ -148,11 +148,11 @@ struct DoseSheetActionsTests {
         let openId = UUID()
         let alreadyTaken = PillDose(
             medicationId: takenId, name: "Ibuprofen", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning, status: .taken(at: Date(), dispensed: 1)
+            form: .pill, time: slot, period: .morning, status: .taken(at: Date(), dispensed: 1)
         )
         let stillOpen = PillDose(
             medicationId: openId, name: "Magnesium", dosage: 1,
-            formSystemImage: "capsule.fill", time: slot, period: .morning
+            form: .capsule, time: slot, period: .morning
         )
         mockDB.pillsToReturn = [alreadyTaken, stillOpen]
 
@@ -178,7 +178,7 @@ struct DoseSheetActionsTests {
 
         var pill = PillDose(
             medicationId: UUID(), name: "Ibuprofen", dosage: 1,
-            formSystemImage: "pills.fill", time: Date().addingTimeInterval(-30 * 60),
+            form: .pill, time: Date().addingTimeInterval(-30 * 60),
             period: .morning
         )
         pill.status = .skipped(at: Date())
@@ -200,7 +200,7 @@ struct DoseSheetActionsTests {
         let slot = Date().addingTimeInterval(-30 * 60)
         let pill = PillDose(
             medicationId: UUID(), name: "Ibuprofen", dosage: 1,
-            formSystemImage: "pills.fill", time: slot, period: .morning
+            form: .pill, time: slot, period: .morning
         )
         mockDB.pillsToReturn = [pill]
 

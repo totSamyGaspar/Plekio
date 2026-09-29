@@ -96,13 +96,13 @@ struct DoseScheduleTests {
 
     // MARK: - Slots of a day
 
-    private func medication(times: [Date], frequencyDays: Int = 1) -> MedicationItem {
+    private func medication(times: [Int], frequencyDays: Int = 1) -> MedicationItem {
         MedicationItem(
             id: UUID(),
             name: "Ibuprofen",
-            formSystemImage: "pills.fill",
+            form: .pill,
             dosage: 1,
-            timesOfDay: times,
+            minutesOfDay: times,
             frequencyDays: frequencyDays
         )
     }
@@ -110,7 +110,7 @@ struct DoseScheduleTests {
     @Test("A day's slots are the dose times placed on that day")
     func testSlotsPlaceTimesOnTheDay() async throws {
         let start = day(2026, 6, 10)
-        let med = medication(times: [testDate(2000, 1, 1, 8, 30), testDate(2000, 1, 1, 20, 0)])
+        let med = medication(times: [8 * 60 + 30, 20 * 60])
 
         let slots = DoseSchedule.slots(
             for: med, courseStartDay: start, courseEndDay: day(2026, 6, 20),
@@ -121,10 +121,24 @@ struct DoseScheduleTests {
         #expect(slots.map(\.hour) == [8, 20])
     }
 
+    @Test("A dose time is wall-clock: 08:00 stays 08:00 in another time zone")
+    func testSlotsKeepWallClockTimeAcrossTimeZones() async throws {
+        var tbilisi = Calendar(identifier: .gregorian)
+        tbilisi.timeZone = try #require(TimeZone(identifier: "Asia/Tbilisi"))
+        let start = tbilisi.startOfDay(for: testDate(2026, 6, 10, 12))
+        let med = medication(times: [8 * 60])
+
+        let slots = DoseSchedule.slots(for: med, courseStartDay: start, courseEndDay: start, on: start, calendar: tbilisi)
+
+        let slot = try #require(slots.first)
+        #expect(slot.hour == 8)
+        #expect(tbilisi.dateComponents([.hour, .minute], from: slot.date) == DateComponents(hour: 8, minute: 0))
+    }
+
     @Test("Outside the course and on off days there are no slots")
     func testNoSlotsOutsideTheCourseOrOffSchedule() async throws {
         let start = day(2026, 6, 10)
-        let med = medication(times: [testDate(2000, 1, 1, 9, 0)], frequencyDays: 3)
+        let med = medication(times: [9 * 60], frequencyDays: 3)
 
         #expect(DoseSchedule.slots(
             for: med, courseStartDay: start, courseEndDay: day(2026, 6, 20),
@@ -142,7 +156,7 @@ struct DoseScheduleTests {
 
     @Test("Both taken and skipped slots count as settled")
     func testSettledSlotsCoverTakenAndSkipped() async throws {
-        let med = medication(times: [testDate(2000, 1, 1, 9, 0)])
+        let med = medication(times: [9 * 60])
 
         let taken = DoseLog(scheduledTime: testDate(2026, 6, 10, 9, 0), status: .taken(at: Date(), dispensed: 1))
         let skipped = DoseLog(scheduledTime: testDate(2026, 6, 11, 9, 0), status: .skipped(at: Date()))
@@ -158,7 +172,7 @@ struct DoseScheduleTests {
 
     @Test("The log index takes only the requested day")
     func testLogsBySlotIsScopedToOneDay() async throws {
-        let med = medication(times: [testDate(2000, 1, 1, 9, 0)])
+        let med = medication(times: [9 * 60])
 
         let today = DoseLog(scheduledTime: testDate(2026, 6, 10, 9, 0), status: .taken(at: Date(), dispensed: 1))
         let tomorrow = DoseLog(scheduledTime: testDate(2026, 6, 11, 9, 0), status: .taken(at: Date(), dispensed: 1))
@@ -190,7 +204,7 @@ struct DoseScheduleTests {
         let start = day(2026, 6, 10)
         let course = TreatmentCourse(name: "Course", startDate: start, endDate: start)
 
-        let med = medication(times: [testDate(2000, 1, 1, 9, 0), testDate(2000, 1, 1, 21, 0)])
+        let med = medication(times: [9 * 60, 21 * 60])
         course.medications.append(med)
 
         let fromSchedule = DoseSchedule.slots(

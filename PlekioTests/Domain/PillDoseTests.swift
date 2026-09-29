@@ -20,7 +20,7 @@ struct PillDoseTests {
             medicationId: UUID(),
             name: "Ibuprofen",
             dosage: 1,
-            formSystemImage: "pills.fill",
+            form: .pill,
             time: time,
             period: .morning,
             status: status
