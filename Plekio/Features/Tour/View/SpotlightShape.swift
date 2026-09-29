@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// The whole rect with a rounded hole; filled with even-odd so the hole stays clear.
-struct SpotlightShape: Shape {
+nonisolated struct SpotlightShape: Shape {
 
     var hole: CGRect
     let cornerRadius: CGFloat

@@ -9,7 +9,7 @@ import SwiftUI
 
 // MARK: - TopRoundedBar
 
-struct TopRoundedBar: Shape {
+nonisolated struct TopRoundedBar: Shape {
     func path(in rect: CGRect) -> Path {
         let r = min(rect.width / 2, rect.height)
         var p = Path()
