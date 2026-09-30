@@ -126,7 +126,7 @@ final class AppDependencies {
         let location = StorageLocation.appGroup()
         let photoCache = ImageCache(directory: location.photosDirectory)
         let database = DatabaseService(
-            storeURL: location.storeURL,
+            location: location,
             photos: photoCache,
             errors: errorPresenter,
             time: time

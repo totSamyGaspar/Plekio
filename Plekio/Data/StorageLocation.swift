@@ -33,6 +33,20 @@ nonisolated struct StorageLocation: Sendable {
 
     var storeURL: URL { root.appending(path: "Plekio.store") }
 
+    var storeFiles: [URL] { Self.files(ofStore: storeURL) }
+
+    /// A store is several files: SQLite keeps recent writes in -wal until a checkpoint,
+    /// and -wal can outweigh the store itself.
+    static func files(ofStore url: URL) -> [URL] {
+        ["", "-wal", "-shm"].map { URL(filePath: url.path + $0) }
+    }
+
+    /// The schema version the store was last opened with, as plain text.
+    var storeVersionURL: URL { root.appending(path: "store-version") }
+
+    /// Copies of the store taken before a migration, one folder each.
+    var backupsDirectory: URL { root.appending(path: "Backups", directoryHint: .isDirectory) }
+
     /// Photos live beside the store, not in it, so fetches never load image data.
     var photosDirectory: URL { root.appending(path: "MedicationImages", directoryHint: .isDirectory) }
 }

@@ -27,10 +27,7 @@ nonisolated struct StorageUsage: Equatable {
         )
     }
 
-    /// Includes SQLite's -wal and -shm files, which can outweigh the store itself.
     private static func storeBytes(at url: URL) -> Int64 {
-        ["", "-wal", "-shm"]
-            .map { URL(filePath: url.path + $0) }
-            .reduce(0) { $0 + ImageCache.fileSize(at: $1) }
+        StorageLocation.files(ofStore: url).reduce(0) { $0 + ImageCache.fileSize(at: $1) }
     }
 }
