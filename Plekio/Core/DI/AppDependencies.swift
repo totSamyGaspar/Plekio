@@ -119,13 +119,12 @@ final class AppDependencies {
     // MARK: - Factories
 
     /// The app's graph: the on-disk store and the real notification centre.
-    static func live() -> AppDependencies {
-        // Created first: the store may report an in-memory fallback while being built.
+    /// Throws when the store can't be opened; AppLauncher then shows the recovery screen.
+    static func live(location: StorageLocation) throws -> AppDependencies {
         let errorPresenter = AppErrorPresenter()
         let time = SystemTime()
-        let location = StorageLocation.appGroup()
         let photoCache = ImageCache(directory: location.photosDirectory)
-        let database = DatabaseService(
+        let database = try DatabaseService(
             location: location,
             photos: photoCache,
             errors: errorPresenter,

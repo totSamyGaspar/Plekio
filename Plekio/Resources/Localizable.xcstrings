@@ -1,6 +1,470 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Try Again" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut versuchen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riprova"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試行"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Қайталау"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Încercați din nou"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторить"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спробувати ще"
+          }
+        }
+      }
+    },
+    "Start Fresh" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu beginnen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empezar de cero"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommencer à zéro"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ricomincia da capo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初からやり直す"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Басынан бастау"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Începeți de la zero"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать заново"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Почати заново"
+          }
+        }
+      }
+    },
+    "Start with empty data?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit leeren Daten beginnen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Empezar sin datos?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repartir sans données ?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ricominciare senza dati?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "空のデータで始めますか？"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бос деректермен бастау керек пе?"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Începeți fără date?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать с пустыми данными?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Почати з порожніми даними?"
+          }
+        }
+      }
+    },
+    "Your entries are still on this device, but Plekio can't open them right now. Reminders that are already scheduled keep coming." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Einträge sind noch auf diesem Gerät, aber Plekio kann sie gerade nicht öffnen. Bereits geplante Erinnerungen kommen weiterhin."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus registros siguen en este dispositivo, pero Plekio no puede abrirlos ahora. Los recordatorios ya programados seguirán llegando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos données sont toujours sur cet appareil, mais Plekio ne peut pas les ouvrir pour le moment. Les rappels déjà programmés continuent d'arriver."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I dati sono ancora su questo dispositivo, ma Plekio non riesce ad aprirli ora. I promemoria già programmati continueranno ad arrivare."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録はこのデバイスに残っていますが、Plekio は現在それを開けません。すでに設定済みのリマインダーは引き続き届きます。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жазбаларыңыз осы құрылғыда сақталған, бірақ Plekio оларды қазір аша алмайды. Жоспарланған еске салғыштар келе береді."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Înregistrările sunt încă pe acest dispozitiv, dar Plekio nu le poate deschide acum. Mementourile deja programate vor continua să sosească."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваши записи по-прежнему на этом устройстве, но Plekio сейчас не может их открыть. Уже запланированные напоминания продолжат приходить."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваші записи досі на цьому пристрої, але Plekio зараз не може їх відкрити. Уже заплановані нагадування надходитимуть і далі."
+          }
+        }
+      }
+    },
+    "If your iPhone is almost out of storage, free up some space, then try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn der Speicher deines iPhones fast voll ist, gib etwas Speicher frei und versuche es dann erneut."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si tu iPhone está casi sin espacio, libera algo de espacio y vuelve a intentarlo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si votre iPhone est presque plein, libérez de l'espace, puis réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se lo spazio sull'iPhone è quasi esaurito, liberane un po' e riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone のストレージがほぼいっぱいの場合は、空き容量を確保してから再試行してください。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone жады толуға жақын болса, біраз орын босатып, қайталап көріңіз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dacă spațiul de stocare al iPhone-ului este aproape plin, eliberați puțin spațiu, apoi încercați din nou."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если память iPhone почти заполнена, освободите место и попробуйте снова."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Якщо пам'ять iPhone майже заповнена, звільніть місце й спробуйте ще раз."
+          }
+        }
+      }
+    },
+    "Your current data is set aside, not deleted, so a later update can still recover it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine aktuellen Daten werden beiseitegelegt, nicht gelöscht, damit ein späteres Update sie noch wiederherstellen kann."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus datos actuales se guardan aparte, no se eliminan, para que una actualización futura aún pueda recuperarlos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos données actuelles sont mises de côté, pas supprimées, afin qu'une mise à jour ultérieure puisse encore les récupérer."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I dati attuali vengono messi da parte, non eliminati, così un aggiornamento futuro potrà ancora recuperarli."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在のデータは削除されずに保管されるため、今後のアップデートで復元できる可能性があります。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Қазіргі деректеріңіз жойылмайды, бөлек сақталады, сондықтан кейінгі жаңарту оларды қалпына келтіре алады."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datele actuale sunt puse deoparte, nu șterse, astfel încât o actualizare ulterioară le poate recupera."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Текущие данные не удаляются, а откладываются, чтобы следующее обновление могло их восстановить."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поточні дані не видаляються, а відкладаються, щоб наступне оновлення могло їх відновити."
+          }
+        }
+      }
+    },
+    "Dose not recorded" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einnahme nicht erfasst"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toma no registrada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prise non enregistrée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assunzione non registrata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服用を記録できませんでした"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Қабылдау тіркелмеді"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doza nu a fost înregistrată"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приём не записан"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прийом не записано"
+          }
+        }
+      }
+    },
+    "Plekio can't open its data right now. Open the app to see what to do." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio kann seine Daten gerade nicht öffnen. Öffne die App, um zu sehen, was zu tun ist."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio no puede abrir sus datos ahora. Abre la app para ver qué hacer."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio ne peut pas ouvrir ses données pour le moment. Ouvrez l'app pour savoir quoi faire."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio non riesce ad aprire i suoi dati ora. Apri l'app per vedere cosa fare."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio は現在データを開けません。アプリを開いて対処方法を確認してください。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio қазір деректерін аша алмайды. Не істеу керегін көру үшін қолданбаны ашыңыз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio nu își poate deschide datele acum. Deschideți aplicația pentru a vedea ce puteți face."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio сейчас не может открыть данные. Откройте приложение, чтобы узнать, что делать."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio зараз не може відкрити дані. Відкрийте застосунок, щоб дізнатися, що робити."
+          }
+        }
+      }
+    },
     "Send feedback" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -25286,66 +25750,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сховище"
-          }
-        }
-      }
-    },
-    "Storage on this device is unavailable. The app is running in temporary mode — entries will not survive a restart." : {
-      "comment" : "Message shown to the user when the app can't access the storage on the device.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Speicher auf diesem Gerät ist nicht verfügbar. Die App läuft im temporären Modus – Einträge überstehen keinen Neustart."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El almacenamiento de este dispositivo no está disponible. La app funciona en modo temporal: las entradas no sobrevivirán a un reinicio."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le stockage de cet appareil est indisponible. L'app fonctionne en mode temporaire : les entrées ne survivront pas à un redémarrage."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'archiviazione su questo dispositivo non è disponibile. L'app è in modalità temporanea: le voci non sopravvivranno a un riavvio."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "この端末のストレージを利用できません。アプリは一時モードで動作しており、記録は再起動後に残りません。"
-          }
-        },
-        "kk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Бұл құрылғыдағы жад қолжетімсіз. Қолданба уақытша режимде жұмыс істеп тұр — жазбалар қайта қосқаннан кейін сақталмайды."
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stocarea pe acest dispozitiv nu este disponibilă. Aplicația rulează în mod temporar — intrările nu vor supraviețui unei reporniri."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Хранилище на устройстве недоступно. Приложение работает во временном режиме — записи не сохранятся после перезапуска."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сховище на пристрої недоступне. Застосунок працює у тимчасовому режимі — записи не збережуться після перезапуску."
           }
         }
       }

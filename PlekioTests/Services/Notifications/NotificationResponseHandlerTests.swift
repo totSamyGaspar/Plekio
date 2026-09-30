@@ -65,6 +65,16 @@ struct NotificationResponseHandlerTests {
                 == .openDoseReminder(medicationIds: [id], slot: slot))
     }
 
+    @Test("Only lock-screen actions count as background actions")
+    func backgroundActions() {
+        let slot = Date(timeIntervalSince1970: 0)
+        #expect(NotificationIntent.take(medicationIds: [], slot: slot).isBackgroundAction)
+        #expect(NotificationIntent.skip(medicationIds: [], slot: slot).isBackgroundAction)
+        #expect(NotificationIntent.snooze(medicationIds: [], names: [], slot: slot).isBackgroundAction)
+        #expect(!NotificationIntent.openDoseReminder(medicationIds: [], slot: slot).isBackgroundAction)
+        #expect(!NotificationIntent.openRefill.isBackgroundAction)
+    }
+
     @Test("A daily reminder is recognised before the medication id check")
     func parsesDailyReminderWithoutMedicationIds() {
         let info: [AnyHashable: Any] = [DailyReminder.userInfoKey: DailyReminder.bloodPressure.rawValue]

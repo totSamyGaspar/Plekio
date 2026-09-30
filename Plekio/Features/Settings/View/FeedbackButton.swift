@@ -12,6 +12,9 @@ struct FeedbackButton: View {
     @Environment(\.openURL) private var openURL
     @State private var showsMailUnavailable = false
 
+    /// Technical details put under the message, e.g. why the store didn't open.
+    var details: String? = nil
+
     private let email = "plekio.support@gmail.com"
 
     var body: some View {
@@ -36,6 +39,10 @@ struct FeedbackButton: View {
         components.queryItems = [
             URLQueryItem(name: "subject", value: String(localized: "Plekio feedback"))
         ]
+        if let details {
+            // Left untranslated: it's for support, below the user's own words.
+            components.queryItems?.append(URLQueryItem(name: "body", value: "\n\n—\nPlekio \(AppBrand.version)\n\(details)"))
+        }
         guard let url = components.url else {
             showsMailUnavailable = true
             return

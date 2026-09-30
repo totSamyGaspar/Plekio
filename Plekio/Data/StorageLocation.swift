@@ -13,7 +13,7 @@ nonisolated struct StorageLocation: Sendable {
 
     static let appGroupId = "group.com.EdHasp.Plekio"
 
-    /// The app's location, built once by `AppDependencies.live()`. A missing App Group
+    /// The app's location, built once when AppDelegate creates the launcher. A missing App Group
     /// is a signing error, not a runtime condition: storing data elsewhere would hide it
     /// until the files are lost.
     static func appGroup() -> StorageLocation {
@@ -46,6 +46,9 @@ nonisolated struct StorageLocation: Sendable {
 
     /// Copies of the store taken before a migration, one folder each.
     var backupsDirectory: URL { root.appending(path: "Backups", directoryHint: .isDirectory) }
+
+    /// Stores set aside by "Start Fresh", kept so a later update can recover them.
+    var recoveredDirectory: URL { root.appending(path: "Recovered", directoryHint: .isDirectory) }
 
     /// Photos live beside the store, not in it, so fetches never load image data.
     var photosDirectory: URL { root.appending(path: "MedicationImages", directoryHint: .isDirectory) }

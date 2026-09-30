@@ -104,10 +104,25 @@ struct StoreBackupTests {
         try Data().write(to: location.backupsDirectory)
         let store = try Data(contentsOf: location.storeURL)
 
-        let persistence = PersistenceController(location: location, photos: FakePhotoStore(), errors: SpyErrorReporter())
-
-        #expect(persistence.storageFailure != nil)
+        #expect(throws: (any Error).self) {
+            try PersistenceController(location: location, photos: FakePhotoStore(), errors: SpyErrorReporter())
+        }
         #expect(try Data(contentsOf: location.storeURL) == store)
         #expect(try String(contentsOf: location.storeVersionURL, encoding: .utf8) == "0.9.0")
+    }
+
+    @Test("Setting the store aside moves every file, so the next open starts empty")
+    func setAsideMovesTheStore() throws {
+        let location = try location(storeOpenedWith: "1.0.0")
+        defer { try? fileManager.removeItem(at: location.root) }
+
+        try StoreBackup(location: location).setAsideStore(now: Date(timeIntervalSince1970: 2_000))
+
+        let folder = location.recoveredDirectory.appending(path: "2000-1.0.0")
+        for file in location.storeFiles {
+            #expect(!fileManager.fileExists(atPath: file.path))
+            #expect(fileManager.fileExists(atPath: folder.appending(path: file.lastPathComponent).path))
+        }
+        #expect(!fileManager.fileExists(atPath: location.storeVersionURL.path))
     }
 }
