@@ -44,15 +44,20 @@ final class PersistenceController {
 
     // MARK: - Init
 
-    init(storeURL: URL, photos: any PhotoStoring, errors: any ErrorReporting) {
+    init(location: StorageLocation, photos: any PhotoStoring, errors: any ErrorReporting) {
         self.photos = photos
         self.errors = errors
         let schema = Self.makeSchema()
+        let backup = StoreBackup(location: location)
+        let version = String(describing: PlekioSchema.Current.versionIdentifier)
 
         do {
-            let config = ModelConfiguration(schema: schema, url: storeURL)
+            // No migration without a copy to go back to.
+            try backup.backUpIfMigrating(to: version)
+            let config = ModelConfiguration(schema: schema, url: location.storeURL)
             // Migration plan, so older stores are upgraded instead of refused.
             container = try ModelContainer(for: schema, migrationPlan: PlekioMigrationPlan.self, configurations: [config])
+            backup.recordOpened(with: version)
         } catch {
             // Never crash on launch: fall back to memory and surface storageFailure.
             AppLog.storage.critical("Failed to open the on-disk store: \(error.localizedDescription, privacy: .public)")
