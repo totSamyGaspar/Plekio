@@ -33,23 +33,51 @@ nonisolated struct StoreBackup {
         let lastOpened = try? String(contentsOf: location.storeVersionURL, encoding: .utf8)
         guard lastOpened != version else { return }
 
-        // Timestamp first, so folder names sort oldest to newest.
-        let name = "\(Int(now.timeIntervalSince1970))-\(lastOpened ?? "unknown")"
-        let folder = location.backupsDirectory.appending(path: name, directoryHint: .isDirectory)
+        try transferStore(into: location.backupsDirectory, named: folderName(lastOpened, now), moving: false)
+        AppLog.storage.notice("Store backed up before migration from \(lastOpened ?? "unknown", privacy: .public)")
+        removeOldCopies()
+    }
+
+    // MARK: - Start Fresh
+
+    /// Moves the store out of the way, never deleting it, so the next open starts
+    /// empty and a later update can still recover the old data.
+    func setAsideStore(now: Date = .now) throws {
+        let lastOpened = try? String(contentsOf: location.storeVersionURL, encoding: .utf8)
+        try transferStore(into: location.recoveredDirectory, named: folderName(lastOpened, now), moving: true)
+        try? fileManager.removeItem(at: location.storeVersionURL)
+        AppLog.storage.notice("Store set aside to start fresh")
+    }
+
+    // MARK: - Files
+
+    /// Timestamp first, so folder names sort oldest to newest.
+    private func folderName(_ version: String?, _ now: Date) -> String {
+        "\(Int(now.timeIntervalSince1970))-\(version ?? "unknown")"
+    }
+
+    /// All or nothing: a partial copy can't restore anything. A failed move puts
+    /// back what already moved, so the store is never left half-gone.
+    private func transferStore(into parent: URL, named name: String, moving: Bool) throws {
+        let folder = parent.appending(path: name, directoryHint: .isDirectory)
+        var moved: [(from: URL, to: URL)] = []
         do {
             try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
             for file in location.storeFiles where fileManager.fileExists(atPath: file.path) {
-                try fileManager.copyItem(at: file, to: folder.appending(path: file.lastPathComponent))
+                let target = folder.appending(path: file.lastPathComponent)
+                if moving {
+                    try fileManager.moveItem(at: file, to: target)
+                    moved.append((file, target))
+                } else {
+                    try fileManager.copyItem(at: file, to: target)
+                }
             }
         } catch {
-            // A partial copy can't restore anything.
+            for file in moved { try? fileManager.moveItem(at: file.to, to: file.from) }
             try? fileManager.removeItem(at: folder)
-            AppLog.storage.critical("Store backup failed: \(error.localizedDescription, privacy: .public)")
+            AppLog.storage.critical("Store transfer failed: \(error.localizedDescription, privacy: .public)")
             throw error
         }
-
-        AppLog.storage.notice("Store backed up before migration from \(lastOpened ?? "unknown", privacy: .public)")
-        removeOldCopies()
     }
 
     // MARK: - After Opening

@@ -27,25 +27,38 @@ struct PlekioApp: App {
 
     var body: some Scene {
         WindowGroup {
-            AppLockRootView()
-                .environmentObject(appDelegate.dependencies.router)
-                .environment(appDelegate.dependencies)
-                .environment(\.imageLoader, appDelegate.dependencies.photoCache)
-                .environment(\.databaseChanges, appDelegate.dependencies.database.changes)
-                // @AppStorage below must read the same defaults SettingsStore writes.
-                .defaultAppStorage(appDelegate.dependencies.settings.defaults)
-                .onChange(of: scenePhase) { _, newPhase in
-                    if newPhase == .active {
-                        refreshAllNotifications()
-                    }
+            Group {
+                if let dependencies = appDelegate.launcher.dependencies {
+                    AppLockRootView()
+                        .environmentObject(dependencies.router)
+                        .environment(dependencies)
+                        .environment(\.imageLoader, dependencies.photoCache)
+                        .environment(\.databaseChanges, dependencies.database.changes)
+                        // @AppStorage below must read the same defaults SettingsStore writes.
+                        .defaultAppStorage(dependencies.settings.defaults)
+                } else {
+                    StorageRecoveryView(launcher: appDelegate.launcher)
                 }
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    becameActive()
+                }
+            }
         }
     }
 
     // MARK: - Helpers
 
-    /// The notification queue only covers a window ahead of now, so top it up on return.
-    private func refreshAllNotifications() {
-        appDelegate.dependencies.reminderSync.sync()
+    /// The notification queue only covers a window ahead of now, so top it up on
+    /// return. With the store still closed, try it again instead: the device may
+    /// have been locked or short of space.
+    private func becameActive() {
+        let launcher = appDelegate.launcher
+        if let dependencies = launcher.dependencies {
+            dependencies.reminderSync.sync()
+        } else {
+            launcher.retry()
+        }
     }
 }

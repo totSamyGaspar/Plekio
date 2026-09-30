@@ -23,18 +23,15 @@ final class DatabaseService {
     var container: ModelContainer { persistence.container }
     var context: ModelContext { persistence.context }
 
-    /// Set when running from memory because the on-disk store failed to open.
-    var storageFailure: Error? { persistence.storageFailure }
-
     var photos: any PhotoStoring { persistence.photos }
 
     var changes: DatabaseChangeFeed { persistence.changes }
 
     // MARK: - Init
 
-    /// The on-disk store, built once by `AppDependencies.live()`.
-    init(location: StorageLocation, photos: any PhotoStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
-        persistence = PersistenceController(location: location, photos: photos, errors: errors)
+    /// The on-disk store, built by `AppDependencies.live(location:)`. Throws when it can't be opened.
+    init(location: StorageLocation, photos: any PhotoStoring, errors: any ErrorReporting, time: any TimeSource = SystemTime()) throws {
+        persistence = try PersistenceController(location: location, photos: photos, errors: errors)
         self.time = time
     }
 

@@ -24,6 +24,15 @@ enum NotificationIntent: Equatable {
     /// A plain tap on a dose reminder: open the app on it.
     case openDoseReminder(medicationIds: [UUID], slot: Date)
 
+    /// Answered from the lock screen without opening the app, so it needs the store
+    /// (or the notification service) to have any effect.
+    var isBackgroundAction: Bool {
+        switch self {
+        case .take, .skip, .snooze: true
+        case .openDailyReminder, .openRefill, .openDoseReminder: false
+        }
+    }
+
     // MARK: - Parsing
 
     /// Nil for a payload that names nothing to act on (malformed or from an older build).

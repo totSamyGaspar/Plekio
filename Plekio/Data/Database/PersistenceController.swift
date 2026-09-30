@@ -22,14 +22,11 @@ final class PersistenceController {
     /// Photo files live beside the store, not in it.
     let photos: any PhotoStoring
 
-    /// For failures with no caller to throw to (in-memory fallback, photo not written).
+    /// For failures with no caller to throw to (a photo not written, a failed read).
     private let errors: any ErrorReporting
 
     /// The store file, for measuring its size; zero-sized for in-memory runs.
     var storeURL: URL? { container.configurations.first?.url }
-
-    /// Set when the on-disk store failed and the app runs from memory.
-    private(set) var storageFailure: Error?
 
     /// One per store, so tests' in-memory stores never hear each other.
     let changes = DatabaseChangeFeed()
@@ -44,7 +41,10 @@ final class PersistenceController {
 
     // MARK: - Init
 
-    init(location: StorageLocation, photos: any PhotoStoring, errors: any ErrorReporting) {
+    /// Throws when the store can't be opened. There is no in-memory fallback: an empty
+    /// app would look like lost data and clear the reminder queue. AppLauncher shows
+    /// the recovery screen instead.
+    init(location: StorageLocation, photos: any PhotoStoring, errors: any ErrorReporting) throws {
         self.photos = photos
         self.errors = errors
         let schema = Self.makeSchema()
@@ -57,25 +57,13 @@ final class PersistenceController {
             let config = ModelConfiguration(schema: schema, url: location.storeURL)
             // Migration plan, so older stores are upgraded instead of refused.
             container = try ModelContainer(for: schema, migrationPlan: PlekioMigrationPlan.self, configurations: [config])
-            backup.recordOpened(with: version)
         } catch {
-            // Never crash on launch: fall back to memory and surface storageFailure.
             AppLog.storage.critical("Failed to open the on-disk store: \(error.localizedDescription, privacy: .public)")
-
-            let fallback = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-            guard let memoryContainer = try? ModelContainer(for: schema, configurations: [fallback]) else {
-                fatalError("SwiftData is unavailable even in memory: \(error)")
-            }
-
-            container = memoryContainer
-            storageFailure = error
+            throw error
         }
 
+        backup.recordOpened(with: version)
         context = container.mainContext
-
-        if let failure = storageFailure {
-            errors.report(DatabaseError.storageUnavailable(underlying: failure))
-        }
     }
 
     /// An in-memory store for tests; always in-memory regardless of the flag.
@@ -188,9 +176,6 @@ final class PersistenceController {
 
 /// Storage failures with user-readable text instead of SwiftData's raw description.
 nonisolated enum DatabaseError: LocalizedError, AlertTitled {
-    /// Running from memory; reported once at launch.
-    case storageUnavailable(underlying: Error)
-
     case saveFailed(underlying: Error)
 
     /// The record was written but its photo was not. Reported, never thrown.
@@ -211,8 +196,6 @@ nonisolated enum DatabaseError: LocalizedError, AlertTitled {
 
     nonisolated var errorDescription: String? {
         switch self {
-        case .storageUnavailable:
-            return String(localized: "Storage on this device is unavailable. The app is running in temporary mode — entries will not survive a restart.")
         case .saveFailed:
             return String(localized: "Couldn't save your changes. They were not written to the device.")
         case .readFailed:
@@ -224,9 +207,6 @@ nonisolated enum DatabaseError: LocalizedError, AlertTitled {
 
     var failureReason: String? {
         switch self {
-        case .storageUnavailable:
-            // The SwiftData detail goes to the log, not the user.
-            return nil
         case .saveFailed(let underlying):
             return underlying.localizedDescription
         case .photoNotSaved, .readFailed:

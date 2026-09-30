@@ -1,3 +1,10 @@
+//
+//  AppLockRootView.swift
+//  Plekio
+//
+//  Created by Edward Gasparian on 30.09.2026.
+//
+
 import SwiftUI
 
 struct AppLockRootView: View {
