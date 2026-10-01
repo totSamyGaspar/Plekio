@@ -27,8 +27,17 @@ nonisolated enum ReportDocument {
         for data: ReportData,
         in directory: URL = FileManager.default.temporaryDirectory
     ) throws -> URL {
-        guard let document = PDFDocument(data: report.data) else {
+        guard let source = PDFDocument(data: report.data) else {
             throw Failure.unreadable
+        }
+
+        // A data-backed PDF can be written by PDFKit without the newly assigned outline.
+        // Build a fresh document so the catalog, including bookmarks, is serialized anew.
+        // Inserting PDF pages preserves their vector content and searchable text.
+        let document = PDFDocument()
+        for index in 0..<source.pageCount {
+            guard let page = source.page(at: index) else { throw Failure.unreadable }
+            document.insert(page, at: index)
         }
 
         document.documentAttributes = attributes(for: data)
@@ -76,14 +85,14 @@ nonisolated enum ReportDocument {
 
         let root = PDFOutline()
 
-        for (index, bookmark) in bookmarks.enumerated() {
+        for bookmark in bookmarks {
             guard let page = document.page(at: bookmark.page) else { continue }
 
             let child = PDFOutline()
             child.label = bookmark.title
             child.destination = PDFDestination(page: page, at: CGPoint(x: 0, y: page.bounds(for: .mediaBox).height))
 
-            root.insertChild(child, at: index)
+            root.insertChild(child, at: root.numberOfChildren)
         }
 
         return root.numberOfChildren > 0 ? root : nil

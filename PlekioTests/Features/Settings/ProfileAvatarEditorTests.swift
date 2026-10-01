@@ -56,17 +56,63 @@ struct ProfileAvatarEditorTests {
 
     // MARK: - Concurrency
 
-    @Test("Of two concurrent replacements one wins, and the loser's file doesn't remain")
-    func overlappingReplacesLeaveOneFile() async {
+    @Test("The newer replacement wins in either write-completion order", arguments: [false, true])
+    func overlappingReplacesLeaveOneFile(newerFinishesFirst: Bool) async throws {
         let photos = FakePhotoStore()
-        let editor = ProfileAvatarEditor(photos: photos)
+        let writes = ControlledAvatarWrites()
+        let editor = ProfileAvatarEditor(photos: photos) { image, current, photos in
+            await writes.save(image, replacing: current, in: photos)
+        }
 
-        // Order is up to the scheduler; either way exactly one id and one file remain.
-        async let a = editor.replace(nil, with: TestImages.solid(.systemRed))
-        async let b = editor.replace(nil, with: TestImages.solid(.systemBlue))
-        let results = [await a, await b].compactMap { $0 }
+        let firstImage = TestImages.solid(.systemRed)
+        let secondImage = TestImages.solid(.systemBlue)
+        let first = Task { await editor.replace(nil, with: firstImage) }
+        await writes.waitForWrite(0)
+        let second = Task { await editor.replace(nil, with: secondImage) }
+        await writes.waitForWrite(1)
 
-        #expect(results.count == 1)
-        #expect(Array(photos.saved.keys) == results)
+        // Both replacements have advanced the generation before either write completes.
+        if newerFinishesFirst {
+            await writes.finish(1)
+            _ = await second.value
+            await writes.finish(0)
+        } else {
+            await writes.finish(0)
+            _ = await first.value
+            await writes.finish(1)
+        }
+
+        let superseded = await first.value
+        let winner = try #require(await second.value)
+        #expect(superseded == nil)
+        #expect(Set(photos.saved.keys) == Set([winner]))
+        #expect(photos.deleted.count == 1)
+        #expect(!photos.deleted.contains(winner))
+    }
+}
+
+/// Suspends writes cooperatively, so the test controls their overlap and completion order.
+private actor ControlledAvatarWrites {
+    private var nextIndex = 0
+    private var pending: [Int: CheckedContinuation<Void, Never>] = [:]
+    private var waitingForStart: [Int: CheckedContinuation<Void, Never>] = [:]
+
+    func save(_ image: UIImage, replacing current: UUID?, in photos: any PhotoStoring) async -> UUID? {
+        let index = nextIndex
+        nextIndex += 1
+        await withCheckedContinuation { continuation in
+            pending[index] = continuation
+            waitingForStart.removeValue(forKey: index)?.resume()
+        }
+        return AvatarStore.save(image, replacing: current, in: photos)
+    }
+
+    func waitForWrite(_ index: Int) async {
+        guard pending[index] == nil else { return }
+        await withCheckedContinuation { waitingForStart[index] = $0 }
+    }
+
+    func finish(_ index: Int) {
+        pending.removeValue(forKey: index)?.resume()
     }
 }

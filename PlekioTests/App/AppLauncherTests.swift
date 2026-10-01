@@ -34,7 +34,8 @@ struct AppLauncherTests {
             notifications: MockNotificationService(),
             photoCache: ImageCache(directory: location.photosDirectory),
             settings: SettingsStore(defaults: UserDefaults(suiteName: UUID().uuidString)!),
-            errorPresenter: AppErrorPresenter()
+            errorPresenter: AppErrorPresenter(),
+            tipJar: PreviewTipJar()
         )
     }
 
