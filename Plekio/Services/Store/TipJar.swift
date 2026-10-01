@@ -17,11 +17,20 @@ nonisolated enum TipSize: String, CaseIterable, Sendable {
     case medium = "com.EdHasp.Plekio.tip.medium"
     case large = "com.EdHasp.Plekio.tip.large"
 
+    /// "Buy the developer a coffee": sizes the user recognises without reading prices.
     var title: LocalizedStringResource {
         switch self {
-        case .small: "Small tip"
-        case .medium: "Medium tip"
-        case .large: "Large tip"
+        case .small: "Coffee"
+        case .medium: "Lunch"
+        case .large: "Dinner"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .small: "cup.and.saucer.fill"
+        case .medium: "takeoutbag.and.cup.and.straw.fill"
+        case .large: "fork.knife"
         }
     }
 }

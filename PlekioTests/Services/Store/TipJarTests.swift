@@ -15,7 +15,9 @@ import StoreKitTest
 @Suite("Tip jar", .serialized)
 struct TipJarTests {
 
-    /// A clean store with purchase sheets confirmed automatically. Keep it alive for the test.
+    /// A clean store with purchase sheets confirmed automatically. Each test resets it
+    /// in a defer: the session changes the simulator's StoreKit state, not just the
+    /// test's, so a leftover Ask to Buy would also apply to the app run from Xcode.
     private func makeSession() throws -> SKTestSession {
         let session = try SKTestSession(configurationFileNamed: "Plekio")
         session.resetToDefaultState()
@@ -27,7 +29,7 @@ struct TipJarTests {
     @Test("Tips load cheapest first, each with its store price")
     func optionsLoadInPriceOrder() async throws {
         let session = try makeSession()
-        defer { withExtendedLifetime(session) {} }
+        defer { session.resetToDefaultState() }
 
         let options = try await StoreKitTipJar().options()
 
@@ -38,7 +40,7 @@ struct TipJarTests {
     @Test("A tip goes through and is thanked")
     func tipIsThanked() async throws {
         let session = try makeSession()
-        defer { withExtendedLifetime(session) {} }
+        defer { session.resetToDefaultState() }
         let jar = StoreKitTipJar()
         _ = try await jar.options()
 
@@ -49,7 +51,7 @@ struct TipJarTests {
     func askToBuyIsPending() async throws {
         let session = try makeSession()
         session.askToBuyEnabled = true
-        defer { withExtendedLifetime(session) {} }
+        defer { session.resetToDefaultState() }
         let jar = StoreKitTipJar()
         _ = try await jar.options()
 

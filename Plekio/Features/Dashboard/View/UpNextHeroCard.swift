@@ -70,13 +70,3 @@ struct UpNextHeroCard: View {
         }
     }
 }
-
-// MARK: - PressableButtonStyle
-
-private struct PressableButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
-            .motion(.spring(response: 0.2, dampingFraction: 0.5), value: configuration.isPressed)
-    }
-}

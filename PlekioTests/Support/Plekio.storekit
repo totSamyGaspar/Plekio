@@ -19,12 +19,12 @@
       "localizations" : [
         {
           "description" : "A small thank-you for Plekio.",
-          "displayName" : "Small tip",
+          "displayName" : "Coffee",
           "locale" : "en_US"
         }
       ],
       "productID" : "com.EdHasp.Plekio.tip.small",
-      "referenceName" : "Small tip",
+      "referenceName" : "Coffee",
       "type" : "Consumable"
     },
     {
@@ -34,12 +34,12 @@
       "localizations" : [
         {
           "description" : "A thank-you that keeps Plekio going.",
-          "displayName" : "Medium tip",
+          "displayName" : "Lunch",
           "locale" : "en_US"
         }
       ],
       "productID" : "com.EdHasp.Plekio.tip.medium",
-      "referenceName" : "Medium tip",
+      "referenceName" : "Lunch",
       "type" : "Consumable"
     },
     {
@@ -49,12 +49,12 @@
       "localizations" : [
         {
           "description" : "A generous thank-you for Plekio.",
-          "displayName" : "Large tip",
+          "displayName" : "Dinner",
           "locale" : "en_US"
         }
       ],
       "productID" : "com.EdHasp.Plekio.tip.large",
-      "referenceName" : "Large tip",
+      "referenceName" : "Dinner",
       "type" : "Consumable"
     }
   ],

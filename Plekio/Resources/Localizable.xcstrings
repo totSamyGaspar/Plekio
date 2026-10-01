@@ -1,176 +1,234 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Small tip" : {
+    "Leave a tip" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kleines Trinkgeld"
+            "value" : "Trinkgeld geben"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Propina pequeña"
+            "value" : "Dejar propina"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Petit pourboire"
+            "value" : "Laisser un pourboire"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mancia piccola"
+            "value" : "Lascia una mancia"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "少しのチップ"
+            "value" : "チップを送る"
           }
         },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Шағын сыйлық"
+            "value" : "Сыйлық қалдыру"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bacșiș mic"
+            "value" : "Lăsați un bacșiș"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Небольшие чаевые"
+            "value" : "Оставить чаевые"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Невеликі чайові"
+            "value" : "Залишити чайові"
           }
         }
       }
     },
-    "Medium tip" : {
+    "Coffee" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mittleres Trinkgeld"
+            "value" : "Kaffee"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Propina mediana"
+            "value" : "Café"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pourboire moyen"
+            "value" : "Café"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mancia media"
+            "value" : "Caffè"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "普通のチップ"
+            "value" : "コーヒー"
           }
         },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Орташа сыйлық"
+            "value" : "Кофе"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bacșiș mediu"
+            "value" : "Cafea"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Средние чаевые"
+            "value" : "Кофе"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Середні чайові"
+            "value" : "Кава"
           }
         }
       }
     },
-    "Large tip" : {
+    "Lunch" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Großes Trinkgeld"
+            "value" : "Mittagessen"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Propina grande"
+            "value" : "Almuerzo"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gros pourboire"
+            "value" : "Déjeuner"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mancia grande"
+            "value" : "Pranzo"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "大きなチップ"
+            "value" : "ランチ"
           }
         },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Үлкен сыйлық"
+            "value" : "Түскі ас"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bacșiș mare"
+            "value" : "Prânz"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Большие чаевые"
+            "value" : "Обед"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Великі чайові"
+            "value" : "Обід"
+          }
+        }
+      }
+    },
+    "Dinner" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abendessen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cena"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dîner"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cena"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ディナー"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кешкі ас"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cină"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ужин"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вечеря"
           }
         }
       }
