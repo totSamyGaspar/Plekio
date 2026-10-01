@@ -69,6 +69,9 @@ final class AppDependencies {
     /// One instance so the whole app agrees on "now".
     let time: any TimeSource
 
+    /// Built at launch: StoreKit delivers interrupted or approved tips right away.
+    let tipJar: any TipJarService
+
     // MARK: - Init
 
     init(
@@ -77,10 +80,12 @@ final class AppDependencies {
         photoCache: ImageCache,
         settings: SettingsStore,
         errorPresenter: AppErrorPresenter,
+        tipJar: any TipJarService,
         storeURL: URL? = nil,
         time: any TimeSource = SystemTime()
     ) {
         self.time = time
+        self.tipJar = tipJar
         self.database = database
         self.notifications = notifications
         self.photoCache = photoCache
@@ -138,6 +143,7 @@ final class AppDependencies {
             photoCache: photoCache,
             settings: settings,
             errorPresenter: errorPresenter,
+            tipJar: StoreKitTipJar(),
             storeURL: database.persistence.storeURL,
             time: time
         )
@@ -156,7 +162,8 @@ final class AppDependencies {
             notifications: NotificationService(settings: settings, time: SystemTime()),
             photoCache: photos,
             settings: settings,
-            errorPresenter: errorPresenter
+            errorPresenter: errorPresenter,
+            tipJar: PreviewTipJar()
         )
     }()
     #endif

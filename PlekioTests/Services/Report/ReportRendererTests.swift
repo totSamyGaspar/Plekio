@@ -179,14 +179,24 @@ struct ReportRendererTests {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let url = try ReportDocument.write(ReportRenderer().render(data), for: data, in: directory)
+        let rendered = ReportRenderer().render(data)
+        #expect(rendered.bookmarks.count == 2)
+        let url = try ReportDocument.write(rendered, for: data, in: directory)
         let written = try #require(PDFDocument(url: url))
 
         let title = written.documentAttributes?[PDFDocumentAttribute.titleAttribute] as? String
         #expect(title?.isEmpty == false)
 
         // Medications and pressure only; no diary, so no bookmark for it.
-        #expect(written.outlineRoot?.numberOfChildren == 2)
+        let outline = try #require(written.outlineRoot)
+        #expect(outline.numberOfChildren == 2)
+        for (index, bookmark) in rendered.bookmarks.enumerated() {
+            let child = try #require(outline.child(at: index))
+            #expect(child.label == bookmark.title)
+            let page = try #require(child.destination?.page)
+            #expect(written.index(for: page) == bookmark.page)
+        }
+        #expect(written.string?.contains("Bisoprolol") == true)
     }
 
     // MARK: - Off the main actor

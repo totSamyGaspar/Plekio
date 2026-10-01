@@ -16,6 +16,8 @@ struct SettingsView: View {
     // Read straight from defaults: every theme-aware screen reads this same key.
     @AppStorage(AppTheme.storageKey) private var theme: AppTheme = .system
 
+    @State private var tipOptions: [TipOption] = []
+
     // MARK: - Body
 
     var body: some View {
@@ -100,17 +102,11 @@ struct SettingsView: View {
                     }
                     .listRowBackground(Color.appSurface)
 
-                    Section {
-                        Button(action: {
-                        }) {
-                            Label("Support the project", systemImage: "cup.and.saucer.fill")
-                                .foregroundColor(.accentPrimary)
-                        }
-                    }
-                    .listRowBackground(Color.appSurface)
+                    TipJarSection(options: tipOptions)
                 }
                 .scrollContentBackground(.hidden)
                 .tint(.accentPrimary)
+                .task { tipOptions = (try? await dependencies.tipJar.options()) ?? [] }
             }
         }
         .navigationTitle("Settings")

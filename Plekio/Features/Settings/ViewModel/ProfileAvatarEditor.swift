@@ -15,14 +15,26 @@ final class ProfileAvatarEditor {
     // MARK: - Properties
 
     private let photos: any PhotoStoring
+    private let save: Save
+
+    /// The asynchronous write boundary; tests can hold a write in flight without sleeps.
+    typealias Save = @Sendable (UIImage, UUID?, any PhotoStoring) async -> UUID?
 
     /// Bumped on every change so a late write knows it has been superseded.
     private var generation = 0
 
     // MARK: - Init
 
-    init(photos: any PhotoStoring) {
+    init(
+        photos: any PhotoStoring,
+        save: @escaping Save = { image, current, photos in
+            await Task.detached(priority: .userInitiated) {
+                AvatarStore.save(image, replacing: current, in: photos)
+            }.value
+        }
+    ) {
         self.photos = photos
+        self.save = save
     }
 
     // MARK: - Public
@@ -35,9 +47,7 @@ final class ProfileAvatarEditor {
         let photos = self.photos
 
         // Encoding and file I/O run off the main actor.
-        let saved = await Task.detached(priority: .userInitiated) {
-            AvatarStore.save(image, replacing: current, in: photos)
-        }.value
+        let saved = await save(image, current, photos)
 
         guard let saved else {
             AppLog.media.error("Avatar could not be stored; the profile keeps its previous photo")
