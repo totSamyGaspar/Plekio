@@ -57,6 +57,9 @@ final class AppDependencies {
 
     let dailyReminderArming: DailyReminderArming
 
+    /// Settings → Manage your data.
+    let dataErasing: DataErasing
+
     /// Held for its subscription, which rebuilds reminders after course writes.
     let reminderSync: ReminderSyncCoordinator
 
@@ -98,6 +101,7 @@ final class AppDependencies {
         doseUndo = DoseUndoCenter(doseLogging: doseLogging, errors: errorPresenter, time: time)
         doseSheetActions = DoseSheetActions(doseLogging: doseLogging, notifications: notifications, undo: doseUndo, errors: errorPresenter)
         dailyReminderArming = DailyReminderArming(notifications: notifications)
+        dataErasing = DataErasing(store: database, settings: settings, photos: photoCache)
         courseRepository = SwiftDataCourseRepository(store: database)
         diaryRepository = SwiftDataDiaryRepository(store: database)
         bloodPressureLogging = BloodPressureLogging(diary: diaryRepository, errors: errorPresenter, time: time)

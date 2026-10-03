@@ -96,20 +96,6 @@ extension DatabaseService: DiaryStoring {
         }
     }
 
-    /// Photo files go only after the commit: a failed delete leaves everything in place.
-    func deleteAllDiaryEntries() throws {
-        let entries = fetchAllDiaryEntries()
-        guard !entries.isEmpty else { return }
-
-        let photoIds = entries.flatMap(\.photoIds)
-        for entry in entries {
-            context.delete(entry)
-        }
-        try persistence.commit([.diary])
-
-        deletePhotos(photoIds)
-    }
-
     // MARK: - Photo Plan
 
     private struct PhotoPlan {

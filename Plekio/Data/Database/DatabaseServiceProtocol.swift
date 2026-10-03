@@ -86,8 +86,6 @@ protocol DiaryStoring {
     func updateDiaryEntry(_ entry: DiaryEntry, with draft: DiaryEntryDraft) throws
     func fetchAllDiaryEntries() -> [DiaryEntry]
     func deleteDiaryEntry(_ entry: DiaryEntry) throws
-    /// Every diary entry and its photo files; blood pressure readings are kept.
-    func deleteAllDiaryEntries() throws
 }
 
 // MARK: - Blood Pressure
@@ -104,7 +102,7 @@ protocol BloodPressureStoring {
 
 /// The whole storage surface, for the composition root and test double only.
 @MainActor
-protocol DatabaseServiceProtocol: CourseStoring, DoseStoring, DiaryStoring, BloodPressureStoring, DatabaseChangeSource, ReportReading {}
+protocol DatabaseServiceProtocol: CourseStoring, DoseStoring, DiaryStoring, BloodPressureStoring, DataErasingStore, DatabaseChangeSource, ReportReading {}
 
 // MARK: - Report
 
