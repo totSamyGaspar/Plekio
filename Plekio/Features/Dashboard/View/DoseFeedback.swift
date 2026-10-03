@@ -28,6 +28,11 @@ nonisolated enum DoseFeedback {
         if changed.contains(where: \.isSkipped) { return .warning }
         return changed.isEmpty ? nil : .impact(weight: .light)
     }
+
+    /// The user just took a dose: the good moment the success haptic marks.
+    static func tookADose(from old: Statuses, to new: Statuses) -> Bool {
+        feedback(from: old, to: new) == .success
+    }
 }
 
 // MARK: - View+DoseFeedback

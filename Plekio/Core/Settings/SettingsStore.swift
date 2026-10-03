@@ -19,6 +19,9 @@ nonisolated enum SettingsKey {
     static let userProfile = "userProfile"
     static let refillReminderEnabled = "refillReminderEnabled"
     static let refillReminderMinuteOfDay = "refillReminderMinuteOfDay"
+    static let reviewActiveDays = "reviewActiveDays"
+    static let reviewLastActiveDay = "reviewLastActiveDay"
+    static let reviewRequestedVersion = "reviewRequestedVersion"
     // Per-reminder keys ("<reminder>ReminderEnabled", ...) live in DailyReminder.
 }
 
