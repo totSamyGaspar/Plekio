@@ -4,11 +4,5 @@
 <dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID to unlock Plekio and protect access to your health data.</string>
-	<key>CFBundleLocalizations</key>
-	<array>
-		<string>en</string>
-		<string>Ukrainian</string>
-		<string>Russian</string>
-	</array>
 </dict>
 </plist>

@@ -93,6 +93,7 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
         }
         .motion(Motion.standard, value: viewModel.undoableAction)
         .doseFeedback(for: allPills)
+        .requestsReviewAfterTaking(allPills)
         .toolbar(.hidden, for: .navigationBar)
     }
 

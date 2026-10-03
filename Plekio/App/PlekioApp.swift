@@ -40,7 +40,8 @@ struct PlekioApp: App {
                     StorageRecoveryView(launcher: appDelegate.launcher)
                 }
             }
-            .onChange(of: scenePhase) { _, newPhase in
+            // `initial`: a cold launch can arrive already active, with no change to observe.
+            .onChange(of: scenePhase, initial: true) { _, newPhase in
                 if newPhase == .active {
                     becameActive()
                 }
@@ -56,6 +57,7 @@ struct PlekioApp: App {
     private func becameActive() {
         let launcher = appDelegate.launcher
         if let dependencies = launcher.dependencies {
+            dependencies.reviewPrompt.recordActiveDay()
             dependencies.reminderSync.sync()
         } else {
             launcher.retry()

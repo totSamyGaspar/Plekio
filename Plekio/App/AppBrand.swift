@@ -18,10 +18,12 @@ nonisolated enum AppBrand {
 
     /// "1.0 (1)": the marketing version and build from the bundle, so it always
     /// matches the build that is running. Set in the target's General tab.
-    static let version: String = {
-        let info = Bundle.main.infoDictionary
-        let marketing = info?["CFBundleShortVersionString"] as? String ?? "?"
-        let build = info?["CFBundleVersion"] as? String ?? "?"
-        return "\(marketing) (\(build))"
-    }()
+    static let version = "\(marketingVersion) (\(bundleValue("CFBundleVersion")))"
+
+    /// "1.0": what the App Store shows; a new one is a new release.
+    static let marketingVersion = bundleValue("CFBundleShortVersionString")
+
+    private static func bundleValue(_ key: String) -> String {
+        Bundle.main.infoDictionary?[key] as? String ?? "?"
+    }
 }

@@ -201,7 +201,8 @@ struct BloodPressureEntryView: View {
 
             Spacer(minLength: 8)
 
-            TextField("", text: text, prompt: Text(verbatim: placeholder))
+            // The title isn't drawn (the prompt is); VoiceOver reads it.
+            TextField(title, text: text, prompt: Text(verbatim: placeholder))
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.trailing)
                 .foregroundColor(isInvalid ? .warningAccent : .textPrimary)

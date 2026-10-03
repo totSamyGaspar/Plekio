@@ -57,6 +57,9 @@ final class AppDependencies {
 
     let dailyReminderArming: DailyReminderArming
 
+    /// Settings → Manage your data.
+    let dataErasing: DataErasing
+
     /// Held for its subscription, which rebuilds reminders after course writes.
     let reminderSync: ReminderSyncCoordinator
 
@@ -71,6 +74,9 @@ final class AppDependencies {
 
     /// Built at launch: StoreKit delivers interrupted or approved tips right away.
     let tipJar: any TipJarService
+
+    /// When to ask for an App Store rating; counted on activation, spent on the dashboard.
+    let reviewPrompt: ReviewPrompt
 
     // MARK: - Init
 
@@ -98,6 +104,8 @@ final class AppDependencies {
         doseUndo = DoseUndoCenter(doseLogging: doseLogging, errors: errorPresenter, time: time)
         doseSheetActions = DoseSheetActions(doseLogging: doseLogging, notifications: notifications, undo: doseUndo, errors: errorPresenter)
         dailyReminderArming = DailyReminderArming(notifications: notifications)
+        dataErasing = DataErasing(store: database, settings: settings, photos: photoCache)
+        reviewPrompt = ReviewPrompt(defaults: settings.defaults, time: time)
         courseRepository = SwiftDataCourseRepository(store: database)
         diaryRepository = SwiftDataDiaryRepository(store: database)
         bloodPressureLogging = BloodPressureLogging(diary: diaryRepository, errors: errorPresenter, time: time)

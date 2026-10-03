@@ -234,8 +234,22 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     func deleteDiaryEntry(_ entry: DiaryEntry) throws {
         deletedDiaryEntry = entry
     }
+}
 
-    func deleteAllDiaryEntries() throws {
+// MARK: - DataErasingStore
+
+extension MockDatabaseService {
+    func storedDataSummary() -> StoredDataSummary {
+        StoredDataSummary(diaryRecords: diaryEntriesToReturn.count)
+    }
+
+    func deleteDiary() throws {
+        diaryEntriesToReturn.removeAll()
+    }
+
+    func deleteFinishedCourses() throws {}
+
+    func deleteAllRecords() throws {
         diaryEntriesToReturn.removeAll()
     }
 }
