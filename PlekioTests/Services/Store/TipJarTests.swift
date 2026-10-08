@@ -7,6 +7,7 @@
 
 import Testing
 import Foundation
+import StoreKit
 import StoreKitTest
 @testable import Plekio
 
@@ -25,7 +26,7 @@ struct TipJarTests {
         return session
     }
 
-    @Test("Tips load cheapest first, each with its store price")
+    @Test("Tips load cheapest first, each with its store price", .enabled(SimulatorStoreKit.noProductsReason) { await SimulatorStoreKit.servesProducts() })
     func optionsLoadInPriceOrder() async throws {
         let session = try makeSession()
         defer { session.resetToDefaultState() }
@@ -36,7 +37,11 @@ struct TipJarTests {
         #expect(options.allSatisfy { !$0.displayPrice.isEmpty })
     }
 
-    @Test("A tip goes through and is thanked", .enabled(if: SimulatorStoreKit.purchasesWork, SimulatorStoreKit.skipReason))
+    @Test(
+        "A tip goes through and is thanked",
+        .enabled(if: SimulatorStoreKit.purchasesWork, SimulatorStoreKit.skipReason),
+        .enabled(SimulatorStoreKit.noProductsReason) { await SimulatorStoreKit.servesProducts() }
+    )
     func tipIsThanked() async throws {
         let session = try makeSession()
         defer { session.resetToDefaultState() }
@@ -46,7 +51,11 @@ struct TipJarTests {
         #expect(try await jar.give(.small) == .thanked)
     }
 
-    @Test("Ask to Buy leaves the tip pending", .enabled(if: SimulatorStoreKit.purchasesWork, SimulatorStoreKit.skipReason))
+    @Test(
+        "Ask to Buy leaves the tip pending",
+        .enabled(if: SimulatorStoreKit.purchasesWork, SimulatorStoreKit.skipReason),
+        .enabled(SimulatorStoreKit.noProductsReason) { await SimulatorStoreKit.servesProducts() }
+    )
     func askToBuyIsPending() async throws {
         let session = try makeSession()
         session.askToBuyEnabled = true
@@ -67,7 +76,8 @@ struct TipJarTests {
 
 // MARK: - SimulatorStoreKit
 
-/// Outside the suite: a trait can't read the type its own macro is attached to.
+/// Where StoreKitTest works. Outside the suite: a trait can't read the type
+/// its own macro is attached to.
 nonisolated private enum SimulatorStoreKit {
 
     /// On the iOS 26 simulator StoreKitTest fails with SKInternalErrorDomain 3:
@@ -77,4 +87,34 @@ nonisolated private enum SimulatorStoreKit {
     }
 
     static let skipReason: Comment = "Purchases hang on the iOS 26 simulator; run on iOS 27"
+
+    static let noProductsReason: Comment = "StoreKitTest serves no products in this environment (Xcode Cloud); run locally on iOS 27"
+
+    /// Whether StoreKitTest serves the products Plekio.storekit declares. Xcode
+    /// Cloud's simulators return none, so the tip tests can't run there. The ids
+    /// come from the file, not from TipSize: a TipSize that drifts from the file
+    /// still fails the tests instead of skipping them.
+    static func servesProducts() async -> Bool {
+        await probe.value
+    }
+
+    private static let probe = Task<Bool, Never> {
+        guard let url = Bundle(for: BundleToken.self).url(forResource: "Plekio", withExtension: "storekit"),
+              let data = try? Data(contentsOf: url),
+              let file = try? JSONDecoder().decode(StoreKitFile.self, from: data),
+              let session = try? SKTestSession(configurationFileNamed: "Plekio")
+        else { return false }
+
+        session.resetToDefaultState()
+        let ids = file.products.map(\.productID)
+        let products = (try? await Product.products(for: ids)) ?? []
+        return Set(products.map(\.id)) == Set(ids)
+    }
+
+    private final class BundleToken {}
+
+    private struct StoreKitFile: Decodable {
+        struct Item: Decodable { let productID: String }
+        let products: [Item]
+    }
 }
