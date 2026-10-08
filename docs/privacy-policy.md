@@ -1,6 +1,6 @@
 # Plekio Privacy Policy
 
-_Last updated: October 3, 2026_
+_Last updated: October 8, 2026_
 
 Plekio is a medication tracker for iPhone. This policy explains what happens to the information you enter in the app. In short: **it stays on your iPhone. We don't collect it, see it, or share it.**
 
@@ -37,6 +37,10 @@ Information leaves the app only when you choose to send it:
 ## Tips
 
 Tips are optional in-app purchases processed by Apple through the App Store. We do not receive your payment details. Apple's privacy policy applies to the purchase.
+
+## Ratings
+
+Now and then the app may ask you to rate it, using Apple's standard dialog. Apple handles the rating; the app doesn't learn whether you rated it or what you chose. You can turn these requests off for all apps in iOS Settings → App Store → In-App Ratings & Reviews.
 
 ## Backups
 

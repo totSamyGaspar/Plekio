@@ -1,0 +1,63 @@
+version 1.0.0
+entity BloodPressureReading
+  attribute diastolic: Int
+  attribute id: UUID unique
+  attribute measuredAt: Date
+  attribute pulse: Optional<Int>
+  attribute systolic: Int
+entity CourseDateRevision
+  attribute endDate: Date
+  attribute startDate: Date
+  attribute validUntil: Date
+  relationship course: TreatmentCourse inverse dateRevisions delete nullify
+entity DiaryEntry
+  attribute checkInDate: Date
+  attribute discomfortLevel: Int
+  attribute energyLevel: Int
+  attribute id: UUID unique
+  attribute isQuickLog: Bool
+  attribute milestoneTags: Array<String>
+  attribute moodLabel: String
+  attribute moodScore: Int
+  attribute photoIds: Array<UUID>
+  attribute physicalSummary: String
+  attribute reflectionNotes: String
+  attribute sleepHours: Double
+  attribute sleepQuality: String
+  attribute symptoms: Array<String>
+  attribute waterGlasses: Int
+entity DoseLog
+  attribute actualTakeTime: Optional<Date>
+  attribute dispensedQuantity: Optional<Int>
+  attribute id: UUID unique
+  attribute isTaken: Bool
+  attribute scheduledTime: Date
+  attribute skippedAt: Optional<Date>
+  relationship medication: MedicationItem inverse logs delete nullify
+entity MedicationItem
+  attribute dosage: Int
+  attribute formRaw: String
+  attribute frequencyDays: Int
+  attribute id: UUID unique
+  attribute lowStockThreshold: Int
+  attribute minutesOfDay: Array<Int>
+  attribute name: String
+  attribute startDate: Optional<Date>
+  attribute stockCount: Int
+  relationship course: TreatmentCourse inverse medications delete nullify
+  relationship logs: [DoseLog] inverse medication delete cascade
+  relationship scheduleRevisions: [ScheduleRevision] inverse medication delete cascade
+entity ScheduleRevision
+  attribute dosage: Int
+  attribute frequencyDays: Int
+  attribute minutesOfDay: Array<Int>
+  attribute validUntil: Date
+  relationship medication: MedicationItem inverse scheduleRevisions delete nullify
+entity TreatmentCourse
+  attribute endDate: Date
+  attribute id: UUID unique
+  attribute name: String
+  attribute repeatedFromId: Optional<UUID>
+  attribute startDate: Date
+  relationship dateRevisions: [CourseDateRevision] inverse course delete cascade
+  relationship medications: [MedicationItem] inverse course delete cascade

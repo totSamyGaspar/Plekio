@@ -12,14 +12,15 @@ import SwiftData
 // so an edit for V2 can never silently change V1 (both would then share one
 // checksum and the migration would fail). The app uses the typealiases below.
 //
-// Changing the schema (once V1 has shipped, it is frozen):
+// V1 is frozen (git tag `schema-v1`): SchemaFreezeTests fails on any change to
+// a V1 model and opens a store V1 wrote with the current schema. To change the schema:
 // - Copy every model file into `extension SchemaV2 { … }` (all of them: models
 //   reference each other through relationships) and edit only the V2 copies.
 // - Add `SchemaV2: VersionedSchema`; point `Current` at it.
 // - Append V2 to `PlekioMigrationPlan.schemas` and add a stage: `.lightweight`
 //   for additive changes, `.custom` when data must be moved or rewritten.
-// - Extend PlekioSchemaTests: a store written in V1, opened in V2.
-// Before the first release, edit the V1 models freely and reinstall.
+// - Extend SchemaV1Fixture.expectMatches for what V2 changed; once V2 ships,
+//   freeze it the same way (SchemaV2.manifest, SchemaV2.store).
 
 // MARK: - Current
 
