@@ -134,3 +134,6 @@ iOSInjectionProject/
 
 # Local xcodebuild output
 test.log
+
+# Written by ci_scripts/ci_pre_xcodebuild.sh on Xcode Cloud only
+PlekioTests/Support/XcodeCloud.marker

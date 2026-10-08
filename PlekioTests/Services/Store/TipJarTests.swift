@@ -88,13 +88,20 @@ struct TipJarTests {
 /// its own macro is attached to.
 nonisolated private enum SimulatorStoreKit {
 
-    /// On the iOS 26 simulator StoreKitTest fails with SKInternalErrorDomain 3:
-    /// products still load, but a purchase never returns.
+    /// Purchases never return on the iOS 26 simulator (SKInternalErrorDomain 3)
+    /// nor, at times, on Xcode Cloud's simulators even when products load, so
+    /// they are tested locally on iOS 27 only. Xcode Cloud is recognised by the
+    /// marker ci_scripts/ci_pre_xcodebuild.sh puts in the test bundle.
     static var purchasesWork: Bool {
-        ProcessInfo.processInfo.isOperatingSystemAtLeast(OperatingSystemVersion(majorVersion: 27, minorVersion: 0, patchVersion: 0))
+        !runsOnXcodeCloud
+            && ProcessInfo.processInfo.isOperatingSystemAtLeast(OperatingSystemVersion(majorVersion: 27, minorVersion: 0, patchVersion: 0))
     }
 
-    static let skipReason: Comment = "Purchases hang on the iOS 26 simulator; run on iOS 27"
+    private static var runsOnXcodeCloud: Bool {
+        Bundle(for: BundleToken.self).url(forResource: "XcodeCloud", withExtension: "marker") != nil
+    }
+
+    static let skipReason: Comment = "Purchases hang on the iOS 26 simulator and on Xcode Cloud; run locally on iOS 27"
 
     static let noProductsReason: Comment = "StoreKitTest serves no products in this environment (Xcode Cloud); run locally on iOS 27"
 
