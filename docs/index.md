@@ -22,3 +22,7 @@ In **Settings → Manage your data** you can delete the diary, the history of fi
 
 **I turned on the app lock and can't get in.**
 The lock uses your iPhone's Face ID, Touch ID or passcode. If Face ID fails, the passcode always works.
+
+## Legal
+
+[Privacy Policy](privacy-policy.md) · [Terms of Use](terms.md)
