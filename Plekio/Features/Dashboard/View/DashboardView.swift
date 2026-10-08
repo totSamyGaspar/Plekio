@@ -306,9 +306,11 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     DashboardView(viewModel: MockDashboardViewModel(), statistics: MockStatisticsViewModel())
         .environmentObject(AppRouter())
         .environment(AppDependencies.preview)
         .appTheme()
 }
+#endif

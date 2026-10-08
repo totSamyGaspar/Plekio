@@ -125,6 +125,7 @@ struct DiaryPhotosCard: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     DiaryPhotosCard(
         images: [],
@@ -135,3 +136,4 @@ struct DiaryPhotosCard: View {
     .padding()
     .background(Color.appBackground)
 }
+#endif

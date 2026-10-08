@@ -111,8 +111,10 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     NewTreatmentView(viewModel: MockNewTreatmentViewModel())
         .environmentObject(AppRouter())
         .environment(AppDependencies.preview)
 }
+#endif

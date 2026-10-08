@@ -169,8 +169,10 @@ struct DayPreview: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     DayPreview()
         .padding(40)
         .background(Color.appBackground)
 }
+#endif

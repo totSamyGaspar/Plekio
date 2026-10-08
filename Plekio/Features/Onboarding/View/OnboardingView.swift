@@ -95,6 +95,8 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     OnboardingView(viewModel: MockOnboardingViewModel())
 }
+#endif

@@ -278,8 +278,10 @@ struct ReminderPreview: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     ReminderPreview()
         .padding(40)
         .background(Color.appBackground)
 }
+#endif

@@ -31,9 +31,11 @@ struct WebLinkRow: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     List {
         WebLinkRow(title: "Privacy Policy", systemImage: "hand.raised", url: AppBrand.privacyPolicyURL)
     }
     .appTheme()
 }
+#endif

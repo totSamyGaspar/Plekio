@@ -45,8 +45,10 @@ struct ContentView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     ContentView()
         .environmentObject(AppRouter())
         .environment(AppDependencies.preview)
 }
+#endif

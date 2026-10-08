@@ -156,6 +156,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     NavigationStack {
         CoursesListView(viewModel: AppDependencies.preview.makeCoursesListViewModel())
@@ -163,3 +164,4 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
     }
     .environment(AppDependencies.preview)
 }
+#endif

@@ -83,6 +83,7 @@ struct DiaryStatsGrid: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     ZStack {
         Color.appBackground.ignoresSafeArea()
@@ -95,3 +96,4 @@ struct DiaryStatsGrid: View {
     }
     .appTheme()
 }
+#endif

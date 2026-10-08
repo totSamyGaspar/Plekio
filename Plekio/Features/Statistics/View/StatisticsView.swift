@@ -162,8 +162,10 @@ final class MockStatisticsViewModel: StatisticsViewModelProtocol {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     StatisticsView(viewModel: MockStatisticsViewModel())
         .environment(AppDependencies.preview)
         .appTheme()
 }
+#endif

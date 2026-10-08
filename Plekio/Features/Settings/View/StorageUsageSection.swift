@@ -61,6 +61,7 @@ struct StorageUsageSection: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     NavigationStack {
         List {
@@ -73,3 +74,4 @@ struct StorageUsageSection: View {
     .environment(AppDependencies.preview)
     .environment(\.databaseChanges, AppDependencies.preview.database.changes)
 }
+#endif

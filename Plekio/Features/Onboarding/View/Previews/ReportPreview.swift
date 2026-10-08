@@ -183,8 +183,10 @@ struct ReportPreview: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     ReportPreview()
         .padding(40)
         .background(Color.appBackground)
 }
+#endif

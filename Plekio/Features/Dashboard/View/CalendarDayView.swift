@@ -49,6 +49,7 @@ struct CalendarDayView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     @Previewable @Namespace var selection
     let today = Calendar.current.startOfDay(for: Date())
@@ -61,3 +62,4 @@ struct CalendarDayView: View {
     .padding()
     .background(Color(UIColor.systemGroupedBackground))
 }
+#endif

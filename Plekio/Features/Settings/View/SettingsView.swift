@@ -120,6 +120,7 @@ struct SettingsView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     NavigationStack {
         SettingsView()
@@ -127,3 +128,4 @@ struct SettingsView: View {
     }
     .environment(AppDependencies.preview)
 }
+#endif
