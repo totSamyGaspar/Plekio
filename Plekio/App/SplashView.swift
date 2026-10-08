@@ -11,7 +11,6 @@ struct SplashView: View {
 
     // MARK: - Properties
 
-    /// Pure branding: stays up exactly as long as the logo fade-in.
     private static let displayDuration: TimeInterval = 1.2
 
     @State private var isActive = false
