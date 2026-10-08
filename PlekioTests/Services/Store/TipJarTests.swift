@@ -66,6 +66,14 @@ struct TipJarTests {
         #expect(try await jar.give(.medium) == .pending)
     }
 
+    @Test("With tips switched off, the jar offers nothing and takes nothing")
+    func disabledJarOffersNothing() async throws {
+        let jar = DisabledTipJar()
+
+        #expect(try await jar.options().isEmpty)
+        await #expect(throws: TipFailed.self) { try await jar.give(.small) }
+    }
+
     @Test("Giving before the tips have loaded fails instead of guessing a product")
     func givingWithoutOptionsFails() async {
         await #expect(throws: TipFailed.self) {
@@ -80,13 +88,16 @@ struct TipJarTests {
 /// its own macro is attached to.
 nonisolated private enum SimulatorStoreKit {
 
-    /// On the iOS 26 simulator StoreKitTest fails with SKInternalErrorDomain 3:
-    /// products still load, but a purchase never returns.
+    /// Purchases run only while tips ship (AppFeatures.tips) and only on iOS 27:
+    /// on the iOS 26 simulator they never return (SKInternalErrorDomain 3), and on
+    /// Xcode Cloud's simulators they hang even when products load. Turning tips on
+    /// means testing purchases locally on iOS 27 before each release.
     static var purchasesWork: Bool {
-        ProcessInfo.processInfo.isOperatingSystemAtLeast(OperatingSystemVersion(majorVersion: 27, minorVersion: 0, patchVersion: 0))
+        AppFeatures.tips
+            && ProcessInfo.processInfo.isOperatingSystemAtLeast(OperatingSystemVersion(majorVersion: 27, minorVersion: 0, patchVersion: 0))
     }
 
-    static let skipReason: Comment = "Purchases hang on the iOS 26 simulator; run on iOS 27"
+    static let skipReason: Comment = "Tips are off (AppFeatures.tips); purchases also hang on the iOS 26 simulator and on Xcode Cloud"
 
     static let noProductsReason: Comment = "StoreKitTest serves no products in this environment (Xcode Cloud); run locally on iOS 27"
 
