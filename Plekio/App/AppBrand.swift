@@ -23,6 +23,18 @@ nonisolated enum AppBrand {
     /// "1.0": what the App Store shows; a new one is a new release.
     static let marketingVersion = bundleValue("CFBundleShortVersionString")
 
+    /// Where feedback and support mail goes; also printed in the privacy policy.
+    static let supportEmail = "plekio.support@gmail.com"
+
+    /// GitHub Pages, published from docs/ on main: the Support URL in App Store Connect.
+    static let supportURL = URL(string: "https://totsamygaspar.github.io/Plekio/")!
+
+    /// The Privacy Policy URL in App Store Connect; App Review also expects it in the app.
+    static let privacyPolicyURL = supportURL.appending(path: "privacy-policy.html")
+
+    /// Medical disclaimer and limits of liability; the custom EULA if App Store Connect asks.
+    static let termsURL = supportURL.appending(path: "terms.html")
+
     private static func bundleValue(_ key: String) -> String {
         Bundle.main.infoDictionary?[key] as? String ?? "?"
     }

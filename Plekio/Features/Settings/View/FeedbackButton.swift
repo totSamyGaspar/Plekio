@@ -15,7 +15,7 @@ struct FeedbackButton: View {
     /// Technical details put under the message, e.g. why the store didn't open.
     var details: String? = nil
 
-    private let email = "plekio.support@gmail.com"
+    private let email = AppBrand.supportEmail
 
     var body: some View {
         Button(action: composeFeedback) {

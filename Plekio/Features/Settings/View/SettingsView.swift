@@ -99,6 +99,10 @@ struct SettingsView: View {
                         }
 
                         FeedbackButton()
+
+                        WebLinkRow(title: "Help & Support", systemImage: "questionmark.circle", url: AppBrand.supportURL)
+                        WebLinkRow(title: "Privacy Policy", systemImage: "hand.raised", url: AppBrand.privacyPolicyURL)
+                        WebLinkRow(title: "Terms of Use", systemImage: "doc.plaintext", url: AppBrand.termsURL)
                     }
                     .listRowBackground(Color.appSurface)
 
