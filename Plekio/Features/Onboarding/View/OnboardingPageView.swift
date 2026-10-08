@@ -81,9 +81,11 @@ struct OnboardingPageView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     ZStack {
         Color.appBackground.ignoresSafeArea()
         OnboardingPageView(page: OnboardingViewModel.allPages[2])
     }
 }
+#endif

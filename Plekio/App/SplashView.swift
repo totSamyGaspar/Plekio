@@ -90,8 +90,10 @@ struct SplashView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     SplashView()
         .environmentObject(AppRouter())
         .environment(AppDependencies.preview)
 }
+#endif

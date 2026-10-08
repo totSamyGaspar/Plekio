@@ -184,8 +184,10 @@ struct MainTabView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     MainTabView()
         .environmentObject(AppRouter())
         .environment(AppDependencies.preview)
 }
+#endif

@@ -190,8 +190,10 @@ struct CoursePreview: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     CoursePreview()
         .padding(40)
         .background(Color.appBackground)
 }
+#endif

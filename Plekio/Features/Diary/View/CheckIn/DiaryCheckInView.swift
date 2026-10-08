@@ -274,8 +274,10 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     DiaryCheckInView(viewModel: MockDiaryCheckInViewModel())
         .environment(AppDependencies.preview)
         .appTheme()
 }
+#endif

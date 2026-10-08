@@ -233,6 +233,7 @@ struct ActionButton: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     TakePillModalView(
         pills: [
@@ -243,3 +244,4 @@ struct ActionButton: View {
     )
     .appTheme()
 }
+#endif

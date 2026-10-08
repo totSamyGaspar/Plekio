@@ -285,8 +285,10 @@ struct DiaryPreview: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     DiaryPreview()
         .padding(40)
         .background(Color.appBackground)
 }
+#endif

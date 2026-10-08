@@ -218,7 +218,9 @@ struct ImagePreviewView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     AddMedicationView(viewModel: AppDependencies.preview.makeAddMedicationViewModel(), onSave: { _ in })
         .appTheme()
 }
+#endif

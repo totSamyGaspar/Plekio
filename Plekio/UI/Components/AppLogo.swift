@@ -24,8 +24,10 @@ struct AppLogo: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     AppLogo(size: 120)
         .padding(40)
         .background(Color.appBackground)
 }
+#endif

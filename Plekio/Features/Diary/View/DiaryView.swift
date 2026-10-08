@@ -262,6 +262,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     NavigationStack {
         DiaryView(viewModel: MockDiaryViewModel())
@@ -270,3 +271,4 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     .environmentObject(AppRouter())
     .environment(AppDependencies.preview)
 }
+#endif

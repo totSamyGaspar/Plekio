@@ -61,8 +61,10 @@ struct StorageRecoveryView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     StorageRecoveryView(launcher: AppLauncher(
         location: StorageLocation(root: FileManager.default.temporaryDirectory.appending(path: "PlekioPreviewRecovery"))
     ) { _ in throw CocoaError(.fileReadCorruptFile) })
 }
+#endif

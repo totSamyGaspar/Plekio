@@ -171,6 +171,7 @@ struct DiaryEntryRowView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     DiaryEntryRowView(
         entry: DiaryEntrySnapshot(
@@ -193,3 +194,4 @@ struct DiaryEntryRowView: View {
     .background(Color.appBackground)
     .appTheme()
 }
+#endif

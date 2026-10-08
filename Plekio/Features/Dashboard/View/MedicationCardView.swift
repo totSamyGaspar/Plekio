@@ -176,6 +176,7 @@ struct MedicationCardView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     ZStack {
         Color.appBackground.ignoresSafeArea()
@@ -243,3 +244,4 @@ struct MedicationCardView: View {
     }
     .appTheme()
 }
+#endif

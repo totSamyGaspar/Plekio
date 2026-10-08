@@ -30,7 +30,7 @@ open Plekio/Plekio.xcodeproj
 
 Select the **Plekio** scheme and run it on a simulator or a device. To run on a device, set your own team under *Signing & Capabilities*.
 
-Before the first release the data schema is still allowed to change. If a build fails to open an existing store, delete the app and install it again.
+The data schema is frozen at `SchemaV1` (git tag `schema-v1`): a build must open every store an earlier release wrote. See *Schema changes* below.
 
 ## Tests
 
@@ -42,6 +42,17 @@ The **Plekio** scheme pins the test environment so date and locale assertions do
 - `-AppleLocale uk_UA`
 
 Test names are in English; assertions and code are in English.
+
+- **Schema freeze.** `SchemaFreezeTests` compares `SchemaV1` with `PlekioTests/Fixtures/SchemaV1.manifest` and opens `SchemaV1.store`, a store V1 wrote, with the current schema. Never regenerate those files.
+- **StoreKit.** Tip tests run against `PlekioTests/Support/Plekio.storekit`. Purchase tests run only while `AppFeatures.tips` is on, and only on iOS 27.
+
+## CI
+
+Xcode Cloud, workflow **Tests**: every pull request into `main` and every push to `main` builds and runs the tests on one iPhone simulator with the latest iOS. A PR is merged only when it is green.
+
+## Releasing
+
+Follow [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). The support page, privacy policy and terms of use live in `docs/` and are published with GitHub Pages at https://totsamygaspar.github.io/Plekio/.
 
 ## Architecture
 
@@ -103,5 +114,8 @@ PlekioTests/        Mirrors the app's folders; Mocks/ and Support/ hold test dou
 ## Conventions
 - **Comments** explain *why*, not *what*.
 - **Localization:** every user-facing string lives in `Localizable.xcstrings` and is translated into all supported languages.
-- **Schema changes:** until the first release, models can change freely. After release, `SchemaV1` is frozen; add a new version and a migration stage in `PlekioSchema`, and extend `PlekioSchemaTests`.
-- **Commits:** short imperative subject, e.g. `Diary: entries can't be dated in the future`.
+- **Schema changes:** `SchemaV1` is frozen. A model change goes into a new `SchemaV2` with a migration stage, following the steps at the top of `PlekioSchema.swift`; extend `SchemaV1Fixture.expectMatches` for it.
+- **Previews and mocks** live inside `#if DEBUG`, so they never reach the App Store build.
+- **Feature flags** are in `AppFeatures` and read only in the composition root.
+- **Branches and PRs:** one branch per change, merged into `main` by pull request once Xcode Cloud is green; merged branches are deleted.
+- **Commits:** short imperative subject, e.g. `Diary: entries can't be dated in the future`, then a body that says what changed and why.

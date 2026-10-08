@@ -51,9 +51,11 @@ struct EmptyStateView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     ZStack {
         Color.appBackground.ignoresSafeArea()
         EmptyStateView(icon: "pills", title: "Nothing for today")
     }
 }
+#endif

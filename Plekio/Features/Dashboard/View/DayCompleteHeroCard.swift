@@ -72,8 +72,10 @@ struct DayCompleteHeroCard: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     DayCompleteHeroCard(date: Date(), takenCount: 4, totalCount: 4, streakDays: 5, isShown: true)
         .frame(height: 280)
         .appTheme()
 }
+#endif

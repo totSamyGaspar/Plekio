@@ -126,9 +126,11 @@ struct ManageDataView: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     NavigationStack {
         ManageDataView()
     }
     .environment(AppDependencies.preview)
 }
+#endif
