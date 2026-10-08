@@ -151,7 +151,7 @@ final class AppDependencies {
             photoCache: photoCache,
             settings: settings,
             errorPresenter: errorPresenter,
-            tipJar: StoreKitTipJar(),
+            tipJar: AppFeatures.tips ? StoreKitTipJar() : DisabledTipJar(),
             storeURL: database.persistence.storeURL,
             time: time
         )

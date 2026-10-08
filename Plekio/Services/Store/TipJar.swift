@@ -127,6 +127,15 @@ nonisolated enum TipFailed: LocalizedError, AlertTitled {
     }
 }
 
+// MARK: - DisabledTipJar
+
+/// Stands in while AppFeatures.tips is off: no products, so Settings hides the
+/// tip section, and no StoreKit transaction listener is started at launch.
+final class DisabledTipJar: TipJarService {
+    func options() async throws -> [TipOption] { [] }
+    func give(_ tip: TipSize) async throws -> TipOutcome { throw TipFailed.unavailable }
+}
+
 #if DEBUG
 // MARK: - PreviewTipJar
 

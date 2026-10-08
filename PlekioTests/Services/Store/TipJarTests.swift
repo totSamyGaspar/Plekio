@@ -66,6 +66,14 @@ struct TipJarTests {
         #expect(try await jar.give(.medium) == .pending)
     }
 
+    @Test("With tips switched off, the jar offers nothing and takes nothing")
+    func disabledJarOffersNothing() async throws {
+        let jar = DisabledTipJar()
+
+        #expect(try await jar.options().isEmpty)
+        await #expect(throws: TipFailed.self) { try await jar.give(.small) }
+    }
+
     @Test("Giving before the tips have loaded fails instead of guessing a product")
     func givingWithoutOptionsFails() async {
         await #expect(throws: TipFailed.self) {

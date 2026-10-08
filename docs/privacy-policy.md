@@ -34,10 +34,6 @@ Information leaves the app only when you choose to send it:
 - **Doctor report (PDF)** — you pick the period and sections and share the file yourself, by any app you choose.
 - **Feedback** — "Send feedback" opens your mail app with a message to us. We receive only what you decide to send, and use it only to reply and improve the app.
 
-## Tips
-
-Tips are optional in-app purchases processed by Apple through the App Store. We do not receive your payment details. Apple's privacy policy applies to the purchase.
-
 ## Ratings
 
 Now and then the app may ask you to rate it, using Apple's standard dialog. Apple handles the rating; the app doesn't learn whether you rated it or what you chose. You can turn these requests off for all apps in iOS Settings → App Store → In-App Ratings & Reviews.

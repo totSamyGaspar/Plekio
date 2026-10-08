@@ -22,10 +22,6 @@ Plekio shows what you entered. Check that courses, doses, times and stock counts
 
 Everything you enter is stored only on your device, as described in the [Privacy Policy](privacy-policy.md). We have no copy of it and cannot restore it. Keep your iPhone backed up if your data matters to you. Data you delete in the app cannot be recovered.
 
-## Tips
-
-Tips are optional and unlock nothing. They are processed by Apple; refunds are handled by Apple under its own terms.
-
 ## The app is provided "as is"
 
 We work to keep Plekio accurate and reliable, but we provide it "as is" and "as available", without warranties of any kind, including that it will be error-free or uninterrupted.
