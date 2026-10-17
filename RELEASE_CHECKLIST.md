@@ -30,7 +30,7 @@ The store holds people's medication history. A broken migration loses it.
 
 ## 3. Strings, privacy, legal
 
-- [ ] **Translations.** Every new string is translated into all ten languages. No `needs_review` entries are left in `Localizable.xcstrings`: search the file for `needs_review`.
+- [ ] **Translations.** Every new string is translated into all eleven languages. No `needs_review` entries are left in `Localizable.xcstrings`: search the file for `needs_review`.
 - [ ] **`PrivacyInfo.xcprivacy`.** Still true:
   - no tracking;
   - no collected data;

@@ -165,6 +165,7 @@
 				fr,
 				kk,
 				it,
+				ka,
 			);
 			mainGroup = 123BA6DD2FA61C8500FFA528;
 			minimizedProjectReferenceProxies = 1;

@@ -38,6 +38,12 @@
             "value" : "· %@"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "· %@"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -96,6 +102,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「%@」"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%@“"
           }
         },
         "kk" : {
@@ -158,6 +170,12 @@
             "value" : "（%lld）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%lld)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -218,6 +236,12 @@
             "value" : "（~%lld ml）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(~%lld მლ)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -273,6 +297,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "#%lld"
+          }
+        },
+        "ka" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "#%lld"
@@ -344,6 +374,12 @@
             "value" : "%1$@（%2$lld）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ (%2$lld)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -408,6 +444,12 @@
             "value" : "%1$@（%2$lld/5）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ (%2$lld/5)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -463,6 +505,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / 5"
+          }
+        },
+        "ka" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ / 5"
@@ -528,6 +576,12 @@
             "value" : "%@ /5"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ /5"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -586,6 +640,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@時間"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ სთ"
           }
         },
         "kk" : {
@@ -648,6 +708,12 @@
             "value" : "一晩%@時間"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ სთ ღამეში"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -706,6 +772,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@の残りが少なくなっています"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%@“ იწურება"
           }
         },
         "kk" : {
@@ -864,6 +936,24 @@
             }
           }
         },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "„%1$@“-ის მარაგი %2$lld ცალით შეივსო."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "„%1$@“-ის მარაგი %2$lld ცალით შეივსო."
+                }
+              }
+            }
+          }
+        },
         "kk" : {
           "variations" : {
             "plural" : {
@@ -1004,6 +1094,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@時間 · %2$@"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ სთ · %2$@"
           }
         },
         "kk" : {
@@ -1156,6 +1252,24 @@
             }
           }
         },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დართულია"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დართულია"
+                }
+              }
+            }
+          }
+        },
         "kk" : {
           "variations" : {
             "plural" : {
@@ -1291,6 +1405,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld bpm"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld დარტყმა/წთ"
           }
         },
         "kk" : {
@@ -1438,6 +1558,24 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld日連続！"
+                }
+              }
+            }
+          }
+        },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დღე ზედიზედ!"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დღე ზედიზედ!"
                 }
               }
             }
@@ -1670,6 +1808,24 @@
             }
           }
         },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დოზა აღირიცხა"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დოზა აღირიცხა"
+                }
+              }
+            }
+          }
+        },
         "kk" : {
           "variations" : {
             "plural" : {
@@ -1892,6 +2048,24 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld回分をスキップしました"
+                }
+              }
+            }
+          }
+        },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დოზა გამოტოვებულია"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დოზა გამოტოვებულია"
                 }
               }
             }
@@ -2125,6 +2299,24 @@
             }
           }
         },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ჭიქა"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ჭიქა"
+                }
+              }
+            }
+          }
+        },
         "kk" : {
           "variations" : {
             "plural" : {
@@ -2353,6 +2545,24 @@
             }
           }
         },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დაემატა"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld დაემატა"
+                }
+              }
+            }
+          }
+        },
         "kk" : {
           "variations" : {
             "plural" : {
@@ -2562,6 +2772,24 @@
             }
           }
         },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "კიდევ %lld"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "კიდევ %lld"
+                }
+              }
+            }
+          }
+        },
         "kk" : {
           "variations" : {
             "plural" : {
@@ -2699,6 +2927,12 @@
             "value" : "%1$lld/%2$lld"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld / %2$lld"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2763,6 +2997,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%2$lld回中%1$lld回を記録"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აღირიცხა %1$lld დოზა %2$lld-დან"
           }
         },
         "kk" : {
@@ -2910,6 +3150,24 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld個"
+                }
+              }
+            }
+          }
+        },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ცალი"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ცალი"
                 }
               }
             }
@@ -3143,6 +3401,24 @@
             }
           }
         },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ფოტო დართულია"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ფოტო დართულია"
+                }
+              }
+            }
+          }
+        },
         "kk" : {
           "variations" : {
             "plural" : {
@@ -3366,6 +3642,24 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "1日%lld回"
+                }
+              }
+            }
+          }
+        },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "დღეში %lld-ჯერ"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "დღეში %lld-ჯერ"
                 }
               }
             }
@@ -3599,6 +3893,24 @@
             }
           }
         },
+        "ka" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "არჩეულია: %lld/2"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "არჩეულია: %lld/2"
+                }
+              }
+            }
+          }
+        },
         "kk" : {
           "variations" : {
             "plural" : {
@@ -3737,6 +4049,12 @@
             "value" : "💊 お薬の時間です"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💊 წამლის მიღების დროა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3796,6 +4114,12 @@
             "value" : "📔 記録の時間です"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📔 დროა, დღიურში ჩაწერო"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3853,6 +4177,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🩺 血圧を測る時間です"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🩺 წნევის გაზომვის დროა"
           }
         },
         "kk" : {
@@ -3915,6 +4245,12 @@
             "value" : "0（なし）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "0 (არ არის)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3973,6 +4309,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "5（我慢できる）"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 (ასატანი)"
           }
         },
         "kk" : {
@@ -4035,6 +4377,12 @@
             "value" : "7日間の平均エネルギー"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 დღის საშუალო ენერგია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4093,6 +4441,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "7日間の平均気分"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 დღის საშუალო განწყობა"
           }
         },
         "kk" : {
@@ -4155,6 +4509,12 @@
             "value" : "7日間の平均睡眠"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 დღის საშუალო ძილი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4215,6 +4575,12 @@
             "value" : "7.5"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7.5"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4268,6 +4634,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10"
+          }
+        },
+        "ka" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "10"
@@ -4333,6 +4705,12 @@
             "value" : "10（重度）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 (ძლიერი)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4386,6 +4764,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30"
+          }
+        },
+        "ka" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "30"
@@ -4450,6 +4834,12 @@
             "value" : "1分で服薬スケジュール"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსი ერთ წუთში"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4506,6 +4896,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "日記の記録を未来の日付にすることはできません。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიურის ჩანაწერს მომავალი თარიღი ვერ ექნება."
           }
         },
         "kk" : {
@@ -4567,6 +4963,12 @@
             "value" : "同じ薬で新しいコースが「実施中」に追加されます。完了したコースは履歴に残ります。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "იგივე წამლებით ახალი კურსი დაემატება აქტიურებს. დასრულებული ისტორიაში დარჩება."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4626,6 +5028,12 @@
             "value" : "医師向けのレポート"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ანგარიში ექიმისთვის"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4683,6 +5091,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "範囲外の値は保存できません。脈拍は任意です — 測定器に表示されない場合は空のままにしてください。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დასაშვები დიაპაზონის გარეთ მნიშვნელობა ვერ შეინახება. პულსი სავალდებულო არ არის — დატოვე ცარიელი, თუ შენი ტონომეტრი არ აჩვენებს."
           }
         },
         "kk" : {
@@ -4745,6 +5159,12 @@
             "value" : "このアプリについて"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აპლიკაციის შესახებ"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4803,6 +5223,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "実施中"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აქტიური"
           }
         },
         "kk" : {
@@ -4865,6 +5291,12 @@
             "value" : "追加"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დამატება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4922,6 +5354,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "比較するには進捗写真を2枚以上追加してください"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შესადარებლად დაამატე სულ მცირე ორი პროგრესის ფოტო"
           }
         },
         "kk" : {
@@ -4984,6 +5422,12 @@
             "value" : "カスタムのマイルストーンを追加…"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაამატე საკუთარი ეტაპის ტეგი..."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5042,6 +5486,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "薬を追加"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამლის დამატება"
           }
         },
         "kk" : {
@@ -5104,6 +5554,12 @@
             "value" : "新規記録"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ახალი ჩანაწერის დამატება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5162,6 +5618,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "他の症状を追加…"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაამატე სხვა სიმპტომი..."
           }
         },
         "kk" : {
@@ -5224,6 +5686,12 @@
             "value" : "写真を追加"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტოს დამატება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5282,6 +5750,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "肌の変化、姿勢、健康のマイルストーン、回復の経過を記録する写真を追加します"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაამატე ფოტოები კანის ცვლილებების, ტანადობის, თვითგრძნობის ეტაპებისა და გაჯანსაღების პროგრესის თვალყურის დევნებისთვის"
           }
         },
         "kk" : {
@@ -5343,6 +5817,12 @@
             "value" : "記録に写真を追加し、ギャラリーで2枚選ぶと並べて比較できます。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაამატე ფოტოები ჩანაწერებს, შემდეგ გალერეაში მონიშნე ორი და შეადარე გვერდიგვერდ."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5402,6 +5882,12 @@
             "value" : "測定を追加"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩანაწერის დამატება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5458,6 +5944,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "時刻を追加"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დროის დამატება"
           }
         },
         "kk" : {
@@ -5519,6 +6011,12 @@
             "value" : "情報を追加"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეიყვანე შენი მონაცემები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5575,6 +6073,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最初のコースを追加すると、ここに服用予定が表示されます"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაამატე პირველი კურსი, რომ აქ დოზები გამოჩნდეს"
           }
         },
         "kk" : {
@@ -5637,6 +6141,12 @@
             "value" : "服薬遵守と通知"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "რეჟიმის დაცვა და გაფრთხილებები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5697,6 +6207,12 @@
             "value" : "服薬遵守の目標"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "რეჟიმის დაცვის მიზანი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5755,6 +6271,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アフター"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შემდეგ"
           }
         },
         "kk" : {
@@ -5821,6 +6343,12 @@
             "value" : "アフター（%@）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შემდეგ (%@)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5885,6 +6413,12 @@
             "value" : "アフター写真（B）："
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტო „შემდეგ“ (B):"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5945,6 +6479,12 @@
             "value" : "昼"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შუადღე"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6001,6 +6541,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "すべてのコース、服用記録、日記、写真、プロフィール。アプリの設定は残ります。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველა კურსი, დოზა, დღიურის ჩანაწერი, ფოტო და შენი პროფილი. აპლიკაციის პარამეტრები დარჩება."
           }
         },
         "kk" : {
@@ -6061,6 +6607,12 @@
             "value" : "すべてのデータを削除しました"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველა მონაცემი წაიშალა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6117,6 +6669,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "今日はすべて完了"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღევანდელი გეგმა შესრულებულია"
           }
         },
         "kk" : {
@@ -6179,6 +6737,12 @@
             "value" : "すべての薬の在庫は十分です"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველა წამლის მარაგი საკმარისია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6237,6 +6801,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "すべての気分"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველა განწყობა"
           }
         },
         "kk" : {
@@ -6299,6 +6869,12 @@
             "value" : "すべての写真（%lld）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველა ფოტო (%lld)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6358,6 +6934,12 @@
             "value" : "アレルギー"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ალერგიები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6415,6 +6997,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "実施中"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "უკვე აქტიურია"
           }
         },
         "kk" : {
@@ -6477,6 +7065,12 @@
             "value" : "数量（例：30）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "რაოდენობა (მაგ.: 30)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6534,6 +7128,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "外観"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გარეგნობა"
           }
         },
         "kk" : {
@@ -6596,6 +7196,12 @@
             "value" : "「%@」を削除しますか？この操作は取り消せません。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წაიშალოს კურსი „%@“? ამ მოქმედების გაუქმება შეუძლებელია."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6656,6 +7262,12 @@
             "value" : "%@"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@-ზე"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6713,6 +7325,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "認証に失敗しました。再試行するか、デバイスのパスコードを使用してください。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ავტორიზაცია ვერ მოხერხდა. სცადე ხელახლა ან გამოიყენე მოწყობილობის კოდი."
           }
         },
         "kk" : {
@@ -6775,6 +7393,12 @@
             "value" : "利用できる記録写真（%lld）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ხელმისაწვდომი პროგრესის ფოტოები (%lld)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6831,6 +7455,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "平均睡眠時間"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ძილის საშუალო ხარისხი"
           }
         },
         "kk" : {
@@ -6891,6 +7521,12 @@
             "value" : "傾向：低下"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "საბაზისო დონე: უარესდება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6947,6 +7583,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "傾向：改善"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "საბაზისო დონე: უმჯობესდება"
           }
         },
         "kk" : {
@@ -7007,6 +7649,12 @@
             "value" : "傾向：データ不足"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "საბაზისო დონე: მონაცემები არასაკმარისია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7063,6 +7711,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "傾向：安定"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "საბაზისო დონე: სტაბილური განწყობა"
           }
         },
         "kk" : {
@@ -7125,6 +7779,12 @@
             "value" : "基本情報"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ძირითადი ინფორმაცია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7183,6 +7843,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ビフォー"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მანამდე"
           }
         },
         "kk" : {
@@ -7249,6 +7915,12 @@
             "value" : "ビフォー（%@）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მანამდე (%@)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7313,6 +7985,12 @@
             "value" : "ビフォー写真（A）："
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტო „მანამდე“ (A):"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7370,6 +8048,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "血圧"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "არტერიული წნევა"
           }
         },
         "kk" : {
@@ -7431,6 +8115,12 @@
             "value" : "血圧のリマインダー"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წნევის შეხსენება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7490,6 +8180,12 @@
             "value" : "血圧を保存しました"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წნევა შენახულია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7547,6 +8243,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "bpm"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დარტყმა/წთ"
           }
         },
         "kk" : {
@@ -7613,6 +8315,12 @@
             "value" : "頭がぼんやり"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აზროვნების სიმძიმე"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7670,6 +8378,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "任意の期間の服用・体調・血圧をまとめたPDFを作成できます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შექმენი PDF დოზებით, თვითგრძნობით და წნევით ნებისმიერი პერიოდისთვის."
           }
         },
         "kk" : {
@@ -7732,6 +8446,12 @@
             "value" : "キャンセル"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაუქმება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7790,6 +8510,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "キャンセル"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაუქმება"
           }
         },
         "kk" : {
@@ -7852,6 +8578,12 @@
             "value" : "カテゴリ："
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კატეგორია:"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7908,6 +8640,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "変更"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეცვლა"
           }
         },
         "kk" : {
@@ -7969,6 +8707,12 @@
             "value" : "写真を変更"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტოს შეცვლა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8026,6 +8770,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "変更を保存しました"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ცვლილებები შენახულია"
           }
         },
         "kk" : {
@@ -8088,6 +8838,12 @@
             "value" : "記録日"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩანაწერის თარიღი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8148,6 +8904,12 @@
             "value" : "ライブラリから選択"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "არჩევა ფოტოთეკიდან"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8204,6 +8966,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "写真を選択"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტოს არჩევა"
           }
         },
         "kk" : {
@@ -8265,6 +9033,12 @@
             "value" : "持病"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ქრონიკული დაავადებები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8323,6 +9097,12 @@
             "value" : "コース履歴を消去"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსების ისტორიის გასუფთავება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8379,6 +9159,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コース履歴を消去しますか？"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაიწმინდოს კურსების ისტორია?"
           }
         },
         "kk" : {
@@ -8440,6 +9226,12 @@
             "value" : "履歴を消去"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ისტორიის გასუფთავება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8497,6 +9289,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "閉じる"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დახურვა"
           }
         },
         "kk" : {
@@ -8557,6 +9355,12 @@
             "value" : "コーヒー"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყავა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8615,6 +9419,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "比較"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შედარება"
           }
         },
         "kk" : {
@@ -8681,6 +9491,12 @@
             "value" : "比較"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შედარება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8745,6 +9561,12 @@
             "value" : "写真を比較"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტოების შედარება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8801,6 +9623,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "経過を比較"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროგრესის შედარება"
           }
         },
         "kk" : {
@@ -8862,6 +9690,12 @@
             "value" : "進捗写真を比較"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროგრესის ფოტოების შედარება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8918,6 +9752,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "見た目の変化を比較"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ვიზუალური ცვლილებების შედარება"
           }
         },
         "kk" : {
@@ -8978,6 +9818,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "直近7サイクルの遵守率"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "რეჟიმის დაცვა ბოლო 7 ციკლში"
           }
         },
         "kk" : {
@@ -9044,6 +9890,12 @@
             "value" : "習慣が定着"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სტაბილური რეჟიმი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9101,6 +9953,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "次へ"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაგრძელება"
           }
         },
         "kk" : {
@@ -9162,6 +10020,12 @@
             "value" : "メールアドレスをコピー"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ელფოსტის მისამართის კოპირება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9219,6 +10083,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "メールを開けませんでした"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ელფოსტის გახსნა ვერ მოხერხდა"
           }
         },
         "kk" : {
@@ -9280,6 +10150,12 @@
             "value" : "本人確認ができませんでした"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პიროვნების დადასტურება ვერ მოხერხდა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9339,6 +10215,12 @@
             "value" : "データを読み込めませんでした"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მონაცემების ჩატვირთვა ვერ მოხერხდა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9396,6 +10278,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "デバイスからデータを読み込めませんでした。表示内容が不完全な可能性があります。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მოწყობილობიდან მონაცემების წაკითხვა ვერ მოხერხდა. ეკრანზე ნაჩვენები ინფორმაცია შეიძლება არასრული იყოს."
           }
         },
         "kk" : {
@@ -9458,6 +10346,12 @@
             "value" : "保存できませんでした"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შენახვა ვერ მოხერხდა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9514,6 +10408,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "写真を保存できませんでした。ほかはすべて保存されています。端末の空き容量が不足している可能性があります。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტოს შენახვა ვერ მოხერხდა. დანარჩენი შენახულია — შესაძლოა მოწყობილობაზე ადგილი არ არის."
           }
         },
         "kk" : {
@@ -9576,6 +10476,12 @@
             "value" : "変更を保存できませんでした。デバイスには書き込まれていません。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ცვლილებების შენახვა ვერ მოხერხდა. ისინი მოწყობილობაზე არ ჩაწერილა."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9636,6 +10542,12 @@
             "value" : "コース終了"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსი დასრულებულია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9693,6 +10605,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コースを作成しました"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსი შეიქმნა"
           }
         },
         "kk" : {
@@ -9755,6 +10673,12 @@
             "value" : "コースは削除されました"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსი წაიშალა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9813,6 +10737,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コースの詳細"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსის დეტალები"
           }
         },
         "kk" : {
@@ -9875,6 +10805,12 @@
             "value" : "コース期間"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსის ხანგრძლივობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9935,6 +10871,12 @@
             "value" : "コースの絞り込み"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსების ფილტრი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9991,6 +10933,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コース履歴を消去しました"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსების ისტორია გასუფთავდა"
           }
         },
         "kk" : {
@@ -10053,6 +11001,12 @@
             "value" : "コース名"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსის სახელი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10113,6 +11067,12 @@
             "value" : "コース名（例：ビタミン）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსის სახელი (მაგ.: ვიტამინები)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10170,6 +11130,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コースを繰り返しました"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსი განმეორდა"
           }
         },
         "kk" : {
@@ -10232,6 +11198,12 @@
             "value" : "コースの設定"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსის პარამეტრები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10292,6 +11264,12 @@
             "value" : "コース"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10348,6 +11326,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コースを作成"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსის შექმნა"
           }
         },
         "kk" : {
@@ -10409,6 +11393,12 @@
             "value" : "書類を作成"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დოკუმენტის შექმნა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10466,6 +11456,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最初のコースを作成"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შექმენი პირველი კურსი"
           }
         },
         "kk" : {
@@ -10528,6 +11524,12 @@
             "value" : "本日の服用スケジュール"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დოზების დღიური გრაფიკი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10584,6 +11586,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "毎日の体調と気分の記録"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჯანმრთელობისა და განწყობის დღიური შეფასება"
           }
         },
         "kk" : {
@@ -10646,6 +11654,12 @@
             "value" : "体調と気分の日記"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჯანმრთელობისა და განწყობის დღიური"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10704,6 +11718,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "日々記録した心と体の状態"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყოველდღიურად აღრიცხული ემოციური და ფიზიკური მდგომარეობა"
           }
         },
         "kk" : {
@@ -10765,6 +11785,12 @@
             "value" : "ダーク"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ბნელი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10824,6 +11850,12 @@
             "value" : "日付"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თარიღი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10881,6 +11913,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "生年月日"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაბადების თარიღი"
           }
         },
         "kk" : {
@@ -10949,6 +11987,12 @@
             "value" : "%2$lld日中%1$lld日目"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღე %1$lld / %2$lld"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11013,6 +12057,12 @@
             "value" : "14日目の節目"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "14-ე დღის ეტაპი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11071,6 +12121,12 @@
             "value" : "今日は完了"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღე დასრულებულია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11127,6 +12183,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "日中のエネルギー水準"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღის ენერგიის საბაზისო დონე"
           }
         },
         "kk" : {
@@ -11189,6 +12251,12 @@
             "value" : "削除"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წაშლა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11246,6 +12314,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "すべて削除"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველას წაშლა"
           }
         },
         "kk" : {
@@ -11306,6 +12380,12 @@
             "value" : "すべてのデータを削除"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველა მონაცემის წაშლა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11362,6 +12442,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "すべてのデータを削除しますか？"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წაიშალოს ყველა მონაცემი?"
           }
         },
         "kk" : {
@@ -11423,6 +12509,12 @@
             "value" : "日記の記録をすべて削除"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიურის ყველა ჩანაწერის წაშლა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11480,6 +12572,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "日記の記録をすべて削除しますか？"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წაიშალოს დღიურის ყველა ჩანაწერი?"
           }
         },
         "kk" : {
@@ -11542,6 +12640,12 @@
             "value" : "記録を削除しますか？"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წაიშალოს ჩანაწერი?"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11600,6 +12704,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コースを削除しますか？"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წაიშალოს კურსი?"
           }
         },
         "kk" : {
@@ -11661,6 +12771,12 @@
             "value" : "すべての測定を削除しますか？"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წაიშალოს ყველა ჩანაწერი?"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11717,6 +12833,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "削除したデータは復元できません。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წაშლილი მონაცემების აღდგენა შეუძლებელია."
           }
         },
         "kk" : {
@@ -11779,6 +12901,12 @@
             "value" : "その日の様子を詳しく書きましょう。薬の効き方、体力の変化、食事への反応、健康の節目、次の受診で聞きたいことなど…"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აღწერე შენი დღე დეტალურად: როგორ იმოქმედა წამლებმა, ენერგიის ცვლილებები, რეაქცია კვებაზე, თვითგრძნობის ეტაპები ან კითხვები ექიმთან შემდეგი ვიზიტისთვის..."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11837,6 +12965,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "開発者"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დეველოპერი"
           }
         },
         "kk" : {
@@ -11899,6 +13033,12 @@
             "value" : "日記"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიური"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11958,6 +13098,12 @@
             "value" : "日記を削除しました"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიური გასუფთავდა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12014,6 +13160,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "日記の記録、その写真、血圧の記録。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიურის ჩანაწერები, მათი ფოტოები და წნევის ჩანაწერები."
           }
         },
         "kk" : {
@@ -12080,6 +13232,12 @@
             "value" : "日記の写真"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიურის ფოტო"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12137,6 +13295,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "日記の写真"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიურის ფოტოები"
           }
         },
         "kk" : {
@@ -12198,6 +13362,12 @@
             "value" : "日記のリマインダー"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიურის შეხსენება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12255,6 +13425,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "拡張期"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დიასტოლური"
           }
         },
         "kk" : {
@@ -12321,6 +13497,12 @@
             "value" : "消化不良"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კუჭ-ნაწლავის დისკომფორტი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12377,6 +13559,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ディナー"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ვახშამი"
           }
         },
         "kk" : {
@@ -12437,6 +13625,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "不調・痛み：%lld/10"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დისკომფორტი/ტკივილი: %lld/10"
           }
         },
         "kk" : {
@@ -12503,6 +13697,12 @@
             "value" : "めまい"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თავბრუსხვევა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12567,6 +13767,12 @@
             "value" : "受診"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კონსულტაცია ექიმთან"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12624,6 +13830,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "完了"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მზადაა"
           }
         },
         "kk" : {
@@ -12684,6 +13896,12 @@
             "value" : "用量"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დოზირება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12740,6 +13958,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld回目"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მიღება %lld"
           }
         },
         "kk" : {
@@ -12800,6 +14024,12 @@
             "value" : "服用を記録できませんでした"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დოზა არ აღირიცხა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12858,6 +14088,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "落ち込み"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დათრგუნული / დაბალი"
           }
         },
         "kk" : {
@@ -12924,6 +14160,12 @@
             "value" : "口の渇き"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პირის სიმშრალე"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12982,6 +14224,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "優"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შ"
           }
         },
         "kk" : {
@@ -13044,6 +14292,12 @@
             "value" : "例：頭がすっきりして落ち着いている、肩に少し張り"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მაგ.: თავი ნათელია და მოდუნებული ვარ, მხრებში მცირე დაჭიმულობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13102,6 +14356,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "編集"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "რედაქტირება"
           }
         },
         "kk" : {
@@ -13164,6 +14424,12 @@
             "value" : "記録を編集"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩანაწერის რედაქტირება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13223,6 +14489,12 @@
             "value" : "薬を編集"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამლის რედაქტირება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13279,6 +14551,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "薬を編集"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამლის რედაქტირება"
           }
         },
         "kk" : {
@@ -13340,6 +14618,12 @@
           }
         },
         "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edward Gasparian"
+          }
+        },
+        "ka" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Edward Gasparian"
@@ -13409,6 +14693,12 @@
             "value" : "動悸"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გახშირებული გულისცემა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13467,6 +14757,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "終了"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დასრულება"
           }
         },
         "kk" : {
@@ -13529,6 +14825,12 @@
             "value" : "エネルギー：%lld/5"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ენერგია: %lld/5"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13587,6 +14889,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "エネルギー：%lld/5"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ენერგია: %lld/5"
           }
         },
         "kk" : {
@@ -13648,6 +14956,12 @@
             "value" : "記録を削除しました"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩანაწერი წაიშალა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13705,6 +15019,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "記録を保存しました"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩანაწერი შენახულია"
           }
         },
         "kk" : {
@@ -13767,6 +15087,12 @@
             "value" : "夜"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "საღამო"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13825,6 +15151,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld日ごと"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყოველ %lld დღეში"
           }
         },
         "kk" : {
@@ -13887,6 +15219,12 @@
             "value" : "2週間ごと"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყოველ 2 კვირაში"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13945,6 +15283,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "3日ごと"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყოველ 3 დღეში"
           }
         },
         "kk" : {
@@ -14007,6 +15351,12 @@
             "value" : "毎日"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყოველდღე"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14065,6 +15415,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1日おき"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღეგამოშვებით"
           }
         },
         "kk" : {
@@ -14127,6 +15483,12 @@
             "value" : "非常に良い"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შესანიშნავი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14187,6 +15549,12 @@
             "value" : "疲労"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოფიტული"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14244,6 +15612,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "書き出し"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ექსპორტი"
           }
         },
         "kk" : {
@@ -14306,6 +15680,12 @@
             "value" : "並"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ს"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14363,6 +15743,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Face ID / デバイスのパスコード"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID / მოწყობილობის კოდი"
           }
         },
         "kk" : {
@@ -14423,6 +15809,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "普通"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "საშუალო"
           }
         },
         "kk" : {
@@ -14489,6 +15881,12 @@
             "value" : "倦怠感"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაღლილობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14546,6 +15944,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "終了したコースは履歴にあります"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დასრულებული კურსები ისტორიაშია"
           }
         },
         "kk" : {
@@ -14606,6 +16010,12 @@
             "value" : "終了したコースと服用履歴。進行中のコースは残ります。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დასრულებული კურსები დოზების ისტორიით. მიმდინარე კურსები დარჩება."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14662,6 +16072,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "剤形"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფორმა"
           }
         },
         "kk" : {
@@ -14721,6 +16137,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "開始"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დან"
           }
         },
         "kk" : {
@@ -14783,6 +16205,12 @@
             "value" : "良"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კ"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14840,6 +16268,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "はじめる"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაწყება"
           }
         },
         "kk" : {
@@ -14902,6 +16336,12 @@
             "value" : "良い"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კარგი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14959,6 +16399,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "了解"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გასაგებია"
           }
         },
         "kk" : {
@@ -15019,6 +16465,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "とても良い"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შესანიშნავი"
           }
         },
         "kk" : {
@@ -15085,6 +16537,12 @@
             "value" : "頭痛"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თავის ტკივილი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15142,6 +16600,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "健康"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჯანმრთელობა"
           }
         },
         "kk" : {
@@ -15203,6 +16667,12 @@
             "value" : "健康レポート"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჯანმრთელობის ანგარიში"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15259,6 +16729,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ヘルプとサポート"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დახმარება და მხარდაჭერა"
           }
         },
         "kk" : {
@@ -15321,6 +16797,12 @@
             "value" : "エネルギー高"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მაღალი ენერგია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15379,6 +16861,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "履歴"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ისტორია"
           }
         },
         "kk" : {
@@ -15441,6 +16929,12 @@
             "value" : "履歴はありません"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ისტორია ცარიელია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15498,6 +16992,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "通知を長押しして、服用・後で・スキップを選ぶだけ。残りの錠数も自動で減ります。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეხსენებაზე ხანგრძლივი დაჭერით მიიღე დოზა, გადადე ან გამოტოვე — შეფუთვაში დარჩენილი რაოდენობა თავისით მცირდება."
           }
         },
         "kk" : {
@@ -15560,6 +17060,12 @@
             "value" : "時間"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "საათი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15618,6 +17124,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "今日の体の調子は？"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "როგორ გრძნობ თავს ფიზიკურად დღეს?"
           }
         },
         "kk" : {
@@ -15680,6 +17192,12 @@
             "value" : "今の気分は？気分をタップすればすぐ記録できます。詳しいメモや写真を残すこともできます。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "როგორ გრძნობ თავს ახლა? შეეხე განწყობას სწრაფი ჩასაწერად ან შეავსე დეტალური შენიშვნები და ფოტოები."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15738,6 +17256,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@を何個追加しますか？"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "რამდენი ცალი „%@“ დაამატო?"
           }
         },
         "kk" : {
@@ -15804,6 +17328,12 @@
             "value" : "水分目標を達成"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წყლის ნორმა შესრულებულია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15862,6 +17392,12 @@
             "value" : "iPhone のストレージがほぼいっぱいの場合は、空き容量を確保してから再試行してください。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თუ iPhone-ზე თითქმის აღარ არის ადგილი, გაათავისუფლე და სცადე ხელახლა."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15918,6 +17454,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "画像"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სურათი"
           }
         },
         "kk" : {
@@ -15980,6 +17522,12 @@
             "value" : "睡眠時間が日中の活力に与える影響"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ძილის საათების გავლენა დღის ენერგიულობაზე"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16040,6 +17588,12 @@
             "value" : "痛み"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მტკივა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16097,6 +17651,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "含める項目"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩასართავი"
           }
         },
         "kk" : {
@@ -16163,6 +17723,12 @@
             "value" : "不眠"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "უძილობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16223,6 +17789,12 @@
             "value" : "写真を見る →"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტოს დათვალიერება →"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16279,6 +17851,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "服用頻度"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მიღების სიხშირე"
           }
         },
         "kk" : {
@@ -16339,6 +17917,12 @@
             "value" : "服用時刻"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მიღების დრო"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16397,6 +17981,12 @@
             "value" : "間隔"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ინტერვალი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16453,6 +18043,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在庫管理"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მარაგის აღრიცხვა"
           }
         },
         "kk" : {
@@ -16519,6 +18115,12 @@
             "value" : "関節のこわばり"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სახსრების გაუძრავობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16578,6 +18180,12 @@
             "value" : "記録"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩანაწერები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16634,6 +18242,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "明日もこの調子で"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ხვალაც ასე გააგრძელე"
           }
         },
         "kk" : {
@@ -16695,6 +18309,12 @@
             "value" : "キー"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გასაღები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16752,6 +18372,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最新"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ბოლო"
           }
         },
         "kk" : {
@@ -16814,6 +18440,12 @@
             "value" : "ビフォー／アフター比較を開く"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შედარება „მანამდე / შემდეგ“"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16870,6 +18502,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "チップを送る"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დატოვე ჩაის ფული"
           }
         },
         "kk" : {
@@ -16931,6 +18569,12 @@
             "value" : "パックの残り"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დარჩა შეფუთვაში"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16990,6 +18634,12 @@
             "value" : "ライト"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ნათელი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17047,6 +18697,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ロック画面"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩაკეტილი ეკრანი"
           }
         },
         "kk" : {
@@ -17109,6 +18765,12 @@
             "value" : "%@を記録"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მიღების აღრიცხვა: „%@“"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17169,6 +18831,12 @@
             "value" : "記録をいくつか残すと、気分の推移がここに表示されます。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩაწერე რამდენიმე ჩანაწერი, რომ აქ განწყობის ტენდენცია გამოჩნდეს."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17226,6 +18894,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "測定を記録すると推移が表示されます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაამატე ჩანაწერი, რომ აქ წნევის ტენდენცია გამოჩნდეს."
           }
         },
         "kk" : {
@@ -17288,6 +18962,12 @@
             "value" : "すべて記録"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველას აღრიცხვა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17344,6 +19024,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "服用を記録"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დოზის აღრიცხვა"
           }
         },
         "kk" : {
@@ -17403,6 +19089,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "気分・体力・症状を記録しましょう"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩაწერე, როგორ გრძნობ თავს დღეს: განწყობა, ენერგია და სიმპტომები"
           }
         },
         "kk" : {
@@ -17465,6 +19157,12 @@
             "value" : "体調と気分を記録し、見た目の変化を追跡"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩაიწერე სხეულის შეგრძნებები, განწყობის შეფასება და თვალყური ადევნე ვიზუალურ პროგრესს"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17523,6 +19221,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "記録する"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აღრიცხვა ახლა"
           }
         },
         "kk" : {
@@ -17585,6 +19289,12 @@
             "value" : "%@の飲み忘れを記録"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოტოვებული დოზის აღრიცხვა: „%@“"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17644,6 +19354,12 @@
             "value" : "服用を記録"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აღრიცხე დოზები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17701,6 +19417,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "間違えて記録した場合は、チェックをタップして取り消せます。スキップや飲み忘れた服用は、丸をタップして記録できます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეცდომით აღირიცხა? შეეხე ნიშანს გასაუქმებლად. გამოტოვე ან დაგავიწყდა დოზა? შეეხე წრეს აღსარიცხად."
           }
         },
         "kk" : {
@@ -17763,6 +19485,12 @@
             "value" : "低"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაბალი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17819,6 +19547,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "残少"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაბალი"
           }
         },
         "kk" : {
@@ -17881,6 +19615,12 @@
             "value" : "エネルギー低"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაბალი ენერგია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17937,6 +19677,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在庫が少ない"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მარაგი იწურება"
           }
         },
         "kk" : {
@@ -17997,6 +19743,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在庫が少なくなっています"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაფრთხილება: მარაგი იწურება"
           }
         },
         "kk" : {
@@ -18063,6 +19815,12 @@
             "value" : "ストレスの少ない日"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაბალი სტრესის დღე"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18119,6 +19877,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ランチ"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სადილი"
           }
         },
         "kk" : {
@@ -18180,6 +19944,12 @@
             "value" : "ファイルがかなり大きくなります"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფაილი გაცილებით დიდი გახდება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18236,6 +20006,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "データを管理"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მონაცემების მართვა"
           }
         },
         "kk" : {
@@ -18298,6 +20074,12 @@
             "value" : "我慢できる"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ასატანი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18355,6 +20137,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "測定日時"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაზომვის დრო"
           }
         },
         "kk" : {
@@ -18416,6 +20204,12 @@
             "value" : "測定日"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაზომვის თარიღი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18473,6 +20267,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "測定履歴"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაზომვების ისტორია"
           }
         },
         "kk" : {
@@ -18533,6 +20333,12 @@
             "value" : "薬"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამალი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18590,6 +20396,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "薬を追加しました"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამალი დაემატა"
           }
         },
         "kk" : {
@@ -18656,6 +20468,12 @@
             "value" : "薬を調整"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამალი შეიცვალა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18712,6 +20530,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "服薬のお知らせ"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაფრთხილება წამალზე"
           }
         },
         "kk" : {
@@ -18774,6 +20598,12 @@
             "value" : "薬"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამლები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18832,6 +20662,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コース内の薬"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამლები კურსში"
           }
         },
         "kk" : {
@@ -18894,6 +20730,12 @@
             "value" : "薬：%lld"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამლები: %lld"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18952,6 +20794,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "軽い"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მსუბუქი"
           }
         },
         "kk" : {
@@ -19018,6 +20866,12 @@
             "value" : "軽い吐き気"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მსუბუქი გულისრევა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19075,6 +20929,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未服用"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოტოვებული"
           }
         },
         "kk" : {
@@ -19137,6 +20997,12 @@
             "value" : "未服用"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოტოვებული"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19194,6 +21060,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "mmHg"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მმ.ვწყ.სვ."
           }
         },
         "kk" : {
@@ -19256,6 +21128,12 @@
             "value" : "中程度"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ზომიერი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19316,6 +21194,12 @@
             "value" : "エネルギー中"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ზომიერი ენერგია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19373,6 +21257,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "傾向"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "განწყობა და ტენდენციები"
           }
         },
         "kk" : {
@@ -19435,6 +21325,12 @@
             "value" : "気分と体調の推移"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "განწყობისა და თვითგრძნობის დინამიკა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19492,6 +21388,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "気分を記録しました"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "განწყობა ჩაწერილია"
           }
         },
         "kk" : {
@@ -19554,6 +21456,12 @@
             "value" : "気分：%@"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "განწყობა: %@"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19612,6 +21520,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "朝"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დილა"
           }
         },
         "kk" : {
@@ -19678,6 +21592,12 @@
             "value" : "朝の散歩"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დილის სეირნობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19735,6 +21655,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "朝・昼・夜は別々に。タップで服用を記録、もう一度タップで取り消し。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დილა, შუადღე და საღამო ცალ-ცალკე. ერთი შეხებით აღირიცხება დოზა, მეორით — გაუქმდება."
           }
         },
         "kk" : {
@@ -19801,6 +21727,12 @@
             "value" : "筋肉の張り"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კუნთების დაჭიმულობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19859,6 +21791,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "マイコース"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩემი კურსები"
           }
         },
         "kk" : {
@@ -19920,6 +21858,12 @@
             "value" : "名前"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სახელი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19976,6 +21920,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "名称（例：イブプロフェン）"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სახელი (მაგ.: იბუპროფენი)"
           }
         },
         "kk" : {
@@ -20035,6 +21985,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "名前、用量、時刻、頻度。3日ごとでも1日2回でも、スケジュールは自動で組まれます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სახელი, დოზა, დრო და სიხშირე. ყოველ სამ დღეში ერთხელ თუ დღეში ორჯერ — გრაფიკი თავისით დალაგდება."
           }
         },
         "kk" : {
@@ -20097,6 +22053,12 @@
             "value" : "普通"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ნეიტრალური"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20155,6 +22117,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新規コース"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ახალი კურსი"
           }
         },
         "kk" : {
@@ -20216,6 +22184,12 @@
             "value" : "新しい日付"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ახალი თარიღები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20272,6 +22246,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新規の薬"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ახალი წამალი"
           }
         },
         "kk" : {
@@ -20333,6 +22313,12 @@
             "value" : "新しい測定"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ახალი ჩანაწერი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20390,6 +22376,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "次へ"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შემდეგი"
           }
         },
         "kk" : {
@@ -20452,6 +22444,12 @@
             "value" : "実施中のコースはありません"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აქტიური კურსები არ არის"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20512,6 +22510,12 @@
             "value" : "まだ記録がありません"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩანაწერები ჯერ არ არის"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20569,6 +22573,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "まだコースがありません"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსები ჯერ არ არის"
           }
         },
         "kk" : {
@@ -20631,6 +22641,12 @@
             "value" : "条件に合う記録はありません"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფილტრებს ჩანაწერი არ შეესაბამება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20689,6 +22705,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "このコースに薬はありません"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ამ კურსში წამლები არ არის"
           }
         },
         "kk" : {
@@ -20751,6 +22773,12 @@
             "value" : "このカテゴリに写真はありません"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ამ კატეგორიაში ფოტოები არ არის"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20809,6 +22837,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "まだ記録写真がありません"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროგრესის ფოტოები ჯერ არ არის"
           }
         },
         "kk" : {
@@ -20870,6 +22904,12 @@
             "value" : "まだ測定がありません"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩანაწერები ჯერ არ არის"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20929,6 +22969,12 @@
             "value" : "選択した期間の記録はありません"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "არჩეული პერიოდისთვის ჩანაწერები არ არის"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20986,6 +23032,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "薬だけではありません"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "არა მხოლოდ აბები"
           }
         },
         "kk" : {
@@ -21048,6 +23100,12 @@
             "value" : "本日の予定はありません"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღეისთვის არაფერია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21107,6 +23165,12 @@
             "value" : "通知がオフになっています"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეტყობინებები გამორთულია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21164,6 +23228,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "今"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ახლა"
           }
         },
         "kk" : {
@@ -21226,6 +23296,12 @@
             "value" : "OK"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კარგი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21284,6 +23360,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "まあまあ"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ნორმალური"
           }
         },
         "kk" : {
@@ -21346,6 +23428,12 @@
             "value" : "月1回"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თვეში ერთხელ"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21404,6 +23492,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "週1回"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კვირაში ერთხელ"
           }
         },
         "kk" : {
@@ -21465,6 +23559,12 @@
             "value" : "医師へは1つのファイルで"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ერთი ფაილი ექიმისთვის"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21523,6 +23623,12 @@
             "value" : "一文で"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეჯამება ერთი წინადადებით"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21579,6 +23685,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "コースを開く"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსის გახსნა"
           }
         },
         "kk" : {
@@ -21640,6 +23752,12 @@
             "value" : "履歴を開いて「繰り返す」をタップすると、同じコースを新しい日程で始められます。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გახსენი ისტორია და შეეხე „გამეორებას“, რომ იგივე მკურნალობა ახალი თარიღებით დაიწყო."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21699,6 +23817,12 @@
             "value" : "設定を開く"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პარამეტრების გახსნა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21756,6 +23880,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "メールアプリを開き、次の宛先に送信してください："
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გახსენი ელფოსტის აპლიკაცია და მისწერე:"
           }
         },
         "kk" : {
@@ -21818,6 +23948,12 @@
             "value" : "良好"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ოპტიმალური"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21875,6 +24011,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "許容範囲外です"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დასაშვები დიაპაზონის გარეთაა"
           }
         },
         "kk" : {
@@ -21937,6 +24079,12 @@
             "value" : "今日の全体的な気分"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღევანდელი ზოგადი განწყობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21995,6 +24143,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "悪"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ც"
           }
         },
         "kk" : {
@@ -22057,6 +24211,12 @@
             "value" : "痛み：%lld/10"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ტკივილი: %lld/10"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22117,6 +24277,12 @@
             "value" : "最高"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პიკი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22174,6 +24340,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "期間"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პერიოდი"
           }
         },
         "kk" : {
@@ -22236,6 +24408,12 @@
             "value" : "個人的な振り返りとメモ"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პირადი ფიქრები და დღიურის ჩანაწერები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22294,6 +24472,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "写真"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტო"
           }
         },
         "kk" : {
@@ -22356,6 +24540,12 @@
             "value" : "写真"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტოები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22414,6 +24604,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "体力と休息"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფიზიკური ენერგია და დასვენება"
           }
         },
         "kk" : {
@@ -22476,6 +24672,12 @@
             "value" : "体の状態と感覚"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფიზიკური მდგომარეობა და შეგრძნებები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22534,6 +24736,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "身体症状と感覚"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფიზიკური სიმპტომები და შეგრძნებები"
           }
         },
         "kk" : {
@@ -22595,6 +24803,12 @@
             "value" : "期間と項目を選ぶと、メッセンジャーやメールで送れるPDFができます。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აირჩიე პერიოდი და სექციები, აპლიკაცია შექმნის PDF-ს, რომლის გაგზავნაც მესენჯერით ან ელფოსტით შეგიძლია."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22651,6 +24865,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plekio は現在データを開けません。アプリを開いて対処方法を確認してください。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio-ს ახლა მონაცემების გახსნა არ შეუძლია. გახსენი აპლიკაცია და ნახავ, რა უნდა გააკეთო."
           }
         },
         "kk" : {
@@ -22712,6 +24932,12 @@
             "value" : "Plekioへのフィードバック"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio — გამოხმაურება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22768,6 +24994,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plekio は無料で広告もありません。役に立っていれば、チップで応援していただけます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio უფასოა და რეკლამა არ აქვს. თუ გეხმარება, შეგიძლია ჩაის ფული დატოვო."
           }
         },
         "kk" : {
@@ -22829,6 +25061,12 @@
             "value" : "Plekioはロックされています"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio ჩაკეტილია"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -22887,6 +25125,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "悪い"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ცუდი"
           }
         },
         "kk" : {
@@ -22953,6 +25197,12 @@
             "value" : "運動後"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ვარჯიშის შემდეგ"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23012,6 +25262,12 @@
             "value" : "血圧"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წნევა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23068,6 +25324,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "プライバシーポリシー"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კონფიდენციალურობის პოლიტიკა"
           }
         },
         "kk" : {
@@ -23129,6 +25391,12 @@
             "value" : "プロフィール"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროფილი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23188,6 +25456,12 @@
             "value" : "ギャラリー"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროგრესის გალერეა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23245,6 +25519,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "経過写真"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროგრესის ფოტოები"
           }
         },
         "kk" : {
@@ -23307,6 +25587,12 @@
             "value" : "記録写真・累計"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროგრესის ფოტოები · მთელი დრო"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23365,6 +25651,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "記録写真（%lld）"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროგრესის ფოტოები (%lld)"
           }
         },
         "kk" : {
@@ -23426,6 +25718,12 @@
             "value" : "脈拍"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პულსი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23482,6 +25780,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "数量：%lld"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "რაოდენობა: %lld"
           }
         },
         "kk" : {
@@ -23542,6 +25846,12 @@
             "value" : "クイック記録"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სწრაფი ჩანაწერი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23598,6 +25908,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "クイック記録 — 詳細な指標は未記録"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "განწყობის სწრაფი ჩანაწერი — დეტალური მაჩვენებლების გარეშე"
           }
         },
         "kk" : {
@@ -23660,6 +25976,12 @@
             "value" : "直近の平均"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ბოლო საშუალო"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23718,6 +26040,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "記録を保存"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიურში ჩაწერა"
           }
         },
         "kk" : {
@@ -23780,6 +26108,12 @@
             "value" : "在庫を補充"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მარაგის შევსება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23838,6 +26172,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在庫を補充"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მარაგის შევსება"
           }
         },
         "kk" : {
@@ -23900,6 +26240,12 @@
             "value" : "残り%lld個"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დარჩენილია: %lld ცალი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23956,6 +26302,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "残りがこの数になったら通知"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეხსენება, როცა დარჩება"
           }
         },
         "kk" : {
@@ -24017,6 +26369,12 @@
             "value" : "通知時刻"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეხსენების დრო"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24074,6 +26432,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "リマインダー"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეხსენებები"
           }
         },
         "kk" : {
@@ -24135,6 +26499,12 @@
             "value" : "写真を削除"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტოს წაშლა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24192,6 +26562,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "繰り返す"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამეორება"
           }
         },
         "kk" : {
@@ -24253,6 +26629,12 @@
             "value" : "コースを繰り返す"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსის გამეორება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24312,6 +26694,12 @@
             "value" : "共有するレポートにこの情報が記載されます。設定でいつでも変更できます。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შემდგომში გაზიარებულ ანგარიშებში ეს მონაცემები იქნება. მათი შეცვლა პარამეტრებში ნებისმიერ დროს შეგიძლია."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24369,6 +26757,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plekioを開くときにFace ID、Touch ID、またはデバイスのパスコードで認証します。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio-ს გახსნისას ავტორიზაციის მოთხოვნა. გამოიყენება Face ID, Touch ID ან მოწყობილობის კოდი."
           }
         },
         "kk" : {
@@ -24435,6 +26829,12 @@
             "value" : "落ち着かない"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მოუსვენრობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24499,6 +26899,12 @@
             "value" : "質の良い睡眠"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სრულფასოვანი ძილი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24555,6 +26961,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "お薬の残りが少なくなっています"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამალი იწურება"
           }
         },
         "kk" : {
@@ -24615,6 +27027,12 @@
             "value" : "保存"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შენახვა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24671,6 +27089,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@に予定"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაგეგმილია: %@"
           }
         },
         "kk" : {
@@ -24733,6 +27157,12 @@
             "value" : "スコア：%lld/5"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეფასება: %lld/5"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24793,6 +27223,12 @@
             "value" : "メモを検索"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩანაწერებში ძიება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24850,6 +27286,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "セキュリティ"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "უსაფრთხოება"
           }
         },
         "kk" : {
@@ -24912,6 +27354,12 @@
             "value" : "写真を選択"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აირჩიე ფოტო"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24970,6 +27418,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アフター写真を選択"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აირჩიე ფოტო „შემდეგ“"
           }
         },
         "kk" : {
@@ -25032,6 +27486,12 @@
             "value" : "2つの時点を選ぶと並べて比較できます。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აირჩიე ნებისმიერი ორი ეტაპი გვერდიგვერდ შესადარებლად."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25090,6 +27550,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ビフォー写真を選択"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აირჩიე ფოტო „მანამდე“"
           }
         },
         "kk" : {
@@ -25152,6 +27618,12 @@
             "value" : "主な気分を選択"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აირჩიე ძირითადი განწყობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25210,6 +27682,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "選択済み"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "არჩეულია"
           }
         },
         "kk" : {
@@ -25271,6 +27749,12 @@
             "value" : "フィードバックを送信"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოხმაურების გაგზავნა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25328,6 +27812,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "送信済み"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაიგზავნა"
           }
         },
         "kk" : {
@@ -25390,6 +27880,12 @@
             "value" : "設定"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პარამეტრები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25448,6 +27944,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重度"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ძლიერი"
           }
         },
         "kk" : {
@@ -25509,6 +28011,12 @@
             "value" : "共有"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაზიარება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25566,6 +28074,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PDFを共有"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF-ის გაზიარება"
           }
         },
         "kk" : {
@@ -25632,6 +28146,12 @@
             "value" : "並べて"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გვერდიგვერდ"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25690,6 +28210,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "副作用・経過・感謝"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გვერდითი მოვლენები, პროგრესის შენიშვნები, მადლიერება"
           }
         },
         "kk" : {
@@ -25756,6 +28282,12 @@
             "value" : "スキップ"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოტოვება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25820,6 +28352,12 @@
             "value" : "すべてスキップ"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველას გამოტოვება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25876,6 +28414,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "服用をスキップ"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დოზის გამოტოვება"
           }
         },
         "kk" : {
@@ -25937,6 +28481,12 @@
             "value" : "あとで"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ახლა გამოტოვება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25994,6 +28544,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "スキップ"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოტოვებული"
           }
         },
         "kk" : {
@@ -26055,6 +28611,12 @@
             "value" : "スキップ"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოტოვებული"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "needs_review",
@@ -26112,6 +28674,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "睡眠"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ძილი"
           }
         },
         "kk" : {
@@ -26172,6 +28740,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "睡眠時間と質"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ძილის ხანგრძლივობა და ხარისხი"
           }
         },
         "kk" : {
@@ -26238,6 +28812,12 @@
             "value" : "15分後"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გადადება 15 წთ-ით"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26302,6 +28882,12 @@
             "value" : "スライダー"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამყოფი ზოლი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26360,6 +28946,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "開始"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაწყება"
           }
         },
         "kk" : {
@@ -26421,6 +29013,12 @@
             "value" : "コースを開始"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კურსის დაწყება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26477,6 +29075,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最初からやり直す"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თავიდან დაწყება"
           }
         },
         "kk" : {
@@ -26538,6 +29142,12 @@
             "value" : "まずはコースから"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაიწყე კურსით"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26594,6 +29204,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "空のデータで始めますか？"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დავიწყოთ ცარიელი მონაცემებით?"
           }
         },
         "kk" : {
@@ -26653,6 +29269,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新しい日付でこのコースをもう一度開始します"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ამ კურსს ახალი თარიღებით თავიდან იწყებს"
           }
         },
         "kk" : {
@@ -26719,6 +29341,12 @@
             "value" : "状態A（開始時）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მდგომარეობა A (ადრინდელი საბაზისო)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26783,6 +29411,12 @@
             "value" : "状態B（現在・経過）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მდგომარეობა B (ბოლო / პროგრესი)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26839,6 +29473,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在庫：%lld"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მარაგი: %lld"
           }
         },
         "kk" : {
@@ -26901,6 +29541,12 @@
             "value" : "ストレージ"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მეხსიერება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26958,6 +29604,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "通知からそのまま"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პირდაპირ შეხსენებიდან"
           }
         },
         "kk" : {
@@ -27020,6 +29672,12 @@
             "value" : "ストレス"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაძაბული"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27078,6 +29736,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "プロジェクトを支援"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროექტის მხარდაჭერა"
           }
         },
         "kk" : {
@@ -27139,6 +29803,12 @@
             "value" : "症状"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სიმპტომები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27196,6 +29866,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "システム"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სისტემური"
           }
         },
         "kk" : {
@@ -27257,6 +29933,12 @@
             "value" : "収縮期"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სისტოლური"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27316,6 +29998,12 @@
             "value" : "収縮期・拡張期の推移"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სისტოლური და დიასტოლური დროში"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27373,6 +30061,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "収縮期血圧は拡張期血圧より高い必要があります。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სისტოლური დიასტოლურზე მაღალი უნდა იყოს."
           }
         },
         "kk" : {
@@ -27435,6 +30129,12 @@
             "value" : "タグとマイルストーン"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ტეგები და ეტაპები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27492,6 +30192,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "測定して日記に記録しましょう"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაზომე წნევა და ჩაიწერე დღიურში"
           }
         },
         "kk" : {
@@ -27552,6 +30258,12 @@
             "value" : "すべて服用"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ყველას მიღება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27608,6 +30320,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "今すぐ服用"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მიღება ახლა"
           }
         },
         "kk" : {
@@ -27670,6 +30388,12 @@
             "value" : "写真を撮る（カメラ）"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გადაღება (კამერა)"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27729,6 +30453,12 @@
             "value" : "服用済み"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მიღებული"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27786,6 +30516,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "＋をタップして、名前・期間・薬を入力してください。保存するとツアーが続きます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეეხე + და შეიყვანე სახელი, თარიღები და წამლები. შენახვის შემდეგ ტური გაგრძელდება."
           }
         },
         "kk" : {
@@ -27848,6 +30584,12 @@
             "value" : "写真をタップで拡大"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეეხე ფოტოს გასადიდებლად"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27905,6 +30647,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "丸をタップして服用を変更"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეეხე წრეს დოზის შესაცვლელად"
           }
         },
         "kk" : {
@@ -27966,6 +30714,12 @@
             "value" : "強調されたボタンをタップ"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეეხე გამოკვეთილ ღილაკს"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28023,6 +30777,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "タップすると今の分をまとめて記録できます。1回ずつチェックすることも。間違えたら下のバナーで取り消せます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შეეხე, რომ ყველაფერი აღირიცხოს, რაც ახლა უნდა მიიღო, ან მონიშნე დოზები სათითაოდ. შეცდომა დაუშვი? გააუქმე ქვემოთ არსებული ბანერიდან."
           }
         },
         "kk" : {
@@ -28083,6 +30843,12 @@
             "value" : "利用規約"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოყენების პირობები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28141,6 +30907,12 @@
             "value" : "Plekio を応援していただきありがとうございます！"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გმადლობ, რომ Plekio-ს უჭერ მხარს!"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28197,6 +30969,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "現在 App Store を利用できません。しばらくしてから再度お試しください。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Store ახლა მიუწვდომელია. სცადე მოგვიანებით."
           }
         },
         "kk" : {
@@ -28258,6 +31036,12 @@
             "value" : "1日をひとつのリストで"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღე ერთ სიაში"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28315,6 +31099,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "血圧の履歴がすべて削除されます。元に戻すことはできません。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წნევის მთელი ისტორია წაიშლება. ამის გაუქმება შეუძლებელია."
           }
         },
         "kk" : {
@@ -28376,6 +31166,12 @@
             "value" : "テーマ"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თემა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28433,6 +31229,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "このコースはすでに「実施中」にあります"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ეს კურსი უკვე აქტიურებშია"
           }
         },
         "kk" : {
@@ -28495,6 +31297,12 @@
             "value" : "このコースは存在しません。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ეს კურსი აღარ არსებობს."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28553,6 +31361,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "この記録と写真は完全に削除されます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღიურის ეს ჩანაწერი და მისი ფოტოები სამუდამოდ წაიშლება."
           }
         },
         "kk" : {
@@ -28614,6 +31428,12 @@
             "value" : "この項目はもう存在しません。削除された可能性があります。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ეს ელემენტი აღარ არსებობს. შესაძლოა წაშლილია."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28671,6 +31491,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "この測定値は保存できません。数値を確認してもう一度お試しください。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ამ ჩანაწერის შენახვა შეუძლებელია. შეამოწმე რიცხვები და სცადე ხელახლა."
           }
         },
         "kk" : {
@@ -28733,6 +31559,12 @@
             "value" : "時刻"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დრო"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28792,6 +31624,12 @@
             "value" : "お薬の時間です"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წამლის მიღების დროა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28848,6 +31686,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "補充の時期です：%@"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შევსების დროა: %@"
           }
         },
         "kk" : {
@@ -28910,6 +31754,12 @@
             "value" : "服用の時間：%@"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მიღების დროა: %@"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28966,6 +31816,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "チップを送れませんでした"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ჩაის ფული არ გაიგზავნა"
           }
         },
         "kk" : {
@@ -29028,6 +31884,12 @@
             "value" : "疲れ気味"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დაღლილი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29087,6 +31949,12 @@
             "value" : "終了"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "მდე"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29144,6 +32012,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "このリマインダーを受け取るには、設定アプリでPlekioの通知を許可してください。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ამ შეხსენების მისაღებად ჩართე Plekio-ს შეტყობინებები პარამეტრებში."
           }
         },
         "kk" : {
@@ -29206,6 +32080,12 @@
             "value" : "今日"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღეს"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29264,6 +32144,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "本日の記録は保存済み"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღევანდელი ჩანაწერი შენახულია"
           }
         },
         "kk" : {
@@ -29326,6 +32212,12 @@
             "value" : "本日の記録が未入力です"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღევანდელი ჩანაწერი ჯერ არ არის"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29382,6 +32274,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1箱の総数（個）"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "სულ შეფუთვაში (ცალი)"
           }
         },
         "kk" : {
@@ -29444,6 +32342,12 @@
             "value" : "体が治療にどう反応しているかを記録し、症状や日々のエネルギーを残して、経過写真を比較しましょう。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თვალყური ადევნე, როგორ რეაგირებს სხეული რეჟიმზე, ჩაიწერე სიმპტომები და ენერგიის დონე და შეადარე პროგრესის ფოტოები დროში."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29504,6 +32408,12 @@
             "value" : "回復、肌の変化、体調の変化を記録"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თვალყური ადევნე გამოჯანმრთელებას, კანის ცვლილებებს და თვითგრძნობის გაუმჯობესებას"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29560,6 +32470,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "再試行"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ხელახლა ცდა"
           }
         },
         "kk" : {
@@ -29621,6 +32537,12 @@
             "value" : "取り消す"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გაუქმება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29677,6 +32599,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "記録を取り消す"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აღრიცხვის გაუქმება"
           }
         },
         "kk" : {
@@ -29739,6 +32667,12 @@
             "value" : "%@の記録を取り消す"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აღრიცხვის გაუქმება: „%@“"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29798,6 +32732,12 @@
             "value" : "ロック解除"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "განბლოკვა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29855,6 +32795,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "健康データにアクセスするにはPlekioのロックを解除してください。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "განბლოკე Plekio ჯანმრთელობის მონაცემებზე წვდომისთვის."
           }
         },
         "kk" : {
@@ -29917,6 +32863,12 @@
             "value" : "次の服用"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღეს შემდეგი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -29975,6 +32927,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "バージョン"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ვერსია"
           }
         },
         "kk" : {
@@ -30037,6 +32995,12 @@
             "value" : "経過の視覚的比較"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "პროგრესის ვიზუალური შედარება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30094,6 +33058,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "水分"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წყალი"
           }
         },
         "kk" : {
@@ -30156,6 +33126,12 @@
             "value" : "水分補給"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "წყლის მიღება"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30214,6 +33190,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "週間の服薬遵守履歴"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "კვირების მიხედვით რეჟიმის დაცვა"
           }
         },
         "kk" : {
@@ -30275,6 +33257,12 @@
             "value" : "体調"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თვითგრძნობა"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30334,6 +33322,12 @@
             "value" : "体調、睡眠、血圧、経過写真。治療が効いているかが目に見えます。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "თვითგრძნობა, ძილი, წნევა და პროგრესის ფოტოები — რომ დაინახო, მოქმედებს თუ არა მკურნალობა."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30391,6 +33385,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "どなたが使いますか？"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ვისთვისაა ეს?"
           }
         },
         "kk" : {
@@ -30453,6 +33453,12 @@
             "value" : "写真あり"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ფოტოებით"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30509,6 +33515,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "現在のデータは削除されずに保管されるため、今後のアップデートで復元できる可能性があります。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შენი მიმდინარე მონაცემები განცალკევებულია და არ წაშლილა, ამიტომ მომავალ განახლებას მათი აღდგენა მაინც შეეძლება."
           }
         },
         "kk" : {
@@ -30573,6 +33585,12 @@
             "value" : "ここに毎日の服用予定が表示されます。まず、今のコースを追加しましょう。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აქ ყოველი დღის დოზები გამოჩნდება. ჯერ დაამატე მკურნალობა, რომელსაც გადიხარ."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30629,6 +33647,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "記録はこのデバイスに残っていますが、Plekio は現在それを開けません。すでに設定済みのリマインダーは引き続き届きます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შენი ჩანაწერები ისევ ამ მოწყობილობაზეა, მაგრამ Plekio-ს ახლა მათი გახსნა არ შეუძლია. უკვე დაგეგმილი შეხსენებები გაგრძელდება."
           }
         },
         "kk" : {
@@ -30691,6 +33715,12 @@
             "value" : "本日の薬"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დღევანდელი წამლები"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30751,6 +33781,12 @@
             "value" : "ミニマルな服薬管理"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შენი მინიმალისტური ტრეკერი"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30807,6 +33843,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "チップは承認待ちです。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "შენი ჩაის ფული დადასტურებას ელოდება."
           }
         },
         "kk" : {
@@ -30867,6 +33909,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "痛みなし"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ტკივილი არ არის"
           }
         },
         "kk" : {
