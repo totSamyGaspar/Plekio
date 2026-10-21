@@ -63,12 +63,16 @@ struct MedicationCardView: View {
             .opacity(isSettled ? 0.6 : 1.0)
 
             VStack(alignment: .leading, spacing: 6) {
-                HStack {
+                // The time sits at the column's trailing edge, so it lines up from card
+                // to card whatever the name's length; with a two-line name, by the first.
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(pill.name)
                         .font(.headline.weight(.bold))
                         .foregroundColor(isSettled ? .textSecondary : .textPrimary)
                         .strikethrough(pill.isTaken)
                         .lineLimit(2)
+
+                    Spacer(minLength: 0)
 
                     Text(pill.time.formatted(date: .omitted, time: .shortened))
                         .font(.caption2.weight(.heavy))
@@ -77,6 +81,7 @@ struct MedicationCardView: View {
                         .padding(.vertical, 4)
                         .background(Color.accentPrimary.opacity(0.15))
                         .cornerRadius(8)
+                        .fixedSize()
                 }
 
                 HStack(spacing: 6) {
@@ -97,8 +102,8 @@ struct MedicationCardView: View {
                     }
                 }
             }
-
-            Spacer()
+            // The whole width up to the check, so the time chip ends at the same place on every card.
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             statusIndicator
         }
@@ -123,7 +128,8 @@ struct MedicationCardView: View {
         if let state {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(state.wash)
-                .overlay(alignment: .topTrailing) {
+                // Bottom corner: the top one is taken by the time chip.
+                .overlay(alignment: .bottomTrailing) {
                     Text(state.label)
                         .font(.caption2.weight(.heavy))
                         .foregroundColor(state.tint)
