@@ -31,6 +31,14 @@ nonisolated extension WidgetSnapshot {
         return !doses.isEmpty && doses.allSatisfy(\.status.isSettled)
     }
 
+    /// Whether the snapshot knows the day of `date`: it holds the day it was built
+    /// and the next. Past that the widget asks for the app instead of showing an empty day.
+    func covers(_ date: Date, calendar: Calendar) -> Bool {
+        let start = calendar.startOfDay(for: generatedAt)
+        guard let end = calendar.date(byAdding: .day, value: 2, to: start) else { return false }
+        return date >= start && date < end
+    }
+
     // MARK: - Up next
 
     /// The earliest slot today with a dose that is pending and not yet missed.

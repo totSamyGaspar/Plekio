@@ -69,6 +69,15 @@ struct WidgetSnapshotTests {
         #expect(!snapshot.isDayComplete(at: testDate(2026, 10, 21, 9), calendar: calendar))
     }
 
+    @Test("The snapshot covers the day it was built and the next, not the day after")
+    func coversTwoDays() {
+        let snapshot = dayOfThree()
+        #expect(snapshot.covers(testDate(2026, 10, 21, 0), calendar: calendar))
+        #expect(snapshot.covers(testDate(2026, 10, 22, 23, 59), calendar: calendar))
+        #expect(!snapshot.covers(testDate(2026, 10, 23), calendar: calendar))
+        #expect(!snapshot.covers(testDate(2026, 10, 20, 23), calendar: calendar))
+    }
+
     // MARK: - Up next
 
     @Test("Up next is the earliest slot with an open dose, skipping settled ones")
