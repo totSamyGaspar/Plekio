@@ -165,6 +165,7 @@
 				fr,
 				kk,
 				it,
+				ka,
 			);
 			mainGroup = 123BA6DD2FA61C8500FFA528;
 			minimizedProjectReferenceProxies = 1;
@@ -365,6 +366,7 @@
 				INFOPLIST_FILE = Plekio/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Plekio uses the camera so you can attach a photo of your medication.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID to unlock Plekio and protect access to your health data.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Plekio uses your photo library so you can attach a photo of your medication.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -403,6 +405,7 @@
 				INFOPLIST_FILE = Plekio/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Plekio uses the camera so you can attach a photo of your medication.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID to unlock Plekio and protect access to your health data.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Plekio uses your photo library so you can attach a photo of your medication.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

@@ -40,6 +40,12 @@
             "value" : "Plekio"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio"
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -103,6 +109,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "薬の写真を添付できるように、Plekioはカメラを使用します。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio იყენებს კამერას, რომ შეძლო შენი წამლის ფოტოს დართვა."
           }
         },
         "kk" : {
@@ -170,6 +182,12 @@
             "value" : "Face IDでPlekioのロックを解除し、健康データへのアクセスを保護します。"
           }
         },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოიყენე Face ID, რომ განბლოკო Plekio და დაიცვა შენი ჯანმრთელობის მონაცემები."
+          }
+        },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -233,6 +251,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "薬の写真を添付できるように、Plekioは写真ライブラリを使用します。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio იყენებს შენს ფოტოთეკას, რომ შეძლო შენი წამლის ფოტოს დართვა."
           }
         },
         "kk" : {

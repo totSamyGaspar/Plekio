@@ -13,7 +13,7 @@ Everything stays on the device: no account, no server, no analytics.
 - **Doctor report** — a PDF of doses, well-being and blood pressure for any period.
 - **Onboarding and first-run tour**, plus one-time TipKit hints where features live.
 - **Accessibility** — Dynamic Type, VoiceOver labels, and Reduce Motion across all animations.
-- **Localized** in English, German, Spanish, French, Italian, Japanese, Kazakh, Romanian, Russian and Ukrainian.
+- **Localized** in English, German, Spanish, French, Italian, Japanese, Georgian, Kazakh, Romanian, Russian and Ukrainian.
 
 ## Requirements
 
