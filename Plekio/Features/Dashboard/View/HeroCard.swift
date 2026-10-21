@@ -15,8 +15,6 @@ struct HeroCard<Content: View>: View {
     let title: LocalizedStringKey
     var systemImage: String? = nil
     let date: Date
-    /// Takes the whole proposed height; used when laid over another card of the same size.
-    var fillsHeight = false
     @ViewBuilder let content: Content
 
     /// Time-of-day gradient based on the current hour.
@@ -36,7 +34,6 @@ struct HeroCard<Content: View>: View {
             header
             content
         }
-        .frame(maxHeight: fillsHeight ? .infinity : nil, alignment: .topLeading)
         .padding(24)
         .background(LinearGradient(colors: gradientColors, startPoint: .topLeading, endPoint: .bottomTrailing))
         .cornerRadius(32)
