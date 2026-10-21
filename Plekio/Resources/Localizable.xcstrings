@@ -6857,61 +6857,61 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "HEUTE ALLES ERLEDIGT"
+            "value" : "ALLES ERLEDIGT"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TODO LISTO HOY"
+            "value" : "TODO LISTO"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TOUT EST FAIT AUJOURD’HUI"
+            "value" : "TOUT EST FAIT"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TUTTO FATTO OGGI"
+            "value" : "TUTTO FATTO"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "今日はすべて完了"
+            "value" : "すべて完了"
           }
         },
         "ka" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "დღევანდელი გეგმა შესრულებულია"
+            "value" : "დასრულდა"
           }
         },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "БҮГІН БӘРІ ОРЫНДАЛДЫ"
+            "value" : "БӘРІ ДАЙЫН"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TOTUL GATA AZI"
+            "value" : "TOTUL GATA"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "НА СЕГОДНЯ ВСЁ"
+            "value" : "ВСЁ ПРИНЯТО"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "НА СЬОГОДНІ ВСЕ"
+            "value" : "ВСЕ ЗРОБЛЕНО"
           }
         }
       }
@@ -32979,25 +32979,25 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ALS NÄCHSTES HEUTE"
+            "value" : "ALS NÄCHSTES"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A CONTINUACIÓN HOY"
+            "value" : "PRÓXIMA TOMA"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PROCHAINE PRISE"
+            "value" : "À SUIVRE"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PROSSIME DI OGGI"
+            "value" : "A SEGUIRE"
           }
         },
         "ja" : {
@@ -33009,31 +33009,31 @@
         "ka" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "დღეს შემდეგი"
+            "value" : "შემდეგი"
           }
         },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "БҮГІН КЕЗЕКТЕ"
+            "value" : "КЕЗЕКТЕ"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URMEAZĂ AZI"
+            "value" : "URMEAZĂ"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "СЛЕДУЮЩИЙ ПРИЁМ"
+            "value" : "НА ОЧЕРЕДИ"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "НАСТУПНИЙ ПРИЙОМ"
+            "value" : "НА ЧЕРЗІ"
           }
         }
       }

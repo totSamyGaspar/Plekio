@@ -46,7 +46,10 @@ struct HeroCard<Content: View>: View {
         HStack(alignment: .center, spacing: 12) {
             HStack(spacing: 6) {
                 if let systemImage { Image(systemName: systemImage) }
+                // One line: a two-line chip pushes the whole card taller.
                 Text(title)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
                 .font(.caption.weight(.heavy))
                 .padding(.horizontal, 14)
