@@ -26,11 +26,7 @@ enum AppAppearance {
 /// the providers run wherever the colour is resolved, not only on the main actor.
 nonisolated extension UIColor {
 
-    static let appAccent = UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor.systemMint.resolvedColor(with: traits)
-            : UIColor(red: 0.122, green: 0.478, blue: 0.396, alpha: 1)
-    }
+    // `appAccent` lives in Shared/Theme/AccentColor.swift: the widget uses it too.
 
     /// Opaque surface for the tab bar under Reduce Transparency.
     static let appSurfaceOpaque = UIColor { traits in

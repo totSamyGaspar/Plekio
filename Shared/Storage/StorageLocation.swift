@@ -8,7 +8,8 @@
 import Foundation
 
 /// The one place that knows where the app's files live. They sit in the App Group
-/// container, so a widget or watch app can later read the same store.
+/// container, so the widget can reach them. In Shared: the widget extension builds it too,
+/// but reads only `widgetSnapshotURL`, never the store.
 nonisolated struct StorageLocation: Sendable {
 
     static let appGroupId = "group.com.EdHasp.Plekio"
@@ -52,4 +53,8 @@ nonisolated struct StorageLocation: Sendable {
 
     /// Photos live beside the store, not in it, so fetches never load image data.
     var photosDirectory: URL { root.appending(path: "MedicationImages", directoryHint: .isDirectory) }
+
+    /// What the widget shows, written by the app. Beside the store, not in it: the
+    /// widget must never open SwiftData, which may be mid-migration in the app.
+    var widgetSnapshotURL: URL { root.appending(path: "widget-snapshot.json") }
 }

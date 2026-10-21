@@ -45,6 +45,11 @@
 			path = PlekioTests;
 			sourceTree = "<group>";
 		};
+		12F0A1B22FF00001000AA001 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				123BA6E82FA61C8500FFA528 /* Plekio */,
+				12F0A1B22FF00001000AA001 /* Shared */,
 				12E9B40A2FD44E9C00EDFB8C /* PlekioTests */,
 				123BA6E72FA61C8500FFA528 /* Products */,
 			);
@@ -100,6 +106,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				123BA6E82FA61C8500FFA528 /* Plekio */,
+				12F0A1B22FF00001000AA001 /* Shared */,
 			);
 			name = Plekio;
 			packageProductDependencies = (
