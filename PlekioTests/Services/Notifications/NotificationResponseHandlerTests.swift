@@ -123,6 +123,24 @@ struct NotificationResponseHandlerTests {
         #expect(h.db.markedTakenSlots.count == 1)
     }
 
+    @Test("afterWrite runs once a Take is in the store, and only for a write")
+    func afterWriteSeesTheWrite() async {
+        let h = Harness()
+        let id = UUID()
+        h.db.pillsToReturn = [dose(id)]
+        var sawTaken: [Bool] = []
+
+        await h.handler.handle(.take(medicationIds: [id], slot: slot)) {
+            sawTaken.append(h.db.pillsToReturn.first?.isTaken == true)
+        }
+        await h.handler.handle(.snooze(medicationIds: [id.uuidString], names: ["Ibuprofen"], slot: slot)) {
+            sawTaken.append(false)
+        }
+
+        // The widget snapshot written here already has the dose taken.
+        #expect(sawTaken == [true])
+    }
+
     @Test("Skip records a skip rather than just dismissing the banner")
     func skipRecordsTheSkip() async {
         let h = Harness()

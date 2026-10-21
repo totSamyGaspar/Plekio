@@ -7,6 +7,7 @@
 
 import SwiftUI
 import WidgetKit
+import AppIntents
 
 // MARK: - TodayWidget
 
@@ -171,15 +172,29 @@ struct SlotRow: View {
     @ViewBuilder
     private var trailing: some View {
         if isSettled {
-            DoseMark(status: slot.doses.contains { $0.status == .taken } ? .taken : .skipped, size: 20)
-        } else if isMissed {
-            Text("MISSED")
-                .font(.system(size: 9, weight: .heavy))
-                .foregroundStyle(Color.warningAccent)
+            DoseMark(status: slot.doses.contains { $0.status == .taken } ? .taken : .skipped, size: 22)
         } else {
-            Text(verbatim: "\(slot.doses.count - pending.count)/\(slot.doses.count)")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(Color.textSecondary)
+            HStack(spacing: 6) {
+                if isMissed {
+                    Text("MISSED")
+                        .font(.system(size: 9, weight: .heavy))
+                        .foregroundStyle(Color.warningAccent)
+                } else if pending.count < slot.doses.count {
+                    // Partly logged: how far it got, next to the button that finishes it.
+                    Text(verbatim: "\(slot.doses.count - pending.count)/\(slot.doses.count)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color.textSecondary)
+                        .invalidatableContent()
+                }
+                // Logs the slot's open doses, like the checkmark on Today; missed ones included.
+                Button(intent: slot.takeOpenDoses) {
+                    DoseMark(status: .pending, isMissed: isMissed, size: 22)
+                        .frame(width: 30, height: 30)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text(pending.count > 1 ? "Take All" : "Take Now"))
+            }
         }
     }
 }

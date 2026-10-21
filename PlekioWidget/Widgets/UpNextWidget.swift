@@ -7,6 +7,7 @@
 
 import SwiftUI
 import WidgetKit
+import AppIntents
 
 // MARK: - UpNext
 
@@ -126,7 +127,7 @@ struct UpNextCard: View {
             }
 
             Spacer(minLength: 6)
-            DoseNames(doses: slot.doses, limit: 2, onHero: true, showsDosage: isMedium)
+            DoseNames(doses: slot.doses, limit: 2, onHero: true, showsDosage: isMedium, slot: slot)
             Spacer(minLength: 6)
 
             HStack(alignment: .center) {
@@ -134,17 +135,22 @@ struct UpNextCard: View {
                     Text("\(dayProgress.taken) of \(dayProgress.total) doses logged")
                         .font(.caption)
                         .opacity(0.88)
+                        .invalidatableContent()
                 } else {
                     Text(verbatim: "\(slot.doses.filter { $0.status == .taken }.count)/\(slot.doses.count)")
                         .font(.caption.weight(.semibold))
                         .opacity(0.88)
+                        .invalidatableContent()
                 }
                 Spacer(minLength: 4)
-                if isMedium {
-                    HeroPill(title: slot.doses.count > 1 ? "LOG ALL" : "LOG NOW")
-                } else {
-                    HeroCheckButton(label: slot.doses.count > 1 ? "Take All" : "Take Now")
+                Button(intent: slot.takeOpenDoses) {
+                    if isMedium {
+                        HeroPill(title: slot.doses.count > 1 ? "LOG ALL" : "LOG NOW")
+                    } else {
+                        HeroCheckButton(label: slot.doses.count > 1 ? "Take All" : "Take Now")
+                    }
                 }
+                .buttonStyle(.plain)
             }
         }
         .foregroundStyle(.white)
@@ -165,15 +171,34 @@ struct UpNextCard: View {
             }
             Spacer(minLength: 6)
             DoseNames(doses: slot.doses.filter { $0.status == .pending }, limit: 2,
-                      onHero: false, showsDosage: isMedium, isMissed: true)
+                      onHero: false, showsDosage: isMedium, isMissed: true, slot: slot)
             Spacer(minLength: 6)
-            Text("Take Now")
-                .font(.system(size: 11, weight: .heavy))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(Color.warningAccent, in: Capsule())
-                .widgetAccentable()
+            HStack(spacing: 6) {
+                // Late doses still count, as on Today: the checkmark stays live past the grace.
+                Button(intent: slot.takeOpenDoses) {
+                    Text(slot.doses.count > 1 ? "Take All" : "Take Now")
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.warningAccent, in: Capsule())
+                        .widgetAccentable()
+                }
+                .buttonStyle(.plain)
+
+                // A deliberate skip, so the slot stops counting as missed.
+                Button(intent: slot.skipOpenDoses) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(Color.textSecondary)
+                        .frame(width: 32, height: 30)
+                        .background(Color.textPrimary.opacity(0.07), in: Capsule())
+                        .accessibilityLabel(Text("Skip"))
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 
@@ -240,6 +265,8 @@ struct DoseNames: View {
     let onHero: Bool
     var showsDosage = false
     var isMissed = false
+    /// When set, an open dose's row logs that one dose. Nil on cards without buttons.
+    var slot: WidgetSnapshot.Slot? = nil
 
     private var shown: [WidgetSnapshot.Dose] { Array(doses.prefix(limit)) }
     private var hidden: Int { doses.count - shown.count }
@@ -247,29 +274,39 @@ struct DoseNames: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(Array(shown.enumerated()), id: \.element.id) { index, dose in
-                HStack(spacing: 7) {
-                    DoseMark(status: dose.status, isMissed: isMissed, onHero: onHero, size: 15)
-                    Text(dose.name)
-                        .font(.widgetSerif(doses.count > 1 || showsDosage ? 16 : 19))
-                        .strikethrough(dose.status == .taken)
-                        .opacity(dose.status.isSettled ? 0.6 : 1)
-                        .lineLimit(1)
-                    if showsDosage {
-                        Text("\(dose.dosage) pcs")
-                            .font(.caption2)
-                            .opacity(0.8)
-                            .fixedSize()
-                    }
-                    if index == shown.count - 1, hidden > 0 {
-                        Text("\(hidden) more")
-                            .font(.caption2.weight(.semibold))
-                            .opacity(0.8)
-                            .fixedSize()
-                    }
+                if let slot, dose.status == .pending {
+                    Button(intent: slot.take(dose)) { row(dose, index: index) }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text("Log \(dose.name)"))
+                } else {
+                    row(dose, index: index)
                 }
-                .foregroundStyle(onHero ? Color.white : Color.textPrimary)
             }
         }
+    }
+
+    private func row(_ dose: WidgetSnapshot.Dose, index: Int) -> some View {
+        HStack(spacing: 7) {
+            DoseMark(status: dose.status, isMissed: isMissed, onHero: onHero, size: 15)
+            Text(dose.name)
+                .font(.widgetSerif(doses.count > 1 || showsDosage ? 16 : 19))
+                .strikethrough(dose.status == .taken)
+                .opacity(dose.status.isSettled ? 0.6 : 1)
+                .lineLimit(1)
+            if showsDosage {
+                Text("\(dose.dosage) pcs")
+                    .font(.caption2)
+                    .opacity(0.8)
+                    .fixedSize()
+            }
+            if index == shown.count - 1, hidden > 0 {
+                Text("\(hidden) more")
+                    .font(.caption2.weight(.semibold))
+                    .opacity(0.8)
+                    .fixedSize()
+            }
+        }
+        .foregroundStyle(onHero ? Color.white : Color.textPrimary)
     }
 }
 

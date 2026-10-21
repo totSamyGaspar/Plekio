@@ -125,6 +125,22 @@ struct WidgetSnapshotPublisherTests {
         #expect(reloader.reloadCount == 2)
     }
 
+    @Test("An awaited refresh still writes when another starts behind it")
+    func awaitedRefreshIsNotCancelled() async {
+        defer { try? store.clear() }
+        db.pillsByDay = [today: [pill("Sertraline", at: testDate(2026, 10, 21, 8))]]
+        let publisher = makePublisher(store: store)
+
+        // As after a widget button: the button awaits one, the write's feed starts another.
+        let awaited = publisher.refresh()
+        publisher.refresh()
+        await awaited.value
+
+        #expect(store.read() != nil)
+        await publisher.lastRefresh?.value
+        #expect(reloader.reloadCount == 1)
+    }
+
     // MARK: - Triggers
 
     @Test("A store write announced by the feed refreshes the snapshot")

@@ -16,6 +16,16 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     /// launch before any view exists and must use the same graph as the UI.
     private(set) lazy var launcher = AppLauncher(location: .appGroup(), open: AppDependencies.live(location:))
 
+    /// For widget buttons, which reach the app through App Intents, not through UIKit.
+    /// `UIApplication.shared.delegate` won't do: under `@UIApplicationDelegateAdaptor`
+    /// it is SwiftUI's own delegate, not this one.
+    private(set) static weak var shared: AppDelegate?
+
+    override init() {
+        super.init()
+        Self.shared = self
+    }
+
     // MARK: - UIApplicationDelegate
 
     func application(_ application: UIApplication,
@@ -50,9 +60,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 if intent.isBackgroundAction { await Self.reportNotRecorded() }
                 return
             }
-            await dependencies.notificationResponses.handle(intent)
-            // Before reporting handled: iOS may suspend the app before the debounced refresh.
-            if intent.isBackgroundAction {
+            // The snapshot right after the write, before the reminder rebuild, and
+            // before reporting handled: iOS may suspend the app before the debounced refresh.
+            await dependencies.notificationResponses.handle(intent) {
                 await dependencies.widgetSnapshots.refresh().value
             }
         }
@@ -60,9 +70,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
     // MARK: - Store Not Open
 
-    /// Take, Skip or Snooze couldn't be carried out. Says so at once, so the dose
-    /// doesn't look logged; the tap opens the app on the recovery screen.
-    private static func reportNotRecorded() async {
+    /// Take, Skip or Snooze — from a notification or a widget — couldn't be carried out.
+    /// Says so at once, so the dose doesn't look logged; the tap opens the app on the
+    /// recovery screen.
+    static func reportNotRecorded() async {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Dose not recorded")
         content.body = String(localized: "Plekio can't open its data right now. Open the app to see what to do.")

@@ -30,7 +30,7 @@ final class WidgetSnapshotPublisher {
     /// The last snapshot on disk, so an unchanged one is neither rewritten nor reloaded.
     private var lastWritten: WidgetSnapshot?
 
-    /// The refresh in flight, for awaiting it (notification actions, tests).
+    /// The last refresh started, for awaiting it (notification actions, tests).
     private(set) var lastRefresh: Task<Void, Never>?
 
     // MARK: - Init
@@ -79,7 +79,11 @@ final class WidgetSnapshotPublisher {
     // MARK: - Refresh
 
     /// Rebuilds the snapshot; the streak's history is read off the main actor.
-    /// A newer refresh supersedes this one.
+    ///
+    /// Refreshes queue up behind each other and are never cancelled: a caller that
+    /// awaits one (a widget button, a notification action) must find the snapshot
+    /// written when it returns. A write's own debounced refresh would otherwise
+    /// cancel the awaited one, and the widget would redraw the old state.
     @discardableResult
     func refresh() -> Task<Void, Never> {
         guard store != nil else { return Task {} }
@@ -88,10 +92,11 @@ final class WidgetSnapshotPublisher {
         let today = calendar.startOfDay(for: time.now)
         let days = StreakRules.days(endingAt: today, calendar: calendar)
 
-        lastRefresh?.cancel()
+        let previous = lastRefresh
         let task = Task { [weak self, doses] in
+            await previous?.value
             let history = await doses.pillHistory(onDays: days)
-            guard !Task.isCancelled, let self else { return }
+            guard let self else { return }
             self.publish(streakDays: StreakRules.streak(pillsByDay: history, today: today, calendar: calendar))
         }
         lastRefresh = task
