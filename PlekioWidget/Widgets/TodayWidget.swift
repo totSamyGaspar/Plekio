@@ -48,6 +48,8 @@ struct TodayView: View {
             }
         }
         .containerBackground(Color.widgetSurface, for: .widget)
+        // Checks log in place; anywhere else opens Today.
+        .widgetURL(WidgetLink.today.url)
     }
 
     private func content(_ snapshot: WidgetSnapshot) -> some View {

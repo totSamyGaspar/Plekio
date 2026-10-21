@@ -42,6 +42,8 @@ struct LowStockView: View {
             }
         }
         .containerBackground(Color.widgetSurface, for: .widget)
+        // Today shows the refill card, as the low-stock reminder's tap does.
+        .widgetURL(WidgetLink.today.url)
     }
 
     private func alert(_ low: WidgetSnapshot.StockAlert, others: Int) -> some View {

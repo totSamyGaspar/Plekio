@@ -39,9 +39,11 @@ struct DayProgressView: View {
     }
 
     var body: some View {
-        content.containerBackground(for: .widget) {
-            if family == .accessoryCircular { Color.clear } else { Color.widgetSurface }
-        }
+        content
+            .containerBackground(for: .widget) {
+                if family == .accessoryCircular { Color.clear } else { Color.widgetSurface }
+            }
+            .widgetURL(WidgetLink.today.url)
     }
 
     @ViewBuilder

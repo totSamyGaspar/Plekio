@@ -36,6 +36,14 @@ enum UpNext {
             }
         }
     }
+
+    /// Where a tap opens the app: the take-dose sheet for the slot shown, else Today.
+    var link: WidgetLink {
+        switch self {
+        case .next(let slot), .missed(let slot): slot.openLink
+        case .complete, .empty, .needsApp: .today
+        }
+    }
 }
 
 // MARK: - UpNextWidget
@@ -61,6 +69,12 @@ struct UpNextView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
+        content
+            .widgetURL(UpNext(entry).link.url)
+    }
+
+    @ViewBuilder
+    private var content: some View {
         switch family {
         // The Lock Screen draws its own backdrop; WidgetKit still expects a container background.
         case .accessoryRectangular:
@@ -123,9 +137,11 @@ struct UpNextCard: View {
                 HeroChip(title: isMedium ? "UP NEXT TODAY" : slot.period.title)
                     .textCase(.uppercase)
                 Spacer(minLength: 4)
+                // Always one line at full size: it's what the card is for. The chip gives way.
                 slot.time.widgetTime
-                    .font(.system(size: isMedium ? 24 : 22, weight: .bold))
-                    .minimumScaleFactor(0.8)
+                    .font(.system(size: isMedium ? 24 : 20, weight: .bold))
+                    .lineLimit(1)
+                    .fixedSize()
             }
 
             Spacer(minLength: 6)

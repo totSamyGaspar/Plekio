@@ -71,7 +71,10 @@ struct HeroChip: View {
     var body: some View {
         HStack(spacing: 4) {
             if let systemImage { Image(systemName: systemImage) }
-            Text(title).lineLimit(1)
+            // Shrinks before it wraps: whatever sits beside it keeps its line.
+            Text(title)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .font(.system(size: 10, weight: .heavy))
         .padding(.horizontal, 9)
