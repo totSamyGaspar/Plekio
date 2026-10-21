@@ -94,7 +94,7 @@ struct SettingsView: View {
                             Text("Developer")
                                 .foregroundColor(.textPrimary)
                             Spacer()
-                            Text("Eduard Hasparian")
+                            Text(verbatim: "Eduard Hasparian")
                                 .foregroundColor(.textSecondary)
                         }
 
