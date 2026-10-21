@@ -17,3 +17,7 @@ extension TakeDosesIntent {
 extension SkipDosesIntent {
     func perform() async throws -> some IntentResult { .result() }
 }
+
+extension ToggleDoseIntent {
+    func perform() async throws -> some IntentResult { .result() }
+}

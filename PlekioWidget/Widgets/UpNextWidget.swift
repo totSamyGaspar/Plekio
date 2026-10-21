@@ -117,7 +117,9 @@ struct UpNextCard: View {
 
     private func next(_ slot: WidgetSnapshot.Slot) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center) {
+            HStack(alignment: .center, spacing: 6) {
+                // Not on the small one: the chip and the time already fill its top row.
+                if isMedium { WidgetLogo(size: 18, tint: .white) }
                 HeroChip(title: isMedium ? "UP NEXT TODAY" : slot.period.title)
                     .textCase(.uppercase)
                 Spacer(minLength: 4)
@@ -143,14 +145,14 @@ struct UpNextCard: View {
                         .invalidatableContent()
                 }
                 Spacer(minLength: 4)
-                Button(intent: slot.takeOpenDoses) {
-                    if isMedium {
-                        HeroPill(title: slot.doses.count > 1 ? "LOG ALL" : "LOG NOW")
-                    } else {
-                        HeroCheckButton(label: slot.doses.count > 1 ? "Take All" : "Take Now")
-                    }
+                // Off: the slot shown here is still open. Tapped, it turns to a check at once.
+                if isMedium {
+                    Toggle(isOn: false, intent: slot.takeOpenDoses) { EmptyView() }
+                        .toggleStyle(HeroPillToggleStyle(title: slot.doses.count > 1 ? "LOG ALL" : "LOG NOW"))
+                } else {
+                    Toggle(isOn: false, intent: slot.takeOpenDoses) { EmptyView() }
+                        .toggleStyle(HeroCheckToggleStyle(label: slot.doses.count > 1 ? "Take All" : "Take Now"))
                 }
-                .buttonStyle(.plain)
             }
         }
         .foregroundStyle(.white)
@@ -160,7 +162,8 @@ struct UpNextCard: View {
 
     private func missed(_ slot: WidgetSnapshot.Slot) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
+            HStack(spacing: 6) {
+                if isMedium { WidgetLogo(size: 16) }
                 Text("MISSED")
                     .font(.system(size: 10, weight: .heavy))
                     .foregroundStyle(Color.warningAccent)
@@ -175,18 +178,8 @@ struct UpNextCard: View {
             Spacer(minLength: 6)
             HStack(spacing: 6) {
                 // Late doses still count, as on Today: the checkmark stays live past the grace.
-                Button(intent: slot.takeOpenDoses) {
-                    Text(slot.doses.count > 1 ? "Take All" : "Take Now")
-                        .font(.system(size: 11, weight: .heavy))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(Color.warningAccent, in: Capsule())
-                        .widgetAccentable()
-                }
-                .buttonStyle(.plain)
+                Toggle(isOn: false, intent: slot.takeOpenDoses) { EmptyView() }
+                    .toggleStyle(MissedTakeToggleStyle(title: slot.doses.count > 1 ? "Take All" : "Take Now"))
 
                 // A deliberate skip, so the slot stops counting as missed.
                 Button(intent: slot.skipOpenDoses) {
@@ -206,7 +199,8 @@ struct UpNextCard: View {
 
     private var complete: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
+            HStack(spacing: 6) {
+                if isMedium { WidgetLogo(size: 18, tint: .white) }
                 HeroChip(title: "ALL DONE TODAY", systemImage: "checkmark")
                 Spacer(minLength: 0)
             }
@@ -265,7 +259,7 @@ struct DoseNames: View {
     let onHero: Bool
     var showsDosage = false
     var isMissed = false
-    /// When set, an open dose's row logs that one dose. Nil on cards without buttons.
+    /// When set, a row's mark logs or un-logs that dose. Nil on cards without controls.
     var slot: WidgetSnapshot.Slot? = nil
 
     private var shown: [WidgetSnapshot.Dose] { Array(doses.prefix(limit)) }
@@ -274,10 +268,14 @@ struct DoseNames: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(Array(shown.enumerated()), id: \.element.id) { index, dose in
-                if let slot, dose.status == .pending {
-                    Button(intent: slot.take(dose)) { row(dose, index: index) }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(Text("Log \(dose.name)"))
+                // Taken or open: a toggle, so the tap shows at once. A skip stays as it is.
+                if let slot, dose.status != .skipped {
+                    Toggle(isOn: dose.status == .taken, intent: slot.toggle(dose)) {
+                        label(dose, index: index)
+                    }
+                    .toggleStyle(DoseRowToggleStyle(isMissed: isMissed, onHero: onHero))
+                    .foregroundStyle(onHero ? Color.white : Color.textPrimary)
+                    .accessibilityLabel(Text(dose.status == .taken ? "Undo logging \(dose.name)" : "Log \(dose.name)"))
                 } else {
                     row(dose, index: index)
                 }
@@ -288,10 +286,18 @@ struct DoseNames: View {
     private func row(_ dose: WidgetSnapshot.Dose, index: Int) -> some View {
         HStack(spacing: 7) {
             DoseMark(status: dose.status, isMissed: isMissed, onHero: onHero, size: 15)
-            Text(dose.name)
-                .font(.widgetSerif(doses.count > 1 || showsDosage ? 16 : 19))
+            label(dose, index: index)
                 .strikethrough(dose.status == .taken)
                 .opacity(dose.status.isSettled ? 0.6 : 1)
+        }
+        .foregroundStyle(onHero ? Color.white : Color.textPrimary)
+    }
+
+    /// Name, dosage and how many more: what the mark sits next to.
+    private func label(_ dose: WidgetSnapshot.Dose, index: Int) -> some View {
+        HStack(spacing: 7) {
+            Text(dose.name)
+                .font(.widgetSerif(doses.count > 1 || showsDosage ? 16 : 19))
                 .lineLimit(1)
             if showsDosage {
                 Text("\(dose.dosage) pcs")
@@ -306,7 +312,6 @@ struct DoseNames: View {
                     .fixedSize()
             }
         }
-        .foregroundStyle(onHero ? Color.white : Color.textPrimary)
     }
 }
 
@@ -323,7 +328,7 @@ struct UpNextRectangular: View {
                 names(slot.doses)
             case .missed(let slot):
                 HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.circle.fill")
+                    WidgetLogo(size: 12)
                     Text("Missed")
                     Text(verbatim: "·")
                     slot.time.widgetTime
@@ -337,6 +342,7 @@ struct UpNextRectangular: View {
                     Text("\(days) days streak!").font(.caption)
                 }
             case .empty(let tomorrow):
+                header { EmptyView() }
                 Text("Nothing for today").font(.headline)
                 if let tomorrow {
                     HStack(spacing: 4) {
@@ -346,6 +352,7 @@ struct UpNextRectangular: View {
                     .font(.caption)
                 }
             case .needsApp:
+                WidgetLogo(size: 14)
                 Text("Open Plekio to update").font(.caption)
             }
         }

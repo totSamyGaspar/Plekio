@@ -794,61 +794,61 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "HEUTE ALLES ERLEDIGT"
+            "value" : "ALLES ERLEDIGT"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TODO LISTO HOY"
+            "value" : "TODO LISTO"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TOUT EST FAIT AUJOURD’HUI"
+            "value" : "TOUT EST FAIT"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TUTTO FATTO OGGI"
+            "value" : "TUTTO FATTO"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "今日はすべて完了"
+            "value" : "すべて完了"
           }
         },
         "ka" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "დღევანდელი გეგმა შესრულებულია"
+            "value" : "დასრულდა"
           }
         },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "БҮГІН БӘРІ ОРЫНДАЛДЫ"
+            "value" : "БӘРІ ДАЙЫН"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TOTUL GATA AZI"
+            "value" : "TOTUL GATA"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "НА СЕГОДНЯ ВСЁ"
+            "value" : "ВСЁ ПРИНЯТО"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "НА СЬОГОДНІ ВСЕ"
+            "value" : "ВСЕ ЗРОБЛЕНО"
           }
         }
       }
@@ -1627,6 +1627,70 @@
         }
       }
     },
+    "Log dose" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosis eintragen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar dosis"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer la prise"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra dose"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服用を記録"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "დოზის აღრიცხვა"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозаны белгілеу"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Înregistrează doza"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отметить приём"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позначити прийом"
+          }
+        }
+      }
+    },
     "Low stock" : {
       "localizations" : {
         "de" : {
@@ -2140,6 +2204,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Відкрийте Plekio, щоб оновити"
+          }
+        }
+      }
+    },
+    "SKIPPED" : {
+      "comment" : "A label for a dose the user deliberately declined, as opposed to MISSED, which is one they simply did not take.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ÜBERSPRUNGEN"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "DESCARTADA"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IGNORÉE"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IGNORATA"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキップ"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გამოტოვებული"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "БАС ТАРТЫЛДЫ"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IGNORATĂ"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ОТКЛОНЕНО"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ВІДХИЛЕНО"
           }
         }
       }
@@ -2866,25 +2995,25 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ALS NÄCHSTES HEUTE"
+            "value" : "ALS NÄCHSTES"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A CONTINUACIÓN HOY"
+            "value" : "PRÓXIMA TOMA"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PROCHAINE PRISE"
+            "value" : "À SUIVRE"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PROSSIME DI OGGI"
+            "value" : "A SEGUIRE"
           }
         },
         "ja" : {
@@ -2896,31 +3025,96 @@
         "ka" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "დღეს შემდეგი"
+            "value" : "შემდეგი"
           }
         },
         "kk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "БҮГІН КЕЗЕКТЕ"
+            "value" : "КЕЗЕКТЕ"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "URMEAZĂ AZI"
+            "value" : "URMEAZĂ"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "СЛЕДУЮЩИЙ ПРИЁМ"
+            "value" : "НА ОЧЕРЕДИ"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "НАСТУПНИЙ ПРИЙОМ"
+            "value" : "НА ЧЕРЗІ"
+          }
+        }
+      }
+    },
+    "Undo logging %@" : {
+      "comment" : "A button that undoes logging a dose of a medication. The argument is the name of the medication.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einnahme von %@ zurücknehmen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deshacer el registro de %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler l'enregistrement de %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla la registrazione di %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の記録を取り消す"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "აღრიცხვის გაუქმება: „%@“"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«%@» белгісін болдырмау"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anulează înregistrarea pentru %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отменить отметку приёма «%@»"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скасувати відмітку прийому «%@»"
           }
         }
       }

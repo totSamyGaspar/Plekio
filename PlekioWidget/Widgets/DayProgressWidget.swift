@@ -106,10 +106,13 @@ struct DayProgressView: View {
         ZStack {
             AccessoryWidgetBackground()
             ProgressRing(progress: fraction, lineWidth: 5, track: .white.opacity(0.3), ring: [.white, .white])
-            label
-                .font(.widgetSerif(14))
-                .minimumScaleFactor(0.6)
-                .padding(8)
+            VStack(spacing: 1) {
+                WidgetLogo(size: 10, tint: .white)
+                label
+                    .font(.widgetSerif(13))
+                    .minimumScaleFactor(0.6)
+            }
+            .padding(9)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("\(progress.taken) of \(progress.total) doses logged"))

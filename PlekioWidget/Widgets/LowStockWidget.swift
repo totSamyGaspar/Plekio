@@ -83,9 +83,7 @@ struct LowStockView: View {
     /// Says what the widget is about: without it the "all stocked" state reads as a stray message.
     private var header: some View {
         HStack(spacing: 5) {
-            Image(systemName: "pills.fill")
-                .foregroundStyle(Color.accentPrimary)
-                .widgetAccentable()
+            WidgetLogo(size: 14)
             Text("Stock")
                 .foregroundStyle(Color.textSecondary)
         }

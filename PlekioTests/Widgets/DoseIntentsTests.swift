@@ -55,6 +55,19 @@ struct DoseIntentsTests {
         #expect(slot.take(open).ids == [open.medicationId])
     }
 
+    @Test("A dose's check carries just that dose and its slot")
+    func toggleCarriesOneDose() {
+        let open = dose(.pending)
+        let done = dose(.taken)
+        let slot = WidgetSnapshot.Slot(time: time, period: .morning, doses: [done, open])
+
+        #expect(slot.toggle(open).ids == [open.medicationId])
+        #expect(slot.toggle(open).slot == time)
+        // An open dose's check takes it; a taken one's takes it back.
+        #expect(slot.toggle(open).taken)
+        #expect(!slot.toggle(done).taken)
+    }
+
     @Test("A malformed id is dropped instead of failing the whole button")
     func malformedIdIsDropped() {
         let id = UUID()

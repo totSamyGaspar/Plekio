@@ -96,22 +96,6 @@ struct HeroPill: View {
     }
 }
 
-/// The small widget's log button: a white circle with a check. A label like
-/// "LOG ALL" doesn't fit next to the count in every language; VoiceOver still reads it.
-struct HeroCheckButton: View {
-    let label: LocalizedStringKey
-
-    var body: some View {
-        Image(systemName: "checkmark")
-            .font(.system(size: 15, weight: .heavy))
-            .foregroundStyle(Color.onHeroButton)
-            .frame(width: 36, height: 36)
-            .background(Color.white, in: Circle())
-            .widgetAccentable()
-            .accessibilityLabel(Text(label))
-    }
-}
-
 // MARK: - Progress
 
 /// The app's progress ring (CircularProgressView), without animation: a widget is a still.
@@ -175,8 +159,10 @@ struct DoseMark: View {
 
 // MARK: - Logo
 
+/// On every widget, so it reads as Plekio's at a glance. White on the hero gradient.
 struct WidgetLogo: View {
     var size: CGFloat = 16
+    var tint: Color = .accentPrimary
 
     var body: some View {
         Image("Logo")
@@ -184,7 +170,7 @@ struct WidgetLogo: View {
             .resizable()
             .scaledToFit()
             .frame(width: size, height: size)
-            .foregroundStyle(Color.accentPrimary)
+            .foregroundStyle(tint)
             .widgetAccentable()
             .accessibilityHidden(true)
     }
