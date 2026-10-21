@@ -317,6 +317,8 @@ struct DoseNames: View {
 
 // MARK: - Lock Screen
 
+/// Half a Lock Screen row: no room for a title, so the header is the time and what
+/// it is for, and the medication goes underneath.
 struct UpNextRectangular: View {
     let entry: DoseEntry
 
@@ -324,26 +326,35 @@ struct UpNextRectangular: View {
         VStack(alignment: .leading, spacing: 1) {
             switch UpNext(entry) {
             case .next(let slot):
-                header { slot.time.widgetTime }
+                header {
+                    slot.time.widgetTime
+                    Text(verbatim: "·")
+                    Text(slot.period.title)
+                }
                 names(slot.doses)
             case .missed(let slot):
-                HStack(spacing: 4) {
-                    WidgetLogo(size: 12)
-                    Text("Missed")
+                header {
+                    Text("MISSED")
                     Text(verbatim: "·")
                     slot.time.widgetTime
                 }
-                .font(.caption.weight(.heavy))
                 names(slot.doses.filter { $0.status == .pending })
             case .complete:
-                header { EmptyView() }
-                Text("Day complete").font(.widgetSerif(16))
+                header { Text("Today") }
+                Text("Day complete")
+                    .font(.widgetSerif(16))
+                    .lineLimit(1)
                 if let days = entry.snapshot?.streakDays, days > 0 {
-                    Text("\(days) days streak!").font(.caption)
+                    Text("\(days) days streak!")
+                        .font(.caption)
+                        .lineLimit(1)
                 }
             case .empty(let tomorrow):
-                header { EmptyView() }
-                Text("Nothing for today").font(.headline)
+                header { Text("Today") }
+                Text("Nothing for today")
+                    .font(.widgetSerif(15))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 if let tomorrow {
                     HStack(spacing: 4) {
                         Text("Tomorrow")
@@ -352,21 +363,24 @@ struct UpNextRectangular: View {
                     .font(.caption)
                 }
             case .needsApp:
-                WidgetLogo(size: 14)
-                Text("Open Plekio to update").font(.caption)
+                header { EmptyView() }
+                Text("Open Plekio to update")
+                    .font(.caption)
+                    .lineLimit(2)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func header<Trailing: View>(@ViewBuilder _ trailing: () -> Trailing) -> some View {
+    private func header<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         HStack(spacing: 4) {
             WidgetLogo(size: 12)
-            Text("Up next")
-            trailing()
+            content()
         }
         .font(.caption.weight(.heavy))
         .textCase(.uppercase)
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
         .widgetAccentable()
     }
 
@@ -378,6 +392,7 @@ struct UpNextRectangular: View {
             if doses.count > 1 {
                 Text("\(doses.count - 1) more")
                     .font(.caption)
+                    .lineLimit(1)
             }
         }
     }
