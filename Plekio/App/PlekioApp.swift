@@ -59,6 +59,8 @@ struct PlekioApp: App {
         if let dependencies = launcher.dependencies {
             dependencies.reviewPrompt.recordActiveDay()
             dependencies.reminderSync.sync()
+            // Also rolls the snapshot over to a new day the app wasn't open for.
+            dependencies.widgetSnapshots.refresh()
         } else {
             launcher.retry()
         }

@@ -63,6 +63,9 @@ final class AppDependencies {
     /// Held for its subscription, which rebuilds reminders after course writes.
     let reminderSync: ReminderSyncCoordinator
 
+    /// Rewrites what the widget shows after course and dose writes.
+    let widgetSnapshots: WidgetSnapshotPublisher
+
     /// Lives here, not in the SwiftUI root, so it exists before the first screen.
     let router: AppRouter
 
@@ -88,6 +91,7 @@ final class AppDependencies {
         errorPresenter: AppErrorPresenter,
         tipJar: any TipJarService,
         storeURL: URL? = nil,
+        widgetSnapshotStore: WidgetSnapshotStore? = nil,
         time: any TimeSource = SystemTime()
     ) {
         self.time = time
@@ -116,6 +120,12 @@ final class AppDependencies {
             canRequestPermission: { settings.hasCompletedTour }
         )
         self.reminderSync = reminderSync
+        widgetSnapshots = WidgetSnapshotPublisher(
+            database: database,
+            courses: courseRepository,
+            store: widgetSnapshotStore,
+            time: time
+        )
         router = AppRouter()
         tour = TourCoordinator(settings: settings, router: router, onFinish: {
             PlekioTips.tourFinished = true
@@ -153,12 +163,14 @@ final class AppDependencies {
             errorPresenter: errorPresenter,
             tipJar: AppFeatures.tips ? StoreKitTipJar() : DisabledTipJar(),
             storeURL: database.persistence.storeURL,
+            widgetSnapshotStore: WidgetSnapshotStore(location: location),
             time: time
         )
     }
 
     #if DEBUG
-    /// In-memory store, so a preview can never touch the user's data.
+    /// In-memory store, so a preview can never touch the user's data. No widget
+    /// snapshot store either: a preview must not overwrite what the widget shows.
     static let preview: AppDependencies = {
         let errorPresenter = AppErrorPresenter()
         // Separate defaults domain so previews never change the app's settings.

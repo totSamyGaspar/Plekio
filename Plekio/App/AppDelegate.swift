@@ -51,6 +51,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 return
             }
             await dependencies.notificationResponses.handle(intent)
+            // Before reporting handled: iOS may suspend the app before the debounced refresh.
+            if intent.isBackgroundAction {
+                await dependencies.widgetSnapshots.refresh().value
+            }
         }
     }
 

@@ -50,8 +50,10 @@ final class AppLauncher {
     func retry() {
         guard dependencies == nil else { return }
         state = Self.attempt(open, at: location)
-        // Opened while the app is active: no scene change will top up the reminders.
+        // Opened while the app is active: no scene change will top up the reminders
+        // or bring the widget back from its last snapshot.
         dependencies?.reminderSync.sync()
+        dependencies?.widgetSnapshots.refresh()
     }
 
     /// The last resort, after the user confirms: sets the store aside (never deletes
