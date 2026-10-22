@@ -1,13 +1,11 @@
 //
-//  WidgetSnapshot+Mood.swift
+//  WidgetSnapshotMood.swift
 //  Plekio
 //
 //  Created by Edward Gasparian on 22.10.2026.
 //
 
 import Foundation
-
-// MARK: - Mood
 
 extension WidgetSnapshot {
 

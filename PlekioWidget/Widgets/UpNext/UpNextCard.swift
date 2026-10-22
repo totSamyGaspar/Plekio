@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - Home Screen
-
 /// Small and medium share one layout; medium lists the doses with their dosage.
 /// The Today widget embeds it, so its background is a property, not set here.
 struct UpNextCard: View {

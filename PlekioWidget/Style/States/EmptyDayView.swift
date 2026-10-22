@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - EmptyDayView
-
 /// Nothing scheduled today; tomorrow's first slot when there is one.
 struct EmptyDayView: View {
     let tomorrow: WidgetSnapshot.Slot?

@@ -8,8 +8,6 @@
 import UIKit
 import os
 
-// MARK: - WidgetDoseActions
-
 /// Carries out a widget button in the app. Hands it to NotificationResponseHandler,
 /// as a notification's Take or Skip would be: same rules, same reminder rebuild.
 @MainActor

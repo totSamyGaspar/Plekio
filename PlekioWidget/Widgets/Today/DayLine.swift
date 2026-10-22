@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - DayLine
-
 /// One line of the day under the card: a time-of-day heading, a medication, or
 /// how many more didn't fit. Laid out like Today's timeline, a dose per line.
 enum DayLine: Identifiable {

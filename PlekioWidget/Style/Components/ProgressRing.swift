@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - Progress
-
 /// The app's progress ring (CircularProgressView), without animation: a widget is a still.
 struct ProgressRing: View {
     let progress: Double

@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - MoodToggleStyle
-
 /// A mood tile as on the diary's Today card; picked at once when tapped.
 struct MoodToggleStyle: ToggleStyle {
     let emoji: String

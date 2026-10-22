@@ -7,8 +7,6 @@
 
 import WidgetKit
 
-// MARK: - DoseEntry
-
 /// One moment of a widget's timeline: the snapshot as it looks at `date`.
 /// Every widget reads the same entry and picks what it shows.
 struct DoseEntry: TimelineEntry {

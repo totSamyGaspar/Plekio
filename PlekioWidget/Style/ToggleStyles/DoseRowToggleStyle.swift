@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - DoseRowToggleStyle
-
 /// A whole medication line on the up-next card: the mark, then the label, struck
 /// through once taken.
 struct DoseRowToggleStyle: ToggleStyle {

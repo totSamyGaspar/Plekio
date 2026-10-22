@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - Log all
-
 /// The hero card's white "LOG ALL" pill; a check once tapped.
 struct HeroPillToggleStyle: ToggleStyle {
     let title: LocalizedStringKey

@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - TodayView
-
 /// The Today screen in one card: the up-next block, then the day by slot.
 struct TodayView: View {
     let entry: DoseEntry

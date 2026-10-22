@@ -7,13 +7,10 @@
 
 import Foundation
 
-// MARK: - WidgetLink
-
 /// Where a tap on a widget opens the app. Built by the widget (`widgetURL`), read
 /// by the app (`onOpenURL`), so the URL's shape lives in one place.
 nonisolated enum WidgetLink: Equatable, Sendable {
 
-    /// The Today tab.
     case today
 
     /// The take-dose sheet for a slot's open doses, as a dose reminder's tap opens it.

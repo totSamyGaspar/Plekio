@@ -9,8 +9,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - PreviewEntries
-
 /// The states each widget steps through in its preview timeline.
 enum PreviewEntries {
     static let calendar = Calendar.autoupdatingCurrent

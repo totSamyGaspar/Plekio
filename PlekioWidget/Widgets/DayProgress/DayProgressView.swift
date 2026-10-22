@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - DayProgressView
-
 struct DayProgressView: View {
     let entry: DoseEntry
 

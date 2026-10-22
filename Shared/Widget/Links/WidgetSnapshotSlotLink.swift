@@ -1,13 +1,11 @@
 //
-//  WidgetSnapshot.Slot+Link.swift
+//  WidgetSnapshotSlotLink.swift
 //  Plekio
 //
 //  Created by Edward Gasparian on 21.10.2026.
 //
 
 import Foundation
-
-// MARK: - Slot
 
 extension WidgetSnapshot.Slot {
 

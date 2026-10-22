@@ -7,8 +7,6 @@
 
 import Foundation
 
-// MARK: - WidgetSnapshotBuilder
-
 /// Turns the app's schedule into the widget's snapshot. Pure: the caller reads
 /// the store, so this can be tested without one.
 nonisolated enum WidgetSnapshotBuilder {

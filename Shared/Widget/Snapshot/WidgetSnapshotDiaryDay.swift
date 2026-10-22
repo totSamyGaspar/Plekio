@@ -1,13 +1,11 @@
 //
-//  WidgetSnapshot+DiaryDay.swift
+//  WidgetSnapshotDiaryDay.swift
 //  Plekio
 //
 //  Created by Edward Gasparian on 22.10.2026.
 //
 
 import Foundation
-
-// MARK: - DiaryDay
 
 extension WidgetSnapshot {
 

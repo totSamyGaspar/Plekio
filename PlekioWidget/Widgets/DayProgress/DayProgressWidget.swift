@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - DayProgressWidget
-
 struct DayProgressWidget: Widget {
     static let kind = "DayProgress"
 

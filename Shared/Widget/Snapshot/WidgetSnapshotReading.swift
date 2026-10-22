@@ -1,13 +1,11 @@
 //
-//  WidgetSnapshot+BloodPressureReading.swift
+//  WidgetSnapshotReading.swift
 //  Plekio
 //
 //  Created by Edward Gasparian on 22.10.2026.
 //
 
 import Foundation
-
-// MARK: - Reading
 
 extension WidgetSnapshot {
 

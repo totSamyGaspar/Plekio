@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - DoseLine
-
 /// A medication as on Today's cards: form tile, name, time and its mark.
 /// Taken is struck through; skipped and missed get a wash and a label.
 struct DoseLine: View {

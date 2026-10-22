@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - TodayWidget
-
 struct TodayWidget: Widget {
     static let kind = "Today"
 

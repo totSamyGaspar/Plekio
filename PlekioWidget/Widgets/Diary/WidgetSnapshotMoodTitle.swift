@@ -1,5 +1,5 @@
 //
-//  WidgetSnapshot.Mood+Title.swift
+//  WidgetSnapshotMoodTitle.swift
 //  PlekioWidget
 //
 //  Created by Edward Gasparian on 22.10.2026.

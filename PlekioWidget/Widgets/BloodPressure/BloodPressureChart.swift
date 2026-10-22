@@ -9,8 +9,6 @@ import Charts
 import SwiftUI
 import WidgetKit
 
-// MARK: - BloodPressureChart
-
 /// The diary card's chart, compact: systolic in the accent, diastolic in the warm
 /// colour, the band between them shaded.
 struct BloodPressureChart: View {

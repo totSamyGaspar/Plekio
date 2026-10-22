@@ -7,8 +7,6 @@
 
 import UIKit
 
-// MARK: - BackgroundExecution
-
 /// Asks iOS for time to finish after the intent returns; ended once, or by iOS
 /// when the time runs out.
 @MainActor

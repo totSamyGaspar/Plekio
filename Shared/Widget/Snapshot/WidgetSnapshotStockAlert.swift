@@ -1,13 +1,11 @@
 //
-//  WidgetSnapshot+StockAlert.swift
+//  WidgetSnapshotStockAlert.swift
 //  Plekio
 //
 //  Created by Edward Gasparian on 21.10.2026.
 //
 
 import Foundation
-
-// MARK: - StockAlert
 
 extension WidgetSnapshot {
 

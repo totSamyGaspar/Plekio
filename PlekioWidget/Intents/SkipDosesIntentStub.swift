@@ -1,5 +1,5 @@
 //
-//  SkipDosesIntent+Widget.swift
+//  SkipDosesIntentStub.swift
 //  PlekioWidget
 //
 //  Created by Edward Gasparian on 21.10.2026.

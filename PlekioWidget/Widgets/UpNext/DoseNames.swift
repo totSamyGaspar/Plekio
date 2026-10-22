@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - DoseNames
-
 /// The slot's medications, as on the hero card: a mark and the serif name.
 /// At most `limit` lines: the rest is counted at the end of the last one, so a
 /// long slot never pushes the card's bottom row out of the widget.

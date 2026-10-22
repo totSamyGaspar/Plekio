@@ -13,8 +13,6 @@ import WidgetKit
 // and redraws from the snapshot once it's done. A Button would sit dimmed until then.
 // The styles draw from `configuration.isOn`; the tap itself is WidgetKit's.
 
-// MARK: - DoseCheckToggleStyle
-
 /// A dose's own check, as on Today's cards.
 struct DoseCheckToggleStyle: ToggleStyle {
     var isMissed = false

@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - BloodPressureWidget
-
 struct BloodPressureWidget: Widget {
     static let kind = "BloodPressure"
 

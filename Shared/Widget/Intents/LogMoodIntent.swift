@@ -8,10 +8,8 @@
 import AppIntents
 import Foundation
 
-// MARK: - LogMoodIntent
-
 /// A mood tapped on the diary widget. Like the dose buttons, a LiveActivityIntent
-/// run in the app (LogMoodIntent+Perform.swift), where QuickMoodLogging keeps it to
+/// run in the app (LogMoodIntentPerform.swift), where QuickMoodLogging keeps it to
 /// one entry a day, exactly as the diary's Today card does.
 struct LogMoodIntent: LiveActivityIntent {
 

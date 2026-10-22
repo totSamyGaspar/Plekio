@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - NeedsAppView
-
 // The widget's background is set once, by each widget's top view: a background set
 // here as well would compete with it when one widget embeds another's card.
 

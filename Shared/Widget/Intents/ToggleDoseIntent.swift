@@ -8,8 +8,6 @@
 import AppIntents
 import Foundation
 
-// MARK: - ToggleDoseIntent
-
 /// One medication's check, as a `Toggle(isOn:intent:)`: WidgetKit shows the new
 /// state the moment it is tapped, while the work runs in the app. Taking it back
 /// un-logs the dose, like the checkbox on Today.

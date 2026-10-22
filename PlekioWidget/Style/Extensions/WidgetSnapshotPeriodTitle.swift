@@ -1,5 +1,5 @@
 //
-//  WidgetSnapshot.Period+Title.swift
+//  WidgetSnapshotPeriodTitle.swift
 //  PlekioWidget
 //
 //  Created by Edward Gasparian on 21.10.2026.

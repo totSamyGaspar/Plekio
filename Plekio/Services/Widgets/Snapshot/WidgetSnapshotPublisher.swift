@@ -9,15 +9,11 @@ import Combine
 import Foundation
 import os
 
-// MARK: - WidgetSnapshotPublisher
-
 /// Keeps the widget's snapshot in step with the store: rebuilt after course and
 /// dose writes, on activation, and after a notification action. Every way a dose
 /// gets logged ends in a store write, so the widget follows all of them.
 @MainActor
 final class WidgetSnapshotPublisher {
-
-    // MARK: - Properties
 
     private let doses: any DoseStoring
     private let courses: any CourseRepository
@@ -34,8 +30,6 @@ final class WidgetSnapshotPublisher {
 
     /// The last refresh started, for awaiting it (notification actions, tests).
     private(set) var lastRefresh: Task<Void, Never>?
-
-    // MARK: - Init
 
     /// `changes` fires once per burst of writes the snapshot has to follow.
     init(

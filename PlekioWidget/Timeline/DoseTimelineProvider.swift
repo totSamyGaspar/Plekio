@@ -7,8 +7,6 @@
 
 import WidgetKit
 
-// MARK: - DoseTimelineProvider
-
 /// Reads the snapshot the app writes; never the store, which may be mid-migration.
 /// The app reloads the widgets after each change; between changes the timeline
 /// carries the widget through the day on its own.

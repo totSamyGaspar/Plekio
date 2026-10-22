@@ -1,5 +1,5 @@
 //
-//  ToggleDoseIntent+Widget.swift
+//  ToggleDoseIntentStub.swift
 //  PlekioWidget
 //
 //  Created by Edward Gasparian on 21.10.2026.

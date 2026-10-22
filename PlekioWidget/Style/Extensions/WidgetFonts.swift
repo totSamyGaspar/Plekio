@@ -1,5 +1,5 @@
 //
-//  Font+Widget.swift
+//  WidgetFonts.swift
 //  PlekioWidget
 //
 //  Created by Edward Gasparian on 21.10.2026.
@@ -7,8 +7,6 @@
 
 import SwiftUI
 import WidgetKit
-
-// MARK: - Fonts
 
 extension Font {
 

@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - LowStockWidget
-
 struct LowStockWidget: Widget {
     static let kind = "LowStock"
 

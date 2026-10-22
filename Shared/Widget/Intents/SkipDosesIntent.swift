@@ -8,8 +8,6 @@
 import AppIntents
 import Foundation
 
-// MARK: - SkipDosesIntent
-
 struct SkipDosesIntent: LiveActivityIntent {
 
     nonisolated static let title: LocalizedStringResource = "Skip doses"

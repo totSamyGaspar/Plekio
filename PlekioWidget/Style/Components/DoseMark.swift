@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - Dose mark
-
 /// A dose's state as a symbol, the same ones Today uses.
 struct DoseMark: View {
     let status: WidgetSnapshot.Status

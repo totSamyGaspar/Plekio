@@ -9,8 +9,6 @@ import Charts
 import SwiftUI
 import WidgetKit
 
-// MARK: - BloodPressureWidgetView
-
 /// The latest reading and, on the medium one, the trend of the last seven. Values
 /// only, never "normal" or "high", as on the diary's card: that is a medical call.
 /// A tap opens the entry form, as the daily blood-pressure reminder does; numbers

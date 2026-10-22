@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - LowStockView
-
 /// The lowest medication, as on Today's refill card; stock doesn't depend on the day.
 struct LowStockView: View {
     let entry: DoseEntry

@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - QuickMood
-
 /// The four moods the diary's Today card offers, with its emoji and labels.
 struct QuickMood: Identifiable {
     let mood: WidgetSnapshot.Mood

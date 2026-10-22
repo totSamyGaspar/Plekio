@@ -7,8 +7,6 @@
 
 import AppIntents
 
-// MARK: - WidgetDiaryActions
-
 @MainActor
 enum WidgetDiaryActions {
 

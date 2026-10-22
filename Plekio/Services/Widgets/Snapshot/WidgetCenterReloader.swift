@@ -7,8 +7,6 @@
 
 import WidgetKit
 
-// MARK: - WidgetCenterReloader
-
 struct WidgetCenterReloader: WidgetReloading {
     func reloadAll() {
         WidgetCenter.shared.reloadAllTimelines()

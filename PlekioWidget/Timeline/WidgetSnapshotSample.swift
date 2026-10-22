@@ -1,13 +1,11 @@
 //
-//  WidgetSnapshot+Sample.swift
+//  WidgetSnapshotSample.swift
 //  PlekioWidget
 //
 //  Created by Edward Gasparian on 21.10.2026.
 //
 
 import Foundation
-
-// MARK: - Sample
 
 /// Doses for the widget gallery, the placeholder and previews. Not DEBUG-only:
 /// the gallery shows it in release builds too.

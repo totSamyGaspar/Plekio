@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - DayLineView
-
 struct DayLineView: View {
     let line: DayLine
     let snapshot: WidgetSnapshot

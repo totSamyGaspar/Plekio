@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - Logo
-
 /// On every widget, so it reads as Plekio's at a glance. White on the hero gradient.
 struct WidgetLogo: View {
     var size: CGFloat = 16

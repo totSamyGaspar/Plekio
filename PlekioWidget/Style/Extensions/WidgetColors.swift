@@ -1,5 +1,5 @@
 //
-//  Color+Widget.swift
+//  WidgetColors.swift
 //  PlekioWidget
 //
 //  Created by Edward Gasparian on 21.10.2026.

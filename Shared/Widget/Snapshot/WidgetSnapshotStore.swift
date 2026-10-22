@@ -8,8 +8,6 @@
 import Foundation
 import OSLog
 
-// MARK: - WidgetSnapshotStore
-
 /// Reads and writes the snapshot file. The app writes, the widget only reads.
 nonisolated struct WidgetSnapshotStore: Sendable {
 

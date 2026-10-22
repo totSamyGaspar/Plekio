@@ -7,12 +7,10 @@
 
 import Foundation
 
-// MARK: - WidgetSnapshot
-
 /// Everything the widget shows, written by the app as JSON beside the store.
 /// Its own types, not PillDose or MedicationForm: the widget builds only Shared,
 /// and the file must stay readable when the app's models change.
-/// Its nested types are each in their own WidgetSnapshot+<Type>.swift.
+/// Its nested types are each in their own WidgetSnapshot<Type>.swift.
 nonisolated struct WidgetSnapshot: Codable, Equatable, Sendable {
 
     /// Bumped on a change the old widget can't read; an unknown version reads as nothing.

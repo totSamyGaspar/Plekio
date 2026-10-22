@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - UpNext
-
 /// What the "Up next" widget shows at one moment. The order matches Today: the
 /// next open slot first; a missed one only when nothing is ahead; then the day's summary.
 enum UpNext {

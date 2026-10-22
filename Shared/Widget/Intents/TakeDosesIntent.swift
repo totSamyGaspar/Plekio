@@ -16,14 +16,12 @@ import Foundation
 //
 // The types live here because both targets must know them: the widget to build its
 // buttons, the app to run them. `perform()` is in each target's own extension:
-// the app's *Intent+Perform.swift files do the work; the widget's
-// *Intent+Widget.swift ones are never called.
+// the app's *IntentPerform.swift files do the work; the widget's *IntentStub.swift
+// ones are never called.
 //
 // Not `nonisolated` as a whole: that would reach the @Parameter properties, which
 // it can't apply to. In the app (MainActor by default) only what the protocol
 // reads without an actor is marked: `title` and `isDiscoverable`.
-
-// MARK: - TakeDosesIntent
 
 struct TakeDosesIntent: LiveActivityIntent {
 

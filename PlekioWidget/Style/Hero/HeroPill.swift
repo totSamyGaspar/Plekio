@@ -8,7 +8,7 @@
 import SwiftUI
 import WidgetKit
 
-/// The white pill button of the hero card; stage 4 wraps it in an intent button.
+/// The white pill button of the hero card.
 struct HeroPill: View {
     let title: LocalizedStringKey
 

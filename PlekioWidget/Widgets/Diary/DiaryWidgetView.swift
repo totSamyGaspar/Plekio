@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - DiaryWidgetView
-
 /// Before today's check-in, four moods to log in one tap; after it, the day's
 /// mood and, on the medium one, sleep, water and energy. A tap elsewhere opens
 /// the check-in form, as the daily diary reminder does.

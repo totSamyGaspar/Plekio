@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - UpNextWidget
-
 struct UpNextWidget: Widget {
     static let kind = "UpNext"
 

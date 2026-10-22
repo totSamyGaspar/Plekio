@@ -9,8 +9,6 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - Lock Screen
-
 /// Half a Lock Screen row: no room for a title, so the header is the time and what
 /// it is for, and the medication goes underneath.
 struct UpNextRectangular: View {
