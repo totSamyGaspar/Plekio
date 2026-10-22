@@ -100,6 +100,8 @@ struct DayProgressView: View {
             .font(.caption)
             .foregroundStyle(Color.textSecondary)
         }
+        // One stop for VoiceOver: "Today, 20:00, 60 %, Taken 3/5".
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: Lock Screen

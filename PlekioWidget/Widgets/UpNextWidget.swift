@@ -225,6 +225,7 @@ struct UpNextCard: View {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: isMedium ? 22 : 18, weight: .bold))
                     .widgetAccentable()
+                    .accessibilityHidden(true)
                 Text("Day complete")
                     .font(.widgetSerif(isMedium ? 24 : 18))
                     .lineLimit(isMedium ? 1 : 2)
@@ -251,6 +252,7 @@ struct UpNextCard: View {
         if let days = snapshot?.streakDays, days > 0 {
             HStack(spacing: 4) {
                 Image(systemName: "flame.fill")
+                    .accessibilityHidden(true)
                 Text("\(days) days streak!")
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)

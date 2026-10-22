@@ -205,6 +205,8 @@ struct DayLineView: View {
                 .textCase(.uppercase)
                 .foregroundStyle(Color.textSecondary)
                 .frame(height: 16, alignment: .bottomLeading)
+                // VoiceOver can jump between times of day with the rotor.
+                .accessibilityAddTraits(.isHeader)
         case .dose(let dose, let slot):
             DoseLine(dose: dose, slot: slot, isMissed: snapshot.isMissed(dose, in: slot, at: now))
         case .more(let count):
@@ -243,6 +245,8 @@ struct DoseLine: View {
             }
             .frame(width: 26, height: 26)
             .opacity(dose.status.isSettled ? 0.6 : 1)
+            // The form is a picture of the name next to it; VoiceOver would read "pills.fill".
+            .accessibilityHidden(true)
 
             Text(dose.name)
                 .font(.subheadline.weight(.bold))

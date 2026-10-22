@@ -153,6 +153,68 @@ struct WidgetSnapshotTests {
         ])
     }
 
+    // MARK: - Edge cases
+
+    // The scheme pins TZ=Europe/Berlin, where clocks go back at 03:00 on 25 October
+    // 2026: that day has 25 hours.
+
+    @Test("Midnights stay on the real start of day across the clock change")
+    func midnightsAcrossClockChange() {
+        let snapshot = WidgetSnapshot(
+            generatedAt: testDate(2026, 10, 24, 20),
+            missedGrace: grace,
+            slots: [slot(testDate(2026, 10, 25, 8), dose("Sertraline"))],
+            streakDays: 0,
+            lowStock: []
+        )
+        let dates = snapshot.changeDates(after: testDate(2026, 10, 24, 20), calendar: calendar)
+
+        #expect(dates.contains(testDate(2026, 10, 25)))
+        #expect(dates.contains(testDate(2026, 10, 26)))
+        // The two midnights are 25 hours apart, not 24: the day is counted, not the hours.
+        #expect(testDate(2026, 10, 26).timeIntervalSince(testDate(2026, 10, 25)) == 25 * 3600)
+    }
+
+    @Test("The snapshot covers both days in full when one of them has 25 hours")
+    func coverageAcrossClockChange() {
+        let snapshot = WidgetSnapshot.empty(at: testDate(2026, 10, 25, 10), missedGrace: grace)
+
+        #expect(snapshot.covers(testDate(2026, 10, 25, 0), calendar: calendar))
+        #expect(snapshot.covers(testDate(2026, 10, 26, 23, 30), calendar: calendar))
+        #expect(!snapshot.covers(testDate(2026, 10, 27), calendar: calendar))
+    }
+
+    @Test("A dose turns missed one second after its grace ends, not at it")
+    func graceBoundary() {
+        let snapshot = dayOfThree()
+        let slotTime = testDate(2026, 10, 21, 14)
+
+        #expect(snapshot.upNext(at: slotTime, calendar: calendar)?.time == slotTime)
+        #expect(snapshot.upNext(at: slotTime.addingTimeInterval(grace), calendar: calendar)?.time == slotTime)
+        #expect(snapshot.missed(at: slotTime.addingTimeInterval(grace + 1), calendar: calendar).first?.time == slotTime)
+        // The timeline's entry for that moment is the one that shows it.
+        #expect(snapshot.changeDates(after: slotTime, calendar: calendar).contains(slotTime.addingTimeInterval(grace + 1)))
+    }
+
+    @Test("Days are read in the device's time zone: after a flight east, a late dose is tomorrow's")
+    func daysFollowTheTimeZone() throws {
+        var tbilisi = Calendar(identifier: .gregorian)
+        tbilisi.timeZone = try #require(TimeZone(identifier: "Asia/Tbilisi"))
+        // 23:30 in Berlin is 01:30 the next day in Tbilisi.
+        let late = testDate(2026, 10, 21, 23, 30)
+        let snapshot = WidgetSnapshot(
+            generatedAt: testDate(2026, 10, 21, 7),
+            missedGrace: grace,
+            slots: [slot(late, dose("Magnesium"))],
+            streakDays: 0,
+            lowStock: []
+        )
+        let nextMorningThere = late.addingTimeInterval(8 * 3600)
+
+        #expect(snapshot.slotsOnDay(of: nextMorningThere, calendar: tbilisi).map(\.time) == [late])
+        #expect(snapshot.slotsOnDay(of: late, calendar: calendar).map(\.time) == [late])
+    }
+
     @Test("Change dates drop anything already past")
     func changeDatesSkipThePast() {
         let dates = dayOfThree().changeDates(after: testDate(2026, 10, 21, 16), calendar: calendar)

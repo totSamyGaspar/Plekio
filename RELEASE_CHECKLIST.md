@@ -30,8 +30,8 @@ The store holds people's medication history. A broken migration loses it.
 
 ## 3. Strings, privacy, legal
 
-- [ ] **Translations.** Every new string is translated into all eleven languages. No `needs_review` entries are left in `Localizable.xcstrings`: search the file for `needs_review`.
-- [ ] **`PrivacyInfo.xcprivacy`.** Still true:
+- [ ] **Translations.** Every new string is translated into all eleven languages, in both catalogs: `Plekio/Resources/Localizable.xcstrings` and `PlekioWidget/Localizable.xcstrings`. No `needs_review` entries are left: search both files for `needs_review`.
+- [ ] **`PrivacyInfo.xcprivacy`**, the app's and the widget's (`PlekioWidget/`). Still true:
   - no tracking;
   - no collected data;
   - every required-reason API is declared.
@@ -50,6 +50,16 @@ The store holds people's medication history. A broken migration loses it.
   - bump it for a new App Store release (1.0 → 1.1);
   - keep it for more TestFlight builds of the same release.
 - [ ] **Build** (`CURRENT_PROJECT_VERSION`) is higher than any build already uploaded, for manual uploads. App Store Connect rejects a repeated number. Xcode Cloud archives number themselves.
+- [ ] **The widget has the same Version and Build** (target `PlekioWidgetExtension` → General). App Store Connect rejects an extension whose version differs from the app's.
+
+## 4a. Widgets
+
+Settings that look removable but aren't:
+
+- [ ] **`NSSupportsLiveActivities = YES`** on the app (target → Info, or `INFOPLIST_KEY_NSSupportsLiveActivities`). Without it the widget's buttons run nowhere: their intents are LiveActivityIntents, which iOS runs in the app only when this is set. No Live Activity is ever started.
+- [ ] **Same App Group** (`group.com.EdHasp.Plekio`) on the app and the widget extension. The widget reads its snapshot from there.
+- [ ] **Data Protection** on the widget extension (`PlekioWidget.entitlements`, *Complete Protection*). It's what keeps medication names off a locked iPhone.
+- [ ] **`plekio` URL scheme** in `Plekio/Info.plist`: widget taps open the app through it.
 
 ## 5. Smoke test on a real iPhone
 
@@ -66,6 +76,14 @@ Release build from TestFlight, not a debug run.
 - [ ] Settings links open Help & Support, Privacy Policy and Terms of Use.
 - [ ] Dark mode, largest Dynamic Type, a quick VoiceOver pass on Today.
 - [ ] One non-English language, e.g. Ukrainian.
+- [ ] **Widgets:**
+  - add Up next, Day progress, Today and Low stock to the Home Screen and two to the Lock Screen;
+  - log a dose in the app: the widgets follow within a second;
+  - with the app killed, tap a check on a widget: it shows at once, and the app has the dose, stock and badge;
+  - log a slot from the widget before its time: its reminder doesn't come;
+  - tap Up next: the take-dose sheet opens;
+  - lock the iPhone with Face ID covered: Plekio's widgets show placeholders;
+  - tinted Home Screen and dark mode.
 
 ## 6. Upload to TestFlight
 

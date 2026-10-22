@@ -1,6 +1,6 @@
 # Plekio Privacy Policy
 
-_Last updated: October 8, 2026_
+_Last updated: October 22, 2026_
 
 Plekio is a medication tracker for iPhone. This policy explains what happens to the information you enter in the app. In short: **it stays on your iPhone. We don't collect it, see it, or share it.**
 
@@ -16,6 +16,10 @@ Everything you enter is stored only on your device:
 - your settings, such as theme, reminders and app lock.
 
 There is no account and no server. The app does not send this information anywhere.
+
+## Widgets
+
+If you add Plekio's widgets, they show today's doses, medication names, your progress and low stock on your Home Screen and Lock Screen. The app keeps a small summary for them on your device, next to its other data. While your iPhone is locked with a passcode, iOS shows the widgets as placeholders, so nothing from Plekio is visible on the Lock Screen until you unlock. Tapping a check on a widget logs the dose in the app, as the reminder's Take button does.
 
 ## What we collect
 

@@ -73,6 +73,8 @@ struct LowStockView: View {
             // Against the threshold, so "low" reads the same as in the app.
             ProgressView(value: Double(min(low.stock, low.threshold)), total: Double(max(low.threshold, 1)))
                 .tint(Color.warningAmber)
+                // "Stock: 4" above already says it; a percentage of the threshold means nothing aloud.
+                .accessibilityHidden(true)
             if others > 0 {
                 Text("\(others) more")
                     .font(.caption2)
@@ -101,6 +103,7 @@ struct LowStockView: View {
                 .font(.title2)
                 .foregroundStyle(Color.accentPrimary)
                 .widgetAccentable()
+                .accessibilityHidden(true)
                 .padding(.bottom, 6)
             // Long in some languages ("Tous les médicaments sont bien approvisionnés"): shrink, don't cut.
             Text("All medications are well stocked")

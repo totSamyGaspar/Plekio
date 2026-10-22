@@ -25,6 +25,8 @@ extension Color {
     /// The widget's own background. Light: the app's screen cream, as pure white
     /// glares on a Home Screen. Dark: the card colour; the app's near-black screen
     /// colour would read as a hole in a dark Home Screen.
+    /// Keep in sync with Assets.xcassets/WidgetBackground, which iOS draws while the
+    /// widget loads and in edit mode.
     static let widgetSurface = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
             ? UIColor(red: 0.11, green: 0.13, blue: 0.19, alpha: 1)

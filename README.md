@@ -11,6 +11,7 @@ Everything stays on the device: no account, no server, no analytics.
 - **Reminders** — a local notification per dose slot with Take / Snooze / Skip, working from the lock screen. The app icon badge shows the doses that are due and not logged yet. There are optional daily diary and blood-pressure reminders, and a daily reminder while any medication is running low.
 - **Diary** — mood, energy, discomfort, sleep, water, symptoms, milestones and photos. Includes mood trends, a progress-photo gallery with side-by-side comparison, and blood-pressure readings with a chart.
 - **Doctor report** — a PDF of doses, well-being and blood pressure for any period.
+- **Widgets** — Up next (small, medium, Lock Screen), Day progress (small, Lock Screen ring), Today (large) and Low stock (small), light and dark. Doses are logged straight from the widget, with the check shown the moment it's tapped. A tap elsewhere opens the dose or Today. While the iPhone is locked, the widgets show placeholders.
 - **Onboarding and first-run tour**, plus one-time TipKit hints where features live.
 - **Accessibility** — Dynamic Type, VoiceOver labels, and Reduce Motion across all animations.
 - **Localized** in English, German, Spanish, French, Italian, Japanese, Georgian, Kazakh, Romanian, Russian and Ukrainian.
@@ -88,6 +89,12 @@ View  →  ViewModel  →  Use case  →  Repository / Store  →  SwiftData
   - `NotificationService` serializes rebuilds.
   - `ReminderSyncCoordinator` rebuilds when courses change or the app becomes active.
 - **Time.** Everything that needs "now" or a calendar gets a `TimeSource`, so tests can pin the clock.
+- **Widgets.**
+  - The widget never opens the store, which may be mid-migration in the app. `WidgetSnapshotPublisher` writes `widget-snapshot.json` beside it in the App Group: today's and tomorrow's slots, the streak and low stock. It rewrites it after course and dose writes, on activation, and after a notification or widget action, then reloads the widgets.
+  - The widget's timeline has an entry at every slot, grace end and midnight, so it moves through the day without the app. Past what the snapshot covers it asks to open the app.
+  - Buttons are `Toggle(isOn:intent:)` over `LiveActivityIntent`s. The system runs those in the app's process, woken in the background if need be, and they log through `NotificationResponseHandler`, like a notification's Take. This needs `NSSupportsLiveActivities` in the app's Info.plist; no Live Activity is started.
+  - Taps open `plekio://` links (`WidgetLink`), handed to `AppRouter` like a reminder's tap.
+  - The extension has Data Protection (`NSFileProtectionComplete`): iOS shows placeholders while the iPhone is passcode-locked.
 - **Motion.** `Motion` defines the app's animation curves; `motion(_:value:)` and `withMotion` drop movement under Reduce Motion.
 
 ## Project structure
@@ -108,6 +115,10 @@ Plekio/
 │   ├── Statistics, Export, Settings, Onboarding, Tour, MainTab
 ├── UI/             Shared components, layout, theme and motion
 └── Resources/      Assets, app icon, Localizable.xcstrings
+Shared/             Built into the app and the widget: palette, storage location,
+                    the widget snapshot, its intents and links
+PlekioWidget/       The widget extension: timeline, styles, one file per widget,
+                    its own Localizable.xcstrings and PrivacyInfo.xcprivacy
 PlekioTests/        Mirrors the app's folders; Mocks/ and Support/ hold test doubles
 ```
 
