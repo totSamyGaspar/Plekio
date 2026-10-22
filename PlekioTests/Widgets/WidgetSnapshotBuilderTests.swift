@@ -81,6 +81,39 @@ struct WidgetSnapshotBuilderTests {
         #expect(snapshot.version == WidgetSnapshot.currentVersion)
     }
 
+    // MARK: - Diary and blood pressure
+
+    @Test("Today's check-in carries its mood and whether it was a quick log")
+    func mapsDiaryDay() {
+        let entry = DiaryEntrySnapshot(
+            id: UUID(), checkInDate: testDate(2026, 10, 21, 9), moodLabel: DiaryMood.downLow.rawValue,
+            moodScore: 2, physicalSummary: "", energyLevel: 2, discomfortLevel: 0, sleepHours: 6.5,
+            sleepQuality: SleepQuality.fair.rawValue, waterGlasses: 4, symptoms: [], reflectionNotes: "",
+            milestoneTags: [], photoIds: [], isQuickLog: true
+        )
+        let day = WidgetSnapshotBuilder.diaryDay(entry)
+
+        #expect(day.mood == .downLow)
+        #expect(day.isQuickLog)
+        #expect(day.sleepHours == 6.5)
+        #expect(day.waterGlasses == 4)
+    }
+
+    @Test("Blood pressure keeps the latest seven readings, oldest first")
+    func keepsLatestReadings() {
+        let readings = (0..<10).map { index in
+            BloodPressureSnapshot(id: UUID(), measuredAt: testDate(2026, 10, 10 + index, 8),
+                                  systolic: 120 + index, diastolic: 80, pulse: index.isMultiple(of: 2) ? 70 : nil)
+        }
+        let snapshot = WidgetSnapshotBuilder.build(
+            pills: [], streakDays: 0, lowStock: [], readings: readings.shuffled(), now: testDate(2026, 10, 21, 9)
+        )
+
+        #expect(snapshot.bloodPressure?.count == WidgetSnapshotBuilder.readingCount)
+        #expect(snapshot.bloodPressure?.map(\.systolic) == Array(123...129))
+        #expect(snapshot.latestReading?.systolic == 129)
+    }
+
     @Test("A slot sent back from the widget finds the same doses in the store")
     func slotTimeMatchesOpenDoses() throws {
         let time = testDate(2026, 10, 21, 8)

@@ -25,6 +25,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
     private let errors: any ErrorReporting
     private let time: any TimeSource
     private let bloodPressure: BloodPressureLogging
+    private let quickMood: QuickMoodLogging
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
@@ -41,6 +42,7 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         self.diary = diary
         self.errors = errors
         self.bloodPressure = BloodPressureLogging(diary: diary, errors: errors, time: time)
+        self.quickMood = QuickMoodLogging(diary: diary, errors: errors, time: time)
         fetchEntries()
 
         // Only diary writes; other writes would needlessly re-fetch every entry.
@@ -104,25 +106,10 @@ final class DiaryViewModel: DiaryViewModelProtocol {
         fetchEntries()
     }
 
+    /// The rule lives in QuickMoodLogging, shared with the widget.
     @discardableResult
     func quickLog(mood: DiaryMood) -> Bool {
-        // One entry per day: update today's instead of adding a duplicate.
-        if let existing = todaysEntry {
-            var draft = DiaryEntryDraft(from: existing)
-            draft.mood = mood
-            guard errors.run({
-                try diary.updateEntry(id: existing.id, with: draft)
-            }) else { return false }
-            fetchEntries()
-            return true
-        }
-
-        var draft = DiaryEntryDraft()
-        draft.mood = mood
-        // Energy/sleep/water are defaults, not user input; stats must exclude them.
-        draft.isQuickLog = true
-
-        guard errors.run({ try diary.saveEntry(draft) }) else { return false }
+        guard quickMood.log(mood) else { return false }
         fetchEntries()
         return true
     }

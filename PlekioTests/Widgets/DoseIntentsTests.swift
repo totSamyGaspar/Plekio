@@ -68,6 +68,14 @@ struct DoseIntentsTests {
         #expect(!slot.toggle(done).taken)
     }
 
+    @Test("A mood button carries the mood's stored key, which the app reads back")
+    func moodIntentCarriesStoredKey() {
+        for mood in WidgetSnapshot.Mood.allCases {
+            #expect(DiaryMood(rawValue: LogMoodIntent(mood).mood) != nil)
+        }
+        #expect(LogMoodIntent(.downLow).mood == DiaryMood.downLow.rawValue)
+    }
+
     @Test("A malformed id is dropped instead of failing the whole button")
     func malformedIdIsDropped() {
         let id = UUID()

@@ -78,6 +78,20 @@ struct WidgetSnapshotTests {
         #expect(!snapshot.covers(testDate(2026, 10, 20, 23), calendar: calendar))
     }
 
+    // MARK: - Diary
+
+    @Test("The check-in shows on its own day only: past midnight it's gone")
+    func diaryEntryIsForItsDay() {
+        var snapshot = dayOfThree()
+        snapshot.diary = WidgetSnapshot.DiaryDay(
+            checkInDate: testDate(2026, 10, 21, 9), mood: .good, isQuickLog: true,
+            energyLevel: 4, sleepHours: 7.5, waterGlasses: 6
+        )
+
+        #expect(snapshot.diaryEntry(onDayOf: testDate(2026, 10, 21, 23), calendar: calendar)?.mood == .good)
+        #expect(snapshot.diaryEntry(onDayOf: testDate(2026, 10, 22, 0, 1), calendar: calendar) == nil)
+    }
+
     // MARK: - Up next
 
     @Test("Up next is the earliest slot with an open dose, skipping settled ones")

@@ -9,6 +9,7 @@ import SwiftUI
 import WidgetKit
 
 /// Every widget reads the snapshot the app writes; none opens the store.
+/// Doses first, then the diary's, in the order the gallery lists them.
 @main
 struct PlekioWidgetBundle: WidgetBundle {
     var body: some Widget {
@@ -16,5 +17,7 @@ struct PlekioWidgetBundle: WidgetBundle {
         DayProgressWidget()
         TodayWidget()
         LowStockWidget()
+        DiaryWidget()
+        BloodPressureWidget()
     }
 }

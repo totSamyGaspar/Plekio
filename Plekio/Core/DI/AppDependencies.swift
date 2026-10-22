@@ -48,6 +48,8 @@ final class AppDependencies {
     let doseLogging: any DoseLoggingUseCaseProtocol
     /// Validates blood-pressure rules on write.
     let bloodPressureLogging: BloodPressureLogging
+    /// A mood in one tap, from the diary widget.
+    let quickMoodLogging: QuickMoodLogging
     let courseEditing: any CourseEditingUseCaseProtocol
 
     /// The single undo window for dose actions, shared by dashboard and notification modal.
@@ -113,6 +115,7 @@ final class AppDependencies {
         courseRepository = SwiftDataCourseRepository(store: database)
         diaryRepository = SwiftDataDiaryRepository(store: database)
         bloodPressureLogging = BloodPressureLogging(diary: diaryRepository, errors: errorPresenter, time: time)
+        quickMoodLogging = QuickMoodLogging(diary: diaryRepository, errors: errorPresenter, time: time)
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)
         let reminderSync = ReminderSyncCoordinator(
             notificationService: notifications,
@@ -123,6 +126,7 @@ final class AppDependencies {
         widgetSnapshots = WidgetSnapshotPublisher(
             database: database,
             courses: courseRepository,
+            diary: diaryRepository,
             store: widgetSnapshotStore,
             time: time
         )

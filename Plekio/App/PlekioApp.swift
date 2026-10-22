@@ -62,6 +62,11 @@ struct PlekioApp: App {
         case .dose(let slot, let ids):
             // Opens the take-dose sheet for what is still open, or just Today if nothing is.
             router.open(.doseReminder(medicationIds: ids, slot: slot))
+        // The same forms the daily reminders open, on the Diary tab.
+        case .diaryCheckIn:
+            router.open(.dailyReminder(.diary))
+        case .bloodPressureEntry:
+            router.open(.dailyReminder(.bloodPressure))
         }
     }
 

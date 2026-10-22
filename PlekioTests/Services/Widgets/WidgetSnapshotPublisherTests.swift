@@ -141,6 +141,34 @@ struct WidgetSnapshotPublisherTests {
         #expect(reloader.reloadCount == 1)
     }
 
+    @Test("Today's check-in reaches the snapshot; yesterday's doesn't")
+    func diaryReachesTheSnapshot() async {
+        defer { try? store.clear() }
+        func entry(_ date: Date, mood: DiaryMood) -> DiaryEntry {
+            DiaryEntry(checkInDate: date, moodLabel: mood.rawValue, moodScore: mood.score, physicalSummary: "",
+                       energyLevel: 3, discomfortLevel: 0, sleepHours: 7, sleepQuality: SleepQuality.good.rawValue,
+                       waterGlasses: 6, symptoms: [], reflectionNotes: "", milestoneTags: [], photoIds: [],
+                       isQuickLog: false)
+        }
+        db.diaryEntriesToReturn = [entry(testDate(2026, 10, 20, 21), mood: .great)]
+        let publisher = WidgetSnapshotPublisher(
+            doses: db,
+            courses: SwiftDataCourseRepository(store: db),
+            diary: SwiftDataDiaryRepository(store: db),
+            store: store,
+            reloader: reloader,
+            changes: Empty().eraseToAnyPublisher(),
+            time: FixedTime(now)
+        )
+
+        await publisher.refresh().value
+        #expect(store.read()?.diary == nil)
+
+        db.diaryEntriesToReturn.append(entry(testDate(2026, 10, 21, 8), mood: .stressed))
+        await publisher.refresh().value
+        #expect(store.read()?.diary?.mood == .stressed)
+    }
+
     // MARK: - Triggers
 
     @Test("A store write announced by the feed refreshes the snapshot")

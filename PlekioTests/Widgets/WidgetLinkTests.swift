@@ -22,7 +22,7 @@ struct WidgetLinkTests {
     @Test("A link reads back as itself, the slot to the exact second")
     func roundTrips() {
         let ids = [UUID(), UUID()]
-        let links: [WidgetLink] = [.today, .dose(slot: slot, medicationIds: ids)]
+        let links: [WidgetLink] = [.today, .diaryCheckIn, .bloodPressureEntry, .dose(slot: slot, medicationIds: ids)]
         for link in links {
             #expect(WidgetLink(url: link.url) == link)
         }
