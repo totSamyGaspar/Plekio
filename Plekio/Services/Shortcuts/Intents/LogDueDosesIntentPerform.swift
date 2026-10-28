@@ -13,6 +13,6 @@ extension LogDueDosesIntent {
         guard let slot = try await ShortcutDoseActions.takeDue() else {
             return .result(dialog: IntentDialog(ShortcutDialog.nothingDue))
         }
-        return .result(dialog: IntentDialog(ShortcutDialog.logged(slot)))
+        return .result(dialog: IntentDialog(ShortcutDialog.logged(slot, hidesDetails: ShortcutContext.hidesDetails)))
     }
 }

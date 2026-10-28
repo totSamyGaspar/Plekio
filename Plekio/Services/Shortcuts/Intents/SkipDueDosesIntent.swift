@@ -19,6 +19,6 @@ nonisolated struct SkipDueDosesIntent: AppIntent {
         guard let slot = try await ShortcutDoseActions.skipDue() else {
             return .result(dialog: IntentDialog(ShortcutDialog.nothingDue))
         }
-        return .result(dialog: IntentDialog(ShortcutDialog.skipped(slot)))
+        return .result(dialog: IntentDialog(ShortcutDialog.skipped(slot, hidesDetails: ShortcutContext.hidesDetails)))
     }
 }

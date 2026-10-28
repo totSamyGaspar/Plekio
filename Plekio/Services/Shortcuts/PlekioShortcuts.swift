@@ -38,5 +38,14 @@ nonisolated struct PlekioShortcuts: AppShortcutsProvider {
             shortTitle: "Skip medications",
             systemImageName: "forward"
         )
+        AppShortcut(
+            intent: LogBloodPressureIntent(),
+            phrases: [
+                "Log my blood pressure in \(.applicationName)",
+                "Record blood pressure in \(.applicationName)"
+            ],
+            shortTitle: "Log blood pressure",
+            systemImageName: "heart.text.square"
+        )
     }
 }

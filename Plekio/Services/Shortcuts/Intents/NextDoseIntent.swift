@@ -17,6 +17,6 @@ nonisolated struct NextDoseIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let upcoming = try ShortcutDoseActions.upcoming()
-        return .result(dialog: IntentDialog(stringLiteral: ShortcutDialog.upcoming(upcoming)))
+        return .result(dialog: IntentDialog(stringLiteral: ShortcutDialog.upcoming(upcoming, hidesDetails: ShortcutContext.hidesDetails)))
     }
 }

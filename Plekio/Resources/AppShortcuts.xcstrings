@@ -1,6 +1,80 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Log my blood pressure in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Blutdruck in ${applicationName} erfassen"
+          }
+        },
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Log my blood pressure in ${applicationName}",
+              "Record blood pressure in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Registra mi presión en ${applicationName}"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enregistre ma tension dans ${applicationName}"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Registra la mia pressione in ${applicationName}"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "${applicationName}で血圧を記録"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "${applicationName}-ში წნევის ჩაწერა"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "${applicationName} қолданбасында қысымды жаз"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Înregistrează tensiunea în ${applicationName}"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Запиши давление в ${applicationName}"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Запиши тиск у ${applicationName}"
+          }
+        }
+      }
+    },
     "Log my medications in ${applicationName}" : {
       "extractionState" : "extracted_with_value",
       "localizations" : {
@@ -201,6 +275,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Наступний прийом у ${applicationName}"
+          }
+        }
+      }
+    },
+    "Record blood pressure in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blutdruck in ${applicationName} eintragen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anota la presión arterial en ${applicationName}"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note ma tension dans ${applicationName}"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annota la pressione in ${applicationName}"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "${applicationName}に血圧を入力"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "${applicationName}-ში წნევის დამატება"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "${applicationName} қолданбасына қысымды енгіз"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notează tensiunea în ${applicationName}"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавь давление в ${applicationName}"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додай тиск у ${applicationName}"
           }
         }
       }

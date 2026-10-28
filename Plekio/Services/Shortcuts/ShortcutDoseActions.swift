@@ -21,7 +21,7 @@ enum ShortcutDoseActions {
     }
 
     static func upcoming() throws -> DueDoses.Upcoming {
-        let dependencies = try openDependencies()
+        let dependencies = try ShortcutContext.dependencies()
         let now = dependencies.time.now
         let calendar = dependencies.time.calendar
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now
@@ -37,7 +37,7 @@ enum ShortcutDoseActions {
     private static func logDue(
         _ command: (AppDependencies, [PillDose]) throws -> DoseLogOutcome
     ) async throws -> DueDoses.Slot? {
-        let dependencies = try openDependencies()
+        let dependencies = try ShortcutContext.dependencies()
         let pills = dependencies.database.fetchPills(for: dependencies.time.now, preFetchedCourses: nil)
         guard let slot = DueDoses.due(in: pills, at: dependencies.time.now) else { return nil }
 
@@ -50,13 +50,5 @@ enum ShortcutDoseActions {
             backgroundExecution.end()
         }
         return slot
-    }
-
-    /// Reading `launcher` opens the store if Siri launched the app.
-    private static func openDependencies() throws -> AppDependencies {
-        guard let dependencies = AppDelegate.shared?.launcher.dependencies else {
-            throw ShortcutError.storeUnavailable
-        }
-        return dependencies
     }
 }
