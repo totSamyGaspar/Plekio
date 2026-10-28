@@ -30,7 +30,7 @@ The store holds people's medication history. A broken migration loses it.
 
 ## 3. Strings, privacy, legal
 
-- [ ] **Translations.** Every new string is translated into all eleven languages, in both catalogs: `Plekio/Resources/Localizable.xcstrings` and `PlekioWidget/Localizable.xcstrings`. No `needs_review` entries are left: search both files for `needs_review`.
+- [ ] **Translations.** Every new string is translated into all eleven languages, in all three catalogs: `Plekio/Resources/Localizable.xcstrings`, `Plekio/Resources/AppShortcuts.xcstrings` (Siri phrases) and `PlekioWidget/Localizable.xcstrings`. No `needs_review` entries are left: search the files for `needs_review`.
 - [ ] **`PrivacyInfo.xcprivacy`**, the app's and the widget's (`PlekioWidget/`). Still true:
   - no tracking;
   - no collected data;
@@ -61,6 +61,13 @@ Settings that look removable but aren't:
 - [ ] **Data Protection** on the widget extension (`PlekioWidget.entitlements`, *Complete Protection*). It's what keeps medication names off a locked iPhone.
 - [ ] **`plekio` URL scheme** in `Plekio/Info.plist`: widget taps open the app through it.
 
+## 4b. Siri and Shortcuts
+
+- [ ] **Every phrase in `PlekioShortcuts` names the app** (`\(.applicationName)`), in English and in each translation in `AppShortcuts.xcstrings`. A phrase without it is rejected at build time or never matched.
+- [ ] **`isDiscoverable = false` in `LogDueDosesIntentStub.swift`** (widget extension) stays. Without it Shortcuts lists "Log due medications" twice.
+- [ ] **`authenticationPolicy = .requiresAuthentication`** stays on every shortcut intent: Siri says medication names.
+- [ ] Siri doesn't speak Ukrainian, Georgian, Kazakh or Romanian. Those phrases appear in Shortcuts and Spotlight only; check Siri itself in English or Russian.
+
 ## 5. Smoke test on a real iPhone
 
 Release build from TestFlight, not a debug run.
@@ -84,6 +91,12 @@ Release build from TestFlight, not a debug run.
   - tap Up next: the take-dose sheet opens;
   - lock the iPhone with Face ID covered: Plekio's widgets show placeholders;
   - tinted Home Screen and dark mode.
+- [ ] **Siri** (after opening the app once):
+  - Plekio's four actions are in the Shortcuts app;
+  - "Log my medications in Plekio": the due slot is logged, and the widget and badge follow;
+  - "What's my next medication in Plekio" names the next slot, and a missed one first;
+  - "Log my blood pressure in Plekio": Siri asks for both numbers, and the reading is in the diary; a lower number above the upper one is refused;
+  - with the app lock on: no medication names or numbers in Siri's answers.
 
 ## 6. Upload to TestFlight
 

@@ -7,10 +7,10 @@
 
 import AppIntents
 
-/// "Log my medications": takes the doses due now (`DueDoses.due`). For Siri,
-/// Shortcuts and the Control Center button. A LiveActivityIntent like the widget's
-/// buttons, so it runs in the app (LogDueDosesIntentPerform.swift); the widget
-/// extension only needs the type to build the control.
+/// "Log my medications": takes the doses due now (`DueDoses.due`), for Siri and
+/// Shortcuts. A LiveActivityIntent like the widget's buttons, so it runs in the app
+/// (LogDueDosesIntentPerform.swift). In Shared so a Control Center button in the
+/// widget extension can run it too.
 ///
 /// `nonisolated` as a whole, unlike the widget's intents: it has no @Parameter.
 nonisolated struct LogDueDosesIntent: LiveActivityIntent {

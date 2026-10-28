@@ -7,8 +7,8 @@
 
 import Foundation
 
-/// What "log my medications" and "what's next" mean at a given moment, for Siri,
-/// Shortcuts and the Control Center button. Pure: the caller reads the schedule.
+/// What "log my medications" and "what's next" mean at a given moment, for Siri
+/// and Shortcuts. Pure: the caller reads the schedule.
 nonisolated enum DueDoses {
 
     /// The open doses of one time of day.
