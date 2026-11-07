@@ -48,6 +48,8 @@ final class AppDependencies {
     let doseLogging: any DoseLoggingUseCaseProtocol
     /// Validates blood-pressure rules on write.
     let bloodPressureLogging: BloodPressureLogging
+    /// A mood in one tap, from the diary widget.
+    let quickMoodLogging: QuickMoodLogging
     let courseEditing: any CourseEditingUseCaseProtocol
 
     /// The single undo window for dose actions, shared by dashboard and notification modal.
@@ -62,6 +64,9 @@ final class AppDependencies {
 
     /// Held for its subscription, which rebuilds reminders after course writes.
     let reminderSync: ReminderSyncCoordinator
+
+    /// Rewrites what the widget shows after course and dose writes.
+    let widgetSnapshots: WidgetSnapshotPublisher
 
     /// Lives here, not in the SwiftUI root, so it exists before the first screen.
     let router: AppRouter
@@ -88,6 +93,7 @@ final class AppDependencies {
         errorPresenter: AppErrorPresenter,
         tipJar: any TipJarService,
         storeURL: URL? = nil,
+        widgetSnapshotStore: WidgetSnapshotStore? = nil,
         time: any TimeSource = SystemTime()
     ) {
         self.time = time
@@ -109,6 +115,7 @@ final class AppDependencies {
         courseRepository = SwiftDataCourseRepository(store: database)
         diaryRepository = SwiftDataDiaryRepository(store: database)
         bloodPressureLogging = BloodPressureLogging(diary: diaryRepository, errors: errorPresenter, time: time)
+        quickMoodLogging = QuickMoodLogging(diary: diaryRepository, errors: errorPresenter, time: time)
         courseEditing = CourseEditingUseCase(courses: courseRepository, notificationService: notifications, time: time)
         let reminderSync = ReminderSyncCoordinator(
             notificationService: notifications,
@@ -116,6 +123,13 @@ final class AppDependencies {
             canRequestPermission: { settings.hasCompletedTour }
         )
         self.reminderSync = reminderSync
+        widgetSnapshots = WidgetSnapshotPublisher(
+            database: database,
+            courses: courseRepository,
+            diary: diaryRepository,
+            store: widgetSnapshotStore,
+            time: time
+        )
         router = AppRouter()
         tour = TourCoordinator(settings: settings, router: router, onFinish: {
             PlekioTips.tourFinished = true
@@ -153,12 +167,14 @@ final class AppDependencies {
             errorPresenter: errorPresenter,
             tipJar: AppFeatures.tips ? StoreKitTipJar() : DisabledTipJar(),
             storeURL: database.persistence.storeURL,
+            widgetSnapshotStore: WidgetSnapshotStore(location: location),
             time: time
         )
     }
 
     #if DEBUG
-    /// In-memory store, so a preview can never touch the user's data.
+    /// In-memory store, so a preview can never touch the user's data. No widget
+    /// snapshot store either: a preview must not overwrite what the widget shows.
     static let preview: AppDependencies = {
         let errorPresenter = AppErrorPresenter()
         // Separate defaults domain so previews never change the app's settings.

@@ -8,7 +8,8 @@
 import SwiftUI
 
 /// Two faces of one card that turns over around the vertical axis.
-/// The front sets the size; the back is laid out in exactly the same frame.
+/// The card takes the height of the face that is showing, so a short back doesn't
+/// sit in a tall front's frame; the height changes with the turn.
 struct FlipCard<Front: View, Back: View>: View {
 
     // MARK: - Properties
@@ -17,20 +18,31 @@ struct FlipCard<Front: View, Back: View>: View {
     @ViewBuilder let front: Front
     @ViewBuilder let back: Back
 
+    /// Each face's own height, measured at its ideal size. Nil until laid out,
+    /// when the card simply fits both.
+    @State private var frontHeight: CGFloat?
+    @State private var backHeight: CGFloat?
+
     // MARK: - Body
 
     var body: some View {
-        front
-            .modifier(FlipFace(angle: isFlipped ? 180 : 0))
-            .allowsHitTesting(!isFlipped)
-            .accessibilityHidden(isFlipped)
-            .overlay {
-                back
-                    .modifier(FlipFace(angle: isFlipped ? 0 : -180))
-                    .allowsHitTesting(isFlipped)
-                    .accessibilityHidden(!isFlipped)
-            }
-            .motion(Motion.flip, value: isFlipped)
+        ZStack(alignment: .top) {
+            front
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { frontHeight = $0 }
+                .modifier(FlipFace(angle: isFlipped ? 180 : 0))
+                .allowsHitTesting(!isFlipped)
+                .accessibilityHidden(isFlipped)
+
+            back
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { backHeight = $0 }
+                .modifier(FlipFace(angle: isFlipped ? 0 : -180))
+                .allowsHitTesting(isFlipped)
+                .accessibilityHidden(!isFlipped)
+        }
+        .frame(height: isFlipped ? backHeight : frontHeight, alignment: .top)
+        .motion(Motion.flip, value: isFlipped)
     }
 }
 

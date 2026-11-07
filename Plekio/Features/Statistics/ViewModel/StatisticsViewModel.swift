@@ -27,10 +27,6 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
     /// The in-flight history read. Exposed so tests can await it.
     private(set) var historyLoad: Task<Void, Never>?
 
-    private static let streakLookbackDays = 30
-    /// Fraction of a day's doses that must be logged for the day to count toward the streak.
-    private static let streakThreshold = 0.9
-
     var progress: Double {
         guard totalCount > 0 else { return 0 }
         return Double(takenCount) / Double(totalCount)
@@ -69,9 +65,7 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
             .flatMap(\.medications)
             .filter(\.isLowOnStock)
 
-        let days = (0...Self.streakLookbackDays).compactMap {
-            calendar.date(byAdding: .day, value: -$0, to: today)
-        }
+        let days = StreakRules.days(endingAt: today, calendar: calendar)
 
         // A newer load supersedes this one; its result must not land on top.
         historyLoad?.cancel()
@@ -82,41 +76,8 @@ final class StatisticsViewModel: StatisticsViewModelProtocol {
             let todaysPills = pillsByDay[today] ?? []
             self.totalCount = todaysPills.count
             self.takenCount = todaysPills.filter(\.isTaken).count
-            self.streakDays = Self.streak(pillsByDay: pillsByDay, today: today, calendar: calendar)
+            self.streakDays = StreakRules.streak(pillsByDay: pillsByDay, today: today, calendar: calendar)
         }
-    }
-
-    // MARK: - Streak
-
-    /// Consecutive days at or above `streakThreshold`. Today can add but never break it.
-    /// The denominator is the schedule (`fetchPills`), not the logged `DoseLog` records.
-    private static func streak(pillsByDay: [Date: [PillDose]], today: Date, calendar: Calendar) -> Int {
-        var streak = 0
-
-        if let todayAdherence = adherence(of: pillsByDay[today] ?? []),
-           todayAdherence >= streakThreshold {
-            streak += 1
-        }
-
-        // Past days are closed and can break the streak.
-        for offset in 1...streakLookbackDays {
-            guard let day = calendar.date(byAdding: .day, value: -offset, to: today) else { break }
-
-            // Days with nothing scheduled neither break nor extend the streak.
-            guard let dayAdherence = adherence(of: pillsByDay[day] ?? []) else { continue }
-            guard dayAdherence >= streakThreshold else { break }
-
-            streak += 1
-        }
-
-        return streak
-    }
-
-    /// Fraction of the day's doses that were logged; `nil` if nothing was scheduled.
-    private static func adherence(of scheduled: [PillDose]) -> Double? {
-        guard !scheduled.isEmpty else { return nil }
-        let taken = scheduled.filter(\.isTaken).count
-        return Double(taken) / Double(scheduled.count)
     }
 
     // MARK: - Refill

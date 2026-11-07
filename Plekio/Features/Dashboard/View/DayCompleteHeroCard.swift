@@ -27,7 +27,7 @@ struct DayCompleteHeroCard: View {
     // MARK: - Body
 
     var body: some View {
-        HeroCard(title: "ALL DONE TODAY", systemImage: "checkmark", date: date, fillsHeight: true) {
+        HeroCard(title: "ALL DONE TODAY", systemImage: "checkmark", date: date) {
             HStack(spacing: 10) {
                 Image(systemName: "checkmark.seal.fill")
                     .scaledFont(size: 24, relativeTo: .title, weight: .bold)

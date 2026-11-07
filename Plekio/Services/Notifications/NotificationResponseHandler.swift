@@ -95,7 +95,9 @@ final class NotificationResponseHandler {
 
     /// Returns only once the work (reminder rebuild included) is done: iOS may
     /// suspend the app as soon as the response is reported handled.
-    func handle(_ intent: NotificationIntent) async {
+    /// - Parameter afterWrite: runs once a Take or Skip is in the store, before the
+    ///   reminder rebuild, which can take a while: the widget's snapshot goes here.
+    func handle(_ intent: NotificationIntent, afterWrite: () async -> Void = {}) async {
         switch intent {
         case .openDailyReminder(let reminder):
             // On a cold launch the router parks the link until the UI is up.
@@ -105,10 +107,10 @@ final class NotificationResponseHandler {
             router.selectedTab = .today
 
         case .take(let ids, let slot):
-            await write(ids, slot) { try self.doseLogging.markTaken($0) }
+            await write(ids, slot, afterWrite: afterWrite) { try self.doseLogging.markTaken($0) }
 
         case .skip(let ids, let slot):
-            await write(ids, slot) { try self.doseLogging.markSkipped($0) }
+            await write(ids, slot, afterWrite: afterWrite) { try self.doseLogging.markSkipped($0) }
 
         case .snooze(let ids, let names, let slot):
             await notifications.scheduleSnooze(for: ids, names: names, slot: slot)
@@ -120,9 +122,11 @@ final class NotificationResponseHandler {
 
     /// Idempotent: already taken or skipped doses are left alone.
     private func write(_ ids: [UUID], _ slot: Date,
+                       afterWrite: () async -> Void,
                        _ command: ([PillDose]) throws -> DoseLogOutcome) async {
         let open = doseLogging.openDoses(medicationIds: ids, at: slot)
         guard let outcome = errors.attempt({ try command(open) }) else { return }
+        await afterWrite()
         await outcome.waitForReminders()
     }
 }

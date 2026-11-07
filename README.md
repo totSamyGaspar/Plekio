@@ -11,6 +11,8 @@ Everything stays on the device: no account, no server, no analytics.
 - **Reminders** — a local notification per dose slot with Take / Snooze / Skip, working from the lock screen. The app icon badge shows the doses that are due and not logged yet. There are optional daily diary and blood-pressure reminders, and a daily reminder while any medication is running low.
 - **Diary** — mood, energy, discomfort, sleep, water, symptoms, milestones and photos. Includes mood trends, a progress-photo gallery with side-by-side comparison, and blood-pressure readings with a chart.
 - **Doctor report** — a PDF of doses, well-being and blood pressure for any period.
+- **Widgets** — Up next (small, medium, Lock Screen), Day progress (small, Lock Screen ring), Today (large), Low stock (small), Diary (small, medium) and Blood pressure (small, medium with a chart), light and dark. Doses and today's mood are logged straight from the widget, with the tap shown at once. A tap elsewhere opens the dose, Today, the diary check-in or a new blood-pressure reading. While the iPhone is locked, the widgets show placeholders.
+- **Siri and Shortcuts** — "Log my medications in Plekio" logs the doses due now, "What's my next medication in Plekio" says what comes next, "Skip my medications in Plekio" skips them, and "Log my blood pressure in Plekio" asks for the two numbers. The same actions are in the Shortcuts app. With the app lock on, Siri says no medication names or readings.
 - **Onboarding and first-run tour**, plus one-time TipKit hints where features live.
 - **Accessibility** — Dynamic Type, VoiceOver labels, and Reduce Motion across all animations.
 - **Localized** in English, German, Spanish, French, Italian, Japanese, Georgian, Kazakh, Romanian, Russian and Ukrainian.
@@ -88,6 +90,18 @@ View  →  ViewModel  →  Use case  →  Repository / Store  →  SwiftData
   - `NotificationService` serializes rebuilds.
   - `ReminderSyncCoordinator` rebuilds when courses change or the app becomes active.
 - **Time.** Everything that needs "now" or a calendar gets a `TimeSource`, so tests can pin the clock.
+- **Widgets.**
+  - The widget never opens the store, which may be mid-migration in the app. `WidgetSnapshotPublisher` writes `widget-snapshot.json` beside it in the App Group: today's and tomorrow's slots, the streak, low stock, today's diary check-in and the latest blood-pressure readings. It rewrites it after course, dose and diary writes, on activation, and after a notification or widget action, then reloads the widgets.
+  - The widget's timeline has an entry at every slot, grace end and midnight, so it moves through the day without the app. Past what the snapshot covers it asks to open the app.
+  - Buttons are `Toggle(isOn:intent:)` over `LiveActivityIntent`s. The system runs those in the app's process, woken in the background if need be, and they log through `NotificationResponseHandler`, like a notification's Take. This needs `NSSupportsLiveActivities` in the app's Info.plist; no Live Activity is started.
+  - Taps open `plekio://` links (`WidgetLink`), handed to `AppRouter` like a reminder's tap.
+  - The extension has Data Protection (`NSFileProtectionComplete`): iOS shows placeholders while the iPhone is passcode-locked.
+- **Siri and Shortcuts.**
+  - `PlekioShortcuts` lists the phrases Siri knows without setup; they are translated in `AppShortcuts.xcstrings`. A phrase can't carry numbers, so for blood pressure Siri asks for them.
+  - `DueDoses` decides which slot "log my medications" means: the current one within its grace hour, else one starting within the hour, else the latest missed.
+  - The intents write through the same use cases as the screens (`DoseLoggingUseCase`, `BloodPressureLogging`), then refresh the widget snapshot. Errors are thrown for Siri to say, not shown as alerts.
+  - Every intent needs an unlocked iPhone. With Plekio's app lock on, `ShortcutDialog` leaves out medication names and readings: an answer is heard by anyone nearby.
+  - `LogDueDosesIntent` is a `LiveActivityIntent` in `Shared/`, like the widget's buttons, so it runs in the app. The widget extension hides its copy from Shortcuts, so the action isn't listed twice.
 - **Motion.** `Motion` defines the app's animation curves; `motion(_:value:)` and `withMotion` drop movement under Reduce Motion.
 
 ## Project structure
@@ -99,7 +113,7 @@ Plekio/
 ├── Domain/         SwiftData models, rules, snapshots, versioned schema
 ├── Data/           SwiftData store, repositories, photo storage and cache
 ├── UseCases/       Dose logging and undo, course editing, diary, reminders
-├── Services/       Notifications, PDF report
+├── Services/       Notifications, PDF report, widget snapshot and actions, Siri shortcuts
 ├── Features/       One folder per screen: Model / View / ViewModel
 │   ├── Dashboard   Today
 │   ├── Courses     Active courses, history, course detail
@@ -107,7 +121,11 @@ Plekio/
 │   ├── Diary       Journal, check-in, photos, blood pressure
 │   ├── Statistics, Export, Settings, Onboarding, Tour, MainTab
 ├── UI/             Shared components, layout, theme and motion
-└── Resources/      Assets, app icon, Localizable.xcstrings
+└── Resources/      Assets, app icon, Localizable.xcstrings, AppShortcuts.xcstrings (Siri phrases)
+Shared/             Built into the app and the widget: palette, storage location,
+                    the widget snapshot, its intents and links, the dose shortcut's intent
+PlekioWidget/       The widget extension: timeline, styles, one file per widget,
+                    its own Localizable.xcstrings and PrivacyInfo.xcprivacy
 PlekioTests/        Mirrors the app's folders; Mocks/ and Support/ hold test doubles
 ```
 
