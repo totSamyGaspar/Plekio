@@ -40,6 +40,8 @@ protocol DoseStoring {
     func fetchPills(onDays days: [Date]) -> [Date: [PillDose]]
 
     /// Same as `fetchPills(onDays:)`, but read off the main actor. For long ranges.
+    /// For adherence only (which doses, their status): past days may be cached, so
+    /// stock, names and thresholds can be those of an earlier read.
     func pillHistory(onDays days: [Date]) async -> [Date: [PillDose]]
 
     /// Flips one dose, for a single card's checkbox. The bulk operations are not toggles.

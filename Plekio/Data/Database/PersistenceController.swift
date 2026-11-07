@@ -34,6 +34,16 @@ final class PersistenceController {
     /// Private so only `commit` can invalidate it and callers use the accessors.
     private var dailyPillsCache: [Date: [PillDose]] = [:]
 
+    private var historyCache: [Date: [PillDose]] = [:]
+    /// The zone the keys are start-of-day in; another zone starts the cache over.
+    /// The identifier, not the TimeZone: an autoupdating zone equals itself after a change.
+    private var historyTimeZone: String?
+    /// Days the dose writes since the last commit touched. Empty at a `.doses`
+    /// commit means a write that didn't say, and the whole history is dropped.
+    private var touchedDoseDays: Set<Date> = []
+    /// Bumped whenever the history cache is invalidated, so a read that raced a write isn't cached.
+    private(set) var historyGeneration = 0
+
     /// Shared by both initialisers so no model is registered in only one.
     private static func makeSchema() -> Schema {
         PlekioSchema.current()
@@ -90,11 +100,13 @@ final class PersistenceController {
         } catch {
             context.rollback()
             dailyPillsCache.removeAll()
+            touchedDoseDays.removeAll()
             throw DatabaseError.saveFailed(underlying: error)
         }
 
         // Invalidated here, not per call site, so no write can leave a stale dose.
         dailyPillsCache.removeAll()
+        invalidateHistory(after: changes)
 
         self.changes.send(changes)
     }
@@ -113,6 +125,40 @@ final class PersistenceController {
         }.value
         cachedReader = reader
         return reader
+    }
+
+    // MARK: - History Cache
+
+    /// Called by a dose write before its commit, with the start of the slot's day.
+    func noteDoseWrite(onDay day: Date) {
+        touchedDoseDays.insert(day)
+    }
+
+    func cachedHistory(for day: Date, calendar: Calendar) -> [PillDose]? {
+        guard historyTimeZone == calendar.timeZone.identifier else { return nil }
+        return historyCache[day]
+    }
+
+    func cacheHistory(_ pills: [PillDose], for day: Date, calendar: Calendar) {
+        if historyTimeZone != calendar.timeZone.identifier {
+            historyCache.removeAll()
+            historyTimeZone = calendar.timeZone.identifier
+        }
+        historyCache[day] = pills
+    }
+
+    private func invalidateHistory(after changes: Set<DatabaseChange>) {
+        defer { touchedDoseDays.removeAll() }
+        if changes.contains(.courses) || (changes.contains(.doses) && touchedDoseDays.isEmpty) {
+            // A course edit can change any day's schedule.
+            historyCache.removeAll()
+        } else if changes.contains(.doses) {
+            for day in touchedDoseDays { historyCache[day] = nil }
+        } else {
+            // The diary isn't in the history.
+            return
+        }
+        historyGeneration += 1
     }
 
     // MARK: - Day Cache

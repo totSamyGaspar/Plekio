@@ -170,6 +170,18 @@ struct DoseScheduleTests {
         #expect(!settled.contains(DoseSchedule.slotKey(untouched.scheduledTime, calendar: calendar)))
     }
 
+    @Test("Settled slots from a day leave out the logs before it")
+    func testSettledSlotsFromADay() async throws {
+        let med = medication(times: [9 * 60])
+        let old = DoseLog(scheduledTime: testDate(2026, 6, 10, 9, 0), status: .taken(at: Date(), dispensed: 1))
+        let recent = DoseLog(scheduledTime: testDate(2026, 6, 12, 9, 0), status: .taken(at: Date(), dispensed: 1))
+        med.logs.append(contentsOf: [old, recent])
+
+        let settled = DoseSchedule.settledSlots(of: med, from: testDate(2026, 6, 12), calendar: calendar)
+
+        #expect(settled == [DoseSchedule.slotKey(recent.scheduledTime, calendar: calendar)])
+    }
+
     @Test("The log index takes only the requested day")
     func testLogsBySlotIsScopedToOneDay() async throws {
         let med = medication(times: [9 * 60])

@@ -15,6 +15,41 @@ nonisolated enum DoseDay {
 
     /// Sorted by time. `day` must be a start of day in `calendar`.
     static func pills(of courses: [TreatmentCourse], on day: Date, calendar: Calendar) -> [PillDose] {
+        pills(of: courses, on: day, calendar: calendar) { med in
+            DoseSchedule.logsBySlot(of: med, on: day, calendar: calendar)
+        }
+    }
+
+    /// The same, matched against `logs` instead of each medication's `logs`.
+    static func pills(of courses: [TreatmentCourse], on day: Date, calendar: Calendar, logs: LogIndex) -> [PillDose] {
+        pills(of: courses, on: day, calendar: calendar) { med in logs.bySlot(of: med.id) }
+    }
+
+    /// Logs read once for a range of days, by medication and slot. BackgroundReader
+    /// fills it with a fetch by date: `medication.logs` faults in a medication's
+    /// whole history, and walking it for every day costs more the longer the app is used.
+    struct LogIndex {
+        private var logs: [UUID: [DateComponents: DoseLog]] = [:]
+
+        init(_ logs: [DoseLog], calendar: Calendar) {
+            for log in logs {
+                guard let medicationId = log.medication?.id else { continue }
+                self.logs[medicationId, default: [:]][DoseSchedule.slotKey(log.scheduledTime, calendar: calendar)] = log
+            }
+        }
+
+        /// Slot keys carry the day, so one dictionary serves every day in the range.
+        func bySlot(of medicationId: UUID) -> [DateComponents: DoseLog] {
+            logs[medicationId] ?? [:]
+        }
+    }
+
+    private static func pills(
+        of courses: [TreatmentCourse],
+        on day: Date,
+        calendar: Calendar,
+        logsOf: (MedicationItem) -> [DateComponents: DoseLog]
+    ) -> [PillDose] {
         var pills: [PillDose] = []
 
         for course in courses {
@@ -27,7 +62,7 @@ nonisolated enum DoseDay {
                 )
                 guard !slots.isEmpty else { continue }
 
-                let logsBySlot = DoseSchedule.logsBySlot(of: med, on: day, calendar: calendar)
+                let logsBySlot = logsOf(med)
 
                 for slot in slots {
                     let log = logsBySlot[DoseSchedule.slotKey(slot.date, calendar: calendar)]

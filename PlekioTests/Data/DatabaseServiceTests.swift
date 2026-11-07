@@ -951,4 +951,52 @@ struct DatabaseServiceTests {
         #expect(background[testDate(2026, 6, 10)]?.first?.isTaken == true)
         #expect(background[testDate(2026, 6, 11)]?.first?.isTaken == false)
     }
+
+    @Test("A cached past day is read again after a dose write for it")
+    func historyCacheFollowsDoseWrites() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = makeCourseWithMed(db)
+        let days = (8...12).map { testDate(2026, 6, $0) }
+        _ = await db.pillHistory(onDays: days)
+
+        try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 10, 9, 0))
+        let afterTake = await db.pillHistory(onDays: days)
+        #expect(afterTake[testDate(2026, 6, 10)]?.first?.isTaken == true)
+        // Statuses, not whole doses: a cached day keeps the stock it was read with.
+        #expect(afterTake.mapValues { $0.map(\.status) } == db.fetchPills(onDays: days).mapValues { $0.map(\.status) })
+
+        try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 10, 9, 0))
+        let afterUndo = await db.pillHistory(onDays: days)
+        #expect(afterUndo[testDate(2026, 6, 10)]?.first?.isTaken == false)
+    }
+
+    @Test("A course edit drops the cached history")
+    func historyCacheFollowsCourseEdits() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = makeCourseWithMed(db)
+        let days = (8...12).map { testDate(2026, 6, $0) }
+        _ = await db.pillHistory(onDays: days)
+
+        med.minutesOfDay = [9 * 60, 21 * 60]
+        try db.persistence.commit([.courses])
+
+        let after = await db.pillHistory(onDays: days)
+        #expect(after[testDate(2026, 6, 10)]?.count == 2)
+        #expect(after == db.fetchPills(onDays: days))
+    }
+
+    @Test("History matches the main read when logs lie outside the range")
+    func historyIgnoresLogsOutsideTheRange() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = makeCourseWithMed(db)
+        try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 3, 9, 0))
+        try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 10, 9, 0))
+        try db.togglePill(medicationId: med.id, scheduledTime: testDate(2026, 6, 20, 9, 0))
+
+        let days = (8...12).map { testDate(2026, 6, $0) }
+        let background = await db.pillHistory(onDays: days)
+
+        #expect(background == db.fetchPills(onDays: days))
+        #expect(background.values.flatMap { $0 }.filter(\.isTaken).count == 1)
+    }
 }
