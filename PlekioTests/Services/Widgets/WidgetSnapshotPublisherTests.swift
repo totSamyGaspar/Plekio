@@ -169,6 +169,73 @@ struct WidgetSnapshotPublisherTests {
         #expect(store.read()?.diary?.mood == .stressed)
     }
 
+    // MARK: - Widget Buttons
+
+    @Test("publishNow writes a logged dose at once, without awaiting a refresh")
+    func publishNowWritesTheDose() async {
+        defer { try? store.clear() }
+        let morning = testDate(2026, 10, 21, 8)
+        let id = UUID()
+        db.pillsByDay = [today: [PillDose(medicationId: id, name: "Sertraline", dosage: 1, form: .pill, time: morning, period: .morning)]]
+        let publisher = makePublisher(store: store)
+        await publisher.refresh().value
+
+        db.pillsByDay = [today: [PillDose(medicationId: id, name: "Sertraline", dosage: 1, form: .pill, time: morning,
+                                          period: .morning, status: .taken(at: now, dispensed: 1))]]
+        publisher.publishNow()
+
+        #expect(store.read()?.slots.first?.doses.first?.status == .taken)
+        #expect(reloader.reloadCount == 2)
+    }
+
+    @Test("publishNow adds today to the streak of the days before")
+    func publishNowCountsToday() async {
+        defer { try? store.clear() }
+        let yesterday = addingDays(-1, to: today)
+        let morning = testDate(2026, 10, 21, 8)
+        let id = UUID()
+        db.pillsByDay = [
+            yesterday: [pill("Sertraline", at: yesterday.addingTimeInterval(8 * 3600), status: .taken(at: yesterday, dispensed: 1))],
+            today: [PillDose(medicationId: id, name: "Sertraline", dosage: 1, form: .pill, time: morning, period: .morning)]
+        ]
+        let publisher = makePublisher(store: store)
+        await publisher.refresh().value
+        #expect(store.read()?.streakDays == 1)
+
+        db.pillsByDay[today] = [PillDose(medicationId: id, name: "Sertraline", dosage: 1, form: .pill, time: morning,
+                                         period: .morning, status: .taken(at: now, dispensed: 1))]
+        publisher.publishNow()
+        #expect(store.read()?.streakDays == 2)
+
+        // Taken back: today no longer counts, the days before still do.
+        db.pillsByDay[today] = [PillDose(medicationId: id, name: "Sertraline", dosage: 1, form: .pill, time: morning, period: .morning)]
+        publisher.publishNow()
+        #expect(store.read()?.streakDays == 1)
+    }
+
+    @Test("Before any refresh, publishNow keeps the streak already on disk")
+    func publishNowKeepsTheStreakOnDisk() throws {
+        defer { try? store.clear() }
+        var onDisk = WidgetSnapshot.empty(at: now, missedGrace: 3600)
+        onDisk.streakDays = 5
+        try store.write(onDisk)
+        db.pillsByDay = [today: [pill("Sertraline", at: testDate(2026, 10, 21, 8), status: .taken(at: now, dispensed: 1))]]
+
+        // As on a launch woken by the widget: no history has been read yet.
+        let publisher = makePublisher(store: store)
+        publisher.publishNow()
+
+        #expect(store.read()?.streakDays == 5)
+        #expect(store.read()?.slots.first?.doses.first?.status == .taken)
+    }
+
+    @Test("Without a store publishNow does nothing, as in previews")
+    func publishNowWithoutStore() {
+        let publisher = makePublisher(store: nil)
+        publisher.publishNow()
+        #expect(reloader.reloadCount == 0)
+    }
+
     // MARK: - Triggers
 
     @Test("A store write announced by the feed refreshes the snapshot")

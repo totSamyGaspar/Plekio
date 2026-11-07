@@ -31,6 +31,24 @@ final class WidgetSnapshotPublisher {
     /// The last refresh started, for awaiting it (notification actions, tests).
     private(set) var lastRefresh: Task<Void, Never>?
 
+    /// The streak without today, from the last full refresh. A widget button only
+    /// changes today, so `publishNow` adds today to it instead of reading the history.
+    private var pastStreak: PastStreak?
+
+    private struct PastStreak {
+        /// The day it counts back from: stale after midnight.
+        let today: Date
+        let days: Int
+    }
+
+    /// How `publish` gets the streak.
+    private enum Streak {
+        /// Days kept before today; today is added from the doses `publish` reads.
+        case past(Int)
+        /// Taken as it is: no history has been read today.
+        case kept(Int)
+    }
+
     /// `changes` fires once per burst of writes the snapshot has to follow.
     init(
         doses: any DoseStoring,
@@ -96,19 +114,45 @@ final class WidgetSnapshotPublisher {
         let previous = lastRefresh
         let task = Task { [weak self, doses] in
             await previous?.value
-            let history = await doses.pillHistory(onDays: days)
+            var history = await doses.pillHistory(onDays: days)
             guard let self else { return }
-            self.publish(streakDays: StreakRules.streak(pillsByDay: history, today: today, calendar: calendar))
+            // Today is left to `publish`: the doses it reads are fresher than the history's.
+            history[today] = nil
+            let past = PastStreak(today: today, days: StreakRules.streak(pillsByDay: history, today: today, calendar: calendar))
+            self.pastStreak = past
+            self.publish(.past(past.days))
         }
         lastRefresh = task
         return task
+    }
+
+    // MARK: - Widget Buttons
+
+    /// For a widget button, right after its write. WidgetKit dims the tapped check
+    /// until the button's intent returns, and the intent returns once the snapshot
+    /// is on disk, so this skips the 31-day history a full refresh reads: today's
+    /// and tomorrow's doses are read now, the streak's past days come from the last
+    /// full refresh.
+    ///
+    /// Synchronous on purpose: run straight after the write, nothing queued on the
+    /// main actor meanwhile (the reminder rebuild above all) gets in first. The
+    /// caller still runs a full refresh afterwards, under its background task.
+    func publishNow() {
+        guard let store else { return }
+        let today = time.calendar.startOfDay(for: time.now)
+        if let pastStreak, pastStreak.today == today {
+            publish(.past(pastStreak.days))
+        } else {
+            // First tap since launch or since midnight: the streak on disk until the full refresh.
+            publish(.kept((lastWritten ?? store.read())?.streakDays ?? 0))
+        }
     }
 
     // MARK: - Publishing
 
     /// Today and tomorrow are read here, after the history, so they are as fresh
     /// as possible; a write that landed meanwhile triggers another refresh anyway.
-    private func publish(streakDays: Int) {
+    private func publish(_ streak: Streak) {
         guard let store else { return }
 
         let now = time.now
@@ -116,7 +160,12 @@ final class WidgetSnapshotPublisher {
         let today = calendar.startOfDay(for: now)
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: today) ?? today
 
-        let pills = doses.fetchPills(onDays: [today, tomorrow]).values.flatMap { $0 }
+        let byDay = doses.fetchPills(onDays: [today, tomorrow])
+        let pills = byDay.values.flatMap { $0 }
+        let streakDays = switch streak {
+        case .past(let days): days + (StreakRules.todayCounts(byDay[today] ?? []) ? 1 : 0)
+        case .kept(let days): days
+        }
         // As on Today's refill card: no restock warning for a course that has ended.
         let lowStock = courses.allCourses()
             .filter { $0.isActive(on: now, calendar: calendar) }

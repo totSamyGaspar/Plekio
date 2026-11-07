@@ -30,8 +30,7 @@ nonisolated enum StreakRules {
     static func streak(pillsByDay: [Date: [PillDose]], today: Date, calendar: Calendar) -> Int {
         var streak = 0
 
-        if let todayAdherence = adherence(of: pillsByDay[today] ?? []),
-           todayAdherence >= threshold {
+        if todayCounts(pillsByDay[today] ?? []) {
             streak += 1
         }
 
@@ -47,6 +46,12 @@ nonisolated enum StreakRules {
         }
 
         return streak
+    }
+
+    /// Whether today adds a day: the one part of the streak a dose logged now can change.
+    static func todayCounts(_ scheduled: [PillDose]) -> Bool {
+        guard let todayAdherence = adherence(of: scheduled) else { return false }
+        return todayAdherence >= threshold
     }
 
     /// Fraction of the day's doses that were logged; `nil` if nothing was scheduled.

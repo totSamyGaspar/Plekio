@@ -17,6 +17,13 @@ enum WidgetDiaryActions {
         guard let mood = DiaryMood(rawValue: raw),
               let dependencies = AppDelegate.shared?.launcher.dependencies,
               dependencies.quickMoodLogging.log(mood) else { return }
-        await dependencies.widgetSnapshots.refresh().value
+        // As for a dose button: the snapshot now, so the tapped mood stops being dimmed,
+        // and the full refresh afterwards under a background task.
+        dependencies.widgetSnapshots.publishNow()
+        let backgroundTask = BackgroundExecution(name: "Widget mood")
+        Task {
+            await dependencies.widgetSnapshots.refresh().value
+            backgroundTask.end()
+        }
     }
 }

@@ -18,4 +18,6 @@ nonisolated enum AppLog {
     static let storage = Logger(subsystem: subsystem, category: "storage")
     static let notifications = Logger(subsystem: subsystem, category: "notifications")
     static let media = Logger(subsystem: subsystem, category: "media")
+    /// Widget buttons run in the app; each step is timed, to see where a tap waits.
+    static let widget = Logger(subsystem: subsystem, category: "widget")
 }
