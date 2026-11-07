@@ -67,7 +67,7 @@ enum ReminderPlanner {
                     frequencyDays: med.frequencyDays,
                     times: med.minutesOfDay.map(MinuteOfDay.hourAndMinute),
                     // Skipped counts as settled, or the rebuild would bring it back.
-                    settledSlots: DoseSchedule.settledSlots(of: med, calendar: calendar)
+                    settledSlots: DoseSchedule.settledSlots(of: med, from: today, calendar: calendar)
                 )
             }
         }

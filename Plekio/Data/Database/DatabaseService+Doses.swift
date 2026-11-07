@@ -49,14 +49,33 @@ extension DatabaseService: DoseStoring {
         return result
     }
 
-    /// Reads on BackgroundReader's context. Sees only committed data, which is
-    /// all there is: every write goes through `commit`.
     func pillHistory(onDays days: [Date]) async -> [Date: [PillDose]] {
         let calendar = time.calendar
+        let today = calendar.startOfDay(for: time.now)
+
+        var result: [Date: [PillDose]] = [:]
+        var missing: [Date] = []
+        for day in Set(days.map { calendar.startOfDay(for: $0) }) {
+            if day < today, let cached = persistence.cachedHistory(for: day, calendar: calendar) {
+                result[day] = cached
+            } else {
+                missing.append(day)
+            }
+        }
+        guard !missing.isEmpty else { return result }
+
+        let generation = persistence.historyGeneration
         let reader = await persistence.backgroundReader()
         do {
-            let result = try await reader.pills(onDays: days, calendar: calendar)
+            let read = try await reader.pills(onDays: missing, calendar: calendar)
             persistence.readSucceeded()
+            // A write that landed during the read may have made it stale: not kept.
+            if persistence.historyGeneration == generation {
+                for (day, pills) in read where day < today {
+                    persistence.cacheHistory(pills, for: day, calendar: calendar)
+                }
+            }
+            result.merge(read) { _, fresh in fresh }
             return result
         } catch {
             persistence.reportReadFailure(error)
@@ -99,6 +118,7 @@ extension DatabaseService: DoseStoring {
 
         // No commit when nothing changed: it would reset the cache and wake subscribers.
         guard changed else { return }
+        persistence.noteDoseWrite(onDay: time.calendar.startOfDay(for: scheduledTime))
         try persistence.commit([.doses])
     }
 
@@ -122,6 +142,7 @@ extension DatabaseService: DoseStoring {
         }
 
         guard changed else { return }
+        persistence.noteDoseWrite(onDay: time.calendar.startOfDay(for: scheduledTime))
         try persistence.commit([.doses])
     }
 
@@ -144,6 +165,7 @@ extension DatabaseService: DoseStoring {
             write(skipped, to: existing, of: med, at: scheduledTime)
         }
 
+        persistence.noteDoseWrite(onDay: time.calendar.startOfDay(for: scheduledTime))
         try persistence.commit([.doses])
     }
 
@@ -166,6 +188,7 @@ extension DatabaseService: DoseStoring {
         }
 
         guard changed else { return }
+        persistence.noteDoseWrite(onDay: time.calendar.startOfDay(for: scheduledTime))
         try persistence.commit([.doses])
     }
 
@@ -188,6 +211,7 @@ extension DatabaseService: DoseStoring {
             med.stockCount -= quantity
             write(taken, to: existing, of: med, at: scheduledTime)
         }
+        persistence.noteDoseWrite(onDay: time.calendar.startOfDay(for: scheduledTime))
         try persistence.commit([.doses])
     }
 

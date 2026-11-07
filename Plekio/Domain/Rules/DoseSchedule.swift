@@ -125,9 +125,12 @@ nonisolated enum DoseSchedule {
     // MARK: - Logs
 
     /// Slots already taken or deliberately skipped; neither should ring.
-    static func settledSlots(of medication: MedicationItem, calendar: Calendar) -> Set<DateComponents> {
+    /// - Parameter day: logs before it are left out. The reminder rebuild only plans
+    ///   from today, and a slot key costs a calendar call per log of the whole history.
+    static func settledSlots(of medication: MedicationItem, from day: Date? = nil, calendar: Calendar) -> Set<DateComponents> {
         Set(
             medication.logs
+                .filter { log in day.map { log.scheduledTime >= $0 } ?? true }
                 .filter { $0.status.isSettled }
                 .map { slotKey($0.scheduledTime, calendar: calendar) }
         )
@@ -150,7 +153,10 @@ nonisolated enum DoseSchedule {
     /// The log for one occurrence; use `logsBySlot` for a whole day.
     static func log(of medication: MedicationItem, at slot: Date, calendar: Calendar) -> DoseLog? {
         let key = slotKey(slot, calendar: calendar)
-        return medication.logs.first { slotKey($0.scheduledTime, calendar: calendar) == key }
+        // Same minute means less than a minute apart: the cheap test first, the calendar call after.
+        return medication.logs.first {
+            abs($0.scheduledTime.timeIntervalSince(slot)) < 60 && slotKey($0.scheduledTime, calendar: calendar) == key
+        }
     }
 }
 
