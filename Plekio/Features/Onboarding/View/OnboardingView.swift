@@ -16,6 +16,8 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
     /// Shown after the carousel; view state, since the view model knows only the pages.
     @State private var isCollectingProfile = false
 
+    @State private var isWide = false
+
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> VM) {
@@ -28,8 +30,13 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
 
+            // The space given, not the content: the content's size changes with the layout.
+            Color.clear
+                .onGeometryChange(for: Bool.self) { $0.size.width > $0.size.height } action: { isWide = $0 }
+                .accessibilityHidden(true)
+
             if isCollectingProfile {
-                OnboardingProfileStep(onFinish: viewModel.completeOnboarding)
+                OnboardingProfileStep(isWide: isWide, onFinish: viewModel.completeOnboarding)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             } else {
                 carousel
@@ -45,17 +52,18 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
         VStack(spacing: 0) {
             TabView(selection: $viewModel.currentPage) {
                 ForEach(Array(viewModel.pages.enumerated()), id: \.element.id) { index, page in
-                    OnboardingPageView(page: page, isActive: index == viewModel.currentPage)
+                    OnboardingPageView(page: page, isActive: index == viewModel.currentPage, isWide: isWide)
                         .tag(index)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
 
-            dots.padding(.vertical, 26)
+            dots.padding(.vertical, isWide ? 16 : 26)
 
             actions
+                .frame(maxWidth: OnboardingLayout.actionsMaxWidth)
                 .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+                .padding(.bottom, isWide ? 20 : 40)
         }
     }
 

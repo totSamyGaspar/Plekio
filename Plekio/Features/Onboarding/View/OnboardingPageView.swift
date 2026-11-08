@@ -18,14 +18,42 @@ struct OnboardingPageView: View {
     /// `onAppear` can't be used to start the scripts.
     var isActive = true
 
+    var isWide = false
+
     @State private var isGlowing = false
 
     // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer(minLength: 0)
+        Group {
+            if isWide {
+                HStack(spacing: 40) {
+                    illustration
+                    text(alignment: .leading)
+                        .frame(maxWidth: 380, alignment: .leading)
+                }
+                .padding(.horizontal, 40)
+            } else {
+                VStack(spacing: 24) {
+                    illustration
+                    text(alignment: .center)
+                        .frame(maxWidth: OnboardingLayout.textMaxWidth)
+                        .padding(.horizontal, 34)
+                }
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .onAppear {
+            withMotion(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+                isGlowing = true
+            }
+        }
+    }
 
+    // MARK: - Subviews
+
+    private var illustration: some View {
+        ScaledToFit {
             ZStack {
                 Circle()
                     .fill(
@@ -41,31 +69,26 @@ struct OnboardingPageView: View {
 
                 preview
             }
-
-            Spacer(minLength: 0)
-
-            VStack(spacing: 12) {
-                Text(page.title)
-                    .scaledFont(size: 28, relativeTo: .title, weight: .bold, design: .serif)
-                    .foregroundColor(.textPrimary)
-
-                Text(page.description)
-                    .font(.body)
-                    .foregroundColor(.textSecondary)
-                    .lineSpacing(3)
-            }
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 34)
         }
-        .accessibilityElement(children: .combine)
-        .onAppear {
-            withMotion(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
-                isGlowing = true
-            }
-        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // MARK: - Subviews
+    /// Laid out first, so the description is never cut.
+    private func text(alignment: HorizontalAlignment) -> some View {
+        VStack(alignment: alignment, spacing: 12) {
+            Text(page.title)
+                .scaledFont(size: 28, relativeTo: .title, weight: .bold, design: .serif)
+                .foregroundColor(.textPrimary)
+
+            Text(page.description)
+                .font(.body)
+                .foregroundColor(.textSecondary)
+                .lineSpacing(3)
+        }
+        .multilineTextAlignment(alignment == .leading ? .leading : .center)
+        .fixedSize(horizontal: false, vertical: true)
+        .layoutPriority(1)
+    }
 
     @ViewBuilder
     private var preview: some View {
