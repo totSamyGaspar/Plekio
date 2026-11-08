@@ -25,6 +25,9 @@ struct WeeklyAdherenceView: View {
     /// Bars grow from zero the first time the card is shown.
     @State private var hasAppeared = false
 
+    /// TopRoundedBar's cap is half the bar's width: a wider bar turns into a dome.
+    private static let maxBarWidth: CGFloat = 40
+
     // MARK: - Body
 
     var body: some View {
@@ -54,12 +57,14 @@ struct WeeklyAdherenceView: View {
                                     .shadow(color: Color.accentPrimary.opacity(0.3), radius: 5, x: 0, y: -5)
                             }
                         }
+                        .frame(maxWidth: Self.maxBarWidth)
                         .frame(height: 80)
 
                         Text(label)
                             .font(.caption2.weight(.bold))
                             .foregroundColor(.textSecondary)
                     }
+                    .frame(maxWidth: .infinity)
                     // Shapes are invisible to VoiceOver, so the value is added explicitly.
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(label)

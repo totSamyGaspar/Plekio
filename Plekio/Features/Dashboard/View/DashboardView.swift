@@ -22,6 +22,14 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
 
     @Namespace private var daySelection
 
+    @State private var width: CGFloat = 0
+
+    private static var twoColumnMinWidth: CGFloat { 780 }
+
+    private var isWide: Bool { width >= Self.twoColumnMinWidth }
+
+    private var overviewWidth: CGFloat { min(max(width * 0.4, 360), 460) }
+
     private let checkmarkTip = DoseCheckmarkTip()
 
     private var hasPills: Bool {
@@ -40,40 +48,14 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             Color.appBackground.ignoresSafeArea()
+            spaceReader
             // Statuses, not just "taken": a skip can also finish the day and swap the hero card.
             let allStatuses = allPills.map(\.status)
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    headerSection
-
-                    if let heroPills {
-                        heroCard(front: heroPills)
-                            .tourTarget(.upNextCard)
-                            .zIndex(1)
-                            .transition(
-                                .asymmetric(
-                                    insertion: .move(edge: .bottom).combined(with: .opacity),
-                                    removal: .opacity
-                                        .combined(with: .scale(scale: 0.8))
-                                        .combined(with: .offset(y: -40))
-                                )
-                            )
-                    } else {
-                        dateSummaryLine
-                    }
-
-                    calendarSection.padding(.top, 8)
-
-                    if viewModel.isEmpty {
-                        emptyDay
-                    } else {
-                        timelineSection
-                    }
-                    StatisticsView(viewModel: statistics, showsAdherence: !isDayComplete)
-                }
-                .padding(.bottom, 100)
-                .motion(Motion.progress, value: allStatuses)
+            if isWide {
+                wideLayout(statuses: allStatuses)
+            } else {
+                narrowLayout(statuses: allStatuses)
             }
         }
         .overlay(alignment: .bottom) {
@@ -97,6 +79,70 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
         .toolbar(.hidden, for: .navigationBar)
     }
 
+    // MARK: - Layouts
+
+    /// The space given, not the content: the content's width changes with the layout.
+    private var spaceReader: some View {
+        Color.clear
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+            .accessibilityHidden(true)
+    }
+
+    private func narrowLayout(statuses: [DoseStatus]) -> some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 24) {
+                headerSection
+                daySection
+
+                if viewModel.isEmpty {
+                    emptyDay
+                } else {
+                    VStack(spacing: 20) {
+                        weeklyChart
+                        doseTimeline
+                    }
+                }
+                overviewSection
+            }
+            .padding(.bottom, 100)
+            .motion(Motion.progress, value: statuses)
+        }
+    }
+
+    private func wideLayout(statuses: [DoseStatus]) -> some View {
+        VStack(spacing: 16) {
+            headerSection
+
+            HStack(alignment: .top, spacing: 0) {
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        daySection
+
+                        if viewModel.isEmpty {
+                            emptyDay
+                        } else {
+                            doseTimeline
+                        }
+                    }
+                    .padding(.bottom, 100)
+                    .motion(Motion.progress, value: statuses)
+                }
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        if !viewModel.isEmpty {
+                            weeklyChart
+                        }
+                        overviewSection
+                    }
+                    .padding(.bottom, 100)
+                    .motion(Motion.progress, value: statuses)
+                }
+                .frame(width: overviewWidth)
+            }
+        }
+    }
+
     // MARK: - Header
 
     private var headerSection: some View {
@@ -112,6 +158,31 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
         .padding(.top, 10)
+    }
+
+    @ViewBuilder
+    private var daySection: some View {
+        if let heroPills {
+            heroCard(front: heroPills)
+                .tourTarget(.upNextCard)
+                .zIndex(1)
+                .transition(
+                    .asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .opacity
+                            .combined(with: .scale(scale: 0.8))
+                            .combined(with: .offset(y: -40))
+                    )
+                )
+        } else {
+            dateSummaryLine
+        }
+
+        calendarSection.padding(.top, 8)
+    }
+
+    private var overviewSection: some View {
+        StatisticsView(viewModel: statistics)
     }
 
     // MARK: - Derived state
@@ -197,28 +268,39 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
     }
 
     private var calendarSection: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
-                ForEach(viewModel.weekDates, id: \.self) { date in
-                    CalendarDayView(
-                        date: date,
-                        isSelected: Calendar.current.isDate(date, inSameDayAs: viewModel.selectedDate),
-                        selection: daySelection
-                    )
-                    .onTapGesture {
-                        withMotion { viewModel.selectedDate = date }
-                    }
-                }
+        ViewThatFits(in: .horizontal) {
+            weekRow(stretches: true)
+                .padding(.horizontal)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                weekRow(stretches: false)
+                    .padding(.horizontal)
             }
-            .selectionIndicator(
-                following: selectedWeekDate,
-                in: daySelection,
-                shape: RoundedRectangle(cornerRadius: 16),
-                fill: .accentPrimary
-            )
-            .padding(.horizontal)
         }
         .sensoryFeedback(.selection, trigger: viewModel.selectedDate)
+    }
+
+    private func weekRow(stretches: Bool) -> some View {
+        HStack(spacing: 12) {
+            ForEach(viewModel.weekDates, id: \.self) { date in
+                CalendarDayView(
+                    date: date,
+                    isSelected: Calendar.current.isDate(date, inSameDayAs: viewModel.selectedDate),
+                    selection: daySelection,
+                    stretches: stretches
+                )
+                .onTapGesture {
+                    withMotion { viewModel.selectedDate = date }
+                }
+                .frame(maxWidth: stretches ? .infinity : nil)
+            }
+        }
+        .selectionIndicator(
+            following: selectedWeekDate,
+            in: daySelection,
+            shape: RoundedRectangle(cornerRadius: 16),
+            fill: .accentPrimary
+        )
     }
 
     /// Before the first course, the empty day offers to create one.
@@ -237,15 +319,17 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
         }
     }
 
-    private var timelineSection: some View {
-        LazyVStack(spacing: 20) {
-            WeeklyAdherenceView(
-                percentages: viewModel.weeklyPercentages,
-                days: viewModel.weeklyDays,
-                recentAverage: viewModel.recentAverage
-            )
-            .padding(.top, 10)
+    private var weeklyChart: some View {
+        WeeklyAdherenceView(
+            percentages: viewModel.weeklyPercentages,
+            days: viewModel.weeklyDays,
+            recentAverage: viewModel.recentAverage
+        )
+        .padding(.top, 10)
+    }
 
+    private var doseTimeline: some View {
+        LazyVStack(spacing: 20) {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Daily Dosage Timeline")
