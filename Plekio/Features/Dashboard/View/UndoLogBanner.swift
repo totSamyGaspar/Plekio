@@ -96,7 +96,8 @@ struct UndoLogBanner: View {
                     .overlay(alignment: .leading) {
                         Capsule()
                             .fill(Color.accentPrimary)
-                            .scaleEffect(x: remaining(at: context.date), y: 1, anchor: .leading)
+                            // Never zero: a zero scale is a singular transform, and CoreGraphics logs NaN.
+                            .scaleEffect(x: max(remaining(at: context.date), 0.001), y: 1, anchor: .leading)
                     }
                     // An implicit animation would lag behind the clock.
                     .transaction { $0.animation = nil }
