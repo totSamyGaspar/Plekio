@@ -15,9 +15,11 @@ struct CalendarDayView: View {
     let isSelected: Bool
     /// Shared by the week's cells so the highlight slides between them.
     let selection: Namespace.ID
+    var stretches = false
 
     /// Fixed (but scaled) width so one- and two-digit days line up.
     @ScaledMetric(relativeTo: .title3) private var cellWidth: CGFloat = 56
+    @ScaledMetric(relativeTo: .title3) private var maxCellWidth: CGFloat = 96
 
     // MARK: - Body
 
@@ -35,7 +37,7 @@ struct CalendarDayView: View {
                 .foregroundColor(isSelected ? .onAccent : .textPrimary)
         }
         .padding(.vertical, 12)
-        .frame(width: cellWidth)
+        .frame(minWidth: cellWidth, maxWidth: stretches ? maxCellWidth : cellWidth)
         .background(
             isSelected ? Color.clear : Color.textPrimary.opacity(0.05),
             in: RoundedRectangle(cornerRadius: 16)
