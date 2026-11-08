@@ -19,6 +19,7 @@ struct OnboardingPageView: View {
     var isActive = true
 
     var isWide = false
+    var isLarge = false
 
     @State private var isGlowing = false
 
@@ -30,7 +31,7 @@ struct OnboardingPageView: View {
                 HStack(spacing: 40) {
                     illustration
                     text(alignment: .leading)
-                        .frame(maxWidth: 380, alignment: .leading)
+                        .frame(maxWidth: isLarge ? 480 : 380, alignment: .leading)
                 }
                 .padding(.horizontal, 40)
             } else {
@@ -53,7 +54,7 @@ struct OnboardingPageView: View {
     // MARK: - Subviews
 
     private var illustration: some View {
-        ScaledToFit {
+        ScaledToFit(maxScale: isLarge ? 1.6 : 1) {
             ZStack {
                 Circle()
                     .fill(
@@ -77,11 +78,11 @@ struct OnboardingPageView: View {
     private func text(alignment: HorizontalAlignment) -> some View {
         VStack(alignment: alignment, spacing: 12) {
             Text(page.title)
-                .scaledFont(size: 28, relativeTo: .title, weight: .bold, design: .serif)
+                .scaledFont(size: isLarge ? 36 : 28, relativeTo: .title, weight: .bold, design: .serif)
                 .foregroundColor(.textPrimary)
 
             Text(page.description)
-                .font(.body)
+                .font(isLarge ? .title3 : .body)
                 .foregroundColor(.textSecondary)
                 .lineSpacing(3)
         }
