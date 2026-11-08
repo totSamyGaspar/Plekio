@@ -7,6 +7,13 @@
 
 import SwiftUI
 
+// MARK: - Layout
+
+enum OnboardingLayout {
+    static let textMaxWidth: CGFloat = 520
+    static let actionsMaxWidth: CGFloat = 420
+}
+
 // MARK: - View Modifiers
 
 /// Onboarding chrome, built from the palette so it follows the light/dark theme.

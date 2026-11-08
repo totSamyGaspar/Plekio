@@ -16,19 +16,49 @@ struct OnboardingProfileStep: View {
     /// Saved as typed; Skip clears it rather than rolling back.
     @AppStorage(UserProfile.storageKey) private var stored = StoredProfile(.empty)
 
+    var isWide = false
+
     let onFinish: () -> Void
 
     // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
-            header
-            fields
-            Spacer()
-            buttons
+        if isWide {
+            ScrollView {
+                HStack(spacing: 48) {
+                    header
+                        .frame(maxWidth: 360)
+                    VStack(spacing: 24) {
+                        fields
+                        buttons
+                    }
+                    .frame(maxWidth: OnboardingLayout.actionsMaxWidth)
+                }
+                .padding(24)
+                .frame(maxWidth: .infinity)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            .defaultScrollAnchor(.center, for: .alignment)
+        } else {
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(spacing: 32) {
+                        header
+                        fields
+                    }
+                    .padding(.vertical, 24)
+                    .frame(maxWidth: OnboardingLayout.textMaxWidth)
+                    .frame(maxWidth: .infinity)
+                }
+                .scrollBounceBehavior(.basedOnSize)
+                .defaultScrollAnchor(.center, for: .alignment)
+
+                buttons
+                    .frame(maxWidth: OnboardingLayout.actionsMaxWidth)
+                    .padding(.bottom, 40)
+            }
+            .padding(.horizontal, 24)
         }
-        .padding(.horizontal, 24)
     }
 
     // MARK: - Subviews
@@ -103,6 +133,5 @@ struct OnboardingProfileStep: View {
                     .foregroundColor(.textSecondary)
             }
         }
-        .padding(.bottom, 40)
     }
 }
