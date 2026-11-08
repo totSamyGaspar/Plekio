@@ -17,6 +17,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
     @State private var isCollectingProfile = false
 
     @State private var isWide = false
+    @State private var isLarge = false
 
     // MARK: - Init
 
@@ -33,6 +34,8 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
             // The space given, not the content: the content's size changes with the layout.
             Color.clear
                 .onGeometryChange(for: Bool.self) { $0.size.width > $0.size.height } action: { isWide = $0 }
+                // An iPad, in either orientation; not a phone on its side.
+                .onGeometryChange(for: Bool.self) { min($0.size.width, $0.size.height) >= 700 } action: { isLarge = $0 }
                 .accessibilityHidden(true)
 
             if isCollectingProfile {
@@ -52,7 +55,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
         VStack(spacing: 0) {
             TabView(selection: $viewModel.currentPage) {
                 ForEach(Array(viewModel.pages.enumerated()), id: \.element.id) { index, page in
-                    OnboardingPageView(page: page, isActive: index == viewModel.currentPage, isWide: isWide)
+                    OnboardingPageView(page: page, isActive: index == viewModel.currentPage, isWide: isWide, isLarge: isLarge)
                         .tag(index)
                 }
             }
