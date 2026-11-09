@@ -24,14 +24,14 @@ nonisolated struct LocalDay: Hashable, Comparable, Sendable {
     /// The day `date` falls on in `calendar`'s time zone. Always Gregorian: a
     /// Buddhist or Japanese year from the calendar shown must not reach the store.
     init(_ date: Date, in calendar: Calendar) {
-        let parts = Self.gregorian(calendar.timeZone).dateComponents([.year, .month, .day], from: date)
+        let parts = Self.gregorian(like: calendar).dateComponents([.year, .month, .day], from: date)
         self.init(year: parts.year ?? 1970, month: parts.month ?? 1, day: parts.day ?? 1)
     }
 
     /// When this day begins in `calendar`'s time zone: midnight, or the first moment
     /// after it where a clock change skips midnight.
     func start(in calendar: Calendar) -> Date {
-        let local = Self.gregorian(calendar.timeZone)
+        let local = Self.gregorian(like: calendar)
         // Noon exists on every day; midnight doesn't everywhere.
         let noon = local.date(from: DateComponents(year: year, month: month, day: day, hour: 12)) ?? .distantPast
         return local.startOfDay(for: noon)
@@ -72,5 +72,10 @@ nonisolated struct LocalDay: Hashable, Comparable, Sendable {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
         return calendar
+    }
+
+    /// `calendar` itself when it's Gregorian, as it nearly always is: no new calendar per call.
+    static func gregorian(like calendar: Calendar) -> Calendar {
+        calendar.identifier == .gregorian ? calendar : gregorian(calendar.timeZone)
     }
 }

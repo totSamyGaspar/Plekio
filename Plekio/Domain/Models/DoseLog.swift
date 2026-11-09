@@ -17,7 +17,8 @@ nonisolated extension SchemaV2 {
         // MARK: - Properties
 
         var id: UUID = UUID()
-        var scheduledTime: Date = Date.distantPast
+        /// The slot as `LocalSlot.stored`; read through `slot`.
+        @Attribute(originalName: "scheduledTime") var storedSlot: Date = Date.distantPast
 
         // MARK: - Storage Behind Status
 
@@ -37,6 +38,27 @@ nonisolated extension SchemaV2 {
             self.scheduledTime = scheduledTime
             self.isTaken = false
             self.status = status
+        }
+
+        init(slot: LocalSlot, status: DoseStatus = .pending) {
+            self.id = UUID()
+            self.slot = slot
+            self.isTaken = false
+            self.status = status
+        }
+
+        // MARK: - Slot
+
+        /// The local day and time the dose belongs to: the same slot wherever it's read.
+        var slot: LocalSlot {
+            get { LocalSlot(stored: storedSlot) }
+            set { storedSlot = newValue.stored }
+        }
+
+        /// The slot as a moment where the person is now. Rules match on `slot`.
+        var scheduledTime: Date {
+            get { slot.date(in: .autoupdatingCurrent) ?? storedSlot }
+            set { slot = LocalSlot(newValue, in: .autoupdatingCurrent) }
         }
 
         // MARK: - Status

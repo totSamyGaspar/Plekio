@@ -29,17 +29,17 @@ nonisolated enum DoseDay {
     /// fills it with a fetch by date: `medication.logs` faults in a medication's
     /// whole history, and walking it for every day costs more the longer the app is used.
     struct LogIndex {
-        private var logs: [UUID: [DateComponents: DoseLog]] = [:]
+        private var logs: [UUID: [LocalSlot: DoseLog]] = [:]
 
-        init(_ logs: [DoseLog], calendar: Calendar) {
+        init(_ logs: [DoseLog]) {
             for log in logs {
                 guard let medicationId = log.medication?.id else { continue }
-                self.logs[medicationId, default: [:]][DoseSchedule.slotKey(log.scheduledTime, calendar: calendar)] = log
+                self.logs[medicationId, default: [:]][log.slot] = log
             }
         }
 
-        /// Slot keys carry the day, so one dictionary serves every day in the range.
-        func bySlot(of medicationId: UUID) -> [DateComponents: DoseLog] {
+        /// Slots carry the day, so one dictionary serves every day in the range.
+        func bySlot(of medicationId: UUID) -> [LocalSlot: DoseLog] {
             logs[medicationId] ?? [:]
         }
     }
@@ -48,7 +48,7 @@ nonisolated enum DoseDay {
         of courses: [TreatmentCourse],
         on day: Date,
         calendar: Calendar,
-        logsOf: (MedicationItem) -> [DateComponents: DoseLog]
+        logsOf: (MedicationItem) -> [LocalSlot: DoseLog]
     ) -> [PillDose] {
         var pills: [PillDose] = []
 
@@ -65,13 +65,14 @@ nonisolated enum DoseDay {
                 let logsBySlot = logsOf(med)
 
                 for slot in slots {
-                    let log = logsBySlot[DoseSchedule.slotKey(slot.date, calendar: calendar)]
+                    // The slot as read here: a log written for that moment holds the same.
+                    let log = logsBySlot[LocalSlot(slot.date, in: calendar)]
 
                     pills.append(
                         PillDose(
                             medicationId: med.id,
                             name: med.name,
-                            dosage: DoseSchedule.schedule(of: med, on: day).dosage,
+                            dosage: DoseSchedule.schedule(of: med, on: LocalDay(day, in: calendar)).dosage,
                             form: med.form,
                             time: slot.date,
                             period: DayPeriod(hour: slot.hour),

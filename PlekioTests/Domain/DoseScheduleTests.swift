@@ -165,9 +165,9 @@ struct DoseScheduleTests {
 
         let settled = DoseSchedule.settledSlots(of: med, calendar: calendar)
 
-        #expect(settled.contains(DoseSchedule.slotKey(taken.scheduledTime, calendar: calendar)))
-        #expect(settled.contains(DoseSchedule.slotKey(skipped.scheduledTime, calendar: calendar)))
-        #expect(!settled.contains(DoseSchedule.slotKey(untouched.scheduledTime, calendar: calendar)))
+        #expect(settled.contains(taken.slot))
+        #expect(settled.contains(skipped.slot))
+        #expect(!settled.contains(untouched.slot))
     }
 
     @Test("Settled slots from a day leave out the logs before it")
@@ -179,7 +179,7 @@ struct DoseScheduleTests {
 
         let settled = DoseSchedule.settledSlots(of: med, from: testDate(2026, 6, 12), calendar: calendar)
 
-        #expect(settled == [DoseSchedule.slotKey(recent.scheduledTime, calendar: calendar)])
+        #expect(settled == [recent.slot])
     }
 
     @Test("The log index takes only the requested day")
@@ -193,7 +193,7 @@ struct DoseScheduleTests {
         let indexed = DoseSchedule.logsBySlot(of: med, on: day(2026, 6, 10), calendar: calendar)
 
         #expect(indexed.count == 1)
-        #expect(indexed[DoseSchedule.slotKey(today.scheduledTime, calendar: calendar)] === today)
+        #expect(indexed[today.slot] === today)
     }
 
     // MARK: - Periods of the day

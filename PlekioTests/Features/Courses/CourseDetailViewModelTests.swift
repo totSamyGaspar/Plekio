@@ -32,8 +32,9 @@ struct CourseDetailViewModelTests {
         let vm = CourseDetailViewModel(course: dummyCourse, dbService: mockDB, notificationService: mockNotifications)
 
         #expect(vm.courseName == "Antibiotics")
-        #expect(vm.startDate == startDate)
-        #expect(vm.endDate == endDate)
+        // A course keeps days: its dates read back as those days' midnights.
+        #expect(vm.startDate == Calendar.current.startOfDay(for: startDate))
+        #expect(vm.endDate == Calendar.current.startOfDay(for: endDate))
         #expect(vm.medications.isEmpty)
     }
 

@@ -27,7 +27,7 @@ nonisolated extension SchemaV2 {
         var frequencyDays: Int = 1
         var course: TreatmentCourse?
         /// First day it's taken, when added to a course already running; nil means from the course start.
-        var startDate: Date?
+        @Attribute(originalName: "startDate") var storedStartDay: Date?
         var stockCount: Int = 0
         var lowStockThreshold: Int = 0
         /// A `MealTiming` raw value, nil when it doesn't matter; read through `mealTiming`.
@@ -83,6 +83,18 @@ nonisolated extension SchemaV2 {
         var form: MedicationForm {
             get { MedicationForm(rawValue: formRaw) ?? .pill }
             set { formRaw = newValue.rawValue }
+        }
+
+        /// First day it's taken, when added to a course already running; nil means from the course start.
+        var startDay: LocalDay? {
+            get { storedStartDay.map(LocalDay.init(stored:)) }
+            set { storedStartDay = newValue?.stored }
+        }
+
+        /// That day's midnight where the person is now; rules use `startDay`.
+        var startDate: Date? {
+            get { startDay?.start(in: .autoupdatingCurrent) }
+            set { startDay = newValue.map { LocalDay($0, in: .autoupdatingCurrent) } }
         }
 
         /// An unknown raw value (from a newer version) reads as "doesn't matter".

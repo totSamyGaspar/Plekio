@@ -62,8 +62,9 @@ nonisolated enum SchemaV1: VersionedSchema {
     }
 }
 
-/// Adds MedicationItem.mealTiming, and is CloudKit-ready: no unique attributes, a default
-/// or nil for every attribute, optional relationships. Not frozen until it ships.
+/// Adds MedicationItem.mealTiming; keeps course days, revisions and dose slots as local
+/// days and times (LocalDay, LocalSlot); and is CloudKit-ready: no unique attributes, a
+/// default or nil for every attribute, optional relationships. Not frozen until it ships.
 nonisolated enum SchemaV2: VersionedSchema {
     static let versionIdentifier = Schema.Version(2, 0, 0)
 
@@ -94,8 +95,11 @@ nonisolated enum PlekioMigrationPlan: SchemaMigrationPlan {
         [migrateV1toV2]
     }
 
-    /// Attributes added or relaxed, relationships renamed (`originalName`): nothing to rewrite.
+    /// The structure moves as in a lightweight migration (attributes added, relaxed and
+    /// renamed with `originalName`); then days and slots become local, see LocalTimeMigration.
     static var migrateV1toV2: MigrationStage {
-        .lightweight(fromVersion: SchemaV1.self, toVersion: SchemaV2.self)
+        .custom(fromVersion: SchemaV1.self, toVersion: SchemaV2.self, willMigrate: nil) { context in
+            try LocalTimeMigration.run(in: context, calendar: .autoupdatingCurrent)
+        }
     }
 }

@@ -116,9 +116,11 @@ struct PlekioSchemaTests {
         let courses = try reopened.mainContext.fetch(FetchDescriptor<TreatmentCourse>())
         #expect(courses.map(\.name) == ["Course"])
         let revision = try #require(courses.first?.dateRevisions.first)
-        #expect(revision.validUntil == Date(timeIntervalSince1970: 200))
-        #expect(revision.startDate == Date(timeIntervalSince1970: 100))
-        #expect(revision.endDate == Date(timeIntervalSince1970: 150))
+        // Local days: the moments given, as days in the device's zone.
+        let local = Calendar.autoupdatingCurrent
+        #expect(revision.validUntilDay == LocalDay(Date(timeIntervalSince1970: 200), in: local))
+        #expect(revision.startDay == LocalDay(Date(timeIntervalSince1970: 100), in: local))
+        #expect(revision.endDay == LocalDay(Date(timeIntervalSince1970: 150), in: local))
         #expect(revision.course?.id == courses.first?.id)
     }
 }

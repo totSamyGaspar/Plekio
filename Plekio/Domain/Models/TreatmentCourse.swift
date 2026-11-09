@@ -18,8 +18,9 @@ nonisolated extension SchemaV2 {
 
         var id: UUID = UUID()
         var name: String = ""
-        var startDate: Date = Date.distantPast
-        var endDate: Date = Date.distantPast
+        /// The first and last days as `LocalDay.stored`; read through `startDay` and `endDay`.
+        @Attribute(originalName: "startDate") var storedStartDay: Date = Date.distantPast
+        @Attribute(originalName: "endDate") var storedEndDay: Date = Date.distantPast
 
         /// Id of the FIRST course in the "Repeat" chain (not the parent), nil for originals.
         var repeatedFromId: UUID?
@@ -41,6 +42,28 @@ nonisolated extension SchemaV2 {
             set { storedDateRevisions = newValue }
         }
 
+        var startDay: LocalDay {
+            get { LocalDay(stored: storedStartDay) }
+            set { storedStartDay = newValue.stored }
+        }
+
+        var endDay: LocalDay {
+            get { LocalDay(stored: storedEndDay) }
+            set { storedEndDay = newValue.stored }
+        }
+
+        /// The days' midnights where the person is now: for screens, pickers and sorting.
+        /// Rules work on `startDay` and `endDay`.
+        var startDate: Date {
+            get { startDay.start(in: .autoupdatingCurrent) }
+            set { startDay = LocalDay(newValue, in: .autoupdatingCurrent) }
+        }
+
+        var endDate: Date {
+            get { endDay.start(in: .autoupdatingCurrent) }
+            set { endDay = LocalDay(newValue, in: .autoupdatingCurrent) }
+        }
+
         // MARK: - Init
 
         init(name: String, startDate: Date, endDate: Date, repeatedFromId: UUID? = nil) {
@@ -48,6 +71,15 @@ nonisolated extension SchemaV2 {
             self.name = name
             self.startDate = startDate
             self.endDate = endDate
+            self.repeatedFromId = repeatedFromId
+            self.medications = []
+        }
+
+        init(name: String, startDay: LocalDay, endDay: LocalDay, repeatedFromId: UUID? = nil) {
+            self.id = UUID()
+            self.name = name
+            self.startDay = startDay
+            self.endDay = endDay
             self.repeatedFromId = repeatedFromId
             self.medications = []
         }

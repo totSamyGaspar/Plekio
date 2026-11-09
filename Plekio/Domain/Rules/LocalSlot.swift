@@ -23,7 +23,7 @@ nonisolated struct LocalSlot: Hashable, Comparable, Sendable {
     init(_ date: Date, in calendar: Calendar) {
         self.init(
             day: LocalDay(date, in: calendar),
-            minuteOfDay: MinuteOfDay.of(date, calendar: LocalDay.gregorian(calendar.timeZone))
+            minuteOfDay: MinuteOfDay.of(date, calendar: LocalDay.gregorian(like: calendar))
         )
     }
 
