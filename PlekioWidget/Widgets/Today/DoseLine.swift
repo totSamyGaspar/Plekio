@@ -37,12 +37,22 @@ struct DoseLine: View {
             // The form is a picture of the name next to it; VoiceOver would read "pills.fill".
             .accessibilityHidden(true)
 
-            Text(dose.name)
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(dose.status.isSettled ? Color.textSecondary : Color.textPrimary)
-                .strikethrough(dose.status == .taken)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 4) {
+                Text(dose.name)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(dose.status.isSettled ? Color.textSecondary : Color.textPrimary)
+                    .strikethrough(dose.status == .taken)
+                    .lineLimit(1)
+
+                // Only the icon fits; VoiceOver reads the words.
+                if let mealTiming = dose.mealTimingTitle {
+                    Image(systemName: WidgetSnapshot.Dose.mealTimingImage)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(Color.textSecondary)
+                        .accessibilityLabel(Text(mealTiming))
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             trailing
         }

@@ -164,6 +164,7 @@ nonisolated struct ReportAssembler {
             minutesOfDay: shown.minutesOfDay,
             frequencyDays: shown.frequencyDays,
             adherence: adherence,
+            mealTiming: medication.mealTiming,
             exceptions: exceptions.sorted { $0.time < $1.time }
         )
     }

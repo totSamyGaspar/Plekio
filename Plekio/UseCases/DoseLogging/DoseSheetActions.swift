@@ -52,7 +52,7 @@ final class DoseSheetActions {
             for (slot, group) in bySlot {
                 await notifications.scheduleSnooze(
                     for: group.map(\.medicationId.uuidString),
-                    names: group.map(\.name),
+                    names: group.map { MealTiming.label($0.name, $0.mealTiming) },
                     slot: slot
                 )
             }

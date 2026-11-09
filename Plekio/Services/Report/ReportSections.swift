@@ -50,9 +50,16 @@ nonisolated struct ReportSections {
     private func medication(_ medication: MedicationReport) {
         canvas.reserve(48)
 
-        let schedule = String(localized: DoseFrequency.title(forDays: medication.frequencyDays))
+        var parts = [
+            medication.name,
+            String(localized: "\(medication.dosage) pcs"),
+            String(localized: DoseFrequency.title(forDays: medication.frequencyDays))
+        ]
+        if let mealTiming = medication.mealTiming {
+            parts.append(String(localized: mealTiming.title))
+        }
         canvas.write(
-            "\(medication.name) · \(String(localized: "\(medication.dosage) pcs")) · \(schedule)",
+            parts.joined(separator: " · "),
             font: style.body,
             indent: 14,
             gap: 2

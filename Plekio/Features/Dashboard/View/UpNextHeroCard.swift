@@ -23,17 +23,32 @@ struct UpNextHeroCard: View {
         HeroCard(title: "UP NEXT TODAY", date: selectedDate) {
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(pills) { pill in
-                    HStack(spacing: 12) {
+                    HStack(alignment: .firstTextBaseline, spacing: 12) {
                         Image(systemName: pill.isTaken ? "checkmark.circle.fill" : "circle.dotted.circle")
                             .scaledFont(size: 18, relativeTo: .headline, weight: .bold)
                             .foregroundColor(pill.isTaken ? .white.opacity(0.6) : .white)
                             .animatedSymbol(pill.isTaken)
 
-                        Text(pill.name)
-                            .font(.system(size: pills.count > 1 ? 20 : 32, weight: .heavy, design: .serif))
-                            .strikethrough(pill.isTaken)
-                            .opacity(pill.isTaken ? 0.6 : 1.0)
-                            .lineLimit(1)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(pill.name)
+                                .font(.system(size: pills.count > 1 ? 20 : 32, weight: .heavy, design: .serif))
+                                .strikethrough(pill.isTaken)
+                                .opacity(pill.isTaken ? 0.6 : 1.0)
+                                .lineLimit(1)
+
+                            // Once taken, it no longer matters.
+                            if let mealTiming = pill.mealTiming, !pill.isTaken {
+                                Label {
+                                    Text(mealTiming.title)
+                                } icon: {
+                                    Image(systemName: MealTiming.systemImage)
+                                }
+                                .labelStyle(.titleAndIcon)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundColor(.white.opacity(0.85))
+                                .lineLimit(1)
+                            }
+                        }
                     }
                     .motion(.easeInOut(duration: 0.3), value: pill.isTaken)
                 }

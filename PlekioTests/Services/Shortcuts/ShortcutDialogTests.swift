@@ -40,4 +40,16 @@ struct ShortcutDialogTests {
         #expect(String(localized: ShortcutDialog.readingSaved(systolic: 128, diastolic: 84, hidesDetails: false)).contains("128/84"))
         #expect(!String(localized: ShortcutDialog.readingSaved(systolic: 128, diastolic: 84, hidesDetails: true)).contains("128"))
     }
+
+    @Test("Doses still to take say when to take them relative to food; logged ones don't")
+    func mealTimingOnlyForUpcoming() {
+        var dose = slot.doses[0]
+        dose.mealTiming = .emptyStomach
+        let withMeal = DueDoses.Slot(time: time, doses: [dose])
+        let title = String(localized: MealTiming.emptyStomach.title)
+
+        #expect(ShortcutDialog.upcoming(.init(next: withMeal), hidesDetails: false).contains(title))
+        #expect(!String(localized: ShortcutDialog.logged(withMeal, hidesDetails: false)).contains(title))
+        #expect(!ShortcutDialog.upcoming(.init(next: withMeal), hidesDetails: true).contains(title))
+    }
 }

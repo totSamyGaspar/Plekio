@@ -297,4 +297,17 @@ struct ReportBuilderTests {
         #expect(background.courses.first?.adherence.taken == 1)
         #expect(background.courses.first?.adherence.skipped == 1)
     }
+
+    @Test("The report lists each medication's meal timing")
+    func reportCarriesMealTiming() throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let course = seedCourse(db)
+        try #require(course.medications.first).mealTiming = .withMeal
+        try db.context.save()
+
+        let data = builder(db, now: afterwards)
+            .build(selection(course, from: testDate(2026, 6, 1), to: testDate(2026, 6, 3)))
+
+        #expect(data.courses.first?.medications.map(\.mealTiming) == [.withMeal])
+    }
 }

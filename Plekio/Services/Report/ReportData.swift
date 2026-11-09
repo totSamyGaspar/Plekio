@@ -45,6 +45,7 @@ nonisolated struct MedicationReport: Equatable {
     let minutesOfDay: [Int]
     let frequencyDays: Int
     let adherence: Adherence
+    var mealTiming: MealTiming? = nil
 
     /// Only doses that were skipped or missed.
     let exceptions: [DoseException]

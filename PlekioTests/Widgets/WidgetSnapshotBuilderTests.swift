@@ -122,4 +122,14 @@ struct WidgetSnapshotBuilderTests {
         // openDoses(medicationIds:at:) matches within one second.
         #expect(abs(slot.time.timeIntervalSince(pills[0].time)) < 1)
     }
+
+    @Test("Meal timing reaches the widget as its stored value")
+    func mapsMealTiming() {
+        let time = testDate(2026, 10, 21, 8)
+        var withMeal = pill("A", at: time)
+        withMeal.mealTiming = .afterMeal
+        let slots = WidgetSnapshotBuilder.slots(from: [withMeal, pill("B", at: time)])
+
+        #expect(slots[0].doses.map(\.mealTiming) == [MealTiming.afterMeal.rawValue, nil])
+    }
 }

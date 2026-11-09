@@ -62,7 +62,8 @@ nonisolated enum WidgetSnapshotBuilder {
             name: pill.name,
             dosage: pill.dosage,
             form: form(pill.form),
-            status: status(pill.status)
+            status: status(pill.status),
+            mealTiming: pill.mealTiming?.rawValue
         )
     }
 
