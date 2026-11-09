@@ -17,28 +17,39 @@ nonisolated extension SchemaV2 {
         // MARK: - Properties
 
         // No image property on purpose: photos live on disk keyed by `id`.
-        @Attribute(.unique) var id: UUID
-        var name: String
+        var id: UUID = UUID()
+        var name: String = ""
         /// A `MedicationForm` raw value; read through `form`.
-        var formRaw: String
-        var dosage: Int
+        var formRaw: String = "pill"
+        var dosage: Int = 1
         /// Wall-clock dose times, see `MinuteOfDay`.
-        var minutesOfDay: [Int]
-        var frequencyDays: Int
+        var minutesOfDay: [Int] = []
+        var frequencyDays: Int = 1
         var course: TreatmentCourse?
         /// First day it's taken, when added to a course already running; nil means from the course start.
         var startDate: Date?
-        var stockCount: Int
-        var lowStockThreshold: Int
+        var stockCount: Int = 0
+        var lowStockThreshold: Int = 0
         /// A `MealTiming` raw value, nil when it doesn't matter; read through `mealTiming`.
         var mealTimingRaw: String?
 
-        @Relationship(deleteRule: .cascade, inverse: \SchemaV2.DoseLog.medication)
-        var logs: [DoseLog]
+        // Optional, as CloudKit requires of every relationship; read through `logs`.
+        @Relationship(deleteRule: .cascade, originalName: "logs", inverse: \SchemaV2.DoseLog.medication)
+        var storedLogs: [DoseLog]? = []
 
         /// Earlier schedules, so a change doesn't rewrite past days.
-        @Relationship(deleteRule: .cascade, inverse: \SchemaV2.ScheduleRevision.medication)
-        var scheduleRevisions: [ScheduleRevision]
+        @Relationship(deleteRule: .cascade, originalName: "scheduleRevisions", inverse: \SchemaV2.ScheduleRevision.medication)
+        var storedScheduleRevisions: [ScheduleRevision]? = []
+
+        var logs: [DoseLog] {
+            get { storedLogs ?? [] }
+            set { storedLogs = newValue }
+        }
+
+        var scheduleRevisions: [ScheduleRevision] {
+            get { storedScheduleRevisions ?? [] }
+            set { storedScheduleRevisions = newValue }
+        }
 
         // MARK: - Init
 

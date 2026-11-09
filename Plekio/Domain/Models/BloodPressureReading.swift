@@ -18,11 +18,11 @@ nonisolated extension SchemaV2 {
 
         // MARK: - Properties
 
-        @Attribute(.unique) var id: UUID
+        var id: UUID = UUID()
 
-        var measuredAt: Date
-        var systolic: Int
-        var diastolic: Int
+        var measuredAt: Date = Date.distantPast
+        var systolic: Int = 0
+        var diastolic: Int = 0
         var pulse: Int?
 
         // MARK: - Init

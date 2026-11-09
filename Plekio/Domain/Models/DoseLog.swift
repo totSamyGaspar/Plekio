@@ -16,14 +16,14 @@ nonisolated extension SchemaV2 {
 
         // MARK: - Properties
 
-        @Attribute(.unique) var id: UUID
-        var scheduledTime: Date
+        var id: UUID = UUID()
+        var scheduledTime: Date = Date.distantPast
 
         // MARK: - Storage Behind Status
 
         // Schema columns; written only together by `status`'s setter, so invalid
         // combinations never reach the store.
-        private var isTaken: Bool
+        private var isTaken: Bool = false
         private var actualTakeTime: Date?
         private var skippedAt: Date?
         private var dispensedQuantity: Int?
