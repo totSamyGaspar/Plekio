@@ -68,6 +68,13 @@ Settings that look removable but aren't:
 - [ ] **`authenticationPolicy = .requiresAuthentication`** stays on every shortcut intent: Siri says medication names.
 - [ ] Siri doesn't speak Ukrainian, Georgian, Kazakh or Romanian. Those phrases appear in Shortcuts and Spotlight only; check Siri itself in English or Russian.
 
+## 4c. Reminders
+
+Settings that look removable but aren't:
+
+- [ ] **Time Sensitive Notifications** capability (`Plekio.entitlements`). Without it dose reminders are held back by Focus and Sleep.
+- [ ] **`UIBackgroundModes` = `fetch`** and **`BGTaskSchedulerPermittedIdentifiers`** containing `com.EdHasp.Plekio.reminders` (`Plekio/Info.plist`). Without them the background refresh never runs and the queue runs out after a week or two unless the app is opened.
+
 ## 5. Smoke test on a real iPhone
 
 Release build from TestFlight, not a debug run.

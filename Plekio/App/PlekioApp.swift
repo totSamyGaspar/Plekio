@@ -47,6 +47,8 @@ struct PlekioApp: App {
             .onChange(of: scenePhase, initial: true) { _, newPhase in
                 if newPhase == .active {
                     becameActive()
+                } else if newPhase == .background {
+                    BackgroundRefresh.schedule()
                 }
             }
         }
