@@ -218,4 +218,36 @@ struct NotificationSchedulingTests {
         let scheduledDays = Set(map.keys.map { Calendar.current.component(.day, from: $0) })
         #expect(scheduledDays == [16, 17])
     }
+
+    // MARK: - Cut short
+
+    @Test("A schedule stopped by the budget while courses go on is cut short")
+    func budgetCutsLongCourseShort() {
+        let anchor = testDate(2026, 6, 15)
+        let course = TreatmentCourse(name: "Long", startDate: anchor, endDate: testDate(2026, 8, 15))
+        course.medications.append(
+            MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1,
+                           minutesOfDay: [8 * 60, 12 * 60, 16 * 60, 20 * 60], frequencyDays: 1)
+        )
+
+        let schedule = ReminderPlanner.buildSchedule(activeCourses: [course], now: anchor, calendar: .current)
+
+        #expect(schedule.isCutShort)
+        // Whole days only: 13 days of four.
+        #expect(schedule.map.count == 52)
+    }
+
+    @Test("A course that ends within the budget isn't cut short")
+    func shortCourseIsNotCutShort() {
+        let anchor = testDate(2026, 6, 15)
+        let course = TreatmentCourse(name: "Short", startDate: anchor, endDate: testDate(2026, 6, 17))
+        course.medications.append(
+            MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1, minutesOfDay: [9 * 60], frequencyDays: 1)
+        )
+
+        let schedule = ReminderPlanner.buildSchedule(activeCourses: [course], now: anchor, calendar: .current)
+
+        #expect(!schedule.isCutShort)
+        #expect(schedule.map.count == 3)
+    }
 }

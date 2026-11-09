@@ -131,9 +131,10 @@ final class NotificationService: NotificationServiceProtocol {
 
     func scheduleNotifications(activeCourses: [TreatmentCourse]) async {
         let calendar = time.calendar
-        let scheduleMap = ReminderPlanner.buildScheduleMap(
+        let schedule = ReminderPlanner.buildSchedule(
             activeCourses: activeCourses, now: time.now, calendar: calendar
         )
+        let scheduleMap = schedule.map
 
         // Soonest first, so the iOS limit drops the furthest reminders.
         let sortedEntries = scheduleMap.sorted { $0.key < $1.key }
@@ -142,6 +143,10 @@ final class NotificationService: NotificationServiceProtocol {
         // Each reminder sets the icon to what will be open when it fires.
         let badges = DoseBadge.counts(at: scheduled.map(\.key), courses: activeCourses, calendar: calendar)
 
+        // Within the queue, not a request of its own: the last day's reminders ask for the
+        // app to be opened, a day before they would stop.
+        let lastDay = schedule.isCutShort ? scheduled.last.map { calendar.startOfDay(for: $0.key) } : nil
+
         // Build all requests before any await, while the SwiftData objects are in hand.
         let requests = scheduled.map { triggerDate, medsAtTime in
             ReminderRequestFactory.doseReminder(
@@ -149,7 +154,8 @@ final class NotificationService: NotificationServiceProtocol {
                 medicationNames: medsAtTime.map { $0.medication.name },
                 triggerDate: triggerDate,
                 calendar: calendar,
-                badge: badges[triggerDate]
+                badge: badges[triggerDate],
+                asksToOpenApp: lastDay.map { calendar.isDate(triggerDate, inSameDayAs: $0) } ?? false
             )
         }
 

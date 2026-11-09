@@ -35890,6 +35890,71 @@
           }
         }
       }
+    },
+    "Open Plekio to keep your reminders coming." : {
+      "comment" : "Added to the dose reminders of the last day the queue covers: after it nothing reminds until the app is opened.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne Plekio, damit die Erinnerungen weiter kommen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Plekio para seguir recibiendo recordatorios."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrez Plekio pour continuer à recevoir vos rappels."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri Plekio per continuare a ricevere i promemoria."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リマインダーを引き続き受け取るには、Plekioを開いてください。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "გახსენი Plekio, რომ შეხსენებები კვლავ მიიღო."
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Еске салғыштар келе беруі үшін Plekio-ны ашыңыз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deschide Plekio ca să primești în continuare memento-urile."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откройте Plekio, чтобы напоминания приходили и дальше."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрийте Plekio, щоб нагадування надходили й далі."
+          }
+        }
+      }
     }
   },
   "version" : "1.2"

@@ -47,6 +47,26 @@ enum ReminderPlanner {
         slotBudget: Int = maxScheduled,
         horizonLimitInDays: Int = maxHorizonDays
     ) -> [Date: [(courseName: String, medication: MedicationItem)]] {
+        buildSchedule(
+            activeCourses: activeCourses, now: now, calendar: calendar,
+            slotBudget: slotBudget, horizonLimitInDays: horizonLimitInDays
+        ).map
+    }
+
+    struct Schedule {
+        let map: [Date: [(courseName: String, medication: MedicationItem)]]
+        /// Stopped by the budget while courses go on: past its last day nothing reminds
+        /// until the app rebuilds the queue.
+        let isCutShort: Bool
+    }
+
+    static func buildSchedule(
+        activeCourses: [TreatmentCourse],
+        now: Date,
+        calendar: Calendar,
+        slotBudget: Int = maxScheduled,
+        horizonLimitInDays: Int = maxHorizonDays
+    ) -> Schedule {
 
         let today = calendar.startOfDay(for: now)
 
@@ -72,7 +92,7 @@ enum ReminderPlanner {
             }
         }
 
-        guard !plans.isEmpty else { return [:] }
+        guard !plans.isEmpty else { return Schedule(map: [:], isCutShort: false) }
 
         var scheduleMap: [Date: [(courseName: String, medication: MedicationItem)]] = [:]
 
@@ -115,14 +135,18 @@ enum ReminderPlanner {
             guard !slotsForDay.isEmpty else { continue }
 
             // Whole days only, except a first day that alone exceeds the budget.
-            if !scheduleMap.isEmpty, scheduleMap.count + slotsForDay.count > slotBudget { break }
+            if !scheduleMap.isEmpty, scheduleMap.count + slotsForDay.count > slotBudget {
+                return Schedule(map: scheduleMap, isCutShort: true)
+            }
 
             scheduleMap.merge(slotsForDay) { current, _ in current }
 
-            if scheduleMap.count >= slotBudget { break }
+            if scheduleMap.count >= slotBudget {
+                return Schedule(map: scheduleMap, isCutShort: !plans.allSatisfy { $0.endDay <= day })
+            }
         }
 
-        return scheduleMap
+        return Schedule(map: scheduleMap, isCutShort: false)
     }
 
     // MARK: - Cancellation
