@@ -44,6 +44,7 @@ nonisolated struct PillDose: Identifiable, Equatable, Sendable {
     var lowStockThreshold: Int = 10
     /// For "Open course"; nil in previews.
     var courseId: UUID? = nil
+    var mealTiming: MealTiming? = nil
 
     // MARK: - Status
 

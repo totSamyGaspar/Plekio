@@ -34,15 +34,21 @@ struct MedicationCardView: View {
         return StockRules.isLow(stock: stock, threshold: pill.lowStockThreshold)
     }
 
-    /// Dosage and remaining stock as one run of text.
+    /// Dosage, meal timing and remaining stock as one run of text, so it wraps instead of squeezing the name.
     private var dosageAndStock: Text {
-        let dosage = Text("\(pill.dosage) pcs")
+        let separator = Text(verbatim: "  ·  ").foregroundStyle(Color.textPrimary.opacity(0.3))
+        var line = Text("\(pill.dosage) pcs")
             .foregroundStyle(Color.textPrimary.opacity(0.7))
 
-        guard let stock = pill.stockCount else { return dosage }
+        if let mealTiming = pill.mealTiming {
+            line = line + separator
+            + (Text(Image(systemName: MealTiming.systemImage)) + Text(verbatim: " ") + Text(mealTiming.title))
+                .foregroundStyle(Color.textPrimary.opacity(0.7))
+        }
 
-        return dosage
-        + Text(verbatim: "  ·  ").foregroundStyle(Color.textPrimary.opacity(0.3))
+        guard let stock = pill.stockCount else { return line }
+
+        return line + separator
         + Text("Stock: \(stock)")
             .foregroundStyle(isLowStock ? Color.warningAmber : Color.textPrimary.opacity(0.7))
     }

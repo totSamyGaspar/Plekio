@@ -38,7 +38,8 @@ extension DatabaseService: CourseStoring {
                 minutesOfDay: draft.minutesOfDay,
                 frequencyDays: draft.frequencyDays,
                 stockCount: draft.stockCount,
-                lowStockThreshold: draft.lowStockThreshold
+                lowStockThreshold: draft.lowStockThreshold,
+                mealTiming: draft.mealTiming
             )
             course.medications.append(med)
             if let imageData = draft.medicationImageData {
@@ -76,7 +77,8 @@ extension DatabaseService: CourseStoring {
                 minutesOfDay: source.minutesOfDay,
                 frequencyDays: source.frequencyDays,
                 stockCount: source.stockCount,
-                lowStockThreshold: source.lowStockThreshold
+                lowStockThreshold: source.lowStockThreshold,
+                mealTiming: source.mealTiming
             )
             newCourse.medications.append(med)
 
@@ -110,6 +112,7 @@ extension DatabaseService: CourseStoring {
         medication.dosage = draft.dosage
         medication.stockCount = draft.stockCount
         medication.lowStockThreshold = draft.lowStockThreshold
+        medication.mealTiming = draft.mealTiming
         medication.frequencyDays = draft.frequencyDays
         medication.minutesOfDay = draft.minutesOfDay
 
@@ -260,7 +263,8 @@ extension DatabaseService: CourseStoring {
             frequencyDays: draft.frequencyDays,
             stockCount: draft.stockCount,
             lowStockThreshold: draft.lowStockThreshold,
-            startDate: courseStarted ? today : nil
+            startDate: courseStarted ? today : nil,
+            mealTiming: draft.mealTiming
         )
         course.medications.append(med)
 

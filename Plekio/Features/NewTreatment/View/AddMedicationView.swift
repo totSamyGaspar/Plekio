@@ -150,6 +150,16 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                         }
                     }
                     .listRowBackground(Color.appSurface)
+
+                    Section(header: Text("Meals").foregroundColor(.textSecondary)) {
+                        FlowLayout(spacing: 8) {
+                            mealChip(nil)
+                            ForEach(MealTiming.allCases, id: \.self) { mealChip($0) }
+                        }
+                        .padding(.vertical, 6)
+                        .sensoryFeedback(.selection, trigger: viewModel.draft.mealTiming)
+                    }
+                    .listRowBackground(Color.appSurface)
                 }
                 .scrollContentBackground(.hidden)
             }
@@ -178,6 +188,30 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                 await viewModel.startEditing(medicationToEdit)
             }
         }
+    }
+
+    /// One choice of several in a Form row: `.plain`, or a tap would trigger every button in it.
+    private func mealChip(_ timing: MealTiming?) -> some View {
+        let isSelected = viewModel.draft.mealTiming == timing
+        return Button {
+            viewModel.draft.mealTiming = timing
+        } label: {
+            Group {
+                if let timing {
+                    Text(timing.title)
+                } else {
+                    Text("Doesn't matter")
+                }
+            }
+            .font(.subheadline.weight(.semibold))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isSelected ? Color.accentPrimary : Color.textPrimary.opacity(0.06))
+            .foregroundColor(isSelected ? .onAccent : .textPrimary.opacity(0.8))
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 
