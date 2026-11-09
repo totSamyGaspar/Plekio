@@ -16,19 +16,30 @@ nonisolated extension SchemaV2 {
 
         // MARK: - Properties
 
-        @Attribute(.unique) var id: UUID
-        var name: String
-        var startDate: Date
-        var endDate: Date
+        var id: UUID = UUID()
+        var name: String = ""
+        var startDate: Date = Date.distantPast
+        var endDate: Date = Date.distantPast
 
         /// Id of the FIRST course in the "Repeat" chain (not the parent), nil for originals.
         var repeatedFromId: UUID?
 
-        @Relationship(deleteRule: .cascade, inverse: \SchemaV2.MedicationItem.course)
-        var medications: [MedicationItem]
+        // Optional, as CloudKit requires of every relationship; read through `medications`.
+        @Relationship(deleteRule: .cascade, originalName: "medications", inverse: \SchemaV2.MedicationItem.course)
+        var storedMedications: [MedicationItem]? = []
 
-        @Relationship(deleteRule: .cascade, inverse: \SchemaV2.CourseDateRevision.course)
-        var dateRevisions: [CourseDateRevision] = []
+        @Relationship(deleteRule: .cascade, originalName: "dateRevisions", inverse: \SchemaV2.CourseDateRevision.course)
+        var storedDateRevisions: [CourseDateRevision]? = []
+
+        var medications: [MedicationItem] {
+            get { storedMedications ?? [] }
+            set { storedMedications = newValue }
+        }
+
+        var dateRevisions: [CourseDateRevision] {
+            get { storedDateRevisions ?? [] }
+            set { storedDateRevisions = newValue }
+        }
 
         // MARK: - Init
 

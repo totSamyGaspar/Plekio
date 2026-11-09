@@ -62,7 +62,8 @@ nonisolated enum SchemaV1: VersionedSchema {
     }
 }
 
-/// Adds MedicationItem.mealTiming. Not frozen until it ships: until then it may still change.
+/// Adds MedicationItem.mealTiming, and is CloudKit-ready: no unique attributes, a default
+/// or nil for every attribute, optional relationships. Not frozen until it ships.
 nonisolated enum SchemaV2: VersionedSchema {
     static let versionIdentifier = Schema.Version(2, 0, 0)
 
@@ -93,7 +94,7 @@ nonisolated enum PlekioMigrationPlan: SchemaMigrationPlan {
         [migrateV1toV2]
     }
 
-    /// An optional attribute added: nothing to rewrite.
+    /// Attributes added or relaxed, relationships renamed (`originalName`): nothing to rewrite.
     static var migrateV1toV2: MigrationStage {
         .lightweight(fromVersion: SchemaV1.self, toVersion: SchemaV2.self)
     }

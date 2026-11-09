@@ -18,24 +18,24 @@ nonisolated extension SchemaV2 {
 
         // MARK: - Properties
 
-        @Attribute(.unique) var id: UUID
-        var checkInDate: Date
-        var moodLabel: String
-        var moodScore: Int
-        var physicalSummary: String
-        var energyLevel: Int
-        var discomfortLevel: Int
-        var sleepHours: Double
-        var sleepQuality: String
-        var waterGlasses: Int
-        var symptoms: [String]
-        var reflectionNotes: String
-        var milestoneTags: [String]
+        var id: UUID = UUID()
+        var checkInDate: Date = Date.distantPast
+        var moodLabel: String = ""
+        var moodScore: Int = 0
+        var physicalSummary: String = ""
+        var energyLevel: Int = 0
+        var discomfortLevel: Int = 0
+        var sleepHours: Double = 0
+        var sleepQuality: String = ""
+        var waterGlasses: Int = 0
+        var symptoms: [String] = []
+        var reflectionNotes: String = ""
+        var milestoneTags: [String] = []
         /// Ids of photo files stored on disk by ImageCache.
-        var photoIds: [UUID]
+        var photoIds: [UUID] = []
         /// From a one-tap mood chip: energy, sleep and water are defaults, not user
         /// input, so averages and per-entry UI must exclude quick logs.
-        var isQuickLog: Bool
+        var isQuickLog: Bool = false
 
         // MARK: - Init
 

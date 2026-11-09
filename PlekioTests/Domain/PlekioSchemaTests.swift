@@ -65,6 +65,21 @@ struct PlekioSchemaTests {
         #expect(medication.mealTiming == nil)
     }
 
+    @Test("The current schema is one CloudKit can sync: no unique attributes, nothing required without a default")
+    func currentSchemaIsCloudKitCompatible() {
+        for entity in PlekioSchema.current().entities {
+            for attribute in entity.attributes {
+                #expect(!attribute.isUnique, "\(entity.name).\(attribute.name) is unique")
+                #expect(attribute.isOptional || attribute.defaultValue != nil,
+                        "\(entity.name).\(attribute.name) is required and has no default")
+            }
+            for relationship in entity.relationships {
+                #expect(relationship.isOptional, "\(entity.name).\(relationship.name) is required")
+                #expect(relationship.deleteRule != .deny, "\(entity.name).\(relationship.name) denies deletion")
+            }
+        }
+    }
+
     // MARK: - Store on disk
 
     @Test("An on-disk store reopens through the migration plan and keeps its data")

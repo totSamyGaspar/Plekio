@@ -22,10 +22,10 @@ nonisolated extension SchemaV2 {
         // MARK: - Properties
 
         /// Start of the first day this schedule no longer applies to (exclusive end).
-        var validUntil: Date
-        var minutesOfDay: [Int]
-        var frequencyDays: Int
-        var dosage: Int
+        var validUntil: Date = Date.distantPast
+        var minutesOfDay: [Int] = []
+        var frequencyDays: Int = 1
+        var dosage: Int = 1
 
         var medication: MedicationItem?
 

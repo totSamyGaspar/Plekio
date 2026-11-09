@@ -7,9 +7,9 @@ nonisolated extension SchemaV2 {
     /// bounds and frequency anchor; the current dates apply from the edit day.
     @Model
     nonisolated final class CourseDateRevision {
-        var validUntil: Date
-        var startDate: Date
-        var endDate: Date
+        var validUntil: Date = Date.distantPast
+        var startDate: Date = Date.distantPast
+        var endDate: Date = Date.distantPast
         var course: TreatmentCourse?
 
         init(validUntil: Date, startDate: Date, endDate: Date) {
