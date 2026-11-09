@@ -72,6 +72,10 @@ final class NotificationService: NotificationServiceProtocol {
         }
     }
 
+    func delivery() async -> ReminderDelivery {
+        await center.delivery()
+    }
+
     // MARK: - Full Rebuild
 
     /// Clears the queue and refills it from active courses. Serialized: overlapping

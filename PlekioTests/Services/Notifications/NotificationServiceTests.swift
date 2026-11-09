@@ -61,6 +61,35 @@ struct NotificationServiceTests {
         )
     }
 
+    // MARK: - Delivery
+
+    @Test("Dose reminders break through Focus; daily reminders don't")
+    func doseRemindersAreTimeSensitive() async {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        await service.rescheduleAll(using: database())
+        await service.scheduleSnooze(for: ["id"], names: ["Ibuprofen"], slot: date(10, 9))
+        await service.scheduleDailyReminder(.diary, minutesOfDay: [20 * 60])
+
+        let doses = center.pending.filter { $0.content.categoryIdentifier == ReminderRequestFactory.doseCategoryIdentifier }
+        #expect(doses.count == 4)
+        #expect(doses.allSatisfy { $0.content.interruptionLevel == .timeSensitive })
+        #expect(center.pending.filter { $0.content.categoryIdentifier != ReminderRequestFactory.doseCategoryIdentifier }
+            .allSatisfy { $0.content.interruptionLevel == .active })
+    }
+
+    @Test("The service passes on what the centre says about delivery")
+    func deliveryComesFromTheCentre() async {
+        let center = FakeNotificationCenterClient()
+        center.deliveryToReturn = .off
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        #expect(await service.delivery() == .off)
+    }
+
     // MARK: - Rebuilds
 
     @Test("A rebuild queues a reminder for every future slot")

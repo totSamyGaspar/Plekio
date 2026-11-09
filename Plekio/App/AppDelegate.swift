@@ -38,6 +38,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
     // MARK: - UNUserNotificationCenterDelegate
 
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .list, .sound])
+    }
+
     /// Only unwraps the response; the testable logic lives in NotificationIntent
     /// and NotificationResponseHandler.
     func userNotificationCenter(_ center: UNUserNotificationCenter,

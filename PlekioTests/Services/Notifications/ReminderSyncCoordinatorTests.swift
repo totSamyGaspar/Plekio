@@ -106,4 +106,26 @@ struct ReminderSyncCoordinatorTests {
         #expect(await waitUntil { notifications.requestPermissionCallCount == 1 })
         #expect(notifications.requestPermissionCallCount == 1)
     }
+
+    // MARK: - Delivery
+
+    @Test("A sync reads whether reminders can reach the person")
+    func syncReadsDelivery() async {
+        let notifications = MockNotificationService()
+        notifications.deliveryToReturn = .off
+        let coordinator = ReminderSyncCoordinator(
+            notificationService: notifications,
+            dbService: MockDatabaseService(),
+            changes: Empty<Void, Never>().eraseToAnyPublisher()
+        )
+        #expect(coordinator.delivery == .on)
+
+        await coordinator.sync().value
+        #expect(await waitUntil { coordinator.delivery == .off })
+
+        // As after turning notifications on in Settings and coming back.
+        notifications.deliveryToReturn = .on
+        await coordinator.sync().value
+        #expect(await waitUntil { coordinator.delivery == .on })
+    }
 }

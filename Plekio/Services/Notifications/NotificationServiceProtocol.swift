@@ -17,6 +17,8 @@ protocol NotificationServiceProtocol {
     @discardableResult
     func requestPermission() async -> Bool
 
+    func delivery() async -> ReminderDelivery
+
     func scheduleNotifications(activeCourses: [TreatmentCourse]) async
     func cancelNotifications(for medicationId: UUID) async
     /// Reminds again about the doses of `slot` after the snooze interval.

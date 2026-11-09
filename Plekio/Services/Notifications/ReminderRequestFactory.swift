@@ -35,6 +35,7 @@ enum ReminderRequestFactory {
         let names = medicationNames.formatted(.list(type: .and))
         content.body = String(localized: "Time to take: \(names)")
         content.sound = .default
+        content.interruptionLevel = .timeSensitive
         content.categoryIdentifier = doseCategoryIdentifier
         // Nil leaves the icon as it is (snoozes, regrouped reminders).
         content.badge = badge.map { NSNumber(value: $0) }

@@ -7,10 +7,12 @@
 
 import Combine
 import Foundation
+import Observation
 
 /// Rebuilds the reminder queue whenever courses change, and asks for notification
 /// permission once a course exists and the first-run tour has finished or been skipped.
 @MainActor
+@Observable
 final class ReminderSyncCoordinator {
 
     // MARK: - Properties
@@ -26,6 +28,10 @@ final class ReminderSyncCoordinator {
 
     /// Once per launch; iOS itself shows the prompt only the first time.
     private var didAskForPermission = false
+
+    /// As of the last sync, i.e. every activation, so coming back from Settings
+    /// clears a warning. `.on` until read: nothing warns before the first check.
+    private(set) var delivery: ReminderDelivery = .on
 
     // MARK: - Init
 
@@ -73,7 +79,15 @@ final class ReminderSyncCoordinator {
             await notificationService.rescheduleAll(using: dbService)
         }
         lastSync = task
+        refreshDelivery()
         return task
+    }
+
+    private func refreshDelivery() {
+        Task { [weak self, notificationService] in
+            let delivery = await notificationService.delivery()
+            self?.delivery = delivery
+        }
     }
 
     // MARK: - Permission
@@ -86,6 +100,8 @@ final class ReminderSyncCoordinator {
             if await notificationService.requestPermission() {
                 // The first rebuild may have run before permission was granted.
                 _ = self?.sync()
+            } else {
+                self?.refreshDelivery()
             }
         }
     }

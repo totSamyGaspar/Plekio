@@ -16,6 +16,8 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
     /// Shared by the statistics section and the finished-day hero card.
     @StateObject private var statistics: Stats
     @EnvironmentObject private var router: AppRouter
+    @Environment(AppDependencies.self) private var dependencies
+    @Environment(\.openURL) private var openURL
 
     /// Scales with the wordmark's text style under Dynamic Type.
     @ScaledMetric(relativeTo: .largeTitle) private var logoSize: CGFloat = 34
@@ -162,6 +164,8 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
 
     @ViewBuilder
     private var daySection: some View {
+        notificationsOffCard
+
         if let heroPills {
             heroCard(front: heroPills)
                 .tourTarget(.upNextCard)
@@ -183,6 +187,47 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
 
     private var overviewSection: some View {
         StatisticsView(viewModel: statistics)
+    }
+
+    /// Above everything else: without notifications not one dose is reminded.
+    @ViewBuilder
+    private var notificationsOffCard: some View {
+        if viewModel.hasCourses, dependencies.reminderSync.delivery == .off {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    Image(systemName: "bell.slash.fill")
+                    Text("Notifications are off")
+                }
+                .font(.headline.weight(.bold))
+                .foregroundColor(.warningAccent)
+
+                Text("Plekio can't remind you about your doses. Allow notifications for Plekio in the Settings app.")
+                    .font(.subheadline)
+                    .foregroundColor(.textPrimary.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Button {
+                    if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                        openURL(url)
+                    }
+                } label: {
+                    Text("Open Settings")
+                        .font(.subheadline.weight(.heavy))
+                        .foregroundColor(.onAccent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.accentPrimary)
+                        .cornerRadius(12)
+                }
+                .padding(.top, 4)
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.appSurface)
+            .cornerRadius(24)
+            .padding(.horizontal)
+            .transition(.opacity)
+        }
     }
 
     // MARK: - Derived state

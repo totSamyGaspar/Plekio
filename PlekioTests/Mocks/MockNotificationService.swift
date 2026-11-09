@@ -26,6 +26,7 @@ final class MockNotificationService: NotificationServiceProtocol {
     var cancelledReminders: [DailyReminder] = []
     /// What requestPermission() returns.
     var permissionGranted = true
+    var deliveryToReturn: ReminderDelivery = .on
     /// Number of rebuilds; `scheduledCourses` only keeps the last one.
     var scheduleCallCount = 0
 
@@ -36,6 +37,10 @@ final class MockNotificationService: NotificationServiceProtocol {
         didCallRequestPermission = true
         requestPermissionCallCount += 1
         return permissionGranted
+    }
+
+    func delivery() async -> ReminderDelivery {
+        deliveryToReturn
     }
 
     func scheduleNotifications(activeCourses: [TreatmentCourse]) async {
