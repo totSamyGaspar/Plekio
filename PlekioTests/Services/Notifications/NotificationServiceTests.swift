@@ -490,4 +490,43 @@ struct NotificationServiceTests {
         #expect(trigger.dateComponents.hour == 18)
         #expect(trigger.dateComponents.minute == 15)
     }
+
+    // MARK: - End of the queue
+
+    @Test("When the queue is cut short, its last day's reminders ask to open the app")
+    func lastDayAsksToOpenTheApp() async {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center, now: date(10, 0))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let course = TreatmentCourse(name: "Long", startDate: date(10, 0), endDate: date(30, 0))
+        course.medications.append(
+            MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1,
+                           minutesOfDay: [8 * 60, 12 * 60, 16 * 60, 20 * 60], frequencyDays: 1)
+        )
+        let db = MockDatabaseService()
+        db.coursesToReturn = [course]
+
+        await service.rescheduleAll(using: db)
+
+        let doses = center.pending.compactMap { request -> (Date, String)? in
+            guard let slot = ReminderPayload.slotTime(in: request.content.userInfo) else { return nil }
+            return (Date(timeIntervalSince1970: slot), request.content.body)
+        }
+        let lastDay = calendar.startOfDay(for: doses.map(\.0).max()!)
+        let asking = doses.filter { $0.1.contains("\n") }
+        #expect(asking.count == 4)
+        #expect(asking.allSatisfy { calendar.isDate($0.0, inSameDayAs: lastDay) })
+    }
+
+    @Test("A queue that covers the whole course doesn't ask")
+    func wholeCourseDoesNotAsk() async {
+        let center = FakeNotificationCenterClient()
+        let (service, defaults, suite) = makeService(center)
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        await service.rescheduleAll(using: database())
+
+        #expect(!center.pending.contains { $0.content.body.contains("\n") })
+    }
 }

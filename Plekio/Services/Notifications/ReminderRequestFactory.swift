@@ -26,7 +26,8 @@ enum ReminderRequestFactory {
         medicationNames: [String],
         triggerDate: Date,
         trigger: UNNotificationTrigger,
-        badge: Int? = nil
+        badge: Int? = nil,
+        asksToOpenApp: Bool = false
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
         // Localized now; safe because the schedule is rebuilt on every scene activation.
@@ -34,6 +35,9 @@ enum ReminderRequestFactory {
         // Locale-aware list formatting.
         let names = medicationNames.formatted(.list(type: .and))
         content.body = String(localized: "Time to take: \(names)")
+        if asksToOpenApp {
+            content.body += "\n" + String(localized: "Open Plekio to keep your reminders coming.")
+        }
         content.sound = .default
         content.interruptionLevel = .timeSensitive
         content.categoryIdentifier = doseCategoryIdentifier
@@ -53,7 +57,8 @@ enum ReminderRequestFactory {
         medicationNames: [String],
         triggerDate: Date,
         calendar: Calendar,
-        badge: Int? = nil
+        badge: Int? = nil,
+        asksToOpenApp: Bool = false
     ) -> UNNotificationRequest {
         let components = calendar.dateComponents(
             [.year, .month, .day, .hour, .minute], from: triggerDate
@@ -64,7 +69,8 @@ enum ReminderRequestFactory {
             medicationNames: medicationNames,
             triggerDate: triggerDate,
             trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false),
-            badge: badge
+            badge: badge,
+            asksToOpenApp: asksToOpenApp
         )
     }
 
