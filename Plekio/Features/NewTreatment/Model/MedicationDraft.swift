@@ -21,6 +21,9 @@ struct MedicationDraft: Identifiable, Equatable {
 
     var stockCount: Int = 30
     var lowStockThreshold: Int = 10
+
+    /// Nil when it doesn't matter.
+    var mealTiming: MealTiming? = nil
 }
 
 // MARK: - Snapshot Conversion
@@ -39,7 +42,8 @@ extension MedicationDraft {
             medicationImageData: nil,
             photoModified: false,
             stockCount: medication.stockCount,
-            lowStockThreshold: medication.lowStockThreshold
+            lowStockThreshold: medication.lowStockThreshold,
+            mealTiming: medication.mealTiming
         )
     }
 }

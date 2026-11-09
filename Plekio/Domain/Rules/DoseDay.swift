@@ -79,7 +79,8 @@ nonisolated enum DoseDay {
                             status: log?.status ?? .pending,
                             stockCount: med.stockCount,
                             lowStockThreshold: med.lowStockThreshold,
-                            courseId: course.id
+                            courseId: course.id,
+                            mealTiming: med.mealTiming
                         )
                     )
                 }

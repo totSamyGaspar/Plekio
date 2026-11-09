@@ -18,6 +18,7 @@ nonisolated struct MedicationSnapshot: Identifiable, Hashable, Sendable {
     let frequencyDays: Int
     let stockCount: Int
     let lowStockThreshold: Int
+    var mealTiming: MealTiming? = nil
 
     var isLowOnStock: Bool { StockRules.isLow(stock: stockCount, threshold: lowStockThreshold) }
 }
@@ -66,7 +67,8 @@ extension MedicationSnapshot {
             minutesOfDay: model.minutesOfDay,
             frequencyDays: model.frequencyDays,
             stockCount: model.stockCount,
-            lowStockThreshold: model.lowStockThreshold
+            lowStockThreshold: model.lowStockThreshold,
+            mealTiming: model.mealTiming
         )
     }
 }

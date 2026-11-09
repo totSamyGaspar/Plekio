@@ -11,4 +11,15 @@ import Foundation
 /// Raw values are stored: never rename them.
 nonisolated enum MealTiming: String, CaseIterable, Sendable {
     case beforeMeal, withMeal, afterMeal, emptyStomach
+
+    var title: LocalizedStringResource {
+        switch self {
+        case .beforeMeal: "Before meals"
+        case .withMeal: "With meals"
+        case .afterMeal: "After meals"
+        case .emptyStomach: "Empty stomach"
+        }
+    }
+
+    static let systemImage = "fork.knife"
 }

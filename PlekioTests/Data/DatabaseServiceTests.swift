@@ -220,6 +220,39 @@ struct DatabaseServiceTests {
         #expect(names(testDate(2026, 6, 10)).contains("Magnesium"))
     }
 
+    // MARK: - Meal timing
+
+    @Test("Meal timing survives save, edit and course repeat, and reaches the dose")
+    func mealTimingTravelsWithTheMedication() throws {
+        let db = DatabaseService(inMemoryForTesting: true, photos: FakePhotoStore(), errors: SpyErrorReporter(),
+                                 time: FixedTime(testDate(2026, 6, 10, 12)))
+        var draft = MedicationDraft()
+        draft.name = "Iron"
+        draft.minutesOfDay = [9 * 60]
+        draft.frequencyDays = 1
+        draft.mealTiming = .emptyStomach
+        try db.saveCourse(name: "Course", startDate: testDate(2026, 6, 1), endDate: testDate(2026, 6, 30), drafts: [draft])
+
+        let med = try #require(try db.context.fetch(FetchDescriptor<MedicationItem>()).first)
+        #expect(med.mealTiming == .emptyStomach)
+        #expect(db.fetchPills(for: testDate(2026, 6, 10)).first?.mealTiming == .emptyStomach)
+
+        var edited = MedicationDraft(from: MedicationSnapshot(med))
+        #expect(edited.mealTiming == .emptyStomach)
+        edited.mealTiming = .afterMeal
+        try db.updateMedication(med, with: edited)
+        #expect(med.mealTiming == .afterMeal)
+
+        try db.duplicateCourse(try #require(med.course), startDate: testDate(2026, 7, 1), endDate: testDate(2026, 7, 31))
+        let copies = try db.context.fetch(FetchDescriptor<MedicationItem>()).filter { $0.id != med.id }
+        #expect(copies.map(\.mealTiming) == [.afterMeal])
+
+        edited.mealTiming = nil
+        try db.updateMedication(med, with: edited)
+        #expect(med.mealTiming == nil)
+        #expect(db.fetchPills(for: testDate(2026, 6, 10)).first?.mealTiming == nil)
+    }
+
     // MARK: - refillStock
 
     @Test("Moving the course start keeps past doses, logs and the old frequency anchor")
