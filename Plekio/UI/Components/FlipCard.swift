@@ -18,31 +18,40 @@ struct FlipCard<Front: View, Back: View>: View {
     @ViewBuilder let front: Front
     @ViewBuilder let back: Back
 
-    /// Each face's own height, measured at its ideal size. Nil until laid out,
-    /// when the card simply fits both.
-    @State private var frontHeight: CGFloat?
-    @State private var backHeight: CGFloat?
-
     // MARK: - Body
 
     var body: some View {
-        ZStack(alignment: .top) {
+        ShowingFaceLayout(showsBack: isFlipped) {
             front
-                .fixedSize(horizontal: false, vertical: true)
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { frontHeight = $0 }
                 .modifier(FlipFace(angle: isFlipped ? 180 : 0))
                 .allowsHitTesting(!isFlipped)
                 .accessibilityHidden(isFlipped)
 
             back
-                .fixedSize(horizontal: false, vertical: true)
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { backHeight = $0 }
                 .modifier(FlipFace(angle: isFlipped ? 0 : -180))
                 .allowsHitTesting(isFlipped)
                 .accessibilityHidden(!isFlipped)
         }
-        .frame(height: isFlipped ? backHeight : frontHeight, alignment: .top)
         .motion(Motion.flip, value: isFlipped)
+    }
+}
+
+// MARK: - ShowingFaceLayout
+
+private struct ShowingFaceLayout: Layout {
+    var showsBack: Bool
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard subviews.count == 2 else { return .zero }
+        let face = subviews[showsBack ? 1 : 0]
+        let size = face.sizeThatFits(ProposedViewSize(width: proposal.width, height: nil))
+        return CGSize(width: proposal.width ?? size.width, height: size.height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        for face in subviews {
+            face.place(at: bounds.origin, anchor: .topLeading, proposal: ProposedViewSize(width: bounds.width, height: nil))
+        }
     }
 }
 
