@@ -12,15 +12,17 @@ import SwiftData
 // so an edit for V2 can never silently change V1 (both would then share one
 // checksum and the migration would fail). The app uses the typealiases below.
 //
-// V1 is frozen (git tag `schema-v1`): SchemaFreezeTests fails on any change to
-// a V1 model and opens a store V1 wrote with the current schema. To change the schema:
-// - Copy every model file into `extension SchemaV2 { … }` (all of them: models
-//   reference each other through relationships) and edit only the V2 copies.
-// - Add `SchemaV2: VersionedSchema`; point `Current` at it.
-// - Append V2 to `PlekioMigrationPlan.schemas` and add a stage: `.lightweight`
+// V1 and V2 are frozen (git tags `schema-v1`, `schema-v2`): SchemaFreezeTests fails on
+// any change to their models and opens a store each wrote with the current schema.
+// To change the schema:
+// - Move V2's model files to `V2/` as frozen copies, then declare the current models
+//   in `extension SchemaV3 { … }` (all of them: models reference each other through
+//   relationships) and edit only those.
+// - Add `SchemaV3: VersionedSchema`; point `Current` at it.
+// - Append V3 to `PlekioMigrationPlan.schemas` and add a stage: `.lightweight`
 //   for additive changes, `.custom` when data must be moved or rewritten.
-// - Extend SchemaV1Fixture.expectMatches for what V2 changed; once V2 ships,
-//   freeze it the same way (SchemaV2.manifest, SchemaV2.store).
+// - Extend SchemaV1Fixture and SchemaV2Fixture `expectMatches` for what V3 changed;
+//   once V3 ships, freeze it the same way (SchemaV3.manifest, SchemaV3.store).
 
 // MARK: - Current
 
@@ -64,7 +66,7 @@ nonisolated enum SchemaV1: VersionedSchema {
 
 /// Adds MedicationItem.mealTiming; keeps course days, revisions and dose slots as local
 /// days and times (LocalDay, LocalSlot); and is CloudKit-ready: no unique attributes, a
-/// default or nil for every attribute, optional relationships. Not frozen until it ships.
+/// default or nil for every attribute, optional relationships. Frozen: see SchemaFreezeTests.
 nonisolated enum SchemaV2: VersionedSchema {
     static let versionIdentifier = Schema.Version(2, 0, 0)
 
