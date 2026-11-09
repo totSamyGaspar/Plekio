@@ -1,0 +1,64 @@
+version 2.0.0
+entity BloodPressureReading
+  attribute diastolic: Int
+  attribute id: UUID
+  attribute measuredAt: Date
+  attribute pulse: Optional<Int>
+  attribute systolic: Int
+entity CourseDateRevision
+  attribute storedEndDay: Date
+  attribute storedStartDay: Date
+  attribute storedValidUntil: Date
+  relationship course: TreatmentCourse inverse storedDateRevisions delete nullify
+entity DiaryEntry
+  attribute checkInDate: Date
+  attribute discomfortLevel: Int
+  attribute energyLevel: Int
+  attribute id: UUID
+  attribute isQuickLog: Bool
+  attribute milestoneTags: Array<String>
+  attribute moodLabel: String
+  attribute moodScore: Int
+  attribute photoIds: Array<UUID>
+  attribute physicalSummary: String
+  attribute reflectionNotes: String
+  attribute sleepHours: Double
+  attribute sleepQuality: String
+  attribute symptoms: Array<String>
+  attribute waterGlasses: Int
+entity DoseLog
+  attribute actualTakeTime: Optional<Date>
+  attribute dispensedQuantity: Optional<Int>
+  attribute id: UUID
+  attribute isTaken: Bool
+  attribute skippedAt: Optional<Date>
+  attribute storedSlot: Date
+  relationship medication: MedicationItem inverse storedLogs delete nullify
+entity MedicationItem
+  attribute dosage: Int
+  attribute formRaw: String
+  attribute frequencyDays: Int
+  attribute id: UUID
+  attribute lowStockThreshold: Int
+  attribute mealTimingRaw: Optional<String>
+  attribute minutesOfDay: Array<Int>
+  attribute name: String
+  attribute stockCount: Int
+  attribute storedStartDay: Optional<Date>
+  relationship course: TreatmentCourse inverse storedMedications delete nullify
+  relationship storedLogs: [DoseLog] inverse medication delete cascade
+  relationship storedScheduleRevisions: [ScheduleRevision] inverse medication delete cascade
+entity ScheduleRevision
+  attribute dosage: Int
+  attribute frequencyDays: Int
+  attribute minutesOfDay: Array<Int>
+  attribute storedValidUntil: Date
+  relationship medication: MedicationItem inverse storedScheduleRevisions delete nullify
+entity TreatmentCourse
+  attribute id: UUID
+  attribute name: String
+  attribute repeatedFromId: Optional<UUID>
+  attribute storedEndDay: Date
+  attribute storedStartDay: Date
+  relationship storedDateRevisions: [CourseDateRevision] inverse course delete cascade
+  relationship storedMedications: [MedicationItem] inverse course delete cascade
