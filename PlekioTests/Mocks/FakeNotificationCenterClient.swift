@@ -21,6 +21,7 @@ final class FakeNotificationCenterClient: NotificationCenterClient {
 
     var grantsAuthorization = true
     var authorizationError: Error?
+    var deliveryToReturn: ReminderDelivery = .on
 
     // MARK: - NotificationCenterClient
 
@@ -31,6 +32,10 @@ final class FakeNotificationCenterClient: NotificationCenterClient {
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
         if let authorizationError { throw authorizationError }
         return grantsAuthorization
+    }
+
+    func delivery() async -> ReminderDelivery {
+        deliveryToReturn
     }
 
     func pendingReminders() async -> [ReminderSnapshot] {

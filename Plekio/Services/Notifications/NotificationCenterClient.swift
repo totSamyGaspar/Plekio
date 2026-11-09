@@ -17,6 +17,8 @@ protocol NotificationCenterClient {
 
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
 
+    func delivery() async -> ReminderDelivery
+
     func pendingReminders() async -> [ReminderSnapshot]
     func deliveredReminders() async -> [ReminderSnapshot]
 
@@ -45,6 +47,15 @@ struct SystemNotificationCenterClient: NotificationCenterClient {
 
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
         try await center.requestAuthorization(options: options)
+    }
+
+    func delivery() async -> ReminderDelivery {
+        let settings = await center.notificationSettings()
+        return ReminderDelivery(
+            authorization: settings.authorizationStatus,
+            showsAnywhere: [settings.alertSetting, settings.lockScreenSetting, settings.notificationCenterSetting]
+                .contains(.enabled)
+        )
     }
 
     func pendingReminders() async -> [ReminderSnapshot] {

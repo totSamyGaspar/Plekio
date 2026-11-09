@@ -35825,6 +35825,71 @@
           }
         }
       }
+    },
+    "Plekio can't remind you about your doses. Allow notifications for Plekio in the Settings app." : {
+      "comment" : "Card on Today when notifications are not allowed: no dose reminder can arrive.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio kann dich nicht an deine Einnahmen erinnern. Erlaube Mitteilungen für Plekio in der Einstellungen-App."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio no puede recordarte tus dosis. Permite las notificaciones de Plekio en la app Ajustes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio ne peut pas vous rappeler vos prises. Autorisez les notifications de Plekio dans l'app Réglages."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio non può ricordarti le dosi. Consenti le notifiche per Plekio nell'app Impostazioni."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekioから服薬のリマインダーを送れません。設定アプリでPlekioの通知を許可してください。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio ვერ შეგახსენებს წამლის მიღებას. ჩართე Plekio-ს შეტყობინებები პარამეტრებში."
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio дәрі қабылдауды еске сала алмайды. Параметрлер қолданбасында Plekio хабарландыруларына рұқсат беріңіз."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio nu îți poate aminti de doze. Permite notificările pentru Plekio în aplicația Configurări."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio не может напоминать о приёме лекарств. Разрешите уведомления для Plekio в приложении «Настройки»."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plekio не може нагадувати про прийом ліків. Дозвольте сповіщення для Plekio у застосунку «Налаштування»."
+          }
+        }
+      }
     }
   },
   "version" : "1.2"
