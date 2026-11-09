@@ -39,14 +39,14 @@ enum SchemaV1Fixture {
     // MARK: - Writing
 
     static func populate(_ context: ModelContext) {
-        let course = TreatmentCourse(name: "Antibiotics", startDate: day(0), endDate: day(10))
+        let course = SchemaV1.TreatmentCourse(name: "Antibiotics", startDate: day(0), endDate: day(10))
         course.id = courseId
-        course.dateRevisions.append(CourseDateRevision(validUntil: day(2), startDate: day(-1), endDate: day(7)))
+        course.dateRevisions.append(SchemaV1.CourseDateRevision(validUntil: day(2), startDate: day(-1), endDate: day(7)))
 
-        let repeated = TreatmentCourse(name: "Antibiotics", startDate: day(20), endDate: day(30), repeatedFromId: courseId)
+        let repeated = SchemaV1.TreatmentCourse(name: "Antibiotics", startDate: day(20), endDate: day(30), repeatedFromId: courseId)
         repeated.id = repeatedCourseId
 
-        let medication = MedicationItem(
+        let medication = SchemaV1.MedicationItem(
             id: medicationId,
             name: "Amoxicillin",
             form: .drops,
@@ -57,19 +57,19 @@ enum SchemaV1Fixture {
             lowStockThreshold: 4,
             startDate: day(1)
         )
-        medication.scheduleRevisions.append(ScheduleRevision(validUntil: day(3), minutesOfDay: [9 * 60], frequencyDays: 1, dosage: 1))
+        medication.scheduleRevisions.append(SchemaV1.ScheduleRevision(validUntil: day(3), minutesOfDay: [9 * 60], frequencyDays: 1, dosage: 1))
         medication.logs.append(contentsOf: [
-            DoseLog(scheduledTime: day(0, hour: 8), status: .taken(at: day(0, hour: 8.25), dispensed: 2)),
-            DoseLog(scheduledTime: day(0, hour: 20.5), status: .taken(at: day(0, hour: 21), dispensed: nil)),
-            DoseLog(scheduledTime: day(2, hour: 8), status: .skipped(at: day(2, hour: 9))),
-            DoseLog(scheduledTime: day(2, hour: 20.5), status: .pending),
+            SchemaV1.DoseLog(scheduledTime: day(0, hour: 8), status: .taken(at: day(0, hour: 8.25), dispensed: 2)),
+            SchemaV1.DoseLog(scheduledTime: day(0, hour: 20.5), status: .taken(at: day(0, hour: 21), dispensed: nil)),
+            SchemaV1.DoseLog(scheduledTime: day(2, hour: 8), status: .skipped(at: day(2, hour: 9))),
+            SchemaV1.DoseLog(scheduledTime: day(2, hour: 20.5), status: .pending),
         ])
         course.medications.append(medication)
 
         context.insert(course)
         context.insert(repeated)
 
-        context.insert(DiaryEntry(
+        context.insert(SchemaV1.DiaryEntry(
             id: diaryId,
             checkInDate: day(1, hour: 21),
             moodLabel: DiaryMood.good.rawValue,
@@ -85,7 +85,7 @@ enum SchemaV1Fixture {
             milestoneTags: ["First week"],
             photoIds: [photoId]
         ))
-        context.insert(DiaryEntry(
+        context.insert(SchemaV1.DiaryEntry(
             id: quickLogId,
             checkInDate: day(2, hour: 12),
             moodLabel: DiaryMood.neutral.rawValue,
@@ -102,8 +102,8 @@ enum SchemaV1Fixture {
             isQuickLog: true
         ))
 
-        context.insert(BloodPressureReading(id: readingId, measuredAt: day(1, hour: 7), systolic: 128, diastolic: 84, pulse: 72))
-        context.insert(BloodPressureReading(id: readingWithoutPulseId, measuredAt: day(2, hour: 7), systolic: 119, diastolic: 77))
+        context.insert(SchemaV1.BloodPressureReading(id: readingId, measuredAt: day(1, hour: 7), systolic: 128, diastolic: 84, pulse: 72))
+        context.insert(SchemaV1.BloodPressureReading(id: readingWithoutPulseId, measuredAt: day(2, hour: 7), systolic: 119, diastolic: 77))
     }
 
     // MARK: - Checking
@@ -140,6 +140,8 @@ enum SchemaV1Fixture {
         #expect(medication.lowStockThreshold == 4)
         #expect(medication.startDate == day(1))
         #expect(medication.course?.id == courseId)
+        // Added in V2: a V1 medication has no meal timing.
+        #expect(medication.mealTiming == nil)
 
         let scheduleRevision = try #require(medication.scheduleRevisions.first)
         #expect(medication.scheduleRevisions.count == 1)

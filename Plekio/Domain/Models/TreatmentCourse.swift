@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-nonisolated extension SchemaV1 {
+nonisolated extension SchemaV2 {
 
     /// `nonisolated`: BackgroundReader reads it on a background context.
     @Model
@@ -24,10 +24,10 @@ nonisolated extension SchemaV1 {
         /// Id of the FIRST course in the "Repeat" chain (not the parent), nil for originals.
         var repeatedFromId: UUID?
 
-        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.MedicationItem.course)
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV2.MedicationItem.course)
         var medications: [MedicationItem]
 
-        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.CourseDateRevision.course)
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV2.CourseDateRevision.course)
         var dateRevisions: [CourseDateRevision] = []
 
         // MARK: - Init

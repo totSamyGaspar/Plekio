@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-nonisolated extension SchemaV1 {
+nonisolated extension SchemaV2 {
 
     /// `nonisolated`: BackgroundReader reads it on a background context.
     @Model
@@ -30,12 +30,14 @@ nonisolated extension SchemaV1 {
         var startDate: Date?
         var stockCount: Int
         var lowStockThreshold: Int
+        /// A `MealTiming` raw value, nil when it doesn't matter; read through `mealTiming`.
+        var mealTimingRaw: String?
 
-        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.DoseLog.medication)
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV2.DoseLog.medication)
         var logs: [DoseLog]
 
         /// Earlier schedules, so a change doesn't rewrite past days.
-        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.ScheduleRevision.medication)
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV2.ScheduleRevision.medication)
         var scheduleRevisions: [ScheduleRevision]
 
         // MARK: - Init
@@ -49,7 +51,8 @@ nonisolated extension SchemaV1 {
             frequencyDays: Int,
             stockCount: Int = 30,
             lowStockThreshold: Int = 10,
-            startDate: Date? = nil
+            startDate: Date? = nil,
+            mealTiming: MealTiming? = nil
         ) {
             self.id = id
             self.name = name
@@ -62,12 +65,19 @@ nonisolated extension SchemaV1 {
             self.stockCount = stockCount
             self.lowStockThreshold = lowStockThreshold
             self.startDate = startDate
+            self.mealTimingRaw = mealTiming?.rawValue
         }
 
         /// An unknown raw value (from a newer version) reads as a pill instead of failing.
         var form: MedicationForm {
             get { MedicationForm(rawValue: formRaw) ?? .pill }
             set { formRaw = newValue.rawValue }
+        }
+
+        /// An unknown raw value (from a newer version) reads as "doesn't matter".
+        var mealTiming: MealTiming? {
+            get { mealTimingRaw.flatMap(MealTiming.init(rawValue:)) }
+            set { mealTimingRaw = newValue?.rawValue }
         }
     }
 }

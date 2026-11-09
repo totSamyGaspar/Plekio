@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-nonisolated extension SchemaV1 {
+nonisolated extension SchemaV2 {
 
     /// The course dates in force before an edit. Past days keep their original
     /// bounds and frequency anchor; the current dates apply from the edit day.

@@ -10,7 +10,7 @@ import SwiftData
 
 // MARK: - ScheduleRevision
 
-nonisolated extension SchemaV1 {
+nonisolated extension SchemaV2 {
 
     /// A medication's schedule as it was before a change. Applies to days before
     /// `validUntil`; the medication's own fields apply from then on. Keeps past

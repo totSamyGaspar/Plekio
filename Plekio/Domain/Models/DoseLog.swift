@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-nonisolated extension SchemaV1 {
+nonisolated extension SchemaV2 {
 
     /// `nonisolated`: BackgroundReader reads it on a background context.
     @Model
