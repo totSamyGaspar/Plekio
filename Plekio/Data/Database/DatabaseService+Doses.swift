@@ -222,7 +222,7 @@ extension DatabaseService: DoseStoring {
         if let existing {
             existing.status = status
         } else {
-            med.logs.append(DoseLog(scheduledTime: scheduledTime, status: status))
+            med.logs.append(DoseLog(slot: LocalSlot(scheduledTime, in: time.calendar), status: status))
         }
     }
 

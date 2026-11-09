@@ -200,7 +200,7 @@ extension DatabaseService: CourseStoring {
     }
 
     func fetchAllCourses() -> [TreatmentCourse] {
-        let descriptor = FetchDescriptor<TreatmentCourse>(sortBy: [SortDescriptor(\.startDate, order: .reverse)])
+        let descriptor = FetchDescriptor<TreatmentCourse>(sortBy: [SortDescriptor(\.storedStartDay, order: .reverse)])
         return fetch(descriptor)
     }
 

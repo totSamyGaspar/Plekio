@@ -21,8 +21,9 @@ nonisolated extension SchemaV2 {
 
         // MARK: - Properties
 
-        /// Start of the first day this schedule no longer applies to (exclusive end).
-        var validUntil: Date = Date.distantPast
+        /// The first day this schedule no longer applies to (exclusive end), as
+        /// `LocalDay.stored`; read through `validUntilDay`.
+        @Attribute(originalName: "validUntil") var storedValidUntil: Date = Date.distantPast
         var minutesOfDay: [Int] = []
         var frequencyDays: Int = 1
         var dosage: Int = 1
@@ -36,6 +37,24 @@ nonisolated extension SchemaV2 {
             self.minutesOfDay = minutesOfDay
             self.frequencyDays = frequencyDays
             self.dosage = dosage
+        }
+
+        init(validUntilDay: LocalDay, minutesOfDay: [Int], frequencyDays: Int, dosage: Int) {
+            self.validUntilDay = validUntilDay
+            self.minutesOfDay = minutesOfDay
+            self.frequencyDays = frequencyDays
+            self.dosage = dosage
+        }
+
+        var validUntilDay: LocalDay {
+            get { LocalDay(stored: storedValidUntil) }
+            set { storedValidUntil = newValue.stored }
+        }
+
+        /// That day's midnight where the person is now; rules use `validUntilDay`.
+        var validUntil: Date {
+            get { validUntilDay.start(in: .autoupdatingCurrent) }
+            set { validUntilDay = LocalDay(newValue, in: .autoupdatingCurrent) }
         }
     }
 }

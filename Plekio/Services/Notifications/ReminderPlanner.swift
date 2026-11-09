@@ -33,7 +33,7 @@ enum ReminderPlanner {
         let frequencyDays: Int
         let times: [(hour: Int, minute: Int)]
         /// Slots already taken or skipped, keyed like trigger dates.
-        let settledSlots: Set<DateComponents>
+        let settledSlots: Set<LocalSlot>
     }
 
     // MARK: - Schedule Building
@@ -123,8 +123,7 @@ enum ReminderPlanner {
                         hour: time.hour, minute: time.minute, on: day, calendar: calendar
                     ), triggerDate > now else { continue }
 
-                    let slot = DoseSchedule.slotKey(triggerDate, calendar: calendar)
-                    guard !plan.settledSlots.contains(slot) else { continue }
+                    guard !plan.settledSlots.contains(LocalSlot(triggerDate, in: calendar)) else { continue }
 
                     slotsForDay[triggerDate, default: []].append(
                         (courseName: plan.courseName, medication: plan.medication)

@@ -10,8 +10,7 @@ import Foundation
 @testable import Plekio
 
 /// Plekio keeps local time: a dose at 08:00 is at 08:00 wherever the person is.
-/// Logs and course days are stored as absolute dates, so a trip moves them; the
-/// known issues below go away with SchemaV2's floating days and slots.
+/// Course days and dose slots are local days and times, so a trip doesn't move them.
 @MainActor
 @Suite("Time zone travel")
 struct TimeZoneTravelTests {
@@ -31,10 +30,14 @@ struct TimeZoneTravelTests {
         calendar.date(from: DateComponents(year: 2030, month: month, day: day))!
     }
 
-    /// 10–12 June, one dose at 08:00, created in `zone`.
+    /// 10–12 June, one dose at 08:00, created in `zone` as the app does: from a picked date.
     private func course(createdIn zone: String) -> (TreatmentCourse, MedicationItem) {
         let home = calendar(zone)
-        let course = TreatmentCourse(name: "Course", startDate: day(6, 10, in: home), endDate: day(6, 12, in: home))
+        let course = TreatmentCourse(
+            name: "Course",
+            startDay: LocalDay(day(6, 10, in: home), in: home),
+            endDay: LocalDay(day(6, 12, in: home), in: home)
+        )
         let medication = MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1,
                                         minutesOfDay: [8 * 60], frequencyDays: 1)
         course.medications.append(medication)
@@ -52,20 +55,18 @@ struct TimeZoneTravelTests {
     func takenDoseSurvivesTravel() {
         let (course, medication) = course(createdIn: tbilisi)
         let slot = tbilisi8am(on: 10)
-        medication.logs.append(DoseLog(scheduledTime: slot, status: .taken(at: slot, dispensed: 1)))
+        medication.logs.append(DoseLog(slot: LocalSlot(slot, in: calendar(tbilisi)), status: .taken(at: slot, dispensed: 1)))
 
-        withKnownIssue("Logs are absolute dates: 08:00 in Tbilisi is 06:00 in Berlin, not today's 08:00 slot") {
-            let today = pills(course, on: 6, 10, in: berlin)
-            #expect(today.count == 1)
-            #expect(today.first?.isTaken == true)
-        }
+        let today = pills(course, on: 6, 10, in: berlin)
+        #expect(today.count == 1)
+        #expect(today.first?.isTaken == true)
     }
 
     @Test("At home a taken dose reads as taken")
     func takenDoseAtHome() {
         let (course, medication) = course(createdIn: tbilisi)
         let slot = tbilisi8am(on: 10)
-        medication.logs.append(DoseLog(scheduledTime: slot, status: .taken(at: slot, dispensed: 1)))
+        medication.logs.append(DoseLog(slot: LocalSlot(slot, in: calendar(tbilisi)), status: .taken(at: slot, dispensed: 1)))
 
         #expect(pills(course, on: 6, 10, in: tbilisi).first?.isTaken == true)
     }
@@ -77,12 +78,9 @@ struct TimeZoneTravelTests {
         let (course, _) = course(createdIn: tbilisi)
         let daysWithDoses = (9...13).filter { !pills(course, on: 6, $0, in: berlin).isEmpty }
 
-        withKnownIssue("Course days are absolute midnights: Tbilisi's midnight is the evening before in Berlin") {
-            #expect(daysWithDoses == [10, 11, 12])
-        }
+        #expect(daysWithDoses == [10, 11, 12])
     }
 
-    /// Holds today too: Berlin's midnight is 02:00 the same day in Tbilisi.
     @Test("A course keeps its days after flying east")
     func courseDaysSurviveEastwardTravel() {
         let (course, _) = course(createdIn: berlin)
@@ -97,7 +95,8 @@ struct TimeZoneTravelTests {
     @Test("A dose time skipped by the clock change still gives one slot")
     func springForwardKeepsTheSlot() {
         let local = calendar(berlin)
-        let course = TreatmentCourse(name: "Course", startDate: day(3, 30, in: local), endDate: day(4, 1, in: local))
+        let course = TreatmentCourse(name: "Course", startDay: LocalDay(day(3, 30, in: local), in: local),
+                                     endDay: LocalDay(day(4, 1, in: local), in: local))
         let medication = MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1,
                                         minutesOfDay: [2 * 60 + 30], frequencyDays: 1)
         course.medications.append(medication)
@@ -107,7 +106,7 @@ struct TimeZoneTravelTests {
 
         // Logged and read back on the same day: the slot must match itself.
         let slot = changeDay[0].time
-        medication.logs.append(DoseLog(scheduledTime: slot, status: .taken(at: slot, dispensed: 1)))
+        medication.logs.append(DoseLog(slot: LocalSlot(slot, in: local), status: .taken(at: slot, dispensed: 1)))
         #expect(DoseDay.pills(of: [course], on: day(3, 31, in: local), calendar: local).first?.isTaken == true)
     }
 
@@ -115,7 +114,8 @@ struct TimeZoneTravelTests {
     @Test("A dose time repeated by the clock change gives one slot, not two")
     func fallBackGivesOneSlot() {
         let local = calendar(berlin)
-        let course = TreatmentCourse(name: "Course", startDate: day(10, 26, in: local), endDate: day(10, 28, in: local))
+        let course = TreatmentCourse(name: "Course", startDay: LocalDay(day(10, 26, in: local), in: local),
+                                     endDay: LocalDay(day(10, 28, in: local), in: local))
         course.medications.append(
             MedicationItem(id: UUID(), name: "Ibuprofen", form: .pill, dosage: 1,
                            minutesOfDay: [2 * 60 + 30], frequencyDays: 1)

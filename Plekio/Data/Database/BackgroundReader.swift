@@ -20,15 +20,16 @@ actor BackgroundReader {
     /// Keyed by start of day in `calendar`.
     func pills(onDays days: [Date], calendar: Calendar) throws -> [Date: [PillDose]] {
         let starts = days.map { calendar.startOfDay(for: $0) }
-        guard let first = starts.min(), let last = starts.max(),
-              let end = calendar.date(byAdding: .day, value: 1, to: last) else { return [:] }
+        guard let first = starts.min(), let last = starts.max() else { return [:] }
+        let from = LocalDay(first, in: calendar).stored
+        let end = LocalDay(last, in: calendar).adding(days: 1).stored
 
         let courses = try modelContext.fetch(FetchDescriptor<TreatmentCourse>())
         // Only the range's logs: `medication.logs` would fault in each medication's whole history.
         let logs = try modelContext.fetch(FetchDescriptor<DoseLog>(
-            predicate: #Predicate { $0.scheduledTime >= first && $0.scheduledTime < end }
+            predicate: #Predicate { $0.storedSlot >= from && $0.storedSlot < end }
         ))
-        let index = DoseDay.LogIndex(logs, calendar: calendar)
+        let index = DoseDay.LogIndex(logs)
 
         var result: [Date: [PillDose]] = [:]
         for start in starts {

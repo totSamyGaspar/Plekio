@@ -32,6 +32,11 @@ enum SchemaV1Fixture {
 
     /// 2026-10-01 00:00 UTC; everything else is an offset from it.
     static let base = Date(timeIntervalSince1970: 1_790_812_800)
+    /// The local day of a V1 moment, as the migration reads it.
+    static func local(_ moment: Date) -> LocalDay {
+        LocalDay(moment, in: .autoupdatingCurrent)
+    }
+
     static func day(_ n: Double, hour: Double = 0) -> Date {
         base.addingTimeInterval(n * 86_400 + hour * 3_600)
     }
@@ -110,22 +115,23 @@ enum SchemaV1Fixture {
 
     /// Every value `populate` wrote, read back through the current models.
     static func expectMatches(_ context: ModelContext) throws {
-        let courses = try context.fetch(FetchDescriptor<TreatmentCourse>(sortBy: [SortDescriptor(\.startDate)]))
+        let courses = try context.fetch(FetchDescriptor<TreatmentCourse>(sortBy: [SortDescriptor(\.storedStartDay)]))
         #expect(courses.map(\.id) == [courseId, repeatedCourseId])
 
         let course = try #require(courses.first)
         #expect(course.name == "Antibiotics")
-        #expect(course.startDate == day(0))
-        #expect(course.endDate == day(10))
+        // V2 keeps local days: V1's moments as days in the device's zone at the update.
+        #expect(course.startDay == local(day(0)))
+        #expect(course.endDay == local(day(10)))
         #expect(course.repeatedFromId == nil)
         #expect(courses.last?.repeatedFromId == courseId)
         #expect(courses.last?.medications.isEmpty == true)
 
         let dateRevision = try #require(course.dateRevisions.first)
         #expect(course.dateRevisions.count == 1)
-        #expect(dateRevision.validUntil == day(2))
-        #expect(dateRevision.startDate == day(-1))
-        #expect(dateRevision.endDate == day(7))
+        #expect(dateRevision.validUntilDay == local(day(2)))
+        #expect(dateRevision.startDay == local(day(-1)))
+        #expect(dateRevision.endDay == local(day(7)))
         #expect(dateRevision.course?.id == courseId)
 
         let medication = try #require(course.medications.first)
@@ -138,14 +144,14 @@ enum SchemaV1Fixture {
         #expect(medication.frequencyDays == 2)
         #expect(medication.stockCount == 14)
         #expect(medication.lowStockThreshold == 4)
-        #expect(medication.startDate == day(1))
+        #expect(medication.startDay == local(day(1)))
         #expect(medication.course?.id == courseId)
         // Added in V2: a V1 medication has no meal timing.
         #expect(medication.mealTiming == nil)
 
         let scheduleRevision = try #require(medication.scheduleRevisions.first)
         #expect(medication.scheduleRevisions.count == 1)
-        #expect(scheduleRevision.validUntil == day(3))
+        #expect(scheduleRevision.validUntilDay == local(day(3)))
         #expect(scheduleRevision.minutesOfDay == [9 * 60])
         #expect(scheduleRevision.frequencyDays == 1)
         #expect(scheduleRevision.dosage == 1)
@@ -159,6 +165,9 @@ enum SchemaV1Fixture {
             .pending,
         ])
         #expect(medication.logs.allSatisfy { $0.medication?.id == medicationId })
+        // V2 keeps local slots: each V1 moment as the day and time it was here.
+        #expect(medication.logs.map(\.slot).sorted() == [day(0, hour: 8), day(0, hour: 20.5), day(2, hour: 8), day(2, hour: 20.5)]
+            .map { LocalSlot($0, in: .autoupdatingCurrent) })
 
         let entries = try context.fetch(FetchDescriptor<DiaryEntry>(sortBy: [SortDescriptor(\.checkInDate)]))
         #expect(entries.map(\.id) == [diaryId, quickLogId])

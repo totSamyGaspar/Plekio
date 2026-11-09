@@ -172,8 +172,8 @@ nonisolated struct ReportAssembler {
         case taken, skipped, missed, upcoming
     }
 
-    private func outcome(at slot: Date, logs: [DateComponents: DoseLog]) -> Outcome {
-        let log = logs[DoseSchedule.slotKey(slot, calendar: calendar)]
+    private func outcome(at slot: Date, logs: [LocalSlot: DoseLog]) -> Outcome {
+        let log = logs[LocalSlot(slot, in: calendar)]
 
         switch log?.status {
         case .taken: return .taken
@@ -185,9 +185,9 @@ nonisolated struct ReportAssembler {
     }
 
     /// Logs indexed by slot once, instead of scanning per slot.
-    private func logsBySlot(of medication: MedicationItem) -> [DateComponents: DoseLog] {
+    private func logsBySlot(of medication: MedicationItem) -> [LocalSlot: DoseLog] {
         Dictionary(
-            medication.logs.map { (DoseSchedule.slotKey($0.scheduledTime, calendar: calendar), $0) },
+            medication.logs.map { ($0.slot, $0) },
             uniquingKeysWith: { first, _ in first }
         )
     }
