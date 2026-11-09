@@ -22,4 +22,11 @@ nonisolated enum MealTiming: String, CaseIterable, Sendable {
     }
 
     static let systemImage = "fork.knife"
+
+    /// For text that lists names, like reminders and Siri: "Iron (Empty stomach)".
+    static func label(_ name: String, _ timing: MealTiming?) -> String {
+        guard let timing else { return name }
+        return String(localized: "\(name) (\(String(localized: timing.title)))",
+                      comment: "A medication name with when to take it relative to food.")
+    }
 }

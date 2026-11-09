@@ -33,20 +33,23 @@ enum ShortcutDialog {
         }
         var sentences: [String] = []
         if let missed = upcoming.missed {
-            sentences.append(String(localized: "Missed at \(time(missed)): \(names(missed))."))
+            sentences.append(String(localized: "Missed at \(time(missed)): \(names(missed, withMealTiming: true))."))
         }
         if let next = upcoming.next {
-            sentences.append(String(localized: "Next at \(time(next)): \(names(next))."))
+            sentences.append(String(localized: "Next at \(time(next)): \(names(next, withMealTiming: true))."))
         } else if let tomorrow = upcoming.tomorrow {
-            sentences.append(String(localized: "Nothing more today. Tomorrow at \(time(tomorrow)): \(names(tomorrow))."))
+            sentences.append(String(localized: "Nothing more today. Tomorrow at \(time(tomorrow)): \(names(tomorrow, withMealTiming: true))."))
         } else if sentences.isEmpty {
             sentences.append(String(localized: "No medications are scheduled."))
         }
         return sentences.joined(separator: " ")
     }
 
-    private static func names(_ slot: DueDoses.Slot) -> String {
-        slot.doses.map(\.name).formatted(.list(type: .and))
+    /// Meal timing only where the doses are still to take; "Logged Iron (Empty stomach)" says nothing useful.
+    private static func names(_ slot: DueDoses.Slot, withMealTiming: Bool = false) -> String {
+        slot.doses
+            .map { withMealTiming ? MealTiming.label($0.name, $0.mealTiming) : $0.name }
+            .formatted(.list(type: .and))
     }
 
     private static func time(_ slot: DueDoses.Slot) -> String {

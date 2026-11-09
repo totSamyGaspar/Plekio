@@ -15,6 +15,9 @@ extension WidgetSnapshot {
         var dosage: Int
         var form: Form
         var status: Status
+        /// `MealTiming`'s raw value; the widget words it in its own language, which can
+        /// differ from the app's. Optional, so snapshots written before it still decode.
+        var mealTiming: String? = nil
 
         /// Unique within a slot: a medication has one dose per slot.
         var id: UUID { medicationId }

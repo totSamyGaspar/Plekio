@@ -151,7 +151,7 @@ final class NotificationService: NotificationServiceProtocol {
         let requests = scheduled.map { triggerDate, medsAtTime in
             ReminderRequestFactory.doseReminder(
                 medicationIds: medsAtTime.map { $0.medication.id.uuidString },
-                medicationNames: medsAtTime.map { $0.medication.name },
+                medicationNames: medsAtTime.map { MealTiming.label($0.medication.name, $0.medication.mealTiming) },
                 triggerDate: triggerDate,
                 calendar: calendar,
                 badge: badges[triggerDate],
