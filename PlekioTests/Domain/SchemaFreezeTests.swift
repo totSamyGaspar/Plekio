@@ -11,15 +11,17 @@ import SwiftData
 import SQLite3
 @testable import Plekio
 
-// V1 shipped, so its shape is frozen. Two files in Fixtures/ hold it:
-// - SchemaV1.manifest: every entity, attribute and relationship, as text. A
-//   change to a V1 model fails `v1ShapeIsFrozen`; the change belongs in V2.
-// - SchemaV1.store: a store written by V1 with SchemaV1Fixture's data. Every
+// A shipped version's shape is frozen. Two files in Fixtures/ hold each one:
+// - SchemaVn.manifest: every entity, attribute and relationship, as text. A
+//   change to a Vn model fails `vnShapeIsFrozen`; the change belongs in a new version.
+// - SchemaVn.store: a store written by Vn with SchemaVnFixture's data. Every
 //   later version must open it through the migration plan with nothing lost.
 //
-// Both are written once, by the shipped code, and never regenerated:
+// Both are written once, by that version's code, and never regenerated:
 //   TEST_RUNNER_PLEKIO_FIXTURE_OUTPUT="$PWD/PlekioTests/Fixtures" xcodebuild test \
-//     -scheme Plekio -destination '…' -only-testing:PlekioTests/SchemaFreezeTests/writeV1Fixtures
+//     -scheme Plekio -destination '…' '-only-testing:PlekioTests/SchemaFreezeTests/writeV2Fixtures()'
+// The parentheses matter: without them the filter matches nothing and the run still "succeeds".
+// A writer only works while its version is `Current`: after that its models have moved on.
 
 @MainActor
 @Suite("Schema freeze")
@@ -34,6 +36,16 @@ struct SchemaFreezeTests {
         #expect(
             SchemaManifest.of(SchemaV1.self) == frozen,
             "SchemaV1 changed after it shipped. Put the change in a new SchemaV2 (see PlekioSchema.swift)."
+        )
+    }
+
+    @Test("SchemaV2 has the shape it shipped with")
+    func v2ShapeIsFrozen() throws {
+        let frozen = try String(contentsOf: Fixtures.url("SchemaV2", "manifest"), encoding: .utf8)
+
+        #expect(
+            SchemaManifest.of(SchemaV2.self) == frozen,
+            "SchemaV2 changed after it shipped. Put the change in a new SchemaV3 (see PlekioSchema.swift)."
         )
     }
 
@@ -56,6 +68,24 @@ struct SchemaFreezeTests {
         )
 
         try SchemaV1Fixture.expectMatches(container.mainContext)
+    }
+
+    @Test("The V2 store opens with the current schema and keeps every value")
+    func v2StoreOpensWithTheCurrentSchema() throws {
+        let directory = try Fixtures.scratchDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let store = directory.appending(path: "Plekio.store")
+        try FileManager.default.copyItem(at: Fixtures.url("SchemaV2", "store"), to: store)
+
+        let schema = PlekioSchema.current()
+        let container = try ModelContainer(
+            for: schema,
+            migrationPlan: PlekioMigrationPlan.self,
+            configurations: [ModelConfiguration(schema: schema, url: store)]
+        )
+
+        try SchemaV2Fixture.expectMatches(container.mainContext)
     }
 
     // MARK: - Writing the fixtures
@@ -82,6 +112,30 @@ struct SchemaFreezeTests {
 
         try SchemaManifest.of(SchemaV1.self)
             .write(to: output.appending(path: "SchemaV1.manifest"), atomically: true, encoding: .utf8)
+    }
+
+    @Test(
+        "Writes the V2 fixtures (only when asked)",
+        .enabled(if: Fixtures.outputDirectory != nil, "Set TEST_RUNNER_PLEKIO_FIXTURE_OUTPUT to write the fixtures")
+    )
+    func writeV2Fixtures() throws {
+        let output = try #require(Fixtures.outputDirectory)
+        try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+
+        let store = output.appending(path: "SchemaV2.store")
+        try #require(!FileManager.default.fileExists(atPath: store.path), "The V2 fixture exists already; it is never rewritten.")
+
+        let schema = Schema(versionedSchema: SchemaV2.self)
+        do {
+            let container = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, url: store)])
+            SchemaV2Fixture.populate(container.mainContext)
+            try container.mainContext.save()
+            try SchemaV2Fixture.expectMatches(container.mainContext)
+        }
+        try Fixtures.collapseIntoOneFile(store)
+
+        try SchemaManifest.of(SchemaV2.self)
+            .write(to: output.appending(path: "SchemaV2.manifest"), atomically: true, encoding: .utf8)
     }
 }
 
@@ -122,7 +176,7 @@ private enum Fixtures {
 
     private final class BundleToken {}
 
-    /// Where `writeV1Fixtures` writes; nil in a normal run.
+    /// Where the fixture writers write; nil in a normal run.
     nonisolated static var outputDirectory: URL? {
         ProcessInfo.processInfo.environment["PLEKIO_FIXTURE_OUTPUT"].map { URL(filePath: $0, directoryHint: .isDirectory) }
     }
