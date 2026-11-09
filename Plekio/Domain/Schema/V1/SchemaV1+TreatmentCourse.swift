@@ -1,0 +1,49 @@
+//
+//  SchemaV1+TreatmentCourse.swift
+//  Plekio
+//
+//  Created by Edward Gasparian on 02.05.2026.
+//
+
+import Foundation
+import SwiftData
+
+nonisolated extension SchemaV1 {
+
+    /// `nonisolated`: BackgroundReader reads it on a background context.
+    @Model
+    nonisolated final class TreatmentCourse {
+
+        // MARK: - Properties
+
+        @Attribute(.unique) var id: UUID
+        var name: String
+        var startDate: Date
+        var endDate: Date
+
+        /// Id of the FIRST course in the "Repeat" chain (not the parent), nil for originals.
+        var repeatedFromId: UUID?
+
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.MedicationItem.course)
+        var medications: [MedicationItem]
+
+        @Relationship(deleteRule: .cascade, inverse: \SchemaV1.CourseDateRevision.course)
+        var dateRevisions: [CourseDateRevision] = []
+
+        // MARK: - Init
+
+        init(name: String, startDate: Date, endDate: Date, repeatedFromId: UUID? = nil) {
+            self.id = UUID()
+            self.name = name
+            self.startDate = startDate
+            self.endDate = endDate
+            self.repeatedFromId = repeatedFromId
+            self.medications = []
+        }
+
+        // MARK: - Lineage
+
+        /// The chain this course belongs to: the original course's id.
+        var repeatLineageId: UUID { repeatedFromId ?? id }
+    }
+}

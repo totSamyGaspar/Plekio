@@ -26,7 +26,7 @@ import SwiftData
 
 /// The single source of the current schema version for the app and tests.
 nonisolated enum PlekioSchema {
-    typealias Current = SchemaV1
+    typealias Current = SchemaV2
 
     static func current() -> Schema {
         Schema(versionedSchema: Current.self)
@@ -62,17 +62,39 @@ nonisolated enum SchemaV1: VersionedSchema {
     }
 }
 
+/// Adds MedicationItem.mealTiming. Not frozen until it ships: until then it may still change.
+nonisolated enum SchemaV2: VersionedSchema {
+    static let versionIdentifier = Schema.Version(2, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        [
+            TreatmentCourse.self,
+            CourseDateRevision.self,
+            MedicationItem.self,
+            DoseLog.self,
+            ScheduleRevision.self,
+            DiaryEntry.self,
+            BloodPressureReading.self,
+        ]
+    }
+}
+
 // MARK: - Migration plan
 
 nonisolated enum PlekioMigrationPlan: SchemaMigrationPlan {
 
     /// Every shipped version, oldest first. Never remove one: old stores exist.
     static var schemas: [any VersionedSchema.Type] {
-        [SchemaV1.self]
+        [SchemaV1.self, SchemaV2.self]
     }
 
     /// Always `schemas.count - 1` stages, one per consecutive pair.
     static var stages: [MigrationStage] {
-        []
+        [migrateV1toV2]
+    }
+
+    /// An optional attribute added: nothing to rewrite.
+    static var migrateV1toV2: MigrationStage {
+        .lightweight(fromVersion: SchemaV1.self, toVersion: SchemaV2.self)
     }
 }

@@ -39,6 +39,9 @@ struct PlekioSchemaTests {
         for model in SchemaV1.models {
             #expect(String(reflecting: model).hasPrefix("Plekio.SchemaV1."))
         }
+        for model in SchemaV2.models {
+            #expect(String(reflecting: model).hasPrefix("Plekio.SchemaV2."))
+        }
     }
 
     @Test("An unknown stored form reads as a pill instead of failing")
@@ -47,6 +50,19 @@ struct PlekioSchemaTests {
         medication.formRaw = "patch"
 
         #expect(medication.form == .pill)
+    }
+
+    @Test("Meal timing round-trips, and an unknown stored value reads as doesn't matter")
+    func mealTimingFallsBackToNil() {
+        let medication = MedicationItem(id: UUID(), name: "Med", form: .pill, dosage: 1, minutesOfDay: [9 * 60],
+                                        frequencyDays: 1, mealTiming: .afterMeal)
+        #expect(medication.mealTiming == .afterMeal)
+
+        medication.mealTiming = nil
+        #expect(medication.mealTimingRaw == nil)
+
+        medication.mealTimingRaw = "withSnack"
+        #expect(medication.mealTiming == nil)
     }
 
     // MARK: - Store on disk
