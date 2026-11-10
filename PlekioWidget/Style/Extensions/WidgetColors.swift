@@ -27,4 +27,6 @@ extension Color {
 
     /// Ink of the white "LOG ALL" button on the hero card (UpNextHeroCard).
     static let onHeroButton = Color(red: 0.05, green: 0.3, blue: 0.2)
+
+    static let heroHeart = Color(red: 1, green: 0.78, blue: 0.8)
 }

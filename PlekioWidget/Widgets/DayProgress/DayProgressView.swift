@@ -50,10 +50,12 @@ struct DayProgressView: View {
     private func small(_ snapshot: WidgetSnapshot) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 5) {
-                WidgetLogo(size: 14)
-                Text("Today")
+                WidgetLogo(size: 16)
+                Text(entry.date.formatted(.dateTime.month(.abbreviated).day()))
                     .font(.caption.weight(.bold))
                     .foregroundStyle(Color.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Spacer(minLength: 4)
                 if let next = snapshot.upNext(at: entry.date, calendar: entry.calendar) {
                     next.time.widgetTime

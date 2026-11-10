@@ -149,7 +149,7 @@ struct WidgetSnapshotTests {
 
     // MARK: - Timeline
 
-    @Test("Change dates are slots, grace ends and midnights after now, in order")
+    @Test("Change dates are slots, grace ends, midnights and hero hours after now, in order")
     func changeDatesCoverEveryVisibleChange() {
         let snapshot = WidgetSnapshot(
             generatedAt: testDate(2026, 10, 21, 7),
@@ -162,7 +162,12 @@ struct WidgetSnapshotTests {
         #expect(dates == [
             testDate(2026, 10, 21, 8),
             testDate(2026, 10, 21, 9).addingTimeInterval(1),
+            testDate(2026, 10, 21, 12),
+            testDate(2026, 10, 21, 18),
             testDate(2026, 10, 22),
+            testDate(2026, 10, 22, 5),
+            testDate(2026, 10, 22, 12),
+            testDate(2026, 10, 22, 18),
             testDate(2026, 10, 23)
         ])
     }

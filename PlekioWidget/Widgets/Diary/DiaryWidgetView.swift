@@ -89,33 +89,38 @@ struct DiaryWidgetView: View {
     @ViewBuilder
     private func logged(_ day: WidgetSnapshot.DiaryDay) -> some View {
         if isMedium {
-            HStack(alignment: .top, spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    header
-                    Spacer(minLength: 0)
-                    moodSummary(day)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            VStack(spacing: 4) {
+                header
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(spacing: 16) {
+                    moodSummary(day, alignment: .center)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                details(day)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                    details(day)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                }
             }
         } else {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(spacing: 0) {
                 header
-                Spacer(minLength: 0)
-                moodSummary(day)
-                Text(day.isQuickLog ? "Quick log" : "Energy: \(day.energyLevel)/5")
-                    .font(.caption2)
-                    .foregroundStyle(Color.textSecondary)
-                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer(minLength: 4)
+                VStack(spacing: 6) {
+                    moodSummary(day, alignment: .center)
+                    Text(day.isQuickLog ? "Quick log" : "Energy: \(day.energyLevel)/5")
+                        .font(.caption2)
+                        .foregroundStyle(Color.textSecondary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity)
+                Spacer(minLength: 4)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
-    private func moodSummary(_ day: WidgetSnapshot.DiaryDay) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private func moodSummary(_ day: WidgetSnapshot.DiaryDay, alignment: HorizontalAlignment = .leading) -> some View {
+        VStack(alignment: alignment, spacing: 6) {
             ZStack {
                 Circle().fill(Color.accentPrimary.opacity(0.15))
                 Text(verbatim: day.mood.emoji).font(.system(size: isMedium ? 26 : 22))

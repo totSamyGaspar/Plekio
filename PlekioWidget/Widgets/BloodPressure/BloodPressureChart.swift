@@ -13,6 +13,10 @@ import WidgetKit
 /// colour, the band between them shaded.
 struct BloodPressureChart: View {
     let readings: [WidgetSnapshot.Reading]
+    let style: BloodPressureStyle
+
+    private var systolicColor: Color { style.systolic }
+    private var diastolicColor: Color { style.diastolic }
 
     /// Fits the readings, rounded outward to tens, as on the diary card.
     private var yDomain: ClosedRange<Int> {
@@ -33,7 +37,7 @@ struct BloodPressureChart: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [Color.warmAccent.opacity(0.18), Color.accentPrimary.opacity(0.14)],
+                        colors: style.band,
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -45,7 +49,7 @@ struct BloodPressureChart: View {
                     y: .value("mmHg", reading.systolic),
                     series: .value("Blood Pressure", "systolic")
                 )
-                .foregroundStyle(Color.accentPrimary)
+                .foregroundStyle(systolicColor)
                 .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
                 .interpolationMethod(.monotone)
                 .symbol(.circle)
@@ -56,7 +60,7 @@ struct BloodPressureChart: View {
                     y: .value("mmHg", reading.diastolic),
                     series: .value("Blood Pressure", "diastolic")
                 )
-                .foregroundStyle(Color.warmAccent)
+                .foregroundStyle(diastolicColor)
                 .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
                 .interpolationMethod(.monotone)
                 .symbol(.circle)
@@ -67,16 +71,16 @@ struct BloodPressureChart: View {
             .chartYScale(domain: yDomain)
             .chartYAxis {
                 AxisMarks(position: .trailing, values: .automatic(desiredCount: 3)) { _ in
-                    AxisGridLine().foregroundStyle(Color.textPrimary.opacity(0.07))
+                    AxisGridLine().foregroundStyle(style.grid)
                     AxisValueLabel()
                         .font(.system(size: 8))
-                        .foregroundStyle(Color.textTertiary)
+                        .foregroundStyle(style.tertiary)
                 }
             }
 
             HStack(spacing: 10) {
-                legend(.accentPrimary, "Systolic")
-                legend(.warmAccent, "Diastolic")
+                legend(systolicColor, "Systolic")
+                legend(diastolicColor, "Diastolic")
             }
         }
         // The latest reading beside it says it in words.
@@ -88,7 +92,7 @@ struct BloodPressureChart: View {
             Circle().fill(color).frame(width: 6, height: 6)
             Text(title)
                 .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(Color.textSecondary)
+                .foregroundStyle(style.secondary)
                 .lineLimit(1)
         }
     }
