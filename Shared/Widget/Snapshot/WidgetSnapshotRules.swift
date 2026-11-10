@@ -95,6 +95,8 @@ nonisolated extension WidgetSnapshot {
 
     // MARK: - Timeline
 
+    static let heroHours = [5, 12, 18]
+
     /// The moments after `now` at which the widget looks different with no new data:
     /// each slot (up next moves on), each slot's grace end (a dose turns missed),
     /// and each midnight (the day rolls over). Sorted, without duplicates.
@@ -109,6 +111,14 @@ nonisolated extension WidgetSnapshot {
         for offset in 1...2 {
             if let midnight = calendar.date(byAdding: .day, value: offset, to: today) {
                 dates.insert(midnight)
+            }
+        }
+        for offset in 0...1 {
+            guard let day = calendar.date(byAdding: .day, value: offset, to: today) else { continue }
+            for hour in Self.heroHours {
+                if let time = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: day) {
+                    dates.insert(time)
+                }
             }
         }
         return dates.filter { $0 > now }.sorted()
