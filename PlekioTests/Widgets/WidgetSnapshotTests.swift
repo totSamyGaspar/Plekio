@@ -238,6 +238,6 @@ struct WidgetSnapshotTests {
     func changeDatesSkipThePast() {
         let dates = dayOfThree().changeDates(after: testDate(2026, 10, 21, 16), calendar: calendar)
         #expect(dates.allSatisfy { $0 > testDate(2026, 10, 21, 16) })
-        #expect(dates.first == testDate(2026, 10, 21, 20))
+        #expect(Array(dates.prefix(2)) == [testDate(2026, 10, 21, 18), testDate(2026, 10, 21, 20)])
     }
 }
