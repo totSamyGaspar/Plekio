@@ -91,6 +91,7 @@ struct UpNextCard: View {
             }
         }
         .foregroundStyle(.white)
+        .heroTextShadow()
     }
 
     // MARK: Missed
@@ -164,6 +165,7 @@ struct UpNextCard: View {
             }
         }
         .foregroundStyle(.white)
+        .heroTextShadow()
     }
 
     @ViewBuilder
