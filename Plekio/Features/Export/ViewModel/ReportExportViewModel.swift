@@ -5,12 +5,12 @@
 //  Created by Edward Gasparian on 19.09.2026.
 //
 
-import Combine
 import SwiftUI
 
 /// The export screen's state: what is selected, and the file it produced.
 @MainActor
-final class ReportExportViewModel: ObservableObject {
+@Observable
+final class ReportExportViewModel {
 
     // MARK: - Types
 
@@ -24,13 +24,13 @@ final class ReportExportViewModel: ObservableObject {
     // MARK: - Properties
 
     /// Any change discards the made file, so a stale document is never shared.
-    @Published var selection: ReportSelection {
+    var selection: ReportSelection {
         didSet { document = nil }
     }
 
-    @Published private(set) var courses: [CourseOption] = []
-    @Published private(set) var isWorking = false
-    @Published private(set) var document: URL?
+    private(set) var courses: [CourseOption] = []
+    private(set) var isWorking = false
+    private(set) var document: URL?
 
     private let database: any CourseStoring & DiaryStoring & BloodPressureStoring & ReportReading
     private let images: any ImageLoading

@@ -9,24 +9,25 @@ import SwiftUI
 import Combine
 
 @MainActor
+@Observable
 final class DiaryViewModel: DiaryViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var entries: [DiaryEntrySnapshot] = []
+    var entries: [DiaryEntrySnapshot] = []
 
     /// Every entry's photos, newest first. Stored so it is rebuilt once per data
     /// change rather than on every body pass.
-    @Published private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
+    private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
 
-    @Published private(set) var bloodPressureReadings: [BloodPressureSnapshot] = []
+    private(set) var bloodPressureReadings: [BloodPressureSnapshot] = []
 
     private let diary: any DiaryRepository
     private let errors: any ErrorReporting
     private let time: any TimeSource
     private let bloodPressure: BloodPressureLogging
     private let quickMood: QuickMoodLogging
-    private var cancellables = Set<AnyCancellable>()
+    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
@@ -165,10 +166,11 @@ final class DiaryViewModel: DiaryViewModelProtocol {
 // MARK: - Mock
 
 #if DEBUG
+@Observable
 final class MockDiaryViewModel: DiaryViewModelProtocol {
-    @Published var entries: [DiaryEntrySnapshot] = []
-    @Published private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
-    @Published private(set) var bloodPressureReadings: [BloodPressureSnapshot] = []
+    var entries: [DiaryEntrySnapshot] = []
+    private(set) var photoCheckpoints: [DiaryPhotoCheckpoint] = []
+    private(set) var bloodPressureReadings: [BloodPressureSnapshot] = []
 
     var avgMoodScore: Double = 4.0
     var avgEnergyLevel: Double = 3.3

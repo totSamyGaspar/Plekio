@@ -5,18 +5,18 @@
 //  Created by Edward Gasparian on 02.05.2026.
 //
 
-import Combine
 import SwiftUI
 
 @MainActor
+@Observable
 final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var courseName: String = ""
-    @Published var startDate: Date = Date()
-    @Published var endDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
-    @Published var medications: [MedicationDraft] = []
+    var courseName: String = ""
+    var startDate: Date = Date()
+    var endDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+    var medications: [MedicationDraft] = []
 
     private let courseEditing: CourseEditingUseCaseProtocol
     private let errors: any ErrorReporting

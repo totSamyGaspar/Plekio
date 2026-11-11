@@ -9,22 +9,23 @@ import SwiftUI
 import Combine
 
 @MainActor
+@Observable
 final class DashboardViewModel: DashboardViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var selectedDate: Date = Date() {
+    var selectedDate: Date = Date() {
         didSet {
             fetchData()
             // The undo banner refers to the previous day's doses.
             clearUndoWindow()
         }
     }
-    @Published private var allPills: [PillDose] = []
-    @Published private(set) var hasCourses = true
-    @Published var weeklyPercentages: [Double] = Array(repeating: 0.0, count: 7)
-    @Published var weeklyDays: [String] = []
-    @Published var recentAverage: Int = 0
+    private var allPills: [PillDose] = []
+    private(set) var hasCourses = true
+    var weeklyPercentages: [Double] = Array(repeating: 0.0, count: 7)
+    var weeklyDays: [String] = []
+    var recentAverage: Int = 0
 
     /// Shared with the notification modal via DoseUndoCenter.
     var undoableAction: UndoableDoseAction? { undoCenter.current }
@@ -35,7 +36,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     private let errors: any ErrorReporting
     private let time: any TimeSource
     private let undoCenter: DoseUndoCenter
-    private var cancellables = Set<AnyCancellable>()
+    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
 
     private static let weekdayFormatter: DateFormatter = {
         let formatter = DateFormatter()

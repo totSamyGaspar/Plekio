@@ -9,20 +9,21 @@ import SwiftUI
 import Combine
 
 @MainActor
+@Observable
 final class StatisticsViewModel: StatisticsViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var takenCount: Int = 0
-    @Published var totalCount: Int = 0
-    @Published var streakDays: Int = 0
-    @Published var lowStockItems: [MedicationSnapshot] = []
+    var takenCount: Int = 0
+    var totalCount: Int = 0
+    var streakDays: Int = 0
+    var lowStockItems: [MedicationSnapshot] = []
 
     private let courses: any CourseRepository
     private let doses: any DoseStoring
     private let errors: any ErrorReporting
     private let time: any TimeSource
-    private var cancellables = Set<AnyCancellable>()
+    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
 
     /// The in-flight history read. Exposed so tests can await it.
     private(set) var historyLoad: Task<Void, Never>?

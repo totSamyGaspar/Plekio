@@ -6,16 +6,16 @@
 //
 
 import SwiftUI
-import Combine
 
 // MARK: - MockNewTreatmentViewModel
 
 #if DEBUG
+@Observable
 final class MockNewTreatmentViewModel: NewTreatmentViewModelProtocol {
-    @Published var courseName: String = "Flu"
-    @Published var startDate: Date = Date()
-    @Published var endDate: Date = Date()
-    @Published var medications: [MedicationDraft] = []
+    var courseName: String = "Flu"
+    var startDate: Date = Date()
+    var endDate: Date = Date()
+    var medications: [MedicationDraft] = []
 
     var isSaveEnabled: Bool = true
 

@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import Observation
 
 // MARK: - DashboardViewModelProtocol
 
-protocol DashboardViewModelProtocol: ObservableObject {
+protocol DashboardViewModelProtocol: AnyObject, Observable {
     var selectedDate: Date { get set }
     var weekDates: [Date] { get }
 

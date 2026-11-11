@@ -9,7 +9,7 @@ import SwiftUI
 
 // MARK: - NewTreatmentViewModelProtocol
 
-protocol NewTreatmentViewModelProtocol: ObservableObject {
+protocol NewTreatmentViewModelProtocol: AnyObject, Observable {
     var courseName: String { get set }
     var startDate: Date { get set }
     var endDate: Date { get set }

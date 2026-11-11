@@ -6,11 +6,10 @@
 //
 
 import SwiftUI
-import Combine
 
 // MARK: - AddMedicationViewModelProtocol
 
-protocol AddMedicationViewModelProtocol: ObservableObject {
+protocol AddMedicationViewModelProtocol: AnyObject, Observable {
     var draft: MedicationDraft { get set }
     var selectedImage: UIImage? { get set }
     var showingPhotoSourceMenu: Bool { get set }

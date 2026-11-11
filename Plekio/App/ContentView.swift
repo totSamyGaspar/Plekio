@@ -48,7 +48,7 @@ struct ContentView: View {
 #if DEBUG
 #Preview {
     ContentView()
-        .environmentObject(AppRouter())
+        .environment(AppRouter())
         .environment(AppDependencies.preview)
 }
 #endif

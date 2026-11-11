@@ -5,18 +5,18 @@
 //  Created by Edward Gasparian on 24.08.2026.
 //
 
-import Combine
 import OSLog
 import SwiftUI
 
 @MainActor
+@Observable
 final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var draft = DiaryEntryDraft()
-    @Published var selectedImages: [UIImage] = []
-    @Published var showingPhotoSourceMenu = false
+    var draft = DiaryEntryDraft()
+    var selectedImages: [UIImage] = []
+    var showingPhotoSourceMenu = false
 
     /// Set only through `startEditing(_:)`.
     private var editingEntry: DiaryEntrySnapshot?
@@ -170,10 +170,11 @@ enum DiaryEntryError: LocalizedError {
 // MARK: - Mock
 
 #if DEBUG
+@Observable
 final class MockDiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
-    @Published var draft = DiaryEntryDraft()
-    @Published var selectedImages: [UIImage] = []
-    @Published var showingPhotoSourceMenu = false
+    var draft = DiaryEntryDraft()
+    var selectedImages: [UIImage] = []
+    var showingPhotoSourceMenu = false
 
     init() {}
 

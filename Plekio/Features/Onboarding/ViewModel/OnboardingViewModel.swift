@@ -6,14 +6,14 @@
 //
 
 import SwiftUI
-import Combine
 
 /// Onboarding carousel state; slide order tells the story, ending on the doctor report.
+@Observable
 final class OnboardingViewModel: OnboardingViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var currentPage = 0
+    var currentPage = 0
 
     private let settings: SettingsStore
 

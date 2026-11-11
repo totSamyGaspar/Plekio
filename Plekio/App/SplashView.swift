@@ -93,7 +93,7 @@ struct SplashView: View {
 #if DEBUG
 #Preview {
     SplashView()
-        .environmentObject(AppRouter())
+        .environment(AppRouter())
         .environment(AppDependencies.preview)
 }
 #endif

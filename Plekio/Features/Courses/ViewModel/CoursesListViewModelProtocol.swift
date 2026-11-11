@@ -6,12 +6,11 @@
 //
 
 import SwiftUI
-import Combine
 
 // MARK: - CoursesListViewModelProtocol
 
 @MainActor
-protocol CoursesListViewModelProtocol: ObservableObject {
+protocol CoursesListViewModelProtocol: AnyObject, Observable {
     var activeCourses: [CourseSnapshot] { get }
     var historyCourses: [CourseSnapshot] { get }
 

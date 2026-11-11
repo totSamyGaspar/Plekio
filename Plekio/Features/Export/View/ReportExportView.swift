@@ -12,12 +12,12 @@ struct ReportExportView: View {
 
     // MARK: - Properties
 
-    @StateObject private var viewModel: ReportExportViewModel
+    @StateModel private var viewModel: ReportExportViewModel
 
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> ReportExportViewModel) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
+        self._viewModel = StateModel(wrappedValue: viewModel())
     }
 
     // MARK: - Body

@@ -12,8 +12,8 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
     // MARK: - Properties
 
     @Environment(AppDependencies.self) private var dependencies
-    @StateObject private var viewModel: VM
-    @EnvironmentObject private var router: AppRouter
+    @StateModel private var viewModel: VM
+    @Environment(AppRouter.self) private var router
 
     @State private var showingAddMedication = false
     @State private var medicationToEdit: MedicationSnapshot?
@@ -21,7 +21,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> VM) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
+        self._viewModel = StateModel(wrappedValue: viewModel())
     }
 
     // MARK: - Body

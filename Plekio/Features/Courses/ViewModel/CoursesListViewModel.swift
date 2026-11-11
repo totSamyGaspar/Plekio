@@ -9,18 +9,19 @@ import SwiftUI
 import Combine
 
 @MainActor
+@Observable
 final class CoursesListViewModel: CoursesListViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var activeCourses: [CourseSnapshot] = []
-    @Published var historyCourses: [CourseSnapshot] = []
+    var activeCourses: [CourseSnapshot] = []
+    var historyCourses: [CourseSnapshot] = []
 
     private let courses: any CourseRepository
     private let courseEditing: CourseEditingUseCaseProtocol
     private let errors: any ErrorReporting
     private let time: any TimeSource
-    private var cancellables = Set<AnyCancellable>()
+    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 

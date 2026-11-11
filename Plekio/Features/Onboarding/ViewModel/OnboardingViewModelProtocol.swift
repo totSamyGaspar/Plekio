@@ -9,7 +9,7 @@ import SwiftUI
 
 // MARK: - OnboardingViewModelProtocol
 
-protocol OnboardingViewModelProtocol: ObservableObject {
+protocol OnboardingViewModelProtocol: AnyObject, Observable {
     var currentPage: Int { get set }
     var pages: [OnboardingPage] { get }
     var isLastPage: Bool { get }
