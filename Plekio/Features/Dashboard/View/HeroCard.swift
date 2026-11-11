@@ -34,6 +34,7 @@ struct HeroCard<Content: View>: View {
             header
             content
         }
+        .heroTextShadow()
         .padding(24)
         .background(LinearGradient(colors: gradientColors, startPoint: .topLeading, endPoint: .bottomTrailing))
         .cornerRadius(32)
