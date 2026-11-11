@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import TipKit
 
 struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelProtocol>: View {
 
@@ -17,12 +16,6 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
     @StateModel private var statistics: Stats
     @Environment(AppRouter.self) private var router
     @Environment(AppDependencies.self) private var dependencies
-    @Environment(\.openURL) private var openURL
-
-    /// Scales with the wordmark's text style under Dynamic Type.
-    @ScaledMetric(relativeTo: .largeTitle) private var logoSize: CGFloat = 34
-
-    @Namespace private var daySelection
 
     @State private var width: CGFloat = 0
 
@@ -32,12 +25,6 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
 
     private var overviewWidth: CGFloat { min(max(width * 0.4, 360), 460) }
 
-    private let checkmarkTip = DoseCheckmarkTip()
-
-    private var hasPills: Bool {
-        !(viewModel.morningPills.isEmpty && viewModel.noonPills.isEmpty && viewModel.eveningPills.isEmpty)
-    }
-
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> VM, statistics: @autoclosure @escaping () -> Stats) {
@@ -45,19 +32,28 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
         self._statistics = StateModel(wrappedValue: statistics())
     }
 
+    // MARK: - Derived state
+
+    private var allPills: [PillDose] {
+        viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills
+    }
+
     // MARK: - Body
 
     var body: some View {
+        let pills = allPills
+        let hero = DayHero(pills: pills, selectedDate: viewModel.selectedDate, now: .now, calendar: .current)
+        // Statuses, not just "taken": a skip can also finish the day and swap the hero card.
+        let statuses = pills.map(\.status)
+
         ZStack(alignment: .bottomTrailing) {
             Color.appBackground.ignoresSafeArea()
             spaceReader
-            // Statuses, not just "taken": a skip can also finish the day and swap the hero card.
-            let allStatuses = allPills.map(\.status)
 
             if isWide {
-                wideLayout(statuses: allStatuses)
+                wideLayout(hero: hero, statuses: statuses)
             } else {
-                narrowLayout(statuses: allStatuses)
+                narrowLayout(hero: hero, statuses: statuses)
             }
         }
         .overlay(alignment: .bottom) {
@@ -76,8 +72,8 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
             }
         }
         .motion(Motion.standard, value: viewModel.undoableAction)
-        .doseFeedback(for: allPills)
-        .requestsReviewAfterTaking(allPills)
+        .doseFeedback(for: pills)
+        .requestsReviewAfterTaking(pills)
         .toolbar(.hidden, for: .navigationBar)
     }
 
@@ -90,11 +86,11 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
             .accessibilityHidden(true)
     }
 
-    private func narrowLayout(statuses: [DoseStatus]) -> some View {
+    private func narrowLayout(hero: DayHero, statuses: [DoseStatus]) -> some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
-                headerSection
-                daySection
+                DashboardHeader()
+                daySection(hero)
 
                 if viewModel.isEmpty {
                     emptyDay
@@ -104,21 +100,21 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
                         doseTimeline
                     }
                 }
-                overviewSection
+                StatisticsView(viewModel: statistics)
             }
             .padding(.bottom, 100)
             .motion(Motion.progress, value: statuses)
         }
     }
 
-    private func wideLayout(statuses: [DoseStatus]) -> some View {
+    private func wideLayout(hero: DayHero, statuses: [DoseStatus]) -> some View {
         VStack(spacing: 16) {
-            headerSection
+            DashboardHeader()
 
             HStack(alignment: .top, spacing: 0) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
-                        daySection
+                        daySection(hero)
 
                         if viewModel.isEmpty {
                             emptyDay
@@ -135,7 +131,7 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
                         if !viewModel.isEmpty {
                             weeklyChart
                         }
-                        overviewSection
+                        StatisticsView(viewModel: statistics)
                     }
                     .padding(.bottom, 100)
                     .motion(Motion.progress, value: statuses)
@@ -145,29 +141,19 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
         }
     }
 
-    // MARK: - Header
-
-    private var headerSection: some View {
-        HStack(spacing: 10) {
-            AppLogo(size: logoSize)
-
-            Text(AppBrand.name)
-                .scaledFont(size: 36, relativeTo: .largeTitle, weight: .heavy, design: .serif)
-                .italic()
-                .foregroundColor(.textPrimary)
-                .accessibilityAddTraits(.isHeader)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
-    }
+    // MARK: - Sections
 
     @ViewBuilder
-    private var daySection: some View {
-        notificationsOffCard
+    private func daySection(_ hero: DayHero) -> some View {
+        @Bindable var viewModel = viewModel
 
-        if let heroPills {
-            heroCard(front: heroPills)
+        if viewModel.hasCourses, dependencies.reminderSync.delivery == .off {
+            NotificationsOffCard()
+                .transition(.opacity)
+        }
+
+        if let front = hero.front {
+            heroCard(hero, front: front)
                 .tourTarget(.upNextCard)
                 .zIndex(1)
                 .transition(
@@ -179,188 +165,38 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
                     )
                 )
         } else {
-            dateSummaryLine
+            DaySummaryLine(date: viewModel.selectedDate, takenCount: hero.takenCount, totalCount: hero.totalCount)
         }
 
-        calendarSection.padding(.top, 8)
+        WeekStrip(dates: viewModel.weekDates, selection: $viewModel.selectedDate)
+            .padding(.top, 8)
     }
-
-    private var overviewSection: some View {
-        StatisticsView(viewModel: statistics)
-    }
-
-    /// Above everything else: without notifications not one dose is reminded.
-    @ViewBuilder
-    private var notificationsOffCard: some View {
-        if viewModel.hasCourses, dependencies.reminderSync.delivery == .off {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 6) {
-                    Image(systemName: "bell.slash.fill")
-                    Text("Notifications are off")
-                }
-                .font(.headline.weight(.bold))
-                .foregroundColor(.warningAccent)
-
-                Text("Plekio can't remind you about your doses. Allow notifications for Plekio in the Settings app.")
-                    .font(.subheadline)
-                    .foregroundColor(.textPrimary.opacity(0.7))
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Button {
-                    if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
-                        openURL(url)
-                    }
-                } label: {
-                    Text("Open Settings")
-                        .font(.subheadline.weight(.heavy))
-                        .foregroundColor(.onAccent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Color.accentPrimary)
-                        .cornerRadius(12)
-                }
-                .padding(.top, 4)
-            }
-            .padding(20)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.appSurface)
-            .cornerRadius(24)
-            .padding(.horizontal)
-            .transition(.opacity)
-        }
-    }
-
-    // MARK: - Derived state
-
-    private var allPills: [PillDose] {
-        viewModel.morningPills + viewModel.noonPills + viewModel.eveningPills
-    }
-
-    private var totalCount: Int { allPills.count }
-    private var takenCount: Int { allPills.filter { $0.isTaken }.count }
-
-    /// Next pending slot today; nil hides the hero card. Missed doses are excluded
-    /// so the hero can't bypass MedicationCardView's missed-dose lock.
-    /// Today, and every dose is taken or skipped: the hero card turns into the day's summary.
-    private var isDayComplete: Bool {
-        Calendar.current.isDateInToday(viewModel.selectedDate)
-            && !allPills.isEmpty
-            && allPills.allSatisfy(\.status.isSettled)
-    }
-
-    /// What the hero's front shows: the next slot, or once the day is done, the last one,
-    /// which is what the card was showing just before it turns over.
-    private var heroPills: [PillDose]? {
-        if let upNextPills { return upNextPills }
-        guard isDayComplete, let last = allPills.map(\.time).max() else { return nil }
-        return allPills.filter { Calendar.current.isDate($0.time, equalTo: last, toGranularity: .minute) }
-    }
-
-    private var upNextPills: [PillDose]? {
-        guard Calendar.current.isDateInToday(viewModel.selectedDate) else { return nil }
-        guard let earliest = allPills
-            .filter({ $0.status == .pending && !$0.isMissed })
-            .min(by: { $0.time < $1.time })?.time
-        else { return nil }
-        return allPills.filter {
-            Calendar.current.isDate($0.time, equalTo: earliest, toGranularity: .minute)
-        }
-    }
-
-    // MARK: - Sections
 
     /// "Up next" on the front; turns over to the day's summary once every dose is settled.
-    private func heroCard(front pills: [PillDose]) -> some View {
-        FlipCard(isFlipped: isDayComplete) {
+    private func heroCard(_ hero: DayHero, front pills: [PillDose]) -> some View {
+        FlipCard(isFlipped: hero.isDayComplete) {
             UpNextHeroCard(
                 pills: pills,
                 selectedDate: viewModel.selectedDate,
-                takenCount: takenCount,
-                totalCount: totalCount
+                takenCount: hero.takenCount,
+                totalCount: hero.totalCount
             ) {
                 viewModel.logDoses(pills)
             }
         } back: {
             DayCompleteHeroCard(
                 date: viewModel.selectedDate,
-                takenCount: takenCount,
-                totalCount: totalCount,
+                takenCount: hero.takenCount,
+                totalCount: hero.totalCount,
                 streakDays: statistics.streakDays,
-                isShown: isDayComplete
+                isShown: hero.isDayComplete
             )
         }
     }
 
-    /// Shown instead of the hero card; describes the selected day, not today.
-    private var dateSummaryLine: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(viewModel.selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
-                .font(.title3.weight(.bold))
-                .foregroundColor(.textPrimary)
-
-            Text("\(takenCount) of \(totalCount) doses logged")
-                .font(.subheadline)
-                .foregroundColor(.accentPrimary)
-                .animatedNumber(Double(takenCount))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 20)
-    }
-
-    /// The week cell matching the selected day; nil once the week has moved past it.
-    private var selectedWeekDate: Date? {
-        viewModel.weekDates.first { Calendar.current.isDate($0, inSameDayAs: viewModel.selectedDate) }
-    }
-
-    private var calendarSection: some View {
-        ViewThatFits(in: .horizontal) {
-            weekRow(stretches: true)
-                .padding(.horizontal)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                weekRow(stretches: false)
-                    .padding(.horizontal)
-            }
-        }
-        .sensoryFeedback(.selection, trigger: viewModel.selectedDate)
-    }
-
-    private func weekRow(stretches: Bool) -> some View {
-        HStack(spacing: 12) {
-            ForEach(viewModel.weekDates, id: \.self) { date in
-                CalendarDayView(
-                    date: date,
-                    isSelected: Calendar.current.isDate(date, inSameDayAs: viewModel.selectedDate),
-                    selection: daySelection,
-                    stretches: stretches
-                )
-                .onTapGesture {
-                    withMotion { viewModel.selectedDate = date }
-                }
-                .frame(maxWidth: stretches ? .infinity : nil)
-            }
-        }
-        .selectionIndicator(
-            following: selectedWeekDate,
-            in: daySelection,
-            shape: RoundedRectangle(cornerRadius: 16),
-            fill: .accentPrimary
-        )
-    }
-
-    /// Before the first course, the empty day offers to create one.
-    @ViewBuilder
     private var emptyDay: some View {
-        if viewModel.hasCourses {
-            EmptyStateView(icon: "pills", title: "Nothing for today", verticalPadding: 60)
-        } else {
-            EmptyStateView(
-                icon: "pills",
-                title: "Add your first course to see your doses here",
-                verticalPadding: 60,
-                actionTitle: "Create a course",
-                action: { router.present(.newTreatment) }
-            )
+        DashboardEmptyDay(hasCourses: viewModel.hasCourses) {
+            router.present(.newTreatment)
         }
     }
 
@@ -374,38 +210,12 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
     }
 
     private var doseTimeline: some View {
-        LazyVStack(spacing: 20) {
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Daily Dosage Timeline")
-                        .scaledFont(size: 24, relativeTo: .title2, weight: .heavy, design: .serif)
-                        .foregroundColor(.textPrimary)
-                    Text("Your medications for today")
-                        .font(.subheadline)
-                        .foregroundColor(.textPrimary.opacity(0.7))
-                }
-                Spacer()
-            }
-            .padding(.horizontal)
-            .padding(.top, 16)
-
-            if hasPills {
-                TipView(checkmarkTip)
-                    .padding(.horizontal)
-            }
-
-            periodSection(pills: viewModel.morningPills, title: DayPeriod.morning.title)
-            periodSection(pills: viewModel.noonPills, title: DayPeriod.noon.title)
-            periodSection(pills: viewModel.eveningPills, title: DayPeriod.evening.title)
-        }
-    }
-
-    @ViewBuilder
-    private func periodSection(pills: [PillDose], title: LocalizedStringResource) -> some View {
-        if !pills.isEmpty {
-            PeriodSectionView(title: title, pills: pills) { action, pill in
-                handle(action, for: pill, in: pills)
-            }
+        DoseTimeline(
+            morning: viewModel.morningPills,
+            noon: viewModel.noonPills,
+            evening: viewModel.eveningPills
+        ) { action, pill, section in
+            handle(action, for: pill, in: section)
         }
     }
 
@@ -414,7 +224,6 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
     private func handle(_ action: DoseCardAction, for pill: PillDose, in section: [PillDose]) {
         switch action {
         case .toggle:
-            checkmarkTip.invalidate(reason: .actionPerformed)
             viewModel.togglePill(id: pill.id)
         case .open:
             presentTakeSheet(for: section.filter { $0.time == pill.time && $0.status == .pending })
