@@ -12,8 +12,8 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
     // MARK: - Properties
 
     @Environment(AppDependencies.self) private var dependencies
-    @StateObject private var viewModel: VM
-    @EnvironmentObject private var router: AppRouter
+    @StateModel private var viewModel: VM
+    @Environment(AppRouter.self) private var router
     @Environment(\.dismiss) private var dismiss
 
     @State private var showingAddMedication = false
@@ -21,7 +21,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> VM) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
+        self._viewModel = StateModel(wrappedValue: viewModel())
     }
 
     // MARK: - Body
@@ -114,7 +114,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
 #if DEBUG
 #Preview {
     NewTreatmentView(viewModel: MockNewTreatmentViewModel())
-        .environmentObject(AppRouter())
+        .environment(AppRouter())
         .environment(AppDependencies.preview)
 }
 #endif

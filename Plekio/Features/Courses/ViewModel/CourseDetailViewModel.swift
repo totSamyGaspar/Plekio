@@ -6,20 +6,20 @@
 //
 
 import SwiftUI
-import Combine
 
 @MainActor
+@Observable
 final class CourseDetailViewModel: CourseDetailViewModelProtocol {
 
     // MARK: - Properties
 
     /// Last-read store state; reloaded after each write rather than observed live.
-    @Published private(set) var course: CourseSnapshot
-    @Published private(set) var medications: [MedicationSnapshot]
+    private(set) var course: CourseSnapshot
+    private(set) var medications: [MedicationSnapshot]
 
-    @Published var courseName: String
-    @Published var startDate: Date
-    @Published var endDate: Date
+    var courseName: String
+    var startDate: Date
+    var endDate: Date
 
     private let courses: any CourseRepository
     private let courseEditing: CourseEditingUseCaseProtocol

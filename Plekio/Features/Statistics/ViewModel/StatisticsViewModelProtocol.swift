@@ -6,12 +6,11 @@
 //
 
 import SwiftUI
-import Combine
 
 // MARK: - StatisticsViewModelProtocol
 
 @MainActor
-protocol StatisticsViewModelProtocol: ObservableObject {
+protocol StatisticsViewModelProtocol: AnyObject, Observable {
     /// Today's logged fraction of scheduled doses, 0...1.
     var progress: Double { get }
     var streakDays: Int { get }

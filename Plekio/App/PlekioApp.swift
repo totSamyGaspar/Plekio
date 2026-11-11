@@ -30,7 +30,7 @@ struct PlekioApp: App {
             Group {
                 if let dependencies = appDelegate.launcher.dependencies {
                     AppLockRootView()
-                        .environmentObject(dependencies.router)
+                        .environment(dependencies.router)
                         .environment(dependencies)
                         .environment(\.imageLoader, dependencies.photoCache)
                         .environment(\.databaseChanges, dependencies.database.changes)

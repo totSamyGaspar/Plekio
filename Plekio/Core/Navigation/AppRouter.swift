@@ -6,24 +6,24 @@
 //
 
 import SwiftUI
-import Combine
 
 @MainActor
-final class AppRouter: ObservableObject {
+@Observable
+final class AppRouter {
 
     // MARK: - Properties
 
-    @Published var selectedTab: AppTab = .today
-    @Published var coursesPath = NavigationPath()
+    var selectedTab: AppTab = .today
+    var coursesPath = NavigationPath()
 
-    @Published var activeSheet: SheetRoute?
-    @Published var activeFullScreen: SheetRoute?
+    var activeSheet: SheetRoute?
+    var activeFullScreen: SheetRoute?
 
     /// Parked for MainTabView: on a cold launch it arrives before the tab bar exists.
-    @Published private(set) var pendingDeepLink: DeepLink?
+    private(set) var pendingDeepLink: DeepLink?
 
     /// Diary sub-tab to land on; consumed by DiaryView.
-    @Published private(set) var pendingDiarySubTab: DiarySubTab?
+    private(set) var pendingDiarySubTab: DiarySubTab?
 
     // MARK: - Sheet presentation
 

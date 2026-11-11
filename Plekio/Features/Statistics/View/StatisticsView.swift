@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Combine
 
 struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
 
@@ -14,7 +13,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
 
     @Environment(AppDependencies.self) private var dependencies
     /// Owned by the screen that embeds it: Today's hero card reads the same numbers.
-    @ObservedObject var viewModel: VM
+    let viewModel: VM
     /// Off while the hero card shows the same summary.
     let showsAdherence: Bool
 
@@ -149,10 +148,11 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
 // MARK: - Mock
 
 #if DEBUG
+@Observable
 final class MockStatisticsViewModel: StatisticsViewModelProtocol {
     var progress: Double { 0.93 }
-    @Published var streakDays: Int = 1
-    @Published var lowStockItems: [MedicationSnapshot] = []
+    var streakDays: Int = 1
+    var lowStockItems: [MedicationSnapshot] = []
 
     init() {}
     func loadStats() {}

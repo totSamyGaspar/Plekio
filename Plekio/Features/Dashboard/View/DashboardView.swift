@@ -12,10 +12,10 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
 
     // MARK: - Properties
 
-    @StateObject private var viewModel: VM
+    @StateModel private var viewModel: VM
     /// Shared by the statistics section and the finished-day hero card.
-    @StateObject private var statistics: Stats
-    @EnvironmentObject private var router: AppRouter
+    @StateModel private var statistics: Stats
+    @Environment(AppRouter.self) private var router
     @Environment(AppDependencies.self) private var dependencies
     @Environment(\.openURL) private var openURL
 
@@ -41,8 +41,8 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> VM, statistics: @autoclosure @escaping () -> Stats) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
-        self._statistics = StateObject(wrappedValue: statistics())
+        self._viewModel = StateModel(wrappedValue: viewModel())
+        self._statistics = StateModel(wrappedValue: statistics())
     }
 
     // MARK: - Body
@@ -438,7 +438,7 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
 #if DEBUG
 #Preview {
     DashboardView(viewModel: MockDashboardViewModel(), statistics: MockStatisticsViewModel())
-        .environmentObject(AppRouter())
+        .environment(AppRouter())
         .environment(AppDependencies.preview)
         .appTheme()
 }

@@ -13,7 +13,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(AppDependencies.self) private var dependencies
-    @StateObject private var viewModel: VM
+    @StateModel private var viewModel: VM
 
     // Separate flags so each popover anchors to its own field.
     @State private var showingDatePicker = false
@@ -25,7 +25,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> VM, editingEntry: DiaryEntrySnapshot? = nil) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
+        self._viewModel = StateModel(wrappedValue: viewModel())
         self.entryToEdit = editingEntry
     }
 

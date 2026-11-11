@@ -12,7 +12,7 @@ struct MainTabView: View {
     // MARK: - Properties
 
     @Environment(AppDependencies.self) private var dependencies
-    @EnvironmentObject var router: AppRouter
+    @Environment(AppRouter.self) var router
 
     /// App-wide write-failure alert; observed via `@Observable` when `message` is read in body.
     private var errorPresenter: AppErrorPresenter { dependencies.errorPresenter }
@@ -45,6 +45,8 @@ struct MainTabView: View {
     // MARK: - Body
 
     var body: some View {
+        @Bindable var router = router
+
         TabView(selection: $router.selectedTab) {
             NavigationStack {
                 DashboardView(
@@ -187,7 +189,7 @@ struct MainTabView: View {
 #if DEBUG
 #Preview {
     MainTabView()
-        .environmentObject(AppRouter())
+        .environment(AppRouter())
         .environment(AppDependencies.preview)
 }
 #endif

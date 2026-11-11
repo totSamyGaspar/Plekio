@@ -11,7 +11,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
 
     // MARK: - Properties
 
-    @StateObject private var viewModel: VM
+    @StateModel private var viewModel: VM
 
     /// Shown after the carousel; view state, since the view model knows only the pages.
     @State private var isCollectingProfile = false
@@ -22,7 +22,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> VM) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
+        self._viewModel = StateModel(wrappedValue: viewModel())
     }
 
     // MARK: - Body

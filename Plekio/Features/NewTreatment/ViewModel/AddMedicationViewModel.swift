@@ -5,18 +5,18 @@
 //  Created by Edward Gasparian on 20.05.2026.
 //
 
-import Combine
 import OSLog
 import SwiftUI
 
 @MainActor
+@Observable
 final class AddMedicationViewModel: AddMedicationViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var draft = MedicationDraft()
-    @Published var selectedImage: UIImage?
-    @Published var showingPhotoSourceMenu = false
+    var draft = MedicationDraft()
+    var selectedImage: UIImage?
+    var showingPhotoSourceMenu = false
 
     private let photos: any PhotoStoring
     private var hasLoadedEditedMedication = false

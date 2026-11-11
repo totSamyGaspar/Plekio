@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
-protocol DiaryViewModelProtocol: ObservableObject {
+protocol DiaryViewModelProtocol: AnyObject, Observable {
     var entries: [DiaryEntrySnapshot] { get }
 
     /// Every entry's photos flattened into checkpoints, newest first.

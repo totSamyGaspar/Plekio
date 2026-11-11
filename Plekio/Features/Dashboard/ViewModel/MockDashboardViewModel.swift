@@ -6,14 +6,14 @@
 //
 
 import SwiftUI
-import Combine
 
 #if DEBUG
+@Observable
 final class MockDashboardViewModel: DashboardViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var selectedDate: Date = Date()
+    var selectedDate: Date = Date()
 
     var weekDates: [Date] = [Date()]
 
@@ -26,13 +26,13 @@ final class MockDashboardViewModel: DashboardViewModelProtocol {
     var isEmpty: Bool = false
     var hasCourses: Bool = true
 
-    @Published var weeklyPercentages: [Double] = [1.0, 1.0, 1.0, 0.6, 1.0, 0.7, 1.0]
-    @Published var weeklyDays: [String] = ["Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu"]
-    @Published var recentAverage: Int = 93
+    var weeklyPercentages: [Double] = [1.0, 1.0, 1.0, 0.6, 1.0, 0.7, 1.0]
+    var weeklyDays: [String] = ["Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu"]
+    var recentAverage: Int = 93
 
     init() {}
 
-    @Published private(set) var undoableAction: UndoableDoseAction?
+    private(set) var undoableAction: UndoableDoseAction?
 
     // MARK: - Actions
 

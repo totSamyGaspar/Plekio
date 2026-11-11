@@ -10,7 +10,7 @@ import SwiftUI
 // MARK: - CourseDetailViewModelProtocol
 
 @MainActor
-protocol CourseDetailViewModelProtocol: ObservableObject {
+protocol CourseDetailViewModelProtocol: AnyObject, Observable {
     var course: CourseSnapshot { get }
     var medications: [MedicationSnapshot] { get }
 

@@ -33,8 +33,8 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     // MARK: - Properties
 
     @Environment(AppDependencies.self) private var dependencies
-    @StateObject private var viewModel: VM
-    @EnvironmentObject private var router: AppRouter
+    @StateModel private var viewModel: VM
+    @Environment(AppRouter.self) private var router
 
     @State private var showingCheckIn = false
     @State private var showingBloodPressureEntry = false
@@ -53,7 +53,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> VM) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
+        self._viewModel = StateModel(wrappedValue: viewModel())
     }
 
     // MARK: - Body
@@ -268,7 +268,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
         DiaryView(viewModel: MockDiaryViewModel())
             .appTheme()
     }
-    .environmentObject(AppRouter())
+    .environment(AppRouter())
     .environment(AppDependencies.preview)
 }
 #endif

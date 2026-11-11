@@ -13,7 +13,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    @StateObject private var viewModel: VM
+    @StateModel private var viewModel: VM
 
     /// Nil when adding. Consumed in `.task`, not `init`, which SwiftUI re-runs often.
     private let medicationToEdit: MedicationSnapshot?
@@ -26,7 +26,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
     init(viewModel: @autoclosure @escaping () -> VM,
          editingMedication: MedicationSnapshot? = nil,
          onSave: @escaping (MedicationDraft) -> Void) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
+        self._viewModel = StateModel(wrappedValue: viewModel())
         self.medicationToEdit = editingMedication
         self.onSave = onSave
     }

@@ -6,10 +6,9 @@
 //
 
 import SwiftUI
-import Combine
 
 @MainActor
-protocol DiaryCheckInViewModelProtocol: ObservableObject {
+protocol DiaryCheckInViewModelProtocol: AnyObject, Observable {
     var draft: DiaryEntryDraft { get set }
     var selectedImages: [UIImage] { get set }
     var showingPhotoSourceMenu: Bool { get set }

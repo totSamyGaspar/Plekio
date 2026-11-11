@@ -6,15 +6,15 @@
 //
 
 import SwiftUI
-import Combine
 
 // Behind #if DEBUG so the mock does not ship in the release binary.
 #if DEBUG
+@Observable
 final class MockOnboardingViewModel: OnboardingViewModelProtocol {
 
     // MARK: - Properties
 
-    @Published var currentPage = 0
+    var currentPage = 0
 
     // The real pages, so previews show the slides that ship.
     let pages = OnboardingViewModel.allPages

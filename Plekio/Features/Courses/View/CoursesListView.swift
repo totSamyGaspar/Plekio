@@ -13,8 +13,8 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
     // MARK: - Properties
 
     @Environment(AppDependencies.self) private var dependencies
-    @StateObject private var viewModel: VM
-    @EnvironmentObject private var router: AppRouter
+    @StateModel private var viewModel: VM
+    @Environment(AppRouter.self) private var router
 
     @State private var selectedSegment = 0
     @State private var showingDeleteAlert = false
@@ -26,7 +26,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
     // MARK: - Init
 
     init(viewModel: @autoclosure @escaping () -> VM) {
-        self._viewModel = StateObject(wrappedValue: viewModel())
+        self._viewModel = StateModel(wrappedValue: viewModel())
     }
 
     // MARK: - Body
