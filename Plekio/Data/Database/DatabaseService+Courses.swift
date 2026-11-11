@@ -168,30 +168,27 @@ extension DatabaseService: CourseStoring {
     /// Moves today's and later logs onto the new times by position; past logs keep
     /// their times (the old schedule still applies to past days).
     private func remapLogs(of medication: MedicationItem, from oldSlots: [Int], to newSlots: [Int]) {
-        let calendar = time.calendar
-        let today = calendar.startOfDay(for: time.now)
+        let today = LocalDay(time.now, in: time.calendar)
 
         guard oldSlots != newSlots else { return }
 
         // Collected first: mutating in place could swap two slots.
-        var moves: [(log: DoseLog, newDate: Date)] = []
+        var moves: [(log: DoseLog, slot: LocalSlot)] = []
 
         for (index, oldSlot) in oldSlots.enumerated() {
             guard index < newSlots.count else { break }
             let newSlot = newSlots[index]
             guard oldSlot != newSlot else { continue }
 
-            let (hour, minute) = MinuteOfDay.hourAndMinute(newSlot)
-            for log in medication.logs
-            where log.scheduledTime >= today && MinuteOfDay.of(log.scheduledTime, calendar: calendar) == oldSlot {
-                if let moved = DoseSchedule.slotDate(hour: hour, minute: minute, on: log.scheduledTime, calendar: calendar) {
-                    moves.append((log, moved))
-                }
+            for log in medication.logs {
+                let slot = log.slot
+                guard slot.day >= today, slot.minuteOfDay == oldSlot else { continue }
+                moves.append((log, LocalSlot(day: slot.day, minuteOfDay: newSlot)))
             }
         }
 
         for move in moves {
-            move.log.scheduledTime = move.newDate
+            move.log.slot = move.slot
         }
     }
 
