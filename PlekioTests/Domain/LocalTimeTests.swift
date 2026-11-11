@@ -94,6 +94,16 @@ struct LocalTimeTests {
         #expect(slot == LocalSlot(day: LocalDay(year: 2030, month: 6, day: 10), minuteOfDay: 8 * 60))
     }
 
+    // A dose logged at 09:00:45 is still the 09:00 dose.
+    @Test("A slot ignores seconds but not minutes or days")
+    func slotIgnoresSeconds() {
+        let nine = LocalSlot(utc(6, 10, 9), in: calendar(tbilisi))
+
+        #expect(LocalSlot(utc(6, 10, 9).addingTimeInterval(45), in: calendar(tbilisi)) == nine)
+        #expect(LocalSlot(utc(6, 10, 9, 1), in: calendar(tbilisi)) != nine)
+        #expect(LocalSlot(utc(6, 11, 9), in: calendar(tbilisi)) != nine)
+    }
+
     @Test("The same slot is 08:00 wherever it's read")
     func slotFollowsLocalTime() {
         let slot = LocalSlot(day: LocalDay(year: 2030, month: 6, day: 10), minuteOfDay: 8 * 60)

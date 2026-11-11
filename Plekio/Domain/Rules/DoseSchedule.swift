@@ -22,35 +22,16 @@ nonisolated enum DoseSchedule {
 
     // MARK: - Constants
 
-    static let slotUnits: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute]
-
     /// Seconds after its time before an unanswered dose counts as missed.
     /// Shared so the dashboard and exported report agree.
     static let missedGrace: TimeInterval = 3600
 
     // MARK: - Rules
 
-    /// The canonical "same dose" key: equal for the same day, hour and minute, ignoring seconds.
-    static func slotKey(_ date: Date, calendar: Calendar) -> DateComponents {
-        calendar.dateComponents(slotUnits, from: date)
-    }
-
-    /// All arguments are start-of-day values; both ends are inclusive.
-    static func isActive(courseStartDay: Date, courseEndDay: Date, day: Date) -> Bool {
-        day >= courseStartDay && day <= courseEndDay
-    }
-
-    /// Dates must be start-of-day (not normalised here: hot loop). Rejects
-    /// frequency <= 0 and days before the start (a negative multiple would match).
-    static func isDoseDay(frequencyDays: Int, courseStartDay: Date, day: Date, calendar: Calendar) -> Bool {
-        guard frequencyDays > 0 else { return false }
-        guard let elapsed = calendar.dateComponents([.day], from: courseStartDay, to: day).day else { return false }
-        return elapsed >= 0 && elapsed.isMultiple(of: frequencyDays)
-    }
-
-    /// Nil when the time does not exist that day (skipped by a DST transition).
-    static func slotDate(hour: Int, minute: Int, on day: Date, calendar: Calendar) -> Date? {
-        calendar.date(bySettingHour: hour, minute: minute, second: 0, of: day)
+    /// Inclusive at both ends. Rejects frequency <= 0, which imported data can carry.
+    static func isDoseDay(_ day: LocalDay, start: LocalDay, end: LocalDay, frequencyDays: Int) -> Bool {
+        frequencyDays > 0 && start <= day && day <= end
+            && start.days(to: day).isMultiple(of: frequencyDays)
     }
 
     /// A medication's schedule as of one day.
@@ -60,13 +41,8 @@ nonisolated enum DoseSchedule {
         let dosage: Int
     }
 
-    /// The schedule in force on `day` (start of day): the earliest revision still
-    /// valid then, else the medication's current fields.
-    /// The schedule in force on `day`, in the device's time zone; for the report.
-    static func schedule(of medication: MedicationItem, on day: Date) -> Schedule {
-        schedule(of: medication, on: LocalDay(day, in: .autoupdatingCurrent))
-    }
-
+    /// The schedule in force on `day`: the earliest revision still valid then, else
+    /// the medication's current fields.
     static func schedule(of medication: MedicationItem, on day: LocalDay) -> Schedule {
         let revision = medication.scheduleRevisions
             .filter { $0.validUntilDay > day }
@@ -77,15 +53,7 @@ nonisolated enum DoseSchedule {
         return Schedule(minutesOfDay: medication.minutesOfDay, frequencyDays: medication.frequencyDays, dosage: medication.dosage)
     }
 
-    /// The first day a medication is taken: its own start when added mid-course,
-    /// else the course start. Also the anchor for "every N days".
-    static func startDay(of medication: MedicationItem, courseStartDay: Date, calendar: Calendar) -> Date {
-        guard let own = medication.startDate else { return courseStartDay }
-        return max(courseStartDay, calendar.startOfDay(for: own))
-    }
-
-    /// Resolves both course-date and medication revisions for the requested day.
-    /// The day's slots, worked out on local days: a course and its revisions keep
+    /// The day's slots, with the course-date and schedule revisions in force then, worked out on local days: a course and its revisions keep
     /// their days wherever `calendar`'s time zone is. `day` is a start of day in it.
     static func slots(
         for medication: MedicationItem,
@@ -98,9 +66,7 @@ nonisolated enum DoseSchedule {
         let start = medication.startDay.map { max(days.start, $0) } ?? days.start
         let schedule = schedule(of: medication, on: today)
 
-        guard start <= today, today <= days.end,
-              schedule.frequencyDays > 0,
-              start.days(to: today).isMultiple(of: schedule.frequencyDays)
+        guard isDoseDay(today, start: start, end: days.end, frequencyDays: schedule.frequencyDays)
         else { return [] }
 
         return schedule.minutesOfDay.compactMap { minuteOfDay in
@@ -110,37 +76,11 @@ nonisolated enum DoseSchedule {
         }
     }
 
-    /// Every slot a medication has on `day`, given the course dates in force then.
-    static func slots(
-        for medication: MedicationItem,
-        courseStartDay: Date,
-        courseEndDay: Date,
-        on day: Date,
-        calendar: Calendar
-    ) -> [Slot] {
-        let schedule = schedule(of: medication, on: day)
-        let start = startDay(of: medication, courseStartDay: courseStartDay, calendar: calendar)
-
-        guard isActive(courseStartDay: start, courseEndDay: courseEndDay, day: day),
-              isDoseDay(
-                frequencyDays: schedule.frequencyDays,
-                courseStartDay: start,
-                day: day,
-                calendar: calendar
-              )
-        else { return [] }
-
-        return schedule.minutesOfDay.map(MinuteOfDay.hourAndMinute).compactMap { time in
-            slotDate(hour: time.hour, minute: time.minute, on: day, calendar: calendar)
-                .map { Slot(hour: time.hour, minute: time.minute, date: $0) }
-        }
-    }
-
     // MARK: - Logs
 
     /// Slots already taken or deliberately skipped; neither should ring.
     /// - Parameter day: logs before it are left out. The reminder rebuild only plans
-    ///   from today, and a slot key costs a calendar call per log of the whole history.
+    ///   from today, and decoding a slot costs a calendar call per log of the whole history.
     static func settledSlots(of medication: MedicationItem, from day: Date? = nil, calendar: Calendar) -> Set<LocalSlot> {
         // Stored forms compare like the slots they stand for, without decoding each log.
         let from = day.map { LocalDay($0, in: calendar).stored }
@@ -152,7 +92,7 @@ nonisolated enum DoseSchedule {
         )
     }
 
-    /// The medication's logs for one day, indexed by slot key, to avoid rescanning per slot.
+    /// The medication's logs for one day, indexed by slot, to avoid rescanning per slot.
     static func logsBySlot(
         of medication: MedicationItem,
         on day: Date,

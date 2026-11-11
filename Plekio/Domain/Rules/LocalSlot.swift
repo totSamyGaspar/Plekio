@@ -28,7 +28,7 @@ nonisolated struct LocalSlot: Hashable, Comparable, Sendable {
     }
 
     /// The moment in `calendar`'s time zone. Where a clock change skips the time,
-    /// the next one that exists, as `DoseSchedule.slotDate` has always done.
+    /// the next one that exists.
     func date(in calendar: Calendar) -> Date? {
         let (hour, minute) = MinuteOfDay.hourAndMinute(minuteOfDay)
         return calendar.date(bySettingHour: hour, minute: minute, second: 0, of: day.start(in: calendar))

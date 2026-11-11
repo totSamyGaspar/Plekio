@@ -21,80 +21,74 @@ struct DoseScheduleTests {
         Calendar.current.startOfDay(for: testDate(year, month, dayOfMonth))
     }
 
-    // MARK: - Course window
+    // MARK: - Dose days
+
+    private func local(_ year: Int, _ month: Int, _ dayOfMonth: Int) -> LocalDay {
+        LocalDay(year: year, month: month, day: dayOfMonth)
+    }
 
     @Test("A course is active inclusively on both bounds")
     func testCourseWindowIsInclusive() async throws {
-        let start = day(2026, 6, 10)
-        let end = day(2026, 6, 12)
+        let start = local(2026, 6, 10)
+        let end = local(2026, 6, 12)
+        let isDoseDay = { (day: LocalDay) in DoseSchedule.isDoseDay(day, start: start, end: end, frequencyDays: 1) }
 
-        #expect(DoseSchedule.isActive(courseStartDay: start, courseEndDay: end, day: start))
-        #expect(DoseSchedule.isActive(courseStartDay: start, courseEndDay: end, day: end))
-        #expect(DoseSchedule.isActive(courseStartDay: start, courseEndDay: end, day: day(2026, 6, 11)))
+        #expect(isDoseDay(start))
+        #expect(isDoseDay(end))
+        #expect(isDoseDay(local(2026, 6, 11)))
 
-        #expect(!DoseSchedule.isActive(courseStartDay: start, courseEndDay: end, day: day(2026, 6, 9)))
-        #expect(!DoseSchedule.isActive(courseStartDay: start, courseEndDay: end, day: day(2026, 6, 13)))
-    }
-
-    // MARK: - Frequency
-
-    @Test("A daily medication falls on every day")
-    func testDailyFrequencyMatchesEveryDay() async throws {
-        let start = day(2026, 6, 10)
-
-        for offset in 0..<5 {
-            let candidate = calendar.date(byAdding: .day, value: offset, to: start)!
-            #expect(DoseSchedule.isDoseDay(frequencyDays: 1, courseStartDay: start, day: candidate, calendar: calendar))
-        }
+        #expect(!isDoseDay(local(2026, 6, 9)))
+        #expect(!isDoseDay(local(2026, 6, 13)))
     }
 
     @Test("Every-three-days dosing falls only on its days")
     func testEveryThirdDay() async throws {
-        let start = day(2026, 6, 10)
+        let start = local(2026, 6, 10)
         let expected = [true, false, false, true, false, false, true]
 
         for (offset, isDue) in expected.enumerated() {
-            let candidate = calendar.date(byAdding: .day, value: offset, to: start)!
             #expect(
-                DoseSchedule.isDoseDay(frequencyDays: 3, courseStartDay: start, day: candidate, calendar: calendar) == isDue,
+                DoseSchedule.isDoseDay(start.adding(days: offset), start: start, end: local(2026, 12, 31), frequencyDays: 3) == isDue,
                 "day offset \(offset)"
             )
         }
     }
 
-    // -3 % 3 == 0 in Swift, so a negative elapsed-day count must be rejected explicitly.
+    // -3 % 3 == 0 in Swift, so a day before the start must be rejected explicitly.
     @Test("The day before the course starts isn't a dose day")
     func testDayBeforeTheCourseIsNeverADoseDay() async throws {
-        let start = day(2026, 6, 10)
+        let start = local(2026, 6, 10)
 
-        #expect(!DoseSchedule.isDoseDay(frequencyDays: 3, courseStartDay: start, day: day(2026, 6, 7), calendar: calendar))
-        #expect(!DoseSchedule.isDoseDay(frequencyDays: 1, courseStartDay: start, day: day(2026, 6, 9), calendar: calendar))
+        #expect(!DoseSchedule.isDoseDay(local(2026, 6, 7), start: start, end: local(2026, 6, 20), frequencyDays: 3))
+        #expect(!DoseSchedule.isDoseDay(local(2026, 6, 9), start: start, end: local(2026, 6, 20), frequencyDays: 1))
     }
 
     // Not reachable from the picker, but imported or migrated data can carry it.
     @Test("Zero frequency doesn't make every day a dose day")
     func testZeroFrequencyIsRefused() async throws {
-        let start = day(2026, 6, 10)
+        let start = local(2026, 6, 10)
 
-        #expect(!DoseSchedule.isDoseDay(frequencyDays: 0, courseStartDay: start, day: start, calendar: calendar))
-        #expect(!DoseSchedule.isDoseDay(frequencyDays: -2, courseStartDay: start, day: start, calendar: calendar))
+        #expect(!DoseSchedule.isDoseDay(start, start: start, end: start, frequencyDays: 0))
+        #expect(!DoseSchedule.isDoseDay(start, start: start, end: start, frequencyDays: -2))
     }
 
-    // MARK: - Slot identity
+    // Counted on the days themselves: the clock change on 29 March doesn't shift every-other-day.
+    @Test("Every-other-day dosing keeps its rhythm across a clock change")
+    func testFrequencyAcrossDaylightSaving() async throws {
+        let start = local(2026, 3, 27)
 
-    @Test("The slot key ignores seconds but not minutes")
-    func testSlotKeyIdentifiesTheOccurrence() async throws {
-        let nineOClock = testDate(2026, 6, 10, 9, 0)
-        let nineOClockLater = nineOClock.addingTimeInterval(45)
-        let ninePastNine = testDate(2026, 6, 10, 9, 1)
-        let nextDay = testDate(2026, 6, 11, 9, 0)
-
-        #expect(DoseSchedule.slotKey(nineOClock, calendar: calendar) == DoseSchedule.slotKey(nineOClockLater, calendar: calendar))
-        #expect(DoseSchedule.slotKey(nineOClock, calendar: calendar) != DoseSchedule.slotKey(ninePastNine, calendar: calendar))
-        #expect(DoseSchedule.slotKey(nineOClock, calendar: calendar) != DoseSchedule.slotKey(nextDay, calendar: calendar))
+        #expect(DoseSchedule.isDoseDay(local(2026, 3, 29), start: start, end: local(2026, 4, 30), frequencyDays: 2))
+        #expect(DoseSchedule.isDoseDay(local(2026, 3, 31), start: start, end: local(2026, 4, 30), frequencyDays: 2))
+        #expect(!DoseSchedule.isDoseDay(local(2026, 3, 30), start: start, end: local(2026, 4, 30), frequencyDays: 2))
     }
 
     // MARK: - Slots of a day
+
+    private func course(_ start: Date, _ end: Date, with medication: MedicationItem) -> TreatmentCourse {
+        let course = TreatmentCourse(name: "Course", startDate: start, endDate: end)
+        course.medications.append(medication)
+        return course
+    }
 
     private func medication(times: [Int], frequencyDays: Int = 1) -> MedicationItem {
         MedicationItem(
@@ -113,7 +107,7 @@ struct DoseScheduleTests {
         let med = medication(times: [8 * 60 + 30, 20 * 60])
 
         let slots = DoseSchedule.slots(
-            for: med, courseStartDay: start, courseEndDay: day(2026, 6, 20),
+            for: med, in: course(start, day(2026, 6, 20), with: med),
             on: day(2026, 6, 12), calendar: calendar
         )
 
@@ -127,8 +121,10 @@ struct DoseScheduleTests {
         tbilisi.timeZone = try #require(TimeZone(identifier: "Asia/Tbilisi"))
         let start = tbilisi.startOfDay(for: testDate(2026, 6, 10, 12))
         let med = medication(times: [8 * 60])
+        let owner = TreatmentCourse(name: "Course", startDay: LocalDay(start, in: tbilisi), endDay: LocalDay(start, in: tbilisi))
+        owner.medications.append(med)
 
-        let slots = DoseSchedule.slots(for: med, courseStartDay: start, courseEndDay: start, on: start, calendar: tbilisi)
+        let slots = DoseSchedule.slots(for: med, in: owner, on: start, calendar: tbilisi)
 
         let slot = try #require(slots.first)
         #expect(slot.hour == 8)
@@ -137,19 +133,13 @@ struct DoseScheduleTests {
 
     @Test("Outside the course and on off days there are no slots")
     func testNoSlotsOutsideTheCourseOrOffSchedule() async throws {
-        let start = day(2026, 6, 10)
         let med = medication(times: [9 * 60], frequencyDays: 3)
+        let owner = course(day(2026, 6, 10), day(2026, 6, 20), with: med)
 
-        #expect(DoseSchedule.slots(
-            for: med, courseStartDay: start, courseEndDay: day(2026, 6, 20),
-            on: day(2026, 6, 21), calendar: calendar
-        ).isEmpty)
+        #expect(DoseSchedule.slots(for: med, in: owner, on: day(2026, 6, 21), calendar: calendar).isEmpty)
 
         // Inside the window, but not a dose day.
-        #expect(DoseSchedule.slots(
-            for: med, courseStartDay: start, courseEndDay: day(2026, 6, 20),
-            on: day(2026, 6, 11), calendar: calendar
-        ).isEmpty)
+        #expect(DoseSchedule.slots(for: med, in: owner, on: day(2026, 6, 11), calendar: calendar).isEmpty)
     }
 
     // MARK: - Logs
@@ -219,13 +209,7 @@ struct DoseScheduleTests {
         let med = medication(times: [9 * 60, 21 * 60])
         course.medications.append(med)
 
-        let fromSchedule = DoseSchedule.slots(
-            for: med,
-            courseStartDay: start,
-            courseEndDay: start,
-            on: start,
-            calendar: calendar
-        ).map(\.date)
+        let fromSchedule = DoseSchedule.slots(for: med, in: course, on: start, calendar: calendar).map(\.date)
 
         // `now` is midnight, so no slot is filtered out as past.
         let fromNotifications = ReminderPlanner.buildScheduleMap(

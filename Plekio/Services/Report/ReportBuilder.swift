@@ -97,13 +97,13 @@ nonisolated struct ReportAssembler {
     private func courses(_ all: [TreatmentCourse], ids: Set<UUID>, from: Date, throughDay lastDay: Date) -> [CourseReport] {
         all
             .filter { ids.contains($0.id) }
-            .sorted { $0.startDate < $1.startDate }
+            .sorted { $0.startDay < $1.startDay }
             .map { course in
-                let dates = CourseRules.dates(of: course, on: lastDay)
+                let days = CourseRules.days(of: course, on: LocalDay(lastDay, in: calendar))
                 return CourseReport(
                     name: course.name,
-                    startDate: dates.startDate,
-                    endDate: dates.endDate,
+                    startDate: days.start.start(in: calendar),
+                    endDate: days.end.start(in: calendar),
                     medications: course.medications
                         .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
                         .map { report(for: $0, in: course, from: from, throughDay: lastDay) }
@@ -118,12 +118,8 @@ nonisolated struct ReportAssembler {
         throughDay lastDay: Date
     ) -> MedicationReport {
         // Revisions may include days outside the course's current dates.
-        let courseStart = calendar.startOfDay(for:
-            course.dateRevisions.reduce(course.startDate) { min($0, $1.startDate) }
-        )
-        let courseEnd = calendar.startOfDay(for:
-            course.dateRevisions.reduce(course.endDate) { max($0, $1.endDate) }
-        )
+        let courseStart = course.dateRevisions.reduce(course.startDay) { min($0, $1.startDay) }.start(in: calendar)
+        let courseEnd = course.dateRevisions.reduce(course.endDay) { max($0, $1.endDay) }.start(in: calendar)
         let logs = logsBySlot(of: medication)
 
         var adherence = Adherence.none
@@ -155,8 +151,8 @@ nonisolated struct ReportAssembler {
         }
 
         // The schedule as it stood at the end of the period, not as it is today.
-        let dates = CourseRules.dates(of: course, on: lastDay)
-        let shown = DoseSchedule.schedule(of: medication, on: min(lastDay, calendar.startOfDay(for: dates.endDate)))
+        let last = LocalDay(lastDay, in: calendar)
+        let shown = DoseSchedule.schedule(of: medication, on: min(last, CourseRules.days(of: course, on: last).end))
 
         return MedicationReport(
             name: medication.name,

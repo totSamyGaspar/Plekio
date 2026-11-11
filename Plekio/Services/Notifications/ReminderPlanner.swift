@@ -28,10 +28,10 @@ enum ReminderPlanner {
     private struct MedicationPlan {
         let courseName: String
         let medication: MedicationItem
-        let startDay: Date
-        let endDay: Date
+        let startDay: LocalDay
+        let endDay: LocalDay
         let frequencyDays: Int
-        let times: [(hour: Int, minute: Int)]
+        let minutesOfDay: [Int]
         /// Slots already taken or skipped, keyed like trigger dates.
         let settledSlots: Set<LocalSlot>
     }
@@ -68,7 +68,8 @@ enum ReminderPlanner {
         horizonLimitInDays: Int = maxHorizonDays
     ) -> Schedule {
 
-        let today = calendar.startOfDay(for: now)
+        let today = LocalDay(now, in: calendar)
+        let todayStart = calendar.startOfDay(for: now)
 
         let plans: [MedicationPlan] = activeCourses.flatMap { course in
             course.medications.compactMap { med -> MedicationPlan? in
@@ -78,16 +79,14 @@ enum ReminderPlanner {
                 return MedicationPlan(
                     courseName: course.name,
                     medication: med,
-                    startDay: DoseSchedule.startDay(
-                        of: med,
-                        courseStartDay: calendar.startOfDay(for: course.startDate),
-                        calendar: calendar
-                    ),
-                    endDay: calendar.startOfDay(for: course.endDate),
+                    // From today on, the course's and medication's own fields are in force:
+                    // revisions only describe days before an edit.
+                    startDay: med.startDay.map { max(course.startDay, $0) } ?? course.startDay,
+                    endDay: course.endDay,
                     frequencyDays: med.frequencyDays,
-                    times: med.minutesOfDay.map(MinuteOfDay.hourAndMinute),
+                    minutesOfDay: med.minutesOfDay,
                     // Skipped counts as settled, or the rebuild would bring it back.
-                    settledSlots: DoseSchedule.settledSlots(of: med, from: today, calendar: calendar)
+                    settledSlots: DoseSchedule.settledSlots(of: med, from: todayStart, calendar: calendar)
                 )
             }
         }
@@ -98,7 +97,7 @@ enum ReminderPlanner {
 
         // Walk day by day: the budget is spent in whole days.
         for dayOffset in 0..<horizonLimitInDays {
-            guard let day = calendar.date(byAdding: .day, value: dayOffset, to: today) else { break }
+            let day = today.adding(days: dayOffset)
 
             // Every course is over; nothing further out can match.
             if plans.allSatisfy({ $0.endDay < day }) { break }
@@ -106,22 +105,14 @@ enum ReminderPlanner {
             var slotsForDay: [Date: [(courseName: String, medication: MedicationItem)]] = [:]
 
             for plan in plans {
-                // Same DoseSchedule rules as the on-screen day list.
-                guard DoseSchedule.isActive(
-                    courseStartDay: plan.startDay, courseEndDay: plan.endDay, day: day
-                ) else { continue }
-
+                // Same DoseSchedule rule as the on-screen day list.
                 guard DoseSchedule.isDoseDay(
-                    frequencyDays: plan.frequencyDays,
-                    courseStartDay: plan.startDay,
-                    day: day,
-                    calendar: calendar
+                    day, start: plan.startDay, end: plan.endDay, frequencyDays: plan.frequencyDays
                 ) else { continue }
 
-                for time in plan.times {
-                    guard let triggerDate = DoseSchedule.slotDate(
-                        hour: time.hour, minute: time.minute, on: day, calendar: calendar
-                    ), triggerDate > now else { continue }
+                for minuteOfDay in plan.minutesOfDay {
+                    guard let triggerDate = LocalSlot(day: day, minuteOfDay: minuteOfDay).date(in: calendar),
+                          triggerDate > now else { continue }
 
                     guard !plan.settledSlots.contains(LocalSlot(triggerDate, in: calendar)) else { continue }
 

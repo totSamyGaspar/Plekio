@@ -9,11 +9,6 @@ import Foundation
 
 nonisolated enum CourseRules {
 
-    struct Dates: Equatable {
-        let startDate: Date
-        let endDate: Date
-    }
-
     struct Days: Equatable {
         let start: LocalDay
         let end: LocalDay
@@ -27,14 +22,6 @@ nonisolated enum CourseRules {
         return Days(start: revision?.startDay ?? course.startDay, end: revision?.endDay ?? course.endDay)
     }
 
-    /// `days(of:on:)` as midnights where the person is now, for screens and the report.
-    /// `day` is the start of the day being displayed, not the current date.
-    static func dates(of course: TreatmentCourse, on day: Date) -> Dates {
-        let calendar = Calendar.autoupdatingCurrent
-        let days = days(of: course, on: LocalDay(day, in: calendar))
-        return Dates(startDate: days.start.start(in: calendar), endDate: days.end.start(in: calendar))
-    }
-
     /// A course ending on `day` is active for the whole of that day.
     static func isActive(endDate: Date, on day: Date, calendar: Calendar) -> Bool {
         calendar.startOfDay(for: endDate) >= calendar.startOfDay(for: day)
@@ -46,6 +33,6 @@ nonisolated enum CourseRules {
 extension TreatmentCourse {
 
     func isActive(on day: Date, calendar: Calendar) -> Bool {
-        CourseRules.isActive(endDate: endDate, on: day, calendar: calendar)
+        endDay >= LocalDay(day, in: calendar)
     }
 }
