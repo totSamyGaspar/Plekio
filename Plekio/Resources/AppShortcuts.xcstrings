@@ -5,9 +5,12 @@
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Blutdruck in ${applicationName} erfassen"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Blutdruck in ${applicationName} erfassen",
+              "Blutdruck in ${applicationName} eintragen"
+            ]
           }
         },
         "en" : {
@@ -20,57 +23,84 @@
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Registra mi presión en ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registra mi presión en ${applicationName}",
+              "Anota la presión arterial en ${applicationName}"
+            ]
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Enregistre ma tension dans ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Enregistre ma tension dans ${applicationName}",
+              "Note ma tension dans ${applicationName}"
+            ]
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Registra la mia pressione in ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registra la mia pressione in ${applicationName}",
+              "Annota la pressione in ${applicationName}"
+            ]
           }
         },
         "ja" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName}で血圧を記録"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}で血圧を記録",
+              "${applicationName}に血圧を入力"
+            ]
           }
         },
         "ka" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName}-ში წნევის ჩაწერა"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}-ში წნევის ჩაწერა",
+              "${applicationName}-ში წნევის დამატება"
+            ]
           }
         },
         "kk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName} қолданбасында қысымды жаз"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName} қолданбасында қысымды жаз",
+              "${applicationName} қолданбасына қысымды енгіз"
+            ]
           }
         },
         "ro" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Înregistrează tensiunea în ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Înregistrează tensiunea în ${applicationName}",
+              "Notează tensiunea în ${applicationName}"
+            ]
           }
         },
         "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Запиши давление в ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Запиши давление в ${applicationName}",
+              "Добавь давление в ${applicationName}"
+            ]
           }
         },
         "uk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Запиши тиск у ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Запиши тиск у ${applicationName}",
+              "Додай тиск у ${applicationName}"
+            ]
           }
         }
       }
@@ -79,9 +109,12 @@
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Medikamente in ${applicationName} erfassen"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Medikamente in ${applicationName} erfassen",
+              "Tabletten in ${applicationName} erfassen"
+            ]
           }
         },
         "en" : {
@@ -94,252 +127,84 @@
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Registra mis medicamentos en ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registra mis medicamentos en ${applicationName}",
+              "Registra mis pastillas en ${applicationName}"
+            ]
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Enregistre mes médicaments dans ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Enregistre mes médicaments dans ${applicationName}",
+              "Enregistre mes comprimés dans ${applicationName}"
+            ]
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Registra i miei farmaci in ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registra i miei farmaci in ${applicationName}",
+              "Registra le mie pillole in ${applicationName}"
+            ]
           }
         },
         "ja" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName}で薬を記録"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}で薬を記録",
+              "${applicationName}で服用を記録"
+            ]
           }
         },
         "ka" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName}-ში წამლების აღრიცხვა"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}-ში წამლების აღრიცხვა",
+              "${applicationName}-ში აბების აღრიცხვა"
+            ]
           }
         },
         "kk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName} қолданбасында дәрілерді белгіле"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName} қолданбасында дәрілерді белгіле",
+              "${applicationName} қолданбасында таблеткаларды белгіле"
+            ]
           }
         },
         "ro" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Înregistrează medicamentele în ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Înregistrează medicamentele în ${applicationName}",
+              "Înregistrează pastilele în ${applicationName}"
+            ]
           }
         },
         "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Отметь лекарства в ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Отметь лекарства в ${applicationName}",
+              "Отметь таблетки в ${applicationName}"
+            ]
           }
         },
         "uk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Відміть ліки в ${applicationName}"
-          }
-        }
-      }
-    },
-    "Log my pills in ${applicationName}" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
+          "stringSet" : {
             "state" : "translated",
-            "value" : "Tabletten in ${applicationName} erfassen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registra mis pastillas en ${applicationName}"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enregistre mes comprimés dans ${applicationName}"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registra le mie pillole in ${applicationName}"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${applicationName}で服用を記録"
-          }
-        },
-        "ka" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${applicationName}-ში აბების აღრიცხვა"
-          }
-        },
-        "kk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${applicationName} қолданбасында таблеткаларды белгіле"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Înregistrează pastilele în ${applicationName}"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Я принял таблетки в ${applicationName}"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Я прийняв таблетки в ${applicationName}"
-          }
-        }
-      }
-    },
-    "Next dose in ${applicationName}" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nächste Einnahme in ${applicationName}"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próxima toma en ${applicationName}"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prochaine prise dans ${applicationName}"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prossima assunzione in ${applicationName}"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${applicationName}の次の服用"
-          }
-        },
-        "ka" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "შემდეგი მიღება ${applicationName}-ში"
-          }
-        },
-        "kk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${applicationName} келесі қабылдау"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Următoarea doză în ${applicationName}"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Следующий приём в ${applicationName}"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Наступний прийом у ${applicationName}"
-          }
-        }
-      }
-    },
-    "Record blood pressure in ${applicationName}" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blutdruck in ${applicationName} eintragen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anota la presión arterial en ${applicationName}"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Note ma tension dans ${applicationName}"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annota la pressione in ${applicationName}"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${applicationName}に血圧を入力"
-          }
-        },
-        "ka" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${applicationName}-ში წნევის დამატება"
-          }
-        },
-        "kk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${applicationName} қолданбасына қысымды енгіз"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notează tensiunea în ${applicationName}"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Добавь давление в ${applicationName}"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Додай тиск у ${applicationName}"
+            "values" : [
+              "Познач ліки в ${applicationName}",
+              "Познач таблетки в ${applicationName}"
+            ]
           }
         }
       }
@@ -348,9 +213,11 @@
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Medikamente in ${applicationName} auslassen"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Medikamente in ${applicationName} auslassen"
+            ]
           }
         },
         "en" : {
@@ -362,57 +229,75 @@
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Omite mis medicamentos en ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Omite mis medicamentos en ${applicationName}"
+            ]
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Saute mes médicaments dans ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Saute mes médicaments dans ${applicationName}"
+            ]
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Salta i miei farmaci in ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Salta i miei farmaci in ${applicationName}"
+            ]
           }
         },
         "ja" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName}で薬をスキップ"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}で薬をスキップ"
+            ]
           }
         },
         "ka" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName}-ში წამლების გამოტოვება"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}-ში წამლების გამოტოვება"
+            ]
           }
         },
         "kk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName} қолданбасында қабылдауды өткіз"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName} қолданбасында қабылдауды өткіз"
+            ]
           }
         },
         "ro" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Omite medicamentele în ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Omite medicamentele în ${applicationName}"
+            ]
           }
         },
         "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Пропусти приём в ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Пропусти приём в ${applicationName}"
+            ]
           }
         },
         "uk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Пропусти прийом у ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Пропусти прийом у ${applicationName}"
+            ]
           }
         }
       }
@@ -421,9 +306,12 @@
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Was ist mein nächstes Medikament in ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Was ist mein nächstes Medikament in ${applicationName}",
+              "Nächste Einnahme in ${applicationName}"
+            ]
           }
         },
         "en" : {
@@ -436,57 +324,84 @@
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Cuál es mi próximo medicamento en ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Cuál es mi próximo medicamento en ${applicationName}",
+              "Próxima toma en ${applicationName}"
+            ]
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Quel est mon prochain médicament dans ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Quel est mon prochain médicament dans ${applicationName}",
+              "Prochaine prise dans ${applicationName}"
+            ]
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Qual è il mio prossimo farmaco in ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Qual è il mio prossimo farmaco in ${applicationName}",
+              "Prossima assunzione in ${applicationName}"
+            ]
           }
         },
         "ja" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName}で次の薬は"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}で次の薬を教えて",
+              "${applicationName}の次の服用"
+            ]
           }
         },
         "ka" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "რა არის ჩემი შემდეგი წამალი ${applicationName}-ში"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "რა არის ჩემი შემდეგი წამალი ${applicationName}-ში",
+              "შემდეგი მიღება ${applicationName}-ში"
+            ]
           }
         },
         "kk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "${applicationName} қолданбасында келесі дәрі қандай"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName} қолданбасында келесі дәрі қандай",
+              "${applicationName} қолданбасындағы келесі қабылдау"
+            ]
           }
         },
         "ro" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Care e următorul medicament în ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Care e următorul medicament în ${applicationName}",
+              "Următoarea doză în ${applicationName}"
+            ]
           }
         },
         "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Что принять дальше в ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Что принять дальше в ${applicationName}",
+              "Следующий приём в ${applicationName}"
+            ]
           }
         },
         "uk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Що прийняти далі в ${applicationName}"
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Що прийняти далі в ${applicationName}",
+              "Наступний прийом у ${applicationName}"
+            ]
           }
         }
       }
