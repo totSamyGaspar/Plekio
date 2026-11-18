@@ -1,6 +1,6 @@
 # App Store Connect · general fields
 
-Locales: en-US (primary), uk, es-ES, fr-FR, de-DE. Copy each field from the matching file in this folder.
+Locales: en-US (primary), uk, es-ES, fr-FR, de-DE, ru, ja. Copy each field from the matching file in this folder.
 
 | Field | Value |
 |---|---|
