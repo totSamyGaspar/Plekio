@@ -4,6 +4,42 @@ A medication tracker for iPhone and iPad. Plan treatment courses, get reminded w
 
 Everything stays on the device: no account, no server, no analytics.
 
+<p align="center">
+  <img src="docs/images/header.jpg" width="100%" alt="Plekio on iPhone: Courses, Diary, Today, Health report and Check-in screens">
+</p>
+
+<p align="center">
+  <!-- TODO: App Store badge — replace idXXXXXXXXXX with the app's ID
+  <a href="https://apps.apple.com/app/idXXXXXXXXXX"><img src="https://tools.applemarketingtools.com/api/badges/download-on-the-app-store/black/en-us" height="40" alt="Download on the App Store"></a>
+  -->
+  <img src="https://img.shields.io/badge/iOS-18%2B-000000?logo=apple" alt="iOS 18+">
+  <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
+  <img src="https://img.shields.io/badge/UI-SwiftUI-0A84FF" alt="SwiftUI">
+  <img src="https://img.shields.io/badge/data-SwiftData-34C759" alt="SwiftData">
+  <img src="https://img.shields.io/badge/dependencies-none-brightgreen" alt="No third-party dependencies">
+  <img src="https://img.shields.io/badge/CI-Xcode%20Cloud-147EFB" alt="Xcode Cloud">
+</p>
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/images/today.jpg" width="200" alt="Today: what's next and log it in one tap">
+  <img src="docs/images/widgets.jpg" width="200" alt="Home Screen widgets for doses, mood and blood pressure">
+  <img src="docs/images/diary.jpg" width="200" alt="Diary: mood, symptoms and blood pressure">
+  <img src="docs/images/report.jpg" width="200" alt="Doctor report as a PDF">
+</p>
+
+<details>
+<summary>More screenshots</summary>
+<br>
+<p align="center">
+  <img src="docs/images/courses.jpg" width="200" alt="Courses: dates, schedules and history">
+  <img src="docs/images/checkin.jpg" width="200" alt="Daily check-in: mood, energy, sleep and symptoms">
+  <img src="docs/images/streak.jpg" width="200" alt="Day complete and streak">
+  <img src="docs/images/themes.jpg" width="200" alt="Light and dark themes">
+</p>
+</details>
+
 ## Features
 
 - **Today** — the day's doses by morning, afternoon and evening, with an "Up next" card that logs a whole slot at once. Once every dose is logged, the card turns over to a summary of the day and the current streak. Any log can be undone. On iPad and the unfolded iPhone Duo the screen splits into two columns.
@@ -67,6 +103,9 @@ View  →  ViewModel  →  Use case  →  Repository / Store  →  SwiftData
                     Services (notifications, PDF)
 ```
 
+<details>
+<summary>Layers, data, notifications, widgets, Siri — in detail</summary>
+
 - **Composition root.** `AppDependencies` builds the object graph once and hands out view models (`make…ViewModel()`). It is owned by `AppDelegate`, so a notification action on a cold launch uses the same graph as the UI.
 - **View models.** Each screen has a protocol (`…ViewModelProtocol`), a live implementation and a mock for previews, all `@Observable`. A view owns its model through `@StateModel`, which builds it once like `@StateObject` did; plain `@State` would rebuild it every time the parent rebuilds the view. Main-actor isolated by default (`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`).
 - **Use cases** hold the rules that span several stores. Examples:
@@ -104,6 +143,8 @@ View  →  ViewModel  →  Use case  →  Repository / Store  →  SwiftData
   - Every intent needs an unlocked iPhone. With Plekio's app lock on, `ShortcutDialog` leaves out medication names and readings: an answer is heard by anyone nearby.
   - `LogDueDosesIntent` is a `LiveActivityIntent` in `Shared/`, like the widget's buttons, so it runs in the app. The widget extension hides its copy from Shortcuts, so the action isn't listed twice.
 - **Motion.** `Motion` defines the app's animation curves; `motion(_:value:)` and `withMotion` drop movement under Reduce Motion.
+
+</details>
 
 ## Project structure
 
