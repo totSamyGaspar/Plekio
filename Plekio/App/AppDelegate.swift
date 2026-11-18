@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -14,7 +15,15 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
     /// Owned here, not by PlekioApp: notification actions can arrive on a cold
     /// launch before any view exists and must use the same graph as the UI.
-    private(set) lazy var launcher = AppLauncher(location: .appGroup(), open: AppDependencies.live(location:))
+    private(set) lazy var launcher: AppLauncher = {
+        #if DEBUG
+        // A UI test's launch: in-memory store, no reminders, never the App Group.
+        if let uiTesting = UITestingLaunch.current {
+            return AppLauncher(location: UITestingLaunch.location) { _ in AppDependencies.uiTesting(uiTesting) }
+        }
+        #endif
+        return AppLauncher(location: .appGroup(), open: AppDependencies.live(location:))
+    }()
 
     /// For widget buttons, which reach the app through App Intents, not through UIKit.
     /// `UIApplication.shared.delegate` won't do: under `@UIApplicationDelegateAdaptor`
@@ -32,6 +41,14 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         BackgroundRefresh.register()
+        #if DEBUG
+        if UITestingLaunch.current != nil {
+            // Tips and animations make taps land late or on the wrong view.
+            // Hiding tips must come before TipKit is configured.
+            Tips.hideAllTipsForTesting()
+            UIView.setAnimationsEnabled(false)
+        }
+        #endif
         PlekioTips.configure()
         _ = launcher
         return true
