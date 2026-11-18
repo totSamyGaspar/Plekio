@@ -17,6 +17,8 @@ struct EmptyStateView: View {
     /// Optional call to action under the title.
     var actionTitle: LocalizedStringKey?
     var action: (() -> Void)?
+    /// For UI tests; see AccessibilityID.
+    var actionIdentifier: String = ""
 
     // MARK: - Body
 
@@ -41,6 +43,7 @@ struct EmptyStateView: View {
                         .background(Capsule().fill(Color.accentPrimary))
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(actionIdentifier)
                 .padding(.top, 6)
             }
         }

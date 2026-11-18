@@ -43,6 +43,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                     Text("History").tag(1)
                 }
                 .pickerStyle(.segmented)
+                .accessibilityIdentifier(AccessibilityID.Courses.filter)
                 .popoverTip(viewModel.historyCourses.isEmpty ? nil : repeatTip, arrowEdge: .top)
                 .onChange(of: selectedSegment) { _, segment in
                     if segment == 1 { repeatTip.invalidate(reason: .actionPerformed) }
@@ -77,6 +78,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                                     NavigationLink(value: Route.courseDetail(courseId: course.id)) {
                                         CourseRowView(row: viewModel.row(for: course), isHistory: false)
                                     }
+                                    .accessibilityIdentifier(AccessibilityID.Courses.row(course.name))
                                 }
                             }
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -144,6 +146,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("New Course")
+            .accessibilityIdentifier(AccessibilityID.Courses.newCourse)
             .tourTarget(.newCourseButton)
             .padding(.top, 6)
         }

@@ -43,6 +43,7 @@ struct UndoLogBanner: View {
                     .foregroundColor(.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
+                    .accessibilityIdentifier(AccessibilityID.Today.undoMessage)
 
                 Spacer(minLength: 8)
 
@@ -57,6 +58,7 @@ struct UndoLogBanner: View {
                         )
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityID.Today.undoButton)
             }
 
             countdownBar

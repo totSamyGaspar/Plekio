@@ -21,7 +21,8 @@ struct DashboardEmptyDay: View {
                 title: "Add your first course to see your doses here",
                 verticalPadding: 60,
                 actionTitle: "Create a course",
-                action: onCreateCourse
+                action: onCreateCourse,
+                actionIdentifier: AccessibilityID.Today.createFirstCourse
             )
         }
     }
