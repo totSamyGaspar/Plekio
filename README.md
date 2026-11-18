@@ -183,3 +183,9 @@ PlekioTests/        Mirrors the app's folders; Mocks/ and Support/ hold test dou
 - **Feature flags** are in `AppFeatures` and read only in the composition root.
 - **Branches and PRs:** one branch per change, merged into `main` by pull request once Xcode Cloud is green; merged branches are deleted.
 - **Commits:** short imperative subject, e.g. `Diary: entries can't be dated in the future`, then a body that says what changed and why.
+
+## License
+
+© 2026 Edward Gasparian. All rights reserved.
+
+The source code is public so it can be read and evaluated. It may not be copied, modified, distributed or published, including on the App Store, without written permission.
