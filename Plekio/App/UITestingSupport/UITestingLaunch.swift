@@ -29,7 +29,8 @@ nonisolated struct UITestingLaunch: Equatable, Sendable {
         case empty
         /// A fresh install: onboarding still to come.
         case onboarding
-        /// One running course with a morning and an evening dose today.
+        /// One running course with a dose at 09:00 and one due at launch,
+        /// so Today always has an Up next card.
         case today
     }
 

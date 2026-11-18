@@ -81,10 +81,20 @@ struct UITestingLaunchTests {
         let courses = dependencies.database.fetchAllCourses()
         #expect(courses.map(\.name) == [UITestingSeed.Names.course])
         #expect(Set(courses.first?.medications.map(\.name) ?? [])
-            == [UITestingSeed.Names.morning, UITestingSeed.Names.evening])
+            == [UITestingSeed.Names.morning, UITestingSeed.Names.dueNow])
 
         let doses = dependencies.database.fetchPills(for: dependencies.time.now, preFetchedCourses: nil)
         #expect(doses.count == 2)
+    }
+
+    @Test("The today seed always has an Up next card, whatever the time")
+    func todaySeedHasUpNext() {
+        let dependencies = AppDependencies.uiTesting(UITestingLaunch(seed: .today))
+        let now = dependencies.time.now
+        let doses = dependencies.database.fetchPills(for: now, preFetchedCourses: nil)
+
+        let hero = DayHero(pills: doses, selectedDate: now, now: now, calendar: dependencies.time.calendar)
+        #expect(hero.upNext?.isEmpty == false)
     }
 
     @Test("Reminders are never asked for or scheduled")

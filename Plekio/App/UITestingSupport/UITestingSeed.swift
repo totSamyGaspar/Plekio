@@ -17,8 +17,10 @@ enum UITestingSeed {
     /// Course names and medication names the UI tests look for.
     enum Names {
         static let course = "Vitamins"
+        /// At 09:00.
         static let morning = "Omega-3"
-        static let evening = "Vitamin D3"
+        /// At the minute the app was launched.
+        static let dueNow = "Vitamin D3"
     }
 
     static func apply(_ seed: UITestingLaunch.Seed, to store: any CourseStoring, time: any TimeSource) {
@@ -49,7 +51,14 @@ enum UITestingSeed {
                 endDate: end,
                 drafts: [
                     MedicationDraft(name: Names.morning, minutesOfDay: [9 * 60], mealTiming: .afterMeal),
-                    MedicationDraft(name: Names.evening, minutesOfDay: [21 * 60], mealTiming: .withMeal),
+                    // Due this minute, so Today always has an Up next card: a dose stays
+                    // open for an hour after its time. A fixed time would leave the card
+                    // missing for tests run late in the evening.
+                    MedicationDraft(
+                        name: Names.dueNow,
+                        minutesOfDay: [MinuteOfDay.of(time.now, calendar: calendar)],
+                        mealTiming: .withMeal
+                    ),
                 ]
             )
         } catch {
