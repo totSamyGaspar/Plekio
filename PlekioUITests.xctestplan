@@ -1,0 +1,26 @@
+{
+  "configurations" : [
+    {
+      "id" : "26343441-1CA2-4A9B-A2CA-4E9022153159",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "testInteropMode" : "complete"
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Plekio.xcodeproj",
+        "identifier" : "128A23F830ADED29002D83F8",
+        "name" : "PlekioUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
