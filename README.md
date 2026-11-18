@@ -9,8 +9,8 @@ Everything stays on the device: no account, no server, no analytics.
 </p>
 
 <p align="center">
-  <!-- TODO: App Store badge — replace idXXXXXXXXXX with the app's ID
-  <a href="https://apps.apple.com/app/idXXXXXXXXXX"><img src="https://tools.applemarketingtools.com/api/badges/download-on-the-app-store/black/en-us" height="40" alt="Download on the App Store"></a>
+  <!-- App Store badge: uncomment once the app is live (ID 6820634068)
+  <a href="https://apps.apple.com/app/id6820634068"><img src="https://tools.applemarketingtools.com/api/badges/download-on-the-app-store/black/en-us" height="40" alt="Download on the App Store"></a>
   -->
   <img src="https://img.shields.io/badge/iOS-18%2B-000000?logo=apple" alt="iOS 18+">
   <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
