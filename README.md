@@ -88,6 +88,7 @@ Test names are in English; assertions and code are in English.
 
 - **Schema freeze.** `SchemaFreezeTests` compares each frozen schema with its manifest in `PlekioTests/Fixtures` (`SchemaV1.manifest`, `SchemaV2.manifest`) and opens the store that version wrote (`SchemaV1.store`, `SchemaV2.store`) with the current schema. Never regenerate those files. A new version's fixtures are written once, while it is current, with the command at the top of `SchemaFreezeTests.swift`; Swift Testing names need their parentheses in `-only-testing`, or the filter matches nothing and the run still passes.
 - **StoreKit.** Tip tests run against `PlekioTests/Support/Plekio.storekit`. Purchase tests run only while `AppFeatures.tips` is on, and only on iOS 27.
+- **UI-testing launch mode.** Launched with `-ui-testing`, a Debug build opens an in-memory store with its own defaults domain, never the App Group; it schedules no reminders, asks for no permissions, hides TipKit tips and turns animations off. `-ui-seed <name>` picks the starting data: `empty` (set up, no courses; the default), `onboarding` (a fresh install) or `today` (one course with a morning and an evening dose). The seeds follow the real clock, because the forms still read `Date()`. Release builds ignore both arguments.
 
 ## CI
 
