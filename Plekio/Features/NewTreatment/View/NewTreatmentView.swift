@@ -35,6 +35,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                     Section(header: Text("Basic Information").foregroundColor(.textSecondary)) {
                         TextField("Course Name (e.g., Vitamins)", text: $viewModel.courseName)
                             .foregroundColor(.textPrimary)
+                            .accessibilityIdentifier(AccessibilityID.NewCourse.name)
                     }
                     .listRowBackground(Color.appSurface)
 
@@ -70,6 +71,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                             Label("Add Medication", systemImage: "plus")
                                 .foregroundColor(.accentPrimary)
                         }
+                        .accessibilityIdentifier(AccessibilityID.NewCourse.addMedication)
                     }
                     .listRowBackground(Color.appSurface)
                 }
@@ -83,6 +85,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
                         .foregroundColor(.textPrimary.opacity(0.7))
+                        .accessibilityIdentifier(AccessibilityID.NewCourse.cancel)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     // Dismiss only on success so typed input isn't lost.
@@ -95,6 +98,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                     .font(.headline)
                     .foregroundColor(viewModel.isSaveEnabled ? .accentPrimary : .textTertiary)
                     .disabled(!viewModel.isSaveEnabled)
+                    .accessibilityIdentifier(AccessibilityID.NewCourse.save)
                 }
             }
             .appTheme()

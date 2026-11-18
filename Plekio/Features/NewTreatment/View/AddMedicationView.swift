@@ -81,6 +81,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     Section(header: Text("Medication").foregroundColor(.textSecondary)) {
                         TextField("Name (e.g., Ibuprofen)", text: $viewModel.draft.name)
                             .foregroundColor(.textPrimary)
+                            .accessibilityIdentifier(AccessibilityID.NewMedication.name)
 
                         Picker("Form", selection: $viewModel.draft.form) {
                             ForEach(MedicationForm.allCases, id: \.self) { form in
@@ -103,6 +104,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                                 set: { viewModel.draft.stockCount = min(max($0, 0), 9999) }
                             ), format: .number)
                             .keyboardType(.numberPad)
+                            .accessibilityIdentifier(AccessibilityID.NewMedication.stock)
                             .multilineTextAlignment(.trailing)
                             .foregroundColor(.accentPrimary)
                             .font(.headline)
@@ -118,6 +120,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                                 set: { viewModel.draft.lowStockThreshold = min(max($0, 0), 9999) }
                             ), format: .number)
                             .keyboardType(.numberPad)
+                            .accessibilityIdentifier(AccessibilityID.NewMedication.lowStockThreshold)
                             .multilineTextAlignment(.trailing)
                             .foregroundColor(.yellow)
                             .font(.headline)
@@ -169,6 +172,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
                         .foregroundColor(.textPrimary.opacity(0.7))
+                        .accessibilityIdentifier(AccessibilityID.NewMedication.cancel)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(isEditing ? "Save" : "Add") {
@@ -178,6 +182,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                     .font(.headline)
                     .foregroundColor(viewModel.draft.name.isEmpty ? .textTertiary : .accentPrimary)
                     .disabled(viewModel.draft.name.isEmpty)
+                    .accessibilityIdentifier(AccessibilityID.NewMedication.save)
                 }
             }
             .photoSourceDialog("Choose Photo", isPresented: $viewModel.showingPhotoSourceMenu) { image in

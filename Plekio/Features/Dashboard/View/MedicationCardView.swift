@@ -162,6 +162,7 @@ struct MedicationCardView: View {
         .expandTouchTarget(8)
         .disabled(!pill.isLoggable)
         .accessibilityLabel(checkmarkLabel)
+        .accessibilityIdentifier(AccessibilityID.Today.doseCheckmark(pill.name))
     }
 
     @ViewBuilder

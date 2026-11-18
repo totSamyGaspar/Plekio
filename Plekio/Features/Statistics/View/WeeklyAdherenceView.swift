@@ -85,6 +85,7 @@ struct WeeklyAdherenceView: View {
                     .foregroundColor(.textPrimary)
                     .italic()
                     .animatedNumber(Double(recentAverage))
+                    .accessibilityIdentifier(AccessibilityID.Today.adherenceAverage)
 
                 Text("recent average")
                     .font(.subheadline)
@@ -101,6 +102,7 @@ struct WeeklyAdherenceView: View {
                     .background(Color.accentPrimary.opacity(0.15))
                     .cornerRadius(10)
                     .padding(.bottom, 6)
+                    .accessibilityIdentifier(AccessibilityID.Today.adherenceBadge)
             }
         }
         .padding(20)

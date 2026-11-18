@@ -36,6 +36,7 @@ struct DayCompleteHeroCard: View {
                     .scaledFont(size: 28, relativeTo: .largeTitle, weight: .heavy, design: .serif)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+                    .accessibilityIdentifier(AccessibilityID.Today.dayComplete)
             }
             .foregroundColor(.white)
 

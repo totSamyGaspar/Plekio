@@ -59,6 +59,7 @@ struct UpNextHeroCard: View {
                 .font(.subheadline)
                 .foregroundColor(.white.opacity(0.85))
                 .animatedNumber(Double(takenCount))
+                .accessibilityIdentifier(AccessibilityID.Today.upNextProgress)
 
             Divider().background(Color.white.opacity(0.3))
 
@@ -81,6 +82,7 @@ struct UpNextHeroCard: View {
                         .cornerRadius(24)
                 }
                 .buttonStyle(PressableButtonStyle())
+                .accessibilityIdentifier(AccessibilityID.Today.logUpNext)
             }
         }
     }
