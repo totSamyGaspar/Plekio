@@ -14,6 +14,7 @@ struct WeeklyAdherenceView: View {
     let percentages: [Double]
     let days: [String]
     let recentAverage: Int
+    let level: AdherenceLevel?
 
     /// Zipped so a length mismatch cannot crash rendering (`weeklyDays` starts empty).
     private var bars: [(offset: Int, element: (Double, String))] {
@@ -94,20 +95,47 @@ struct WeeklyAdherenceView: View {
                     .padding(.leading, 4)
                 Spacer()
 
-                Text("Optimal")
-                    .font(.caption.weight(.bold))
-                    .foregroundColor(.accentPrimary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.accentPrimary.opacity(0.15))
-                    .cornerRadius(10)
-                    .padding(.bottom, 6)
-                    .accessibilityIdentifier(AccessibilityID.Today.adherenceBadge)
+                if let level {
+                    Text(level.title)
+                        .font(.caption.weight(.bold))
+                        .lineLimit(1)
+                        .fixedSize()
+                        .foregroundColor(level.tint)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(level.tint.opacity(0.15))
+                        .cornerRadius(10)
+                        .padding(.bottom, 6)
+                        .accessibilityIdentifier(AccessibilityID.Today.adherenceBadge)
+                        .transition(.opacity)
+                }
             }
+            .motion(Motion.progress, value: level)
         }
         .padding(20)
         .background(appSurface)
         .cornerRadius(24)
         .padding(.horizontal)
+    }
+}
+
+// MARK: - AdherenceLevel
+
+private extension AdherenceLevel {
+
+    var title: LocalizedStringResource {
+        switch self {
+        case .optimal:        "Optimal"
+        case .couldBeBetter:  "Could be better"
+        case .needsAttention: "Needs attention"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .optimal:        .accentPrimary
+        case .couldBeBetter:  .warningAmber
+        case .needsAttention: .warningAccent
+        }
     }
 }

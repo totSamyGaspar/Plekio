@@ -27,6 +27,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     var weeklyPercentages: [Double] = Array(repeating: 0.0, count: 7)
     var weeklyDays: [String] = []
     var recentAverage: Int = 0
+    var adherenceLevel: AdherenceLevel?
 
     /// Shared with the notification modal via DoseUndoCenter.
     var undoableAction: UndoableDoseAction? { undoCenter.current }
@@ -184,11 +185,14 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         weeklyLoad = Task { [weak self, dbService] in
             let pillsByDay = await dbService.pillHistory(onDays: dates)
             guard !Task.isCancelled, let self else { return }
-            self.applyWeeklyStats(pillsByDay, dates: dates, calendar: calendar)
+            self.applyWeeklyStats(pillsByDay, dates: dates, now: now, calendar: calendar)
         }
     }
 
-    private func applyWeeklyStats(_ pillsByDay: [Date: [PillDose]], dates: [Date], calendar: Calendar) {
+    /// Only settled doses are graded: one still pending within its grace window
+    /// (later today, say) is neither taken nor missed yet, so a course created
+    /// this morning does not open at 0%.
+    private func applyWeeklyStats(_ pillsByDay: [Date: [PillDose]], dates: [Date], now: Date, calendar: Calendar) {
         var percentages: [Double] = []
         var daysLabels: [String] = []
 
@@ -198,7 +202,8 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         for date in dates {
             daysLabels.append(Self.weekdayFormatter.string(from: date))
 
-            let dailyPills = pillsByDay[calendar.startOfDay(for: date)] ?? []
+            let dailyPills = (pillsByDay[calendar.startOfDay(for: date)] ?? [])
+                .filter { $0.status != .pending || $0.isMissed(at: now) }
             if dailyPills.isEmpty {
                 percentages.append(0.0)
             } else {
@@ -217,5 +222,8 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         ? Int((adherenceSum / Double(daysWithDoses)) * 100)
         : 0
         if recentAverage != average { recentAverage = average }
+
+        let level = daysWithDoses > 0 ? AdherenceLevel(percent: average) : nil
+        if adherenceLevel != level { adherenceLevel = level }
     }
 }

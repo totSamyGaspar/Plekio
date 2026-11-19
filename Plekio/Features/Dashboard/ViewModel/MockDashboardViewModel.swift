@@ -29,6 +29,7 @@ final class MockDashboardViewModel: DashboardViewModelProtocol {
     var weeklyPercentages: [Double] = [1.0, 1.0, 1.0, 0.6, 1.0, 0.7, 1.0]
     var weeklyDays: [String] = ["Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu"]
     var recentAverage: Int = 93
+    var adherenceLevel: AdherenceLevel? = .optimal
 
     init() {}
 

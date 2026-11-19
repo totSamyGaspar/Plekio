@@ -205,7 +205,8 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
         WeeklyAdherenceView(
             percentages: viewModel.weeklyPercentages,
             days: viewModel.weeklyDays,
-            recentAverage: viewModel.recentAverage
+            recentAverage: viewModel.recentAverage,
+            level: viewModel.adherenceLevel
         )
         .padding(.top, 10)
     }

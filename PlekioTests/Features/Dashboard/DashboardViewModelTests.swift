@@ -109,6 +109,7 @@ struct DashboardViewModelTests {
 
         await vm.weeklyLoad?.value
         #expect(vm.recentAverage == 100)
+        #expect(vm.adherenceLevel == .optimal)
         #expect(vm.weeklyPercentages.count == 7)
         #expect(vm.weeklyDays.count == 7)
     }
@@ -122,7 +123,46 @@ struct DashboardViewModelTests {
 
         await vm.weeklyLoad?.value
         #expect(vm.recentAverage == 0)
+        // Nothing to grade: no badge rather than "Needs attention".
+        #expect(vm.adherenceLevel == nil)
         #expect(vm.weeklyPercentages == Array(repeating: 0.0, count: 7))
+    }
+
+    @Test("A dose still to come today is not graded; a missed one is")
+    func testAdherenceGradesSettledDosesOnly() async throws {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let clock = FixedTime(today.addingTimeInterval(12 * 3600), calendar: calendar)
+        let mockDB = MockDatabaseService()
+
+        // A course created this morning: its only dose is tonight.
+        let tonight = PillDose(medicationId: UUID(), name: "Aspirin", dosage: 1, form: .pill,
+                               time: today.addingTimeInterval(20 * 3600), period: .evening)
+        mockDB.pillsByDay[today] = [tonight]
+
+        let fresh = dashboard(mockDB, at: clock)
+        await fresh.weeklyLoad?.value
+        #expect(fresh.recentAverage == 0)
+        #expect(fresh.adherenceLevel == nil)
+
+        // The morning dose is past its grace window and still pending: missed.
+        let morning = PillDose(medicationId: UUID(), name: "Magnesium", dosage: 1, form: .capsule,
+                               time: today.addingTimeInterval(8 * 3600), period: .morning)
+        mockDB.pillsByDay[today] = [morning, tonight]
+
+        let missed = dashboard(mockDB, at: clock)
+        await missed.weeklyLoad?.value
+        #expect(missed.recentAverage == 0)
+        #expect(missed.adherenceLevel == .needsAttention)
+    }
+
+    private func dashboard(_ db: MockDatabaseService, at clock: FixedTime) -> DashboardViewModel {
+        DashboardViewModel(
+            dbService: db,
+            doseLogging: DoseLoggingUseCase(dbService: db, notificationService: MockNotificationService()),
+            errors: SpyErrorReporter(),
+            time: clock
+        )
     }
 
     // MARK: - Back-dated logging and delivered notifications
