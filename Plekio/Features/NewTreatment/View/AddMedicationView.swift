@@ -35,97 +35,41 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color.appBackground.ignoresSafeArea()
+            Form {
+                Section(header: header("Image")) {
+                    MedicationPhotoPicker(
+                        image: viewModel.selectedImage,
+                        onChoose: { viewModel.showingPhotoSourceMenu = true },
+                        onRemove: { viewModel.removeImage() }
+                    )
+                    .padding(.vertical, 8)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                }
 
-                Form {
-                    Section(
-                        header: Text("Image")
-                            .foregroundColor(.textSecondary)
-                    ) {
-                        HStack {
-                            Spacer()
-                            VStack(spacing: 12) {
-                                Button {
-                                    viewModel.showingPhotoSourceMenu = true
-                                } label: {
-                                    ImagePreviewView(image: viewModel.selectedImage)
-                                }
-
-                                HStack(spacing: 20) {
-                                    Button {
-                                        viewModel.showingPhotoSourceMenu = true
-                                    } label: {
-                                        Text(viewModel.selectedImage == nil ? "Add" : "Change")
-                                            .foregroundColor(.accentPrimary)
-                                    }
-
-                                    if viewModel.selectedImage != nil {
-                                        Button(role: .destructive) {
-                                            withMotion {
-                                                viewModel.removeImage()
-                                            }
-                                        } label: {
-                                            Text("Delete")
-                                        }
-                                    }
-                                }
-                            }
-                            Spacer()
-                        }
-                        .padding(.vertical, 8)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets())
-                    }
-
-                    Section(header: Text("Medication").foregroundColor(.textSecondary)) {
+                Group {
+                    Section(header: header("Medication")) {
                         TextField("Name (e.g., Ibuprofen)", text: $viewModel.draft.name)
                             .foregroundColor(.textPrimary)
                             .accessibilityIdentifier(AccessibilityID.NewMedication.name)
 
                         Picker("Form", selection: $viewModel.draft.form) {
                             ForEach(MedicationForm.allCases, id: \.self) { form in
-                                Image(systemName: form.systemImage)
-                                    .tag(form)
+                                Image(systemName: form.systemImage).tag(form)
                             }
                         }
                         .pickerStyle(.segmented)
                         .padding(.vertical, 8)
                     }
-                    .listRowBackground(Color.appSurface)
 
-                    Section(header: Text("Inventory Tracking").foregroundColor(.textSecondary)) {
-                        HStack {
-                            Text("Total in package (pcs)")
-                                .foregroundColor(.textPrimary)
-                            Spacer()
-                            TextField("30", value: Binding(
-                                get: { viewModel.draft.stockCount },
-                                set: { viewModel.draft.stockCount = min(max($0, 0), 9999) }
-                            ), format: .number)
-                            .keyboardType(.numberPad)
-                            .accessibilityIdentifier(AccessibilityID.NewMedication.stock)
-                            .multilineTextAlignment(.trailing)
-                            .foregroundColor(.accentPrimary)
-                            .font(.headline)
-                            .padding(.trailing)
-                        }
+                    Section(header: header("Inventory Tracking")) {
+                        CountRow(title: "Total in package (pcs)", placeholder: "30",
+                                 value: $viewModel.draft.stockCount, tint: .accentPrimary,
+                                 identifier: AccessibilityID.NewMedication.stock)
 
-                        HStack {
-                            Text("Remind when remaining")
-                                .foregroundColor(.textPrimary)
-                            Spacer()
-                            TextField("10", value: Binding(
-                                get: { viewModel.draft.lowStockThreshold },
-                                set: { viewModel.draft.lowStockThreshold = min(max($0, 0), 9999) }
-                            ), format: .number)
-                            .keyboardType(.numberPad)
-                            .accessibilityIdentifier(AccessibilityID.NewMedication.lowStockThreshold)
-                            .multilineTextAlignment(.trailing)
-                            .foregroundColor(.yellow)
-                            .font(.headline)
-                            .padding(.trailing)
-                        }
+                        CountRow(title: "Remind when remaining", placeholder: "10",
+                                 value: $viewModel.draft.lowStockThreshold, tint: .warningAmber,
+                                 identifier: AccessibilityID.NewMedication.lowStockThreshold)
 
                         if viewModel.draft.isLowFromTheStart {
                             Text("That's the whole package or more, so it will count as running low right away.")
@@ -134,64 +78,40 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                                 .accessibilityIdentifier(AccessibilityID.NewMedication.lowFromTheStartHint)
                         }
                     }
-                    .listRowBackground(Color.appSurface)
 
-                    Section(header: Text("Intake Frequency").foregroundColor(.textSecondary)) {
+                    Section(header: header("Intake Frequency")) {
                         Picker("Interval", selection: $viewModel.draft.frequencyDays) {
                             ForEach(DoseFrequency.allCases) { frequency in
                                 Text(frequency.title).tag(frequency.rawValue)
                             }
                         }
                         .pickerStyle(.menu)
-                        .accentColor(.accentPrimary)
+                        .tint(.accentPrimary)
                         .foregroundColor(.textPrimary)
                     }
-                    .listRowBackground(Color.appSurface)
 
-                    Section(header: Text("Dosage").foregroundColor(.textSecondary)) {
+                    Section(header: header("Dosage")) {
                         Stepper("Quantity: \(viewModel.draft.dosage)", value: $viewModel.draft.dosage, in: 1...10)
                             .foregroundColor(.textPrimary)
                     }
-                    .listRowBackground(Color.appSurface)
 
-                    Section(header: Text("Intake Time").foregroundColor(.textSecondary)) {
+                    Section(header: header("Intake Time")) {
                         TimeOfDayRows(minutes: $viewModel.draft.minutesOfDay) { index in
                             Text("Dose \(index + 1)")
                         }
                     }
-                    .listRowBackground(Color.appSurface)
 
-                    Section(header: Text("Meals").foregroundColor(.textSecondary)) {
-                        FlowLayout(spacing: 8) {
-                            mealChip(nil)
-                            ForEach(MealTiming.allCases, id: \.self) { mealChip($0) }
-                        }
-                        .padding(.vertical, 6)
-                        .sensoryFeedback(.selection, trigger: viewModel.draft.mealTiming)
+                    Section(header: header("Meals")) {
+                        MealTimingPicker(selection: $viewModel.draft.mealTiming)
                     }
-                    .listRowBackground(Color.appSurface)
                 }
-                .scrollContentBackground(.hidden)
+                .listRowBackground(Color.appSurface)
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.appBackground.ignoresSafeArea())
             .navigationTitle(isEditing ? "Edit Medication" : "New Medication")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
-                        .foregroundColor(.textPrimary.opacity(0.7))
-                        .accessibilityIdentifier(AccessibilityID.NewMedication.cancel)
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(isEditing ? "Save" : "Add") {
-                        onSave(viewModel.draft.forSaving)
-                        dismiss()
-                    }
-                    .font(.headline)
-                    .foregroundColor(viewModel.draft.isValid ? .accentPrimary : .textTertiary)
-                    .disabled(!viewModel.draft.isValid)
-                    .accessibilityIdentifier(AccessibilityID.NewMedication.save)
-                }
-            }
+            .toolbar { toolbar }
             .photoSourceDialog("Choose Photo", isPresented: $viewModel.showingPhotoSourceMenu) { image in
                 Task { await viewModel.attachPhoto(image) }
             }
@@ -202,63 +122,30 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
         }
     }
 
-    /// One choice of several in a Form row: `.plain`, or a tap would trigger every button in it.
-    private func mealChip(_ timing: MealTiming?) -> some View {
-        let isSelected = viewModel.draft.mealTiming == timing
-        return Button {
-            viewModel.draft.mealTiming = timing
-        } label: {
-            Group {
-                if let timing {
-                    Text(timing.title)
-                } else {
-                    Text("Doesn't matter")
-                }
-            }
-            .font(.subheadline.weight(.semibold))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(isSelected ? Color.accentPrimary : Color.textPrimary.opacity(0.06))
-            .foregroundColor(isSelected ? .onAccent : .textPrimary.opacity(0.8))
-            .clipShape(Capsule())
+    // MARK: - Parts
+
+    @ToolbarContentBuilder
+    private var toolbar: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) {
+            Button("Cancel") { dismiss() }
+                .foregroundColor(.textPrimary.opacity(0.7))
+                .accessibilityIdentifier(AccessibilityID.NewMedication.cancel)
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button(isEditing ? "Save" : "Add") {
+                onSave(viewModel.draft.forSaving)
+                dismiss()
+            }
+            .font(.headline)
+            .foregroundColor(viewModel.draft.isValid ? .accentPrimary : .textTertiary)
+            .disabled(!viewModel.draft.isValid)
+            .accessibilityIdentifier(AccessibilityID.NewMedication.save)
+        }
     }
-}
 
-// MARK: - ImagePreviewView
-
-struct ImagePreviewView: View {
-    var image: UIImage?
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(Color.appSurface)
-                .frame(width: 100, height: 100)
-                .overlay(
-                    Circle()
-                        .stroke(Color.accentPrimary.opacity(0.5), lineWidth: 2)
-                )
-
-            if let image = image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 100, height: 100)
-                    .clipShape(Circle())
-            } else {
-                VStack(spacing: 4) {
-                    Image(systemName: "camera.fill")
-                        .font(.largeTitle)
-                    Text("Photo")
-                        .font(.caption2)
-                }
-                .foregroundColor(.textSecondary)
-            }
-        }
-        .buttonStyle(PlainButtonStyle())
+    /// `LocalizedStringResource`, so the literals passed in still reach the string catalog.
+    private func header(_ title: LocalizedStringResource) -> some View {
+        Text(title).foregroundColor(.textSecondary)
     }
 }
 
