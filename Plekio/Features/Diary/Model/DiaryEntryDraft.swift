@@ -105,6 +105,8 @@ struct DiaryEntryDraft: Identifiable, Equatable {
     // MARK: - Fields
 
     var id = UUID()
+    /// A fallback for drafts built in code; the check-in view model dates new
+    /// entries from its `TimeSource`.
     var checkInDate: Date = Date()
     var mood: DiaryMood = .good
     var physicalSummary: String = ""

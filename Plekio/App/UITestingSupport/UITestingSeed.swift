@@ -35,8 +35,7 @@ enum UITestingSeed {
     // MARK: - Seeds
 
     /// Started yesterday, so the course is running whatever time the test runs at.
-    /// Dates follow the real clock: the forms still read `Date()`, so a fixed clock
-    /// here would put seeded data and data entered in a test on different days.
+    /// Dates follow the launch's `TimeSource`, the same clock the screens and forms read.
     private static func seedToday(_ store: any CourseStoring, time: any TimeSource) {
         let calendar = time.calendar
         let today = calendar.startOfDay(for: time.now)

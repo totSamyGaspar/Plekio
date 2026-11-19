@@ -14,7 +14,8 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
 
     // MARK: - Properties
 
-    var draft = DiaryEntryDraft()
+    /// A new check-in is dated now; set from `time` in init.
+    var draft: DiaryEntryDraft
     var selectedImages: [UIImage] = []
     var showingPhotoSourceMenu = false
 
@@ -33,6 +34,7 @@ final class DiaryCheckInViewModel: DiaryCheckInViewModelProtocol {
         self.photos = photos
         self.errors = errors
         self.time = time
+        draft = DiaryEntryDraft(checkInDate: time.now)
     }
 
     /// Over the SwiftData store — the shape tests use.

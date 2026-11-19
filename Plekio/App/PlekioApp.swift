@@ -34,6 +34,7 @@ struct PlekioApp: App {
                         .environment(dependencies)
                         .environment(\.imageLoader, dependencies.photoCache)
                         .environment(\.databaseChanges, dependencies.database.changes)
+                        .environment(\.timeSource, dependencies.time)
                         // @AppStorage below must read the same defaults SettingsStore writes.
                         .defaultAppStorage(dependencies.settings.defaults)
                 } else {

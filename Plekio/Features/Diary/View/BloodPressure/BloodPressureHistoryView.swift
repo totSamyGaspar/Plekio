@@ -17,6 +17,7 @@ struct BloodPressureHistoryView: View {
     var onDeleteAll: () -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.timeSource) private var time
 
     @State private var isClearConfirmationShown = false
 
@@ -27,7 +28,7 @@ struct BloodPressureHistoryView: View {
 
     /// Newest day first, newest reading first within each day.
     private var sections: [DaySection] {
-        let calendar = Calendar.current
+        let calendar = time.calendar
         return Dictionary(grouping: readings) { calendar.startOfDay(for: $0.measuredAt) }
             .map { day, items in
                 DaySection(id: day, readings: items.sorted { $0.measuredAt > $1.measuredAt })
@@ -123,8 +124,8 @@ struct BloodPressureHistoryView: View {
 
     /// "Today"/"Yesterday" (localized by Foundation), otherwise an abbreviated date.
     private func sectionTitle(for day: Date) -> String {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        let calendar = time.calendar
+        let today = calendar.startOfDay(for: time.now)
         let dayDelta = calendar.dateComponents([.day], from: day, to: today).day
 
         guard let dayDelta, dayDelta == 0 || dayDelta == 1 else {

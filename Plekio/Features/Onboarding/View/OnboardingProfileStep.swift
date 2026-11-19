@@ -15,6 +15,7 @@ struct OnboardingProfileStep: View {
 
     /// Saved as typed; Skip clears it rather than rolling back.
     @AppStorage(UserProfile.storageKey) private var stored = StoredProfile(.empty)
+    @Environment(\.timeSource) private var time
 
     var isWide = false
 
@@ -101,7 +102,7 @@ struct OnboardingProfileStep: View {
                 DatePicker(
                     "Date of birth",
                     selection: $stored.profile.birthDateOrDefault,
-                    in: ...Date(),
+                    in: ...time.now,
                     displayedComponents: .date
                 )
                 .labelsHidden()

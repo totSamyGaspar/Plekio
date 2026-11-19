@@ -51,18 +51,9 @@ nonisolated struct PillDose: Identifiable, Equatable, Sendable {
     var isTaken: Bool { status.isTaken }
     var isSkipped: Bool { status.isSkipped }
 
-    /// Pending past the grace period. A skipped dose is never missed.
-    var isMissed: Bool {
-        isMissed(at: Date())
-    }
-
     /// Pending past `DoseSchedule.missedGrace`; skipped never counts as missed.
     func isMissed(at now: Date) -> Bool {
         status == .pending && now > time.addingTimeInterval(DoseSchedule.missedGrace)
-    }
-
-    var isLoggable: Bool {
-        isLoggable(at: Date())
     }
 
     /// Past, or later today; future days cannot be logged in advance.

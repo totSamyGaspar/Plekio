@@ -158,7 +158,7 @@ struct MainTabView: View {
                 .appTheme()
 
         case .bloodPressureEntry:
-            BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
+            BloodPressureEntryView(time: dependencies.time) { measuredAt, systolic, diastolic, pulse in
                 if dependencies.bloodPressureLogging.save(
                     measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
                 ) {

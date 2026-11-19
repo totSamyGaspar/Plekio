@@ -15,6 +15,8 @@ struct MedicationCardView: View {
     let pill: PillDose
     let onAction: (DoseCardAction) -> Void
 
+    @Environment(\.timeSource) private var time
+
     let appSurface = Color.appSurface
 
     // MARK: - Derived state
@@ -22,9 +24,13 @@ struct MedicationCardView: View {
     /// Taken or skipped: the row recedes. Only taken gets the strikethrough.
     private var isSettled: Bool { pill.status.isSettled }
 
+    /// Read at each render; the screen re-renders on every write and on return to the app.
+    private var isMissed: Bool { pill.isMissed(at: time.now) }
+    private var isLoggable: Bool { pill.isLoggable(at: time.now, calendar: time.calendar) }
+
     /// Overlay colour, label and tint for missed/skipped cards; nil otherwise.
     private var state: (wash: Color, label: LocalizedStringKey, tint: Color)? {
-        if pill.isMissed { return (.missedWash, "MISSED", .warningAccent) }
+        if isMissed { return (.missedWash, "MISSED", .warningAccent) }
         if pill.isSkipped { return (.skippedWash, "SKIPPED", .textSecondary) }
         return nil
     }
@@ -121,7 +127,7 @@ struct MedicationCardView: View {
         .overlay { stateCloth }
         .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onTapGesture {
-            if pill.isLoggable && !isSettled && !pill.isMissed { onAction(.open) }
+            if isLoggable && !isSettled && !isMissed { onAction(.open) }
         }
         .contextMenu { contextMenuItems }
     }
@@ -160,14 +166,14 @@ struct MedicationCardView: View {
         }
         .buttonStyle(.plain)
         .expandTouchTarget(8)
-        .disabled(!pill.isLoggable)
+        .disabled(!isLoggable)
         .accessibilityLabel(checkmarkLabel)
         .accessibilityIdentifier(AccessibilityID.Today.doseCheckmark(pill.name))
     }
 
     @ViewBuilder
     private var contextMenuItems: some View {
-        ForEach(DoseCardAction.menu(for: pill), id: \.self) { action in
+        ForEach(DoseCardAction.menu(for: pill, at: time.now, calendar: time.calendar), id: \.self) { action in
             Button { onAction(action) } label: {
                 Label(action.title(for: pill), systemImage: action.systemImage(for: pill))
             }
@@ -176,13 +182,13 @@ struct MedicationCardView: View {
 
         private var checkmarkTint: Color {
         if pill.isTaken { return .accentPrimary }
-        if !pill.isLoggable { return .textPrimary.opacity(0.1) }
-        return pill.isMissed ? .warningAccent : .textTertiary
+        if !isLoggable { return .textPrimary.opacity(0.1) }
+        return isMissed ? .warningAccent : .textTertiary
     }
 
     private var checkmarkLabel: Text {
         if pill.isTaken { return Text("Undo logging \(pill.name)") }
-        if pill.isMissed { return Text("Log the missed dose of \(pill.name)") }
+        if isMissed { return Text("Log the missed dose of \(pill.name)") }
         return Text("Log \(pill.name)")
     }
 }

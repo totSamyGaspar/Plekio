@@ -251,7 +251,7 @@ struct DashboardViewModelTests {
             medicationId: UUID(), name: "Ibuprofen", dosage: 1,
             form: .pill, time: slot, period: .morning
         )
-        #expect(pill.isMissed)
+        #expect(pill.isMissed(at: .now))
         mockDB.pillsToReturn = [pill]
 
         let vm = DashboardViewModel(dbService: mockDB, notificationService: mockNotifications)

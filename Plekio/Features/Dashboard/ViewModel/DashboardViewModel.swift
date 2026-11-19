@@ -14,7 +14,8 @@ final class DashboardViewModel: DashboardViewModelProtocol {
 
     // MARK: - Properties
 
-    var selectedDate: Date = Date() {
+    /// Set from `time` in init; this placeholder is never read.
+    var selectedDate: Date = .distantPast {
         didSet {
             fetchData()
             // The undo banner refers to the previous day's doses.

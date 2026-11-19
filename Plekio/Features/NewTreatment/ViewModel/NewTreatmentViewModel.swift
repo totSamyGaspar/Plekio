@@ -14,8 +14,9 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     // MARK: - Properties
 
     var courseName: String = ""
-    var startDate: Date = Date()
-    var endDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+    /// Today, and a week later; set from `time` in init.
+    var startDate: Date
+    var endDate: Date
     var medications: [MedicationDraft] = []
 
     private let courseEditing: CourseEditingUseCaseProtocol
@@ -24,9 +25,12 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     // MARK: - Init
 
     /// Reminders sync to the new course on their own (ReminderSyncCoordinator).
-    init(courseEditing: CourseEditingUseCaseProtocol, errors: any ErrorReporting) {
+    init(courseEditing: CourseEditingUseCaseProtocol, errors: any ErrorReporting, time: any TimeSource = SystemTime()) {
         self.courseEditing = courseEditing
         self.errors = errors
+        let now = time.now
+        startDate = now
+        endDate = time.calendar.date(byAdding: .day, value: 7, to: now) ?? now
     }
 
     // MARK: - Actions

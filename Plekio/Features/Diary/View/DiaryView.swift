@@ -105,7 +105,7 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                 .appTheme()
         }
         .sheet(isPresented: $showingBloodPressureEntry) {
-            BloodPressureEntryView { measuredAt, systolic, diastolic, pulse in
+            BloodPressureEntryView(time: dependencies.time) { measuredAt, systolic, diastolic, pulse in
                 if viewModel.addBloodPressureReading(
                     measuredAt: measuredAt, systolic: systolic, diastolic: diastolic, pulse: pulse
                 ) {

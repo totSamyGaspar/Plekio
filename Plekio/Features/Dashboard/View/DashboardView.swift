@@ -16,6 +16,7 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
     @StateModel private var statistics: Stats
     @Environment(AppRouter.self) private var router
     @Environment(AppDependencies.self) private var dependencies
+    @Environment(\.timeSource) private var time
 
     @State private var width: CGFloat = 0
 
@@ -42,7 +43,7 @@ struct DashboardView<VM: DashboardViewModelProtocol, Stats: StatisticsViewModelP
 
     var body: some View {
         let pills = allPills
-        let hero = DayHero(pills: pills, selectedDate: viewModel.selectedDate, now: .now, calendar: .current)
+        let hero = DayHero(pills: pills, selectedDate: viewModel.selectedDate, now: time.now, calendar: time.calendar)
         // Statuses, not just "taken": a skip can also finish the day and swap the hero card.
         let statuses = pills.map(\.status)
 

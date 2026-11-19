@@ -14,7 +14,8 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
 
     // MARK: - Properties
 
-    var draft = MedicationDraft()
+    /// A new medication's first dose time is the current time of day; set in init.
+    var draft: MedicationDraft
     var selectedImage: UIImage?
     var showingPhotoSourceMenu = false
 
@@ -23,8 +24,9 @@ final class AddMedicationViewModel: AddMedicationViewModelProtocol {
 
     // MARK: - Init
 
-    init(photos: any PhotoStoring) {
+    init(photos: any PhotoStoring, time: any TimeSource = SystemTime()) {
         self.photos = photos
+        draft = MedicationDraft(minutesOfDay: [MinuteOfDay.of(time.now, calendar: time.calendar)])
     }
 
     // MARK: - Editing

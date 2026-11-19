@@ -109,7 +109,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
                     Text("Are you sure you want to delete '\(course.name)'? This action cannot be undone.")
                 }
                 .sheet(item: $courseToRepeat) { course in
-                    RepeatCourseSheet(course: course) { startDate, endDate in
+                    RepeatCourseSheet(course: course, time: dependencies.time) { startDate, endDate in
                         guard viewModel.repeatCourse(course, startDate: startDate, endDate: endDate) else { return }
                         dependencies.toasts.show(.success("Course repeated"))
                         // Show the Active tab, where the new copy lands.
