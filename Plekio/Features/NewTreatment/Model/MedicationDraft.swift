@@ -49,3 +49,31 @@ extension MedicationDraft {
         )
     }
 }
+
+// MARK: - Validation
+
+extension MedicationDraft {
+
+    /// The name as it is saved: spaces and line breaks at either end dropped.
+    var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Enough to save. A name of spaces only would make a card with no name.
+    var isValid: Bool {
+        !trimmedName.isEmpty
+    }
+
+    /// The draft as it is handed to the store, with the name trimmed.
+    var forSaving: MedicationDraft {
+        var draft = self
+        draft.name = trimmedName
+        return draft
+    }
+
+    /// The warning threshold is the whole package or more: the medication counts
+    /// as running low from the moment it is saved. Allowed, but worth saying.
+    var isLowFromTheStart: Bool {
+        StockRules.isLow(stock: stockCount, threshold: lowStockThreshold)
+    }
+}

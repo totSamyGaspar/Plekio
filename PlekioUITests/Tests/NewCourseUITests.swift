@@ -31,7 +31,8 @@ final class NewCourseUITests: XCTestCase {
 
         let newMedication = newCourse.addMedication()
         assertExists(newMedication.nameField, in: app)
-        newMedication.typeName(medicationName)
+        // Typed with spaces around it: the dose card below must carry the trimmed name.
+        newMedication.typeName("  \(medicationName) ")
         newMedication.save()
 
         assertExists(newCourse.saveButton, in: app)
@@ -55,11 +56,6 @@ final class NewCourseUITests: XCTestCase {
         assertExists(newMedication.nameField, in: app)
         newMedication.typeName("   ")
 
-        // Known bug: Save checks `name.isEmpty` without trimming. Fixed on the
-        // add_medication_validation branch; remove XCTExpectFailure there, or this
-        // test fails as an unexpected pass.
-        XCTExpectFailure("Save accepts a name of spaces until add_medication_validation lands") {
-            XCTAssertFalse(newMedication.saveButton.isEnabled)
-        }
+        XCTAssertFalse(newMedication.saveButton.isEnabled)
     }
 }

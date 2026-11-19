@@ -32760,6 +32760,70 @@
         }
       }
     },
+    "That's the whole package or more, so it will count as running low right away." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ist die ganze Packung oder mehr, daher gilt das Medikament sofort als knapp."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es el envase entero o más, así que contará como casi agotado desde el principio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C'est la boîte entière ou plus : elle comptera tout de suite comme presque épuisée."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "È l'intera confezione o più, quindi risulterà subito in esaurimento."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パッケージの全量以上のため、最初から残りわずかとして扱われます。"
+          }
+        },
+        "ka" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ეს მთელი შეფუთვაა ან მეტი, ამიტომ წამალი მაშინვე ჩაითვლება იწურებად."
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бұл бүкіл қаптама немесе одан көп, сондықтан дәрі бірден таусылып жатқан деп саналады."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este tot ambalajul sau mai mult, așa că va apărea imediat ca fiind pe terminate."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это вся упаковка или больше, поэтому лекарство сразу будет считаться заканчивающимся."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Це вся упаковка або більше, тому ліки одразу вважатимуться такими, що закінчуються."
+          }
+        }
+      }
+    },
     "The App Store isn't available right now. Please try again later." : {
       "localizations" : {
         "de" : {

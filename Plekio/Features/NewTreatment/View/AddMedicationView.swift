@@ -126,6 +126,13 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                             .font(.headline)
                             .padding(.trailing)
                         }
+
+                        if viewModel.draft.isLowFromTheStart {
+                            Text("That's the whole package or more, so it will count as running low right away.")
+                                .font(.footnote)
+                                .foregroundStyle(Color.textSecondary)
+                                .accessibilityIdentifier(AccessibilityID.NewMedication.lowFromTheStartHint)
+                        }
                     }
                     .listRowBackground(Color.appSurface)
 
@@ -176,12 +183,12 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(isEditing ? "Save" : "Add") {
-                        onSave(viewModel.draft)
+                        onSave(viewModel.draft.forSaving)
                         dismiss()
                     }
                     .font(.headline)
-                    .foregroundColor(viewModel.draft.name.isEmpty ? .textTertiary : .accentPrimary)
-                    .disabled(viewModel.draft.name.isEmpty)
+                    .foregroundColor(viewModel.draft.isValid ? .accentPrimary : .textTertiary)
+                    .disabled(!viewModel.draft.isValid)
                     .accessibilityIdentifier(AccessibilityID.NewMedication.save)
                 }
             }
