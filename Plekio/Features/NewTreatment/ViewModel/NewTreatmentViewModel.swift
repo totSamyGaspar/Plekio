@@ -35,8 +35,11 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
 
     // MARK: - Actions
 
+    /// What gets saved: the field without leading or trailing whitespace.
+    private var trimmedName: String { courseName.trimmingCharacters(in: .whitespacesAndNewlines) }
+
     var isSaveEnabled: Bool {
-        !courseName.trimmingCharacters(in: .whitespaces).isEmpty && !medications.isEmpty
+        !trimmedName.isEmpty && !medications.isEmpty
     }
 
     func addMedication(_ draft: MedicationDraft) { medications.append(draft) }
@@ -46,7 +49,7 @@ final class NewTreatmentViewModel: NewTreatmentViewModelProtocol {
     @discardableResult
     func saveCourse() -> Bool {
         guard errors.run({
-            try courseEditing.createCourse(name: courseName, startDate: startDate, endDate: endDate, medications: medications)
+            try courseEditing.createCourse(name: trimmedName, startDate: startDate, endDate: endDate, medications: medications)
         }) else { return false }
 
         return true

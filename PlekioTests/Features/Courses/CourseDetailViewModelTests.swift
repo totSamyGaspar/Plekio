@@ -38,6 +38,37 @@ struct CourseDetailViewModelTests {
         #expect(vm.medications.isEmpty)
     }
 
+    // MARK: - saveCourseChanges
+
+    @Test("A renamed course is saved trimmed")
+    func testSaveCourseChangesTrimsTheName() async throws {
+        let mockDB = MockDatabaseService()
+        let course = TreatmentCourse(name: "Vitamins", startDate: Date(), endDate: Date().addingTimeInterval(86400 * 7))
+        mockDB.coursesToReturn = [course]
+        let vm = CourseDetailViewModel(course: course, dbService: mockDB, notificationService: MockNotificationService())
+
+        vm.courseName = "  Omega-3 "
+        vm.saveCourseChanges()
+
+        #expect(mockDB.updatedCourseName == "Omega-3")
+        #expect(vm.courseName == "Omega-3")
+    }
+
+    @Test("A blank name is not saved: the field goes back to the stored name")
+    func testSaveCourseChangesKeepsTheNameWhenBlank() async throws {
+        let mockDB = MockDatabaseService()
+        let course = TreatmentCourse(name: "Vitamins", startDate: Date(), endDate: Date().addingTimeInterval(86400 * 7))
+        mockDB.coursesToReturn = [course]
+        let vm = CourseDetailViewModel(course: course, dbService: mockDB, notificationService: MockNotificationService())
+
+        vm.courseName = "   "
+        vm.saveCourseChanges()
+
+        // Nothing else changed, so nothing is written.
+        #expect(mockDB.didCallUpdateCourseDetails == false)
+        #expect(vm.courseName == "Vitamins")
+    }
+
     // MARK: - addNewMedication
 
     @Test("addNewMedication writes to the store and doesn't rebuild reminders itself")
