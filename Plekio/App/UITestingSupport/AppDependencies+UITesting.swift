@@ -17,8 +17,8 @@ extension AppDependencies {
     /// launch, so each test starts from its seed and nothing else.
     static func uiTesting(_ launch: UITestingLaunch) -> AppDependencies {
         let errorPresenter = AppErrorPresenter()
-        // The real clock: see UITestingSeed for why not a fixed one.
-        let time = SystemTime()
+        // Started where the test asked (`-ui-now`), else the real clock.
+        let time: any TimeSource = launch.now.map { UITestingClock(startingAt: $0) } ?? SystemTime()
 
         guard let defaults = UserDefaults(suiteName: UITestingLaunch.defaultsSuite) else {
             // Never fall back to .standard: the wipe below would erase the user's settings.

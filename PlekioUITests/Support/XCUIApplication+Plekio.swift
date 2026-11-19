@@ -15,6 +15,16 @@ enum Seed: String {
     case empty, onboarding, today
 }
 
+/// Moments a test can start the app's clock at, as `-ui-now` takes them: local
+/// wall-clock time, so a run in UTC on Xcode Cloud sees the same screen as one here.
+enum TestTime {
+    /// Thursday morning. The default: the today seed's second dose is due right
+    /// then, and Omega-3 at 09:00 is still ahead.
+    static let morning = "2026-11-12T08:30"
+    /// Two hours after Omega-3's 09:00, past its grace hour: it shows as missed.
+    static let lateMorning = "2026-11-12T11:00"
+}
+
 /// Mirrors `UITestingSeed.Names` in the app.
 enum SeedNames {
     static let course = "Vitamins"
@@ -26,13 +36,13 @@ enum SeedNames {
 
 extension XCUIApplication {
 
-    /// Starts Plekio in its UI-testing mode, in English whatever the simulator's
-    /// language, so the few checks that read text don't depend on the machine.
+    /// Starts Plekio in its UI-testing mode with its clock at `now`, in English
+    /// whatever the simulator's language, so a run is the same on every machine.
     @MainActor
-    static func launchPlekio(seed: Seed = .empty) -> XCUIApplication {
+    static func launchPlekio(seed: Seed = .empty, at now: String = TestTime.morning) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
-            "-ui-testing", "-ui-seed", seed.rawValue,
+            "-ui-testing", "-ui-seed", seed.rawValue, "-ui-now", now,
             "-AppleLanguages", "(en)", "-AppleLocale", "en_US",
         ]
         app.launch()

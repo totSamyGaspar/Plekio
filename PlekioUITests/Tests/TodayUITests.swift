@@ -24,25 +24,38 @@ final class TodayUITests: XCTestCase {
         assertExists(newCourse.nameField, in: app)
     }
 
-    /// Logging the Up next slot changes the count, and Undo puts it back.
-    /// Compares the label before and after rather than exact numbers: which slot
-    /// is up next depends on the time the test runs.
+    /// At 08:30 the dose due now is up next on its own. Logging it counts one of
+    /// two, and Undo puts it back.
     @MainActor
     func testLogUpNext_thenUndo() {
-        let app = XCUIApplication.launchPlekio(seed: .today)
+        let app = XCUIApplication.launchPlekio(seed: .today, at: TestTime.morning)
         let today = TodayScreen(app: app)
 
         assertExists(today.logUpNextButton, in: app)
         assertExists(today.upNextProgress, in: app)
-        let before = today.upNextProgress.label
+        XCTAssertEqual(today.upNextProgress.label, "0 of 2 doses logged")
 
         today.logUpNextButton.tap()
         assertExists(today.undoButton, in: app)
-        XCTAssertNotEqual(today.upNextProgress.label, before)
+        XCTAssertEqual(today.upNextProgress.label, "1 of 2 doses logged")
 
         today.undoButton.tap()
         assertExists(today.logUpNextButton, in: app)
-        XCTAssertEqual(today.upNextProgress.label, before)
+        XCTAssertEqual(today.upNextProgress.label, "0 of 2 doses logged")
+    }
+
+    /// Past its grace hour a dose is marked missed, and it can still be logged.
+    @MainActor
+    func testMissedDose_canStillBeLogged() {
+        let app = XCUIApplication.launchPlekio(seed: .today, at: TestTime.lateMorning)
+        let today = TodayScreen(app: app)
+        let checkmark = today.doseCheckmark(SeedNames.morning)
+
+        XCTAssertTrue(app.scrollTo(checkmark), "No dose card for \(SeedNames.morning)")
+        XCTAssertEqual(checkmark.label, "Log the missed dose of \(SeedNames.morning)")
+
+        checkmark.tap()
+        XCTAssertEqual(checkmark.label, "Undo logging \(SeedNames.morning)")
     }
 
     /// Logging every dose turns the card over to "Day complete".
