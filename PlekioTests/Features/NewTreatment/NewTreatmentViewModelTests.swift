@@ -28,6 +28,18 @@ struct NewTreatmentViewModelTests {
         #expect(mockDB.savedCourseName == "Vitamins")
     }
 
+    @Test("The course name is saved without surrounding whitespace")
+    func testSaveCourseTrimsTheName() async throws {
+        let mockDB = MockDatabaseService()
+
+        let vm = NewTreatmentViewModel(courseEditing: CourseEditingUseCase(dbService: mockDB, notificationService: MockNotificationService()), errors: SpyErrorReporter())
+        vm.courseName = "  Vitamins \n"
+        vm.addMedication(MedicationDraft(name: "Vitamin D"))
+
+        #expect(vm.saveCourse() == true)
+        #expect(mockDB.savedCourseName == "Vitamins")
+    }
+
     // MARK: - Validation
 
     @Test("isSaveEnabled requires a non-empty course name and at least one medication")
@@ -38,6 +50,9 @@ struct NewTreatmentViewModelTests {
         #expect(vm.isSaveEnabled == false)
 
         vm.courseName = "   "
+        #expect(vm.isSaveEnabled == false)
+
+        vm.courseName = " \n "
         #expect(vm.isSaveEnabled == false)
 
         vm.courseName = "Course"

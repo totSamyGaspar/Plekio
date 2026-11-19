@@ -56,7 +56,6 @@
 		126C8C2D3088F30600AA3333 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		126C8C2F3088F30600AA3333 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		128A23F930ADED29002D83F8 /* PlekioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlekioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		128A241930ADF111002D83F8 /* PlekioUITests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = PlekioUITests.xctestplan; sourceTree = "<group>"; };
 		12E9B4092FD44E9C00EDFB8C /* PlekioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlekioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -79,6 +78,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Resources/PlekioUITests.xctestplan,
 			);
 			target = 123BA6E52FA61C8500FFA528 /* Plekio */;
 		};
@@ -156,7 +156,6 @@
 		123BA6DD2FA61C8500FFA528 = {
 			isa = PBXGroup;
 			children = (
-				128A241930ADF111002D83F8 /* PlekioUITests.xctestplan */,
 				123BA6E82FA61C8500FFA528 /* Plekio */,
 				12F0A1B22FF00001000AA001 /* Shared */,
 				12E9B40A2FD44E9C00EDFB8C /* PlekioTests */,
@@ -557,7 +556,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Plekio/Plekio.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Plekio/Resources/Plekio.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = CZ5Y366HYY;
@@ -599,7 +598,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Plekio/Plekio.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Plekio/Resources/Plekio.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = CZ5Y366HYY;

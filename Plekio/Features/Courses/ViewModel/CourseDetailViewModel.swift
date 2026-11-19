@@ -57,9 +57,15 @@ final class CourseDetailViewModel: CourseDetailViewModelProtocol {
 
     // MARK: - Actions
 
+    /// Saved trimmed; a blank name is not saved and the field snaps back to the stored one,
+    /// so a date change made while the field is empty still goes through.
     func saveCourseChanges() {
+        let trimmed = courseName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = trimmed.isEmpty ? course.name : trimmed
+        if courseName != name { courseName = name }
+
         guard let wrote = errors.attempt({
-            try courseEditing.updateDetails(of: course, name: courseName, startDate: startDate, endDate: endDate)
+            try courseEditing.updateDetails(of: course, name: name, startDate: startDate, endDate: endDate)
         }), wrote else { return }
         reload()
     }
