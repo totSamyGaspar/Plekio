@@ -880,6 +880,40 @@ struct DatabaseServiceTests {
         #expect(med.stockCount == 8)
     }
 
+    @Test("Skipping a taken dose is a no-op: no commit, no change event")
+    func testSkippingATakenDoseDoesNotCommit() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        let med = medication(stock: 10, dosage: 2, in: db)
+        let slot = testDate(2026, 6, 10, 9, 0)
+        try db.togglePill(medicationId: med.id, scheduledTime: slot)
+
+        var heard = 0
+        let subscription = db.changes.publisher(for: [.doses]).sink { heard += 1 }
+        defer { subscription.cancel() }
+        let generation = db.persistence.historyGeneration
+
+        try db.skipDoses(medicationIds: [med.id], scheduledTime: slot)
+
+        #expect(med.logs.first?.status.isTaken == true)
+        #expect(med.stockCount == 8)
+        #expect(heard == 0)
+        #expect(db.persistence.historyGeneration == generation)
+    }
+
+    @Test("Skipping unknown medications does not commit")
+    func testSkippingUnknownMedicationsDoesNotCommit() async throws {
+        let db = DatabaseService(inMemoryForTesting: true)
+        var heard = 0
+        let subscription = db.changes.publisher(for: [.doses]).sink { heard += 1 }
+        defer { subscription.cancel() }
+        let generation = db.persistence.historyGeneration
+
+        try db.skipDoses(medicationIds: [UUID()], scheduledTime: testDate(2026, 6, 10, 9, 0))
+
+        #expect(heard == 0)
+        #expect(db.persistence.historyGeneration == generation)
+    }
+
     // MARK: - Bulk logging
 
     @Test("markDosesTaken writes the whole slot and leaves an already taken dose alone")
