@@ -21,6 +21,8 @@ protocol DashboardViewModelProtocol: AnyObject, Observable {
     var weeklyPercentages: [Double] { get }
     var weeklyDays: [String] { get }
     var recentAverage: Int { get }
+    /// Nil while the week has no scheduled doses: there is nothing to grade.
+    var adherenceLevel: AdherenceLevel? { get }
 
     var isEmpty: Bool { get }
     /// False until the first course exists; the empty day then offers to create one.
