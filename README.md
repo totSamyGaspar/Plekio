@@ -93,7 +93,10 @@ Test names are in English; assertions and code are in English.
 
 ## CI
 
-Xcode Cloud, workflow **Tests**: every pull request into `main` and every push to `main` builds and runs the tests on one iPhone simulator with the latest iOS. A PR is merged only when it is green.
+Xcode Cloud runs two workflows:
+
+- **Tests** — the **Plekio** scheme's unit tests on every pull request into `main` and every push to `main`, on one iPhone simulator with the latest iOS. A PR is merged only when it is green.
+- **UI Tests** — the **PlekioUITests** scheme on every push to `main`, and on demand from Xcode or App Store Connect for a branch that touches the UI. Slower, so it doesn't gate pull requests; a red run on `main` is fixed before the next change.
 
 ## Releasing
 

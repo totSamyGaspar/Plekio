@@ -56,18 +56,34 @@ extension XCUIElement {
 
 extension XCUIApplication {
 
-    /// Swipes up until `element` is on screen and tappable. Needed below the fold:
-    /// Today's dose list is a LazyVStack, so its cards aren't in the hierarchy at
-    /// all until they scroll into view.
+    /// Swipes up until `element` is on screen, clear of the tab bar. Needed below
+    /// the fold: Today's dose list is a LazyVStack, so its cards aren't in the
+    /// hierarchy until they scroll into view, and a card that has just been made
+    /// can still have no frame.
+    ///
+    /// Judged by frame, not `isHittable`: asking an element without a usable frame
+    /// whether it is hittable fails the test instead of answering false.
     @MainActor
     @discardableResult
     func scrollTo(_ element: XCUIElement, maxSwipes: Int = 8) -> Bool {
         var swipes = 0
-        while !(element.exists && element.isHittable), swipes < maxSwipes {
+        while !isOnScreen(element), swipes < maxSwipes {
             swipeUp()
             swipes += 1
         }
-        return element.exists && element.isHittable
+        return isOnScreen(element)
+    }
+
+    /// The element's middle is inside the window and above the tab bar.
+    @MainActor
+    func isOnScreen(_ element: XCUIElement) -> Bool {
+        guard element.exists else { return false }
+        let frame = element.frame
+        guard !frame.isEmpty else { return false }
+
+        let window = windows.firstMatch.frame
+        let tabBarTop = tabBars.firstMatch.exists ? tabBars.firstMatch.frame.minY : window.maxY
+        return frame.midY > window.minY && frame.midY < tabBarTop
     }
 }
 
