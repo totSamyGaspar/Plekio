@@ -28,7 +28,7 @@ struct SettingsView: View {
                 // Custom title to match the other tabs; header trait kept for VoiceOver.
                 Text("Settings")
                     .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .accessibilityAddTraits(.isHeader)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
@@ -37,11 +37,11 @@ struct SettingsView: View {
                 List {
                     ProfileSection()
 
-                    Section(header: Text("Appearance").foregroundColor(.textSecondary)) {
+                    Section(header: Text("Appearance").foregroundStyle(Color.textSecondary)) {
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
                                 Label("Theme", systemImage: theme.iconName)
-                                    .foregroundColor(.textPrimary)
+                                    .foregroundStyle(Color.textPrimary)
                                 Spacer()
                             }
 
@@ -59,7 +59,7 @@ struct SettingsView: View {
 
                     AppLockSettingsSection()
 
-                    Section(header: Text("Reminders").foregroundColor(.textSecondary)) {
+                    Section(header: Text("Reminders").foregroundStyle(Color.textSecondary)) {
 
                         ForEach(DailyReminder.allCases) { reminder in
                             DailyReminderRows(reminder)
@@ -68,34 +68,34 @@ struct SettingsView: View {
                     }
                     .listRowBackground(Color.appSurface)
 
-                    Section(header: Text("Export").foregroundColor(.textSecondary)) {
+                    Section(header: Text("Export").foregroundStyle(Color.textSecondary)) {
                         TipView(DoctorReportTip())
                         NavigationLink {
                             ReportExportView(viewModel: dependencies.makeReportExportViewModel())
                         } label: {
                             Label("Create document", systemImage: "doc.text")
-                                .foregroundColor(.textPrimary)
+                                .foregroundStyle(Color.textPrimary)
                         }
                     }
                     .listRowBackground(Color.appSurface)
 
                     StorageUsageSection()
 
-                    Section(header: Text("About").foregroundColor(.textSecondary)) {
+                    Section(header: Text("About").foregroundStyle(Color.textSecondary)) {
                         HStack {
                             Text("Version")
-                                .foregroundColor(.textPrimary)
+                                .foregroundStyle(Color.textPrimary)
                             Spacer()
                             Text(verbatim: AppBrand.version)
-                                .foregroundColor(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
 
                         HStack {
                             Text("Developer")
-                                .foregroundColor(.textPrimary)
+                                .foregroundStyle(Color.textPrimary)
                             Spacer()
                             Text(verbatim: "Eduard Hasparian")
-                                .foregroundColor(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
 
                         FeedbackButton()

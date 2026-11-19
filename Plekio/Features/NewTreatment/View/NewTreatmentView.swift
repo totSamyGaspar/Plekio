@@ -32,35 +32,35 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                 Color.appBackground.ignoresSafeArea()
 
                 Form {
-                    Section(header: Text("Basic Information").foregroundColor(.textSecondary)) {
+                    Section(header: Text("Basic Information").foregroundStyle(Color.textSecondary)) {
                         TextField("Course Name (e.g., Vitamins)", text: $viewModel.courseName)
-                            .foregroundColor(.textPrimary)
+                            .foregroundStyle(Color.textPrimary)
                             .accessibilityIdentifier(AccessibilityID.NewCourse.name)
                     }
                     .listRowBackground(Color.appSurface)
 
-                    Section(header: Text("Course Duration").foregroundColor(.textSecondary)) {
+                    Section(header: Text("Course Duration").foregroundStyle(Color.textSecondary)) {
                         DatePicker("Start", selection: $viewModel.startDate, displayedComponents: .date)
-                            .foregroundColor(.textPrimary)
+                            .foregroundStyle(Color.textPrimary)
                         // An end before the start would yield a course with no doses.
                         DatePicker("End", selection: $viewModel.endDate,
                                    in: viewModel.startDate..., displayedComponents: .date)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     }
                     .listRowBackground(Color.appSurface)
 
-                    Section(header: Text("Medications").foregroundColor(.textSecondary)) {
+                    Section(header: Text("Medications").foregroundStyle(Color.textSecondary)) {
                         ForEach(viewModel.medications) { med in
                             HStack {
                                 Image(systemName: med.form.systemImage)
-                                    .foregroundColor(.accentPrimary)
+                                    .foregroundStyle(Color.accentPrimary)
                                     .frame(width: 30)
-                                Text(med.name).foregroundColor(.textPrimary)
+                                Text(med.name).foregroundStyle(Color.textPrimary)
                                 Spacer()
                                 // Separate strings: each plural is declined independently in ru/uk.
                                 (Text("\(med.dosage) pcs") + Text(verbatim: ", ") + Text("\(med.minutesOfDay.count) times/day"))
                                     .font(.caption)
-                                    .foregroundColor(.textSecondary)
+                                    .foregroundStyle(Color.textSecondary)
                             }
                         }
                         .onDelete(perform: viewModel.deleteMedication)
@@ -69,7 +69,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                             showingAddMedication = true
                         }) {
                             Label("Add Medication", systemImage: "plus")
-                                .foregroundColor(.accentPrimary)
+                                .foregroundStyle(Color.accentPrimary)
                         }
                         .accessibilityIdentifier(AccessibilityID.NewCourse.addMedication)
                     }
@@ -84,7 +84,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
-                        .foregroundColor(.textPrimary.opacity(0.7))
+                        .foregroundStyle(Color.textPrimary.opacity(0.7))
                         .accessibilityIdentifier(AccessibilityID.NewCourse.cancel)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -96,7 +96,7 @@ struct NewTreatmentView<VM: NewTreatmentViewModelProtocol>: View {
                         dismiss()
                     }
                     .font(.headline)
-                    .foregroundColor(viewModel.isSaveEnabled ? .accentPrimary : .textTertiary)
+                    .foregroundStyle(viewModel.isSaveEnabled ? Color.accentPrimary : .textTertiary)
                     .disabled(!viewModel.isSaveEnabled)
                     .accessibilityIdentifier(AccessibilityID.NewCourse.save)
                 }

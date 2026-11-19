@@ -67,7 +67,7 @@ struct BloodPressureHistoryView: View {
                             } header: {
                                 Text(sectionTitle(for: section.id))
                                     .font(.caption.weight(.semibold))
-                                    .foregroundColor(.textSecondary)
+                                    .foregroundStyle(Color.textSecondary)
                             }
                         }
                     }
@@ -83,7 +83,7 @@ struct BloodPressureHistoryView: View {
                         isClearConfirmationShown = true
                     } label: {
                         Image(systemName: "trash")
-                            .foregroundColor(.warningAccent)
+                            .foregroundStyle(Color.warningAccent)
                     }
                     .disabled(readings.isEmpty)
                     .opacity(readings.isEmpty ? 0.4 : 1)
@@ -92,7 +92,7 @@ struct BloodPressureHistoryView: View {
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Close") { dismiss() }
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 }
             }
             .confirmationDialog(
@@ -144,10 +144,10 @@ struct BloodPressureHistoryView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(reading.formattedPressure)
                     .font(.subheadline.weight(.bold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 Text(reading.measuredAt.formatted(date: .omitted, time: .shortened))
                     .font(.caption2)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             Spacer(minLength: 8)
@@ -156,10 +156,10 @@ struct BloodPressureHistoryView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "heart.fill")
                         .font(.caption2)
-                        .foregroundColor(.warningAccent)
+                        .foregroundStyle(Color.warningAccent)
                     Text("\(pulse) bpm")
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
         }

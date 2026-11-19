@@ -60,7 +60,7 @@ struct DiaryProgressGalleryView: View {
         HStack {
             Text("Category:")
                 .font(.subheadline.weight(.semibold))
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
             Menu {
                 Button("All Photos (\(checkpoints.count))") { categoryFilter = nil }
                 ForEach(availableCategories, id: \.self) { cat in
@@ -73,7 +73,7 @@ struct DiaryProgressGalleryView: View {
                     Image(systemName: "chevron.down")
                 }
                 .font(.subheadline.weight(.semibold))
-                .foregroundColor(.textPrimary.opacity(0.8))
+                .foregroundStyle(Color.textPrimary.opacity(0.8))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
                 .background(Color.appSurface)
@@ -87,19 +87,19 @@ struct DiaryProgressGalleryView: View {
         HStack(alignment: .top, spacing: 16) {
             ZStack {
                 Circle().fill(Color.accentPrimary.opacity(0.15)).frame(width: 46, height: 46)
-                Image(systemName: "arrow.left.arrow.right").foregroundColor(.accentPrimary)
+                Image(systemName: "arrow.left.arrow.right").foregroundStyle(Color.accentPrimary)
             }
             VStack(alignment: .leading, spacing: 8) {
                 Text("Compare Visual Transformation")
                     .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 Text(
                     selection.isEmpty
                     ? "Select any two checkpoints to view a side-by-side comparison."
                     : "\(selection.count)/2 checkpoints selected."
                 )
                 .font(.caption)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
 
                 Button {
                     onLaunchComparison()
@@ -112,7 +112,7 @@ struct DiaryProgressGalleryView: View {
                     }
                     .font(.caption.weight(.heavy))
                     .lineLimit(1)
-                    .foregroundColor(selection.count == 2 ? Color.onAccent : .textTertiary)
+                    .foregroundStyle(selection.count == 2 ? Color.onAccent : .textTertiary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
                     .background(selection.count == 2 ? Color.accentPrimary : Color.textPrimary.opacity(0.06))
@@ -146,7 +146,7 @@ struct DiaryProgressGalleryView: View {
                     Text(item.category)
                         .font(.caption2.weight(.heavy))
                         .textCase(.uppercase)
-                        .foregroundColor(.white)
+                        .foregroundStyle(Color.white)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Color.black.opacity(0.55))
@@ -156,7 +156,7 @@ struct DiaryProgressGalleryView: View {
                 .overlay(alignment: .topTrailing) {
                     Text("#\(index + 1)")
                         .font(.caption2.weight(.heavy))
-                        .foregroundColor(Color.onAccent)
+                        .foregroundStyle(Color.onAccent)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Color.accentPrimary)
@@ -171,11 +171,11 @@ struct DiaryProgressGalleryView: View {
                 HStack {
                     Label(item.entry.checkInDate.formatted(date: .numeric, time: .omitted), systemImage: "calendar")
                         .font(.caption)
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                     Spacer()
                     Text("Mood: \(item.entry.moodTitle)")
                         .font(.caption2.weight(.semibold))
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Color.accentPrimary.opacity(0.12))
@@ -186,7 +186,7 @@ struct DiaryProgressGalleryView: View {
                 if !caption.isEmpty {
                     Text(caption)
                         .font(.caption)
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                         .lineLimit(2)
                 }
 
@@ -196,7 +196,7 @@ struct DiaryProgressGalleryView: View {
                     } label: {
                         Text("Inspect Photo →")
                             .font(.caption.weight(.semibold))
-                            .foregroundColor(.accentPrimary)
+                            .foregroundStyle(Color.accentPrimary)
                             .frame(minHeight: 44)
                             .contentShape(Rectangle())
                     }
@@ -216,7 +216,7 @@ struct DiaryProgressGalleryView: View {
                                 .font(.caption.weight(.bold))
                                 .lineLimit(2)
                         }
-                        .foregroundColor(isSelected ? Color.onAccent : .textPrimary.opacity(0.7))
+                        .foregroundStyle(isSelected ? Color.onAccent : .textPrimary.opacity(0.7))
                         .padding(.horizontal, 14)
                         .frame(minWidth: 88, minHeight: 44)
                         .background(isSelected ? Color.accentPrimary : Color.appBackground)

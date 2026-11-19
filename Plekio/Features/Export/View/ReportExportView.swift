@@ -44,11 +44,11 @@ struct ReportExportView: View {
     // MARK: - Period
 
     private var period: some View {
-        Section(header: Text("Period").foregroundColor(.textSecondary)) {
+        Section(header: Text("Period").foregroundStyle(Color.textSecondary)) {
             DatePicker("From", selection: $viewModel.selection.from, in: ...viewModel.selection.to, displayedComponents: .date)
             DatePicker("To", selection: $viewModel.selection.to, in: viewModel.selection.from...max(viewModel.selection.from, time.now), displayedComponents: .date)
         }
-        .foregroundColor(.textPrimary)
+        .foregroundStyle(Color.textPrimary)
         .appColorScheme()
         .listRowBackground(Color.appSurface)
     }
@@ -56,20 +56,20 @@ struct ReportExportView: View {
     // MARK: - Sections
 
     private var content: some View {
-        Section(header: Text("Include").foregroundColor(.textSecondary)) {
+        Section(header: Text("Include").foregroundStyle(Color.textSecondary)) {
             ForEach(ReportSection.allCases) { section in
                 Toggle(isOn: binding(for: section)) {
-                    Text(section.title).foregroundColor(.textPrimary)
+                    Text(section.title).foregroundStyle(Color.textPrimary)
                 }
             }
 
             if viewModel.selection.includes(.diary) {
                 Toggle(isOn: $viewModel.selection.includesPhotos) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Diary photos").foregroundColor(.textPrimary)
+                        Text("Diary photos").foregroundStyle(Color.textPrimary)
                         Text("Makes the file much larger")
                             .font(.caption)
-                            .foregroundColor(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                     }
                 }
             }
@@ -87,27 +87,27 @@ struct ReportExportView: View {
     // MARK: - Courses
 
     private var courses: some View {
-        Section(header: Text("Medications").foregroundColor(.textSecondary)) {
+        Section(header: Text("Medications").foregroundStyle(Color.textSecondary)) {
             if viewModel.courses.isEmpty {
-                Text("No courses yet").foregroundColor(.textSecondary)
+                Text("No courses yet").foregroundStyle(Color.textSecondary)
             }
 
             ForEach(viewModel.courses) { course in
                 Button { viewModel.toggle(courseId: course.id) } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(course.name).foregroundColor(.textPrimary)
+                            Text(course.name).foregroundStyle(Color.textPrimary)
                             Text(range(course))
                                 .font(.caption)
-                                .foregroundColor(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
 
                         Spacer()
 
                         Image(systemName: viewModel.selection.courseIds.contains(course.id)
                               ? "checkmark.circle.fill" : "circle")
-                            .foregroundColor(viewModel.selection.courseIds.contains(course.id)
-                                             ? .accentPrimary : .textTertiary)
+                            .foregroundStyle(viewModel.selection.courseIds.contains(course.id)
+                                             ? Color.accentPrimary : .textTertiary)
                     }
                 }
                 .buttonStyle(.plain)
@@ -129,7 +129,7 @@ struct ReportExportView: View {
             if let document = viewModel.document {
                 ShareLink(item: document) {
                     Label("Share", systemImage: "square.and.arrow.up")
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                         .frame(maxWidth: .infinity)
                 }
             } else {
@@ -141,7 +141,7 @@ struct ReportExportView: View {
                         if viewModel.isWorking {
                             ProgressView().tint(.accentPrimary)
                         } else {
-                            Text("Create document").foregroundColor(.accentPrimary)
+                            Text("Create document").foregroundStyle(Color.accentPrimary)
                         }
                         Spacer()
                     }

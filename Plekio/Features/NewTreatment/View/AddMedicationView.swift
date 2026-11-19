@@ -50,7 +50,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                 Group {
                     Section(header: header("Medication")) {
                         TextField("Name (e.g., Ibuprofen)", text: $viewModel.draft.name)
-                            .foregroundColor(.textPrimary)
+                            .foregroundStyle(Color.textPrimary)
                             .accessibilityIdentifier(AccessibilityID.NewMedication.name)
 
                         Picker("Form", selection: $viewModel.draft.form) {
@@ -87,12 +87,12 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                         }
                         .pickerStyle(.menu)
                         .tint(.accentPrimary)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     }
 
                     Section(header: header("Dosage")) {
                         Stepper("Quantity: \(viewModel.draft.dosage)", value: $viewModel.draft.dosage, in: 1...10)
-                            .foregroundColor(.textPrimary)
+                            .foregroundStyle(Color.textPrimary)
                     }
 
                     Section(header: header("Intake Time")) {
@@ -128,7 +128,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .navigationBarLeading) {
             Button("Cancel") { dismiss() }
-                .foregroundColor(.textPrimary.opacity(0.7))
+                .foregroundStyle(Color.textPrimary.opacity(0.7))
                 .accessibilityIdentifier(AccessibilityID.NewMedication.cancel)
         }
         ToolbarItem(placement: .navigationBarTrailing) {
@@ -137,7 +137,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
                 dismiss()
             }
             .font(.headline)
-            .foregroundColor(viewModel.draft.isValid ? .accentPrimary : .textTertiary)
+            .foregroundStyle(viewModel.draft.isValid ? Color.accentPrimary : .textTertiary)
             .disabled(!viewModel.draft.isValid)
             .accessibilityIdentifier(AccessibilityID.NewMedication.save)
         }
@@ -145,7 +145,7 @@ struct AddMedicationView<VM: AddMedicationViewModelProtocol>: View {
 
     /// `LocalizedStringResource`, so the literals passed in still reach the string catalog.
     private func header(_ title: LocalizedStringResource) -> some View {
-        Text(title).foregroundColor(.textSecondary)
+        Text(title).foregroundStyle(Color.textSecondary)
     }
 }
 

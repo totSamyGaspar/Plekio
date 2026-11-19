@@ -26,7 +26,7 @@ struct UpNextHeroCard: View {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
                         Image(systemName: pill.isTaken ? "checkmark.circle.fill" : "circle.dotted.circle")
                             .scaledFont(size: 18, relativeTo: .headline, weight: .bold)
-                            .foregroundColor(pill.isTaken ? .white.opacity(0.6) : .white)
+                            .foregroundStyle(pill.isTaken ? Color.white.opacity(0.6) : .white)
                             .animatedSymbol(pill.isTaken)
 
                         VStack(alignment: .leading, spacing: 2) {
@@ -45,7 +45,7 @@ struct UpNextHeroCard: View {
                                 }
                                 .labelStyle(.titleAndIcon)
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundColor(.white.opacity(0.85))
+                                .foregroundStyle(Color.white.opacity(0.85))
                                 .lineLimit(1)
                             }
                         }
@@ -53,11 +53,11 @@ struct UpNextHeroCard: View {
                     .motion(.easeInOut(duration: 0.3), value: pill.isTaken)
                 }
             }
-            .foregroundColor(.white)
+            .foregroundStyle(Color.white)
 
             Text("\(takenCount) of \(totalCount) doses logged")
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.85))
+                .foregroundStyle(Color.white.opacity(0.85))
                 .animatedNumber(Double(takenCount))
                 .accessibilityIdentifier(AccessibilityID.Today.upNextProgress)
 
@@ -67,7 +67,7 @@ struct UpNextHeroCard: View {
                 if let firstTime = pills.first?.time {
                     Text(firstTime.formatted(date: .omitted, time: .shortened))
                         .scaledFont(size: 30, relativeTo: .title, weight: .bold, design: .default)
-                        .foregroundColor(.white)
+                        .foregroundStyle(Color.white)
                 }
 
                 Spacer()
@@ -75,7 +75,7 @@ struct UpNextHeroCard: View {
                 Button(action: onLogNow) {
                     Text(pills.count > 1 ? "LOG ALL" : "LOG NOW")
                         .font(.subheadline.weight(.heavy))
-                        .foregroundColor(Color(red: 0.05, green: 0.3, blue: 0.2))
+                        .foregroundStyle(Color(red: 0.05, green: 0.3, blue: 0.2))
                         .padding(.horizontal, 24)
                         .padding(.vertical, 14)
                         .background(Color.white)

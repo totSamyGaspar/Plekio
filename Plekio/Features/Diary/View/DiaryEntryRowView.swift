@@ -30,7 +30,7 @@ struct DiaryEntryRowView: View {
                         .font(.caption.weight(.heavy))
                         .textCase(.uppercase)
                 }
-                .foregroundColor(.accentPrimary)
+                .foregroundStyle(Color.accentPrimary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .background(Color.accentPrimary.opacity(0.12))
@@ -40,19 +40,19 @@ struct DiaryEntryRowView: View {
 
                 Text("at \(entry.checkInDate.formatted(date: .omitted, time: .shortened))")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             Text(entry.checkInDate.formatted(.dateTime.weekday(.wide).month(.wide).day().year()))
                 .scaledFont(size: 19, relativeTo: .headline, weight: .bold, design: .serif)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
 
             // Quick logs never asked for these metrics; their stored values are draft
             // defaults, so showing them would present made-up numbers as real data.
             if entry.isQuickLog {
                 Text("Quick mood log — no detailed metrics recorded")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             } else {
                 HStack(spacing: 10) {
                     statChip(icon: "bolt.fill", iconColor: .yellow, text: "Energy: \(entry.energyLevel)/5")
@@ -73,17 +73,17 @@ struct DiaryEntryRowView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("PHYSICAL STATE & SENSATIONS")
                         .font(.caption2.weight(.heavy))
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                     Text(entry.physicalSummary)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.textPrimary.opacity(0.9))
+                        .foregroundStyle(Color.textPrimary.opacity(0.9))
                 }
             }
 
             if !entry.reflectionNotes.isEmpty {
                 Text(entry.reflectionNotes)
                     .font(.subheadline)
-                    .foregroundColor(.textPrimary.opacity(0.7))
+                    .foregroundStyle(Color.textPrimary.opacity(0.7))
                     .lineLimit(4)
             }
 
@@ -103,11 +103,11 @@ struct DiaryEntryRowView: View {
                     HStack {
                         Text("PROGRESS PHOTOS (\(entry.photoIds.count))")
                             .font(.caption2.weight(.heavy))
-                            .foregroundColor(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                         Spacer()
                         Text("Tap photo to zoom")
                             .font(.caption2)
-                            .foregroundColor(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                     }
                     ScrollView(.horizontal, showsIndicators: false) {
                         // Plain HStack: only a few photos per entry, so laziness isn't worth its cost here.
@@ -126,13 +126,13 @@ struct DiaryEntryRowView: View {
                 Button(action: onEdit) {
                     Label("Edit", systemImage: "pencil")
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 .expandTouchTarget(vertical: 14, horizontal: 6)
                 Button(action: onDelete) {
                     Label("Delete", systemImage: "trash")
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(.warningAccent)
+                        .foregroundStyle(Color.warningAccent)
                 }
                 .expandTouchTarget(vertical: 14, horizontal: 6)
                 Spacer()
@@ -148,8 +148,8 @@ struct DiaryEntryRowView: View {
 
     private func statChip(icon: String, iconColor: Color, text: LocalizedStringKey) -> some View {
         HStack(spacing: 4) {
-            Image(systemName: icon).foregroundColor(iconColor)
-            Text(text).foregroundColor(.textPrimary.opacity(0.8))
+            Image(systemName: icon).foregroundStyle(iconColor)
+            Text(text).foregroundStyle(Color.textPrimary.opacity(0.8))
         }
         .font(.caption2.weight(.semibold))
         .padding(.horizontal, 8)
@@ -161,7 +161,7 @@ struct DiaryEntryRowView: View {
     private func smallTag(text: String, color: Color) -> some View {
         Text(text)
             .font(.caption2.weight(.semibold))
-            .foregroundColor(color)
+            .foregroundStyle(color)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(color.opacity(0.12))

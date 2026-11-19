@@ -27,14 +27,14 @@ struct CalendarDayView: View {
         VStack(spacing: 8) {
             Text(date.formatted(.dateTime.weekday(.abbreviated)))
                 .font(.caption2.weight(.bold))
-                .foregroundColor(isSelected ? .onAccent : .textSecondary)
+                .foregroundStyle(isSelected ? Color.onAccent : .textSecondary)
             // Fixed width: long localized abbreviations may shrink slightly.
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
 
             Text(date.formatted(.dateTime.day()))
                 .font(.title3.weight(.bold))
-                .foregroundColor(isSelected ? .onAccent : .textPrimary)
+                .foregroundStyle(isSelected ? Color.onAccent : .textPrimary)
         }
         .padding(.vertical, 12)
         .frame(minWidth: cellWidth, maxWidth: stretches ? maxCellWidth : cellWidth)

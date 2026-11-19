@@ -34,19 +34,19 @@ struct DiarySleepWaterCard: View {
     private var sleep: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
-                Image(systemName: "moon.stars.fill").foregroundColor(.purple)
+                Image(systemName: "moon.stars.fill").foregroundStyle(Color.purple)
                 Text("Sleep Duration & Quality")
                     .font(.subheadline.weight(.bold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
             }
             HStack(spacing: 12) {
                 HStack(spacing: 6) {
                     // Range is enforced by DiaryEntryDraft, not here.
                     TextField("7.5", value: $sleepHours, format: .number)
                         .keyboardType(.decimalPad)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                         .frame(width: 40)
-                    Text("hours").foregroundColor(.textSecondary).font(.caption)
+                    Text("hours").foregroundStyle(Color.textSecondary).font(.caption)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -64,7 +64,7 @@ struct DiarySleepWaterCard: View {
                                 .font(.caption.weight(.heavy))
                                 .frame(width: 30, height: 30)
                                 .background(sleepQuality == quality ? Color.accentPrimary : Color.appBackground)
-                                .foregroundColor(sleepQuality == quality ? Color.onAccent : .textSecondary)
+                                .foregroundStyle(sleepQuality == quality ? Color.onAccent : .textSecondary)
                                 .clipShape(Circle())
                         }
                         .buttonStyle(.plain)
@@ -80,10 +80,10 @@ struct DiarySleepWaterCard: View {
     private var water: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
-                Image(systemName: "drop.fill").foregroundColor(.blue)
+                Image(systemName: "drop.fill").foregroundStyle(Color.blue)
                 Text("Water Hydration")
                     .font(.subheadline.weight(.bold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
             }
             HStack {
                 Button {
@@ -92,7 +92,7 @@ struct DiarySleepWaterCard: View {
                     Image(systemName: "minus")
                         .frame(width: 32, height: 32)
                         .background(Color.appBackground)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -102,10 +102,10 @@ struct DiarySleepWaterCard: View {
                 VStack(spacing: 2) {
                     Text("\(waterGlasses) glasses")
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     Text("(~\(waterGlasses * 250)ml)")
                         .font(.caption2)
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 Spacer()
 
@@ -115,7 +115,7 @@ struct DiarySleepWaterCard: View {
                     Image(systemName: "plus")
                         .frame(width: 32, height: 32)
                         .background(Color.accentPrimary)
-                        .foregroundColor(Color.onAccent)
+                        .foregroundStyle(Color.onAccent)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)

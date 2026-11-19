@@ -104,16 +104,16 @@ struct BeforeAfterComparisonView: View {
                     Circle().fill(Color.accentPrimary.opacity(0.15)).frame(width: 40, height: 40)
                     Image(systemName: "arrow.left.arrow.right")
                         .font(.subheadline)
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Visual Progress Comparison")
                         .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     Text("Track your recovery, skin changes & wellness transformation")
                         .font(.caption2)
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 // Wraps instead of truncating long translations.
                 .fixedSize(horizontal: false, vertical: true)
@@ -130,7 +130,7 @@ struct BeforeAfterComparisonView: View {
         Button { dismiss() } label: {
             Image(systemName: "xmark")
                 .font(.caption)
-                .foregroundColor(.textPrimary.opacity(0.7))
+                .foregroundStyle(Color.textPrimary.opacity(0.7))
                 .padding(8)
                 .background(Color.textPrimary.opacity(0.08))
                 .clipShape(Circle())
@@ -153,7 +153,7 @@ struct BeforeAfterComparisonView: View {
                 .font(.caption2.weight(.bold))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
-                .foregroundColor(isActive ? Color.onAccent : .textSecondary)
+                .foregroundStyle(isActive ? Color.onAccent : .textSecondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
                 .frame(maxWidth: .infinity, minHeight: 40, maxHeight: .infinity)
@@ -202,11 +202,11 @@ struct BeforeAfterComparisonView: View {
                     HStack {
                         Text(DiaryPhotoCheckpoint.caption(for: item))
                             .font(.subheadline)
-                            .foregroundColor(.textPrimary)
+                            .foregroundStyle(Color.textPrimary)
                             .multilineTextAlignment(.leading)
                         Spacer()
                         Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
-                            .foregroundColor(.accentPrimary)
+                            .foregroundStyle(Color.accentPrimary)
                     }
                 }
                 .listRowBackground(Color.appSurface)
@@ -263,7 +263,7 @@ struct BeforeAfterComparisonView: View {
                         .overlay(
                             Image(systemName: "arrow.left.and.right")
                                 .font(.caption)
-                                .foregroundColor(.black)
+                                .foregroundStyle(Color.black)
                         )
                         .position(x: geo.size.width * sliderPosition, y: geo.size.height / 2)
                         .gesture(
@@ -289,12 +289,12 @@ struct BeforeAfterComparisonView: View {
             HStack(spacing: 12) {
                 Text("Before")
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
                 Slider(value: $sliderPosition)
                     .tint(.white)
                 Text("After")
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.warmAccent)
+                    .foregroundStyle(Color.warmAccent)
             }
         }
     }
@@ -302,7 +302,7 @@ struct BeforeAfterComparisonView: View {
     private func tag(_ text: LocalizedStringKey, tint: Color) -> some View {
         Text(text)
             .font(.caption2.weight(.heavy))
-            .foregroundColor(Color.onAccent)
+            .foregroundStyle(Color.onAccent)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(tint)
@@ -331,7 +331,7 @@ struct BeforeAfterComparisonView: View {
             HStack {
                 Text(title)
                     .font(.caption2.weight(.heavy))
-                    .foregroundColor(Color.onAccent)
+                    .foregroundStyle(Color.onAccent)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(tint)
@@ -339,7 +339,7 @@ struct BeforeAfterComparisonView: View {
                 Spacer()
                 Text(shortDate(checkpoint))
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             Group {
@@ -359,18 +359,18 @@ struct BeforeAfterComparisonView: View {
             if !boldLine.isEmpty {
                 Text(boldLine)
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.textPrimary.opacity(0.9))
+                    .foregroundStyle(Color.textPrimary.opacity(0.9))
             }
             if !quote.isEmpty && quote != boldLine {
                 Text(quote)
                     .font(.caption.italic())
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                     .lineLimit(2)
             }
             if let checkpoint {
                 Text("Mood: \(checkpoint.entry.moodTitle)")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(tint)
+                    .foregroundStyle(tint)
             }
         }
         .padding(14)

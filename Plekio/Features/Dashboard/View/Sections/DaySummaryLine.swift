@@ -17,11 +17,11 @@ struct DaySummaryLine: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(date.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
                 .font(.title3.weight(.bold))
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
 
             Text("\(takenCount) of \(totalCount) doses logged")
                 .font(.subheadline)
-                .foregroundColor(.accentPrimary)
+                .foregroundStyle(Color.accentPrimary)
                 .animatedNumber(Double(takenCount))
         }
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -38,11 +38,11 @@ struct DayCompleteHeroCard: View {
                     .minimumScaleFactor(0.7)
                     .accessibilityIdentifier(AccessibilityID.Today.dayComplete)
             }
-            .foregroundColor(.white)
+            .foregroundStyle(Color.white)
 
             Text("\(takenCount) of \(totalCount) doses logged")
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.85))
+                .foregroundStyle(Color.white.opacity(0.85))
 
             Spacer(minLength: 0)
 
@@ -59,10 +59,10 @@ struct DayCompleteHeroCard: View {
                             .animatedNumber(Double(streakDays))
                     }
                     .font(.headline.weight(.bold))
-                    .foregroundColor(.white)
+                    .foregroundStyle(Color.white)
                     Text("Keep it up tomorrow")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundStyle(Color.white.opacity(0.8))
                 }
 
                 Spacer(minLength: 0)

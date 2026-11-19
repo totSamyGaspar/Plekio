@@ -79,11 +79,11 @@ struct OnboardingPageView: View {
         VStack(alignment: alignment, spacing: 12) {
             Text(page.title)
                 .scaledFont(size: isLarge ? 36 : 28, relativeTo: .title, weight: .bold, design: .serif)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
 
             Text(page.description)
                 .font(isLarge ? .title3 : .body)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
                 .lineSpacing(3)
         }
         .multilineTextAlignment(alignment == .leading ? .leading : .center)

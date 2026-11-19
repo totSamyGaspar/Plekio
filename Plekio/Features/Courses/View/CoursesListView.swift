@@ -128,7 +128,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
             VStack(alignment: .leading, spacing: 10) {
                 Text("My Courses")
                     .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
@@ -139,7 +139,7 @@ struct CoursesListView<VM: CoursesListViewModelProtocol>: View {
             Button(action: { router.present(.newTreatment) }) {
                 Image(systemName: "plus.circle.fill")
                     .font(.title3)
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
                     .frame(width: 44, height: 44)
                     .background(Circle().fill(Color.textPrimary.opacity(0.04)))
                     .overlay(Circle().stroke(Color.textPrimary.opacity(0.06), lineWidth: 1))

@@ -21,19 +21,19 @@ struct StorageRecoveryView: View {
 
             Image(systemName: "externaldrive.badge.exclamationmark")
                 .font(.system(size: 52))
-                .foregroundColor(.accentPrimary)
+                .foregroundStyle(Color.accentPrimary)
                 .accessibilityHidden(true)
 
             Text("Couldn't load your data")
                 .font(.title2.bold())
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
 
             Text("Your entries are still on this device, but Plekio can't open them right now. Reminders that are already scheduled keep coming.")
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
 
             Text("If your iPhone is almost out of storage, free up some space, then try again.")
                 .font(.footnote)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
 
             Spacer()
 

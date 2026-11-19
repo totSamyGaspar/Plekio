@@ -18,7 +18,7 @@ struct ProfileSection: View {
     // MARK: - Body
 
     var body: some View {
-        Section(header: Text("Profile").foregroundColor(.textSecondary)) {
+        Section(header: Text("Profile").foregroundStyle(Color.textSecondary)) {
             Button { isEditing = true } label: {
                 HStack(spacing: 14) {
                     ProfileAvatar(id: stored.profile.avatarId, side: 52)
@@ -26,7 +26,7 @@ struct ProfileSection: View {
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.footnote.weight(.semibold))
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 .padding(.vertical, 4)
             }
@@ -46,17 +46,17 @@ struct ProfileSection: View {
         VStack(alignment: .leading, spacing: 2) {
             if stored.profile.name.isEmpty {
                 Text("Add your details")
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             } else {
                 Text(stored.profile.name)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
             }
 
             // The date, not the age: it localises without plural forms.
             if let birthDate = stored.profile.birthDate {
                 Text(birthDate.formatted(date: .abbreviated, time: .omitted))
                     .font(.subheadline)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
         }
     }

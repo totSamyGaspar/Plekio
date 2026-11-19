@@ -45,20 +45,20 @@ struct ComparisonSlotRow: View {
         HStack(alignment: .top, spacing: 10) {
             Text(label)
                 .font(.caption2.weight(.heavy))
-                .foregroundColor(tint)
+                .foregroundStyle(tint)
                 .frame(width: 96, alignment: .leading)
 
             Button(action: action) {
                 HStack {
                     Text(DiaryPhotoCheckpoint.caption(for: checkpoint))
                         .font(.caption)
-                        .foregroundColor(.textPrimary.opacity(0.85))
+                        .foregroundStyle(Color.textPrimary.opacity(0.85))
                         .lineLimit(1)
                         .truncationMode(.tail)
                     Spacer(minLength: 6)
                     Image(systemName: "chevron.down")
                         .font(.caption2)
-                        .foregroundColor(.textTertiary)
+                        .foregroundStyle(Color.textTertiary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)

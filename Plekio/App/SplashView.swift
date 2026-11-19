@@ -61,12 +61,12 @@ struct SplashView: View {
                     VStack(spacing: 8) {
                         Text(AppBrand.name)
                             .scaledFont(size: 42, relativeTo: .largeTitle, weight: .heavy, design: .serif)
-                            .foregroundColor(.textPrimary)
+                            .foregroundStyle(Color.textPrimary)
                             .italic()
 
                         Text("Your minimalist tracker")
                             .scaledFont(size: 11, relativeTo: .caption2, weight: .bold)
-                            .foregroundColor(.accentPrimary)
+                            .foregroundStyle(Color.accentPrimary)
                             .tracking(1.5)
                     }
                     .opacity(logoOpacity)

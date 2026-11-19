@@ -81,16 +81,16 @@ struct ReportPreview: View {
                     .font(.system(size: 8, weight: .bold))
                     .tracking(0.5)
                     .textCase(.uppercase)
-                    .foregroundColor(Self.ink)
+                    .foregroundStyle(Self.ink)
             }
 
             Text("Health report")
                 .font(.system(size: 15, weight: .bold, design: .serif))
-                .foregroundColor(Self.paperText)
+                .foregroundStyle(Self.paperText)
 
             Text(verbatim: "1 — 30")
                 .font(.system(size: 8))
-                .foregroundColor(Self.paperMuted)
+                .foregroundStyle(Self.paperMuted)
 
             Rectangle().fill(Self.paperRule).frame(height: 1)
 
@@ -115,7 +115,7 @@ struct ReportPreview: View {
         return VStack(alignment: .leading, spacing: 5) {
             Text(title)
                 .font(.system(size: 9, weight: .bold))
-                .foregroundColor(Self.ink)
+                .foregroundStyle(Self.ink)
                 .opacity(isWritten ? 1 : 0)
 
             if showsRate {
@@ -133,7 +133,7 @@ struct ReportPreview: View {
                     Text(verbatim: "\(shown.rate)%")
                         .font(.system(size: 8, weight: .bold))
                         .monospacedDigit()
-                        .foregroundColor(Self.paperText)
+                        .foregroundStyle(Self.paperText)
                         .contentTransition(.numericText(value: Double(shown.rate)))
                 }
                 .opacity(isWritten ? 1 : 0)
@@ -163,7 +163,7 @@ struct ReportPreview: View {
             }
             .font(.system(size: 14, weight: .semibold))
         }
-        .foregroundColor(.accentPrimary)
+        .foregroundStyle(Color.accentPrimary)
         .padding(.horizontal, 16)
         .padding(.vertical, 9)
         .background(Color.accentPrimary.opacity(shown.isShared ? 0.22 : 0.14))

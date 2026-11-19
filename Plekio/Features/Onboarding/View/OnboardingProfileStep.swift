@@ -70,12 +70,12 @@ struct OnboardingProfileStep: View {
 
             Text("Who is this for?")
                 .font(.system(.title2, design: .serif).weight(.bold))
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .multilineTextAlignment(.center)
 
             Text("Reports you share later will carry these details. You can change them any time in Settings.")
                 .font(.body)
-                .foregroundColor(.textPrimary.opacity(0.7))
+                .foregroundStyle(Color.textPrimary.opacity(0.7))
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
         }
@@ -84,7 +84,7 @@ struct OnboardingProfileStep: View {
     private var fields: some View {
         VStack(spacing: 0) {
             TextField("Name", text: $stored.profile.name)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .textContentType(.name)
                 .padding(.horizontal, 16)
                 .frame(height: 52)
@@ -92,7 +92,7 @@ struct OnboardingProfileStep: View {
             Divider().overlay(Color.textPrimary.opacity(0.1))
 
             Toggle("Date of birth", isOn: $stored.profile.isBirthDateSet)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .padding(.horizontal, 16)
                 .frame(height: 52)
 
@@ -131,7 +131,7 @@ struct OnboardingProfileStep: View {
             } label: {
                 Text("Skip for now")
                     .font(.subheadline)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
         }
     }

@@ -20,12 +20,12 @@ struct CountRow: View {
     var body: some View {
         HStack {
             Text(title)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
             Spacer()
             TextField(String(localized: placeholder), value: clamped, format: .number)
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.trailing)
-                .foregroundColor(tint)
+                .foregroundStyle(tint)
                 .font(.headline)
                 .padding(.trailing)
                 .accessibilityIdentifier(identifier)

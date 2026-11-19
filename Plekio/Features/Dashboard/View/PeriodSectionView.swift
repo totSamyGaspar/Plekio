@@ -30,9 +30,9 @@ struct PeriodSectionView: View {
             HStack {
                 Circle().fill(Color.accentPrimary).frame(width: 10, height: 10)
                     .shadow(color: .accentPrimary.opacity(0.5), radius: 4)
-                Text(title).font(.headline).foregroundColor(.textPrimary)
+                Text(title).font(.headline).foregroundStyle(Color.textPrimary)
                 Spacer()
-                Text(timeString).font(.subheadline).foregroundColor(.textSecondary)
+                Text(timeString).font(.subheadline).foregroundStyle(Color.textSecondary)
             }
 
             ForEach(pills) { pill in

@@ -27,7 +27,7 @@ struct AdherenceSummaryView: View {
                     .font(.headline.weight(.bold))
                 Text("\(streakDays) days streak!")
                     .font(.headline.weight(.bold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .multilineTextAlignment(.center)
                     .animatedNumber(Double(streakDays))
             }

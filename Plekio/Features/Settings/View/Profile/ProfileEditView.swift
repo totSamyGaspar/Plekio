@@ -46,7 +46,7 @@ struct ProfileEditView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 }
             }
             .photoSourceDialog("Photo", isPresented: $isChoosingSource, onPick: saveAvatar) {
@@ -69,7 +69,7 @@ struct ProfileEditView: View {
                         ProfileAvatar(id: profile.avatarId, side: 96)
                         Text(profile.avatarId == nil ? "Add Photo" : "Change photo")
                             .font(.subheadline)
-                            .foregroundColor(.accentPrimary)
+                            .foregroundStyle(Color.accentPrimary)
                     }
                     Spacer()
                 }
@@ -81,13 +81,13 @@ struct ProfileEditView: View {
     }
 
     private var identitySection: some View {
-        Section(header: Text("Name").foregroundColor(.textSecondary)) {
+        Section(header: Text("Name").foregroundStyle(Color.textSecondary)) {
             TextField("Name", text: $profile.name)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .textContentType(.name)
 
             Toggle("Date of birth", isOn: $profile.isBirthDateSet)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
 
             if profile.birthDate != nil {
                 DatePicker(
@@ -96,7 +96,7 @@ struct ProfileEditView: View {
                     in: ...time.now,
                     displayedComponents: .date
                 )
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .labelsHidden()
                 .appColorScheme()
             }
@@ -105,7 +105,7 @@ struct ProfileEditView: View {
     }
 
     private var healthSection: some View {
-        Section(header: Text("Health").foregroundColor(.textSecondary)) {
+        Section(header: Text("Health").foregroundStyle(Color.textSecondary)) {
             field("Allergies", text: $profile.allergies)
             field("Chronic conditions", text: $profile.conditions)
         }
@@ -116,9 +116,9 @@ struct ProfileEditView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.subheadline)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
             TextField(title, text: text, axis: .vertical)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .lineLimit(1...4)
         }
         .padding(.vertical, 4)

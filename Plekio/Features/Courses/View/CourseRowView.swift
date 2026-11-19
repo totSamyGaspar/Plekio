@@ -48,7 +48,7 @@ struct CourseRowView: View {
                 Button(action: repeatAction) {
                     Label(repeatTitle, systemImage: canRepeat ? "arrow.clockwise" : "checkmark.circle")
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(canRepeat ? .accentPrimary : .textTertiary)
+                        .foregroundStyle(canRepeat ? Color.accentPrimary : .textTertiary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
                         .background(
@@ -106,17 +106,17 @@ struct CourseRowView: View {
             HStack {
                 Text(viewModel.title)
                     .font(.headline.weight(.bold))
-                    .foregroundColor(isHistory ? .textSecondary : .textPrimary)
+                    .foregroundStyle(isHistory ? Color.textSecondary : .textPrimary)
 
                 Spacer()
 
                 if isHistory {
                     Image(systemName: "checkmark.seal.fill")
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 } else {
                     Text("Day \(viewModel.currentDayNumber) of \(viewModel.totalDays)")
                         .font(.caption.weight(.heavy))
-                        .foregroundColor(Color.onAccent)
+                        .foregroundStyle(Color.onAccent)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
                         .background(Color.accentPrimary)
@@ -126,10 +126,10 @@ struct CourseRowView: View {
 
             HStack(spacing: 6) {
                 Image(systemName: "calendar")
-                    .foregroundColor(.accentPrimary.opacity(0.8))
+                    .foregroundStyle(Color.accentPrimary.opacity(0.8))
                 Text(viewModel.dateRangeText)
                     .font(.subheadline)
-                    .foregroundColor(.textPrimary.opacity(0.7))
+                    .foregroundStyle(Color.textPrimary.opacity(0.7))
             }
 
             LinearProgressBar(progress: animatedProgress)
@@ -139,7 +139,7 @@ struct CourseRowView: View {
                 if !isHistory {
                     Text("Medications: \(viewModel.medicationsCount)")
                         .font(.caption.weight(.medium))
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
 
                 Spacer()
@@ -147,7 +147,7 @@ struct CourseRowView: View {
                 if isHistory {
                     Text("Course completed")
                         .font(.caption.weight(.bold))
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 }
             }
 
@@ -167,12 +167,12 @@ struct CourseRowView: View {
                 HStack(spacing: 10) {
                     Image(systemName: medication.systemImage)
                         .font(.caption)
-                        .foregroundColor(.accentPrimary.opacity(0.8))
+                        .foregroundStyle(Color.accentPrimary.opacity(0.8))
                         .frame(width: 18)
 
                     Text(medication.name)
                         .font(.subheadline)
-                        .foregroundColor(.textPrimary.opacity(0.85))
+                        .foregroundStyle(Color.textPrimary.opacity(0.85))
                         .lineLimit(1)
 
                     Spacer(minLength: 8)
@@ -180,7 +180,7 @@ struct CourseRowView: View {
                     // Same localization key as the course detail screen.
                     Text("\(medication.dosage) pcs")
                         .font(.caption.weight(.medium))
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                         .monospacedDigit()
                 }
             }

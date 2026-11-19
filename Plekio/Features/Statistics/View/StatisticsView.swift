@@ -36,7 +36,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 // One line in every language; longer translations shrink instead of wrapping.
                 Text("Adherence & Alerts")
                     .scaledFont(size: 24, relativeTo: .title2, weight: .heavy, design: .serif)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .tracking(1.5)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
@@ -45,9 +45,9 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 if viewModel.lowStockItems.isEmpty {
                     HStack {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.accentPrimary)
+                            .foregroundStyle(Color.accentPrimary)
                         Text("All medications are well stocked")
-                            .foregroundColor(.textPrimary.opacity(0.7))
+                            .foregroundStyle(Color.textPrimary.opacity(0.7))
                             .font(.subheadline)
                     }
                     .padding(.horizontal)
@@ -96,15 +96,15 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
                 Text("LOW STOCK WARNING")
             }
             .font(.caption.weight(.heavy))
-            .foregroundColor(.warningAccent)
+            .foregroundStyle(Color.warningAccent)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(med.name) is running low")
                     .font(.headline.weight(.bold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 Text("Remaining count: \(med.stockCount) pills")
                     .font(.subheadline)
-                    .foregroundColor(.textPrimary.opacity(0.7))
+                    .foregroundStyle(Color.textPrimary.opacity(0.7))
             }
 
             Button(action: {
@@ -114,7 +114,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
             }) {
                 Text("REFILL STOCK")
                     .font(.subheadline.weight(.heavy))
-                    .foregroundColor(Color.onAccent)
+                    .foregroundStyle(Color.onAccent)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Color.accentPrimary)
@@ -133,7 +133,7 @@ struct StatisticsView<VM: StatisticsViewModelProtocol>: View {
         VStack {
             Text("ADHERENCE TARGET")
                 .font(.headline.weight(.heavy))
-                .foregroundColor(.accentPrimary)
+                .foregroundStyle(Color.accentPrimary)
                 .tracking(1.5)
                 .padding(.top, 24)
 

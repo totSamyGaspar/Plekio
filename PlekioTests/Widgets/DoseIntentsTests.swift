@@ -79,7 +79,7 @@ struct DoseIntentsTests {
     @Test("A malformed id is dropped instead of failing the whole button")
     func malformedIdIsDropped() {
         let id = UUID()
-        var intent = TakeDosesIntent(slot: time, medicationIds: [id])
+        let intent = TakeDosesIntent(slot: time, medicationIds: [id])
         intent.medicationIds.append("not-a-uuid")
 
         #expect(intent.ids == [id])

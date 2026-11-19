@@ -21,7 +21,7 @@ struct MedicationRowView: View {
                         .fill(Color.accentPrimary.opacity(0.12))
                     Image(systemName: med.form.systemImage)
                         .scaledFont(size: 20, relativeTo: .title3)
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 }
             }
             .overlay(
@@ -35,14 +35,14 @@ struct MedicationRowView: View {
 
                 Text(DoseFrequency.title(forDays: med.frequencyDays))
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(Color.secondary)
             }
 
             Spacer()
 
             Text("\(med.dosage) pcs")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(Color.secondary)
         }
         .padding(.vertical, 4)
     }

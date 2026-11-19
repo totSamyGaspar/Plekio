@@ -59,7 +59,7 @@ struct BloodPressureCard: View {
             if chartReadings.isEmpty {
                 Text("Log a reading to see your pressure trend here.")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 30)
             } else {
@@ -88,10 +88,10 @@ struct BloodPressureCard: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Blood Pressure")
                 .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
             Text("Systolic and diastolic over time")
                 .font(.caption)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
         }
     }
 
@@ -187,7 +187,7 @@ struct BloodPressureCard: View {
             Circle().fill(color).frame(width: 8, height: 8)
             Text(title)
                 .font(.caption2.weight(.semibold))
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
         }
     }
 
@@ -200,11 +200,11 @@ struct BloodPressureCard: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Latest")
                         .font(.caption2.weight(.semibold))
-                        .foregroundColor(.textTertiary)
+                        .foregroundStyle(Color.textTertiary)
                         .textCase(.uppercase)
                     Text(reading.formattedPressure)
                         .font(.title3.weight(.bold))
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                 }
 
                 Spacer(minLength: 0)
@@ -214,15 +214,15 @@ struct BloodPressureCard: View {
                         HStack(spacing: 4) {
                             Image(systemName: "heart.fill")
                                 .font(.caption2)
-                                .foregroundColor(.warningAccent)
+                                .foregroundStyle(Color.warningAccent)
                             Text("\(pulse) bpm")
                                 .font(.caption.weight(.semibold))
-                                .foregroundColor(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
                     }
                     Text(reading.measuredAt.formatted(date: .abbreviated, time: .shortened))
                         .font(.caption2)
-                        .foregroundColor(.textTertiary)
+                        .foregroundStyle(Color.textTertiary)
                 }
             }
             .padding(.horizontal, 14)
@@ -245,7 +245,7 @@ struct BloodPressureCard: View {
                 Label("History", systemImage: "clock.arrow.circlepath")
                     .labelStyle(.centered)
                     .font(.subheadline.weight(.bold))
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
                     .lineLimit(1)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 16)
@@ -268,7 +268,7 @@ struct BloodPressureCard: View {
                 Label("Add reading", systemImage: "plus")
                     .labelStyle(.centered)
                     .font(.subheadline.weight(.bold))
-                    .foregroundColor(Color.onAccent)
+                    .foregroundStyle(Color.onAccent)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                     .padding(.vertical, 12)

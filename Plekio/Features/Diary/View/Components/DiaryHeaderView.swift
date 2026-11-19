@@ -31,17 +31,17 @@ struct DiaryHeaderView: View {
             HStack {
                 Text("Daily Health & Mood Diary")
                     .scaledFont(size: 30, relativeTo: .title, weight: .heavy, design: .serif)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
                 Text("· \(time.now.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             Text("Track how your body responds to your regimen, log symptoms, record daily energy levels, and compare progress photos over time.")
                 .font(.subheadline)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
 
             HStack(spacing: 12) {
                 Button {
@@ -51,7 +51,7 @@ struct DiaryHeaderView: View {
                     Label("Compare Progress", systemImage: "arrow.triangle.2.circlepath")
                         .labelStyle(.centered)
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary.opacity(0.8))
+                        .foregroundStyle(Color.textPrimary.opacity(0.8))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -66,7 +66,7 @@ struct DiaryHeaderView: View {
                     Label("Add New Entry", systemImage: "plus")
                         .labelStyle(.centered)
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(Color.onAccent)
+                        .foregroundStyle(Color.onAccent)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -19,11 +19,11 @@ struct NotificationsOffCard: View {
                 Text("Notifications are off")
             }
             .font(.headline.weight(.bold))
-            .foregroundColor(.warningAccent)
+            .foregroundStyle(Color.warningAccent)
 
             Text("Plekio can't remind you about your doses. Allow notifications for Plekio in the Settings app.")
                 .font(.subheadline)
-                .foregroundColor(.textPrimary.opacity(0.7))
+                .foregroundStyle(Color.textPrimary.opacity(0.7))
                 .fixedSize(horizontal: false, vertical: true)
 
             Button {
@@ -33,7 +33,7 @@ struct NotificationsOffCard: View {
             } label: {
                 Text("Open Settings")
                     .font(.subheadline.weight(.heavy))
-                    .foregroundColor(.onAccent)
+                    .foregroundStyle(Color.onAccent)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Color.accentPrimary)
