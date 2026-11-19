@@ -20,6 +20,8 @@ struct UndoLogBanner: View {
     var onUndo: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// `startedAt` comes from this clock, so time left is measured on it too.
+    @Environment(\.timeSource) private var time
 
     /// LocalizedStringKey per case; a String ternary would skip localization.
     private var message: LocalizedStringKey {
@@ -91,7 +93,9 @@ struct UndoLogBanner: View {
     @ViewBuilder
     private var countdownBar: some View {
         if !reduceMotion {
-            TimelineView(.animation) { context in
+            // The timeline only paces the redraws; time left is read from `time`,
+            // which may not be the wall clock (a UI test can start it elsewhere).
+            TimelineView(.animation) { _ in
                 Capsule()
                     .fill(Color.accentPrimary.opacity(0.14))
                     .frame(height: 3)
@@ -99,7 +103,7 @@ struct UndoLogBanner: View {
                         Capsule()
                             .fill(Color.accentPrimary)
                             // Never zero: a zero scale is a singular transform, and CoreGraphics logs NaN.
-                            .scaleEffect(x: max(remaining(at: context.date), 0.001), y: 1, anchor: .leading)
+                            .scaleEffect(x: max(remaining(at: time.now), 0.001), y: 1, anchor: .leading)
                     }
                     // An implicit animation would lag behind the clock.
                     .transaction { $0.animation = nil }

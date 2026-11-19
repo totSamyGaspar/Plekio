@@ -46,6 +46,52 @@ struct UITestingLaunchTests {
         #expect(root.hasPrefix(FileManager.default.temporaryDirectory.standardizedFileURL.path))
     }
 
+    @Test("-ui-now is read as local wall-clock time")
+    func nowArgument() {
+        let launch = UITestingLaunch(arguments: ["Plekio", "-ui-testing", "-ui-now", "2026-11-12T08:30"])
+        #expect(launch?.now == testDate(2026, 11, 12, 8, 30))
+    }
+
+    @Test("A missing or malformed -ui-now keeps the real clock")
+    func badNowArgument() {
+        #expect(UITestingLaunch(arguments: ["Plekio", "-ui-testing"])?.now == nil)
+        #expect(UITestingLaunch(arguments: ["Plekio", "-ui-testing", "-ui-now", "tomorrow"])?.now == nil)
+        #expect(UITestingLaunch(arguments: ["Plekio", "-ui-testing", "-ui-now"])?.now == nil)
+    }
+
+    // MARK: - Clock
+
+    @Test("The UI-testing clock starts at the given time and keeps running")
+    func clockStartsThereAndRuns() {
+        let start = testDate(2026, 11, 12, 8, 30)
+        let realNow = Date()
+        let clock = UITestingClock(startingAt: start, realNow: realNow)
+
+        let elapsed = Date().timeIntervalSince(realNow)
+        #expect(abs(clock.now.timeIntervalSince(start) - elapsed) < 1)
+    }
+
+    @Test("A launch with -ui-now gives the whole graph that clock")
+    func graphUsesTheClock() {
+        let start = testDate(2026, 11, 12, 8, 30)
+        let dependencies = AppDependencies.uiTesting(UITestingLaunch(seed: .empty, now: start))
+
+        #expect(abs(dependencies.time.now.timeIntervalSince(start)) < 5)
+    }
+
+    @Test("At a fixed time the today seed is the same every run")
+    func todaySeedAtFixedTime() {
+        let start = testDate(2026, 11, 12, 11, 0)
+        let dependencies = AppDependencies.uiTesting(UITestingLaunch(seed: .today, now: start))
+        let doses = dependencies.database.fetchPills(for: start, preFetchedCourses: nil)
+
+        // 09:00 is two hours gone, past its grace hour; the other is due at 11:00.
+        let morning = doses.first { $0.name == UITestingSeed.Names.morning }
+        let dueNow = doses.first { $0.name == UITestingSeed.Names.dueNow }
+        #expect(morning?.isMissed(at: start) == true)
+        #expect(dueNow?.isMissed(at: start) == false)
+    }
+
     // MARK: - Graph
 
     @Test("Every seed but onboarding skips onboarding and the tour")

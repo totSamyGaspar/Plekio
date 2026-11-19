@@ -19,6 +19,8 @@ nonisolated struct UITestingLaunch: Equatable, Sendable {
 
     static let flag = "-ui-testing"
     static let seedFlag = "-ui-seed"
+    /// A local wall-clock time, `yyyy-MM-dd'T'HH:mm`, the app's clock starts at.
+    static let nowFlag = "-ui-now"
 
     // MARK: - Seed
 
@@ -35,11 +37,14 @@ nonisolated struct UITestingLaunch: Equatable, Sendable {
     }
 
     let seed: Seed
+    /// Where the clock starts; nil keeps the real time.
+    let now: Date?
 
     // MARK: - Init
 
-    init(seed: Seed) {
+    init(seed: Seed, now: Date? = nil) {
         self.seed = seed
+        self.now = now
     }
 
     /// An unknown or missing seed falls back to `.empty` rather than failing the
@@ -53,6 +58,24 @@ nonisolated struct UITestingLaunch: Equatable, Sendable {
         } else {
             self.seed = .empty
         }
+        now = Self.value(after: Self.nowFlag, in: arguments).flatMap(Self.parseLocalTime)
+    }
+
+    private static func value(after flag: String, in arguments: [String]) -> String? {
+        guard let index = arguments.firstIndex(of: flag), arguments.indices.contains(index + 1) else { return nil }
+        return arguments[index + 1]
+    }
+
+    /// Read as wall-clock time in the device's own zone, not as an instant:
+    /// "08:30" is 08:30 on the screen whether the simulator runs in UTC (Xcode
+    /// Cloud) or in Tbilisi, so the same test sees the same day everywhere.
+    static func parseLocalTime(_ text: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm"
+        return formatter.date(from: text)
     }
 
     /// Read once per process; launch arguments never change while it runs.

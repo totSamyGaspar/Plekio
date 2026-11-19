@@ -13,7 +13,18 @@ struct SplashView: View {
 
     private static let displayDuration: TimeInterval = 1.2
 
-    @State private var isActive = false
+    /// UI tests skip the splash. Its 1.2 s only slows them, and a tap on the first
+    /// screen while it is still fading in can be lost: SwiftUI drops a sheet
+    /// requested mid-transition, which failed a test that tapped "Create a course".
+    private static var startsActive: Bool {
+        #if DEBUG
+        UITestingLaunch.current != nil
+        #else
+        false
+        #endif
+    }
+
+    @State private var isActive = Self.startsActive
     @State private var logoOpacity = 0.0
 
     @State private var isPulsing = false
