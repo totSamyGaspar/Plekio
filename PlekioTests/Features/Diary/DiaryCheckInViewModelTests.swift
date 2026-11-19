@@ -16,6 +16,16 @@ struct DiaryCheckInViewModelTests {
 
     // MARK: - Draft editing
 
+    @Test("A new check-in is dated now, by TimeSource")
+    func newCheckInIsDatedByTimeSource() {
+        let now = testDate(2026, 11, 12, 8, 30)
+        let vm = DiaryCheckInViewModel(
+            dbService: MockDatabaseService(), photos: FakePhotoStore(), errors: SpyErrorReporter(), time: FixedTime(now)
+        )
+
+        #expect(vm.draft.checkInDate == now)
+    }
+
     @Test("Initial state — default draft, no photos")
     func testInitialState() async throws {
         let mockDb = MockDatabaseService()

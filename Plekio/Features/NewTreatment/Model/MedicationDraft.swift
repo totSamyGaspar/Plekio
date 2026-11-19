@@ -12,6 +12,8 @@ struct MedicationDraft: Identifiable, Equatable {
     var name: String = ""
     var form: MedicationForm = .pill
     var dosage: Int = 1
+    /// A fallback for drafts built in code. The form's view model sets it from its
+    /// `TimeSource`, so the app itself never reaches this default.
     var minutesOfDay: [Int] = [MinuteOfDay.of(Date(), calendar: .current)]
     var frequencyDays: Int = 1
     var medicationImageData: Data? = nil

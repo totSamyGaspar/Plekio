@@ -22,13 +22,14 @@ struct RepeatCourseSheet: View {
 
     // MARK: - Init
 
-    init(course: CourseSnapshot, onConfirm: @escaping (Date, Date) -> Void) {
+    /// `time` comes from the caller: the environment isn't readable in init.
+    init(course: CourseSnapshot, time: any TimeSource, onConfirm: @escaping (Date, Date) -> Void) {
         self.course = course
         self.onConfirm = onConfirm
 
         // Default to the previous run's length, starting today.
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        let calendar = time.calendar
+        let today = calendar.startOfDay(for: time.now)
         let previousLength = calendar.dateComponents(
             [.day],
             from: calendar.startOfDay(for: course.startDate),

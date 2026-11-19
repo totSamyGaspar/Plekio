@@ -13,10 +13,11 @@ struct WeekStrip: View {
     @Binding var selection: Date
 
     @Namespace private var daySelection
+    @Environment(\.timeSource) private var time
 
     /// The cell matching the selected day; nil once the week has moved past it.
     private var selectedDate: Date? {
-        dates.first { Calendar.current.isDate($0, inSameDayAs: selection) }
+        dates.first { time.calendar.isDate($0, inSameDayAs: selection) }
     }
 
     var body: some View {
@@ -37,7 +38,7 @@ struct WeekStrip: View {
             ForEach(dates, id: \.self) { date in
                 CalendarDayView(
                     date: date,
-                    isSelected: Calendar.current.isDate(date, inSameDayAs: selection),
+                    isSelected: time.calendar.isDate(date, inSameDayAs: selection),
                     selection: daySelection,
                     stretches: stretches
                 )

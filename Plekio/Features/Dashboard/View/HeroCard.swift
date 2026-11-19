@@ -17,9 +17,11 @@ struct HeroCard<Content: View>: View {
     let date: Date
     @ViewBuilder let content: Content
 
+    @Environment(\.timeSource) private var time
+
     /// Time-of-day gradient based on the current hour.
     private var gradientColors: [Color] {
-        let hour = Calendar.current.component(.hour, from: Date())
+        let hour = time.calendar.component(.hour, from: time.now)
         switch hour {
         case 5..<12:  return [Color.heroMorningStart, Color.heroMorningEnd]
         case 12..<18: return [Color.heroNoonStart, Color.heroNoonEnd]

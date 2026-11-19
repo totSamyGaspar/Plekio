@@ -13,6 +13,7 @@ struct ReportExportView: View {
     // MARK: - Properties
 
     @StateModel private var viewModel: ReportExportViewModel
+    @Environment(\.timeSource) private var time
 
     // MARK: - Init
 
@@ -45,7 +46,7 @@ struct ReportExportView: View {
     private var period: some View {
         Section(header: Text("Period").foregroundColor(.textSecondary)) {
             DatePicker("From", selection: $viewModel.selection.from, in: ...viewModel.selection.to, displayedComponents: .date)
-            DatePicker("To", selection: $viewModel.selection.to, in: viewModel.selection.from...Date(), displayedComponents: .date)
+            DatePicker("To", selection: $viewModel.selection.to, in: viewModel.selection.from...max(viewModel.selection.from, time.now), displayedComponents: .date)
         }
         .foregroundColor(.textPrimary)
         .appColorScheme()

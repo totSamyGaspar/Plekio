@@ -16,7 +16,9 @@ struct BloodPressureEntryView: View {
 
     var onSave: (_ measuredAt: Date, _ systolic: Int, _ diastolic: Int, _ pulse: Int?) -> Void
 
-    @State private var measuredAt = Date()
+    private let time: any TimeSource
+
+    @State private var measuredAt: Date
     @State private var systolicText = ""
     @State private var diastolicText = ""
     @State private var pulseText = ""
@@ -46,7 +48,20 @@ struct BloodPressureEntryView: View {
     }
 
     /// Upper bound of every picker: a reading can't be in the future.
-    private var latestSelectableDate: Date { Date() }
+    private var latestSelectableDate: Date { time.now }
+
+    // MARK: - Init
+
+    /// `time` comes from the caller: the form starts at "now", and the environment
+    /// isn't readable in init.
+    init(
+        time: any TimeSource,
+        onSave: @escaping (_ measuredAt: Date, _ systolic: Int, _ diastolic: Int, _ pulse: Int?) -> Void
+    ) {
+        self.time = time
+        self.onSave = onSave
+        _measuredAt = State(initialValue: time.now)
+    }
 
     // MARK: - Body
 

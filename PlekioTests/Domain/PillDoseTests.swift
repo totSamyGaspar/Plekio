@@ -33,16 +33,16 @@ struct PillDoseTests {
     func testMissedDoseStaysLoggable() async throws {
         let missed = dose(at: Date().addingTimeInterval(-2 * 3600))
 
-        #expect(missed.isMissed == true)
-        #expect(missed.isLoggable == true)
+        #expect(missed.isMissed(at: .now) == true)
+        #expect(missed.isLoggable(at: .now) == true)
     }
 
     @Test("A dose within an hour after its time isn't missed and can be logged")
     func testRecentDoseIsNotMissed() async throws {
         let recent = dose(at: Date().addingTimeInterval(-600))
 
-        #expect(recent.isMissed == false)
-        #expect(recent.isLoggable == true)
+        #expect(recent.isMissed(at: .now) == false)
+        #expect(recent.isLoggable(at: .now) == true)
     }
 
     @Test("A past day's dose can be logged retroactively")
@@ -50,7 +50,7 @@ struct PillDoseTests {
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
         let time = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: yesterday)!
 
-        #expect(dose(at: time).isLoggable == true)
+        #expect(dose(at: time).isLoggable(at: .now) == true)
     }
 
     @Test("Any dose today can be logged, even before its time")
@@ -58,7 +58,7 @@ struct PillDoseTests {
         let startOfToday = Calendar.current.startOfDay(for: Date())
         let lateToday = startOfToday.addingTimeInterval(23 * 3600)
 
-        #expect(dose(at: lateToday).isLoggable == true)
+        #expect(dose(at: lateToday).isLoggable(at: .now) == true)
     }
 
     @Test("A future day's dose stays read-only")
@@ -66,14 +66,14 @@ struct PillDoseTests {
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
         let time = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: tomorrow)!
 
-        #expect(dose(at: time).isLoggable == false)
+        #expect(dose(at: time).isLoggable(at: .now) == false)
     }
 
     @Test("A logged dose isn't missed")
     func testTakenDoseIsNeverMissed() async throws {
         let taken = dose(at: Date().addingTimeInterval(-5 * 3600), status: .taken(at: Date(), dispensed: 1))
 
-        #expect(taken.isMissed == false)
+        #expect(taken.isMissed(at: .now) == false)
     }
 
     // MARK: - Skipped
@@ -95,16 +95,16 @@ struct PillDoseTests {
         var skipped = dose(at: Date().addingTimeInterval(-5 * 3600))
         skipped.status = .skipped(at: Date())
 
-        #expect(skipped.isMissed == false)
+        #expect(skipped.isMissed(at: .now) == false)
         #expect(skipped.isTaken == false)
         // Still loggable: the user can change their mind.
-        #expect(skipped.isLoggable == true)
+        #expect(skipped.isLoggable(at: .now) == true)
     }
 
     @Test("The same dose without a skip is missed")
     func testSameDoseWithoutSkipIsMissed() async throws {
         let untouched = dose(at: Date().addingTimeInterval(-5 * 3600))
 
-        #expect(untouched.isMissed == true)
+        #expect(untouched.isMissed(at: .now) == true)
     }
 }

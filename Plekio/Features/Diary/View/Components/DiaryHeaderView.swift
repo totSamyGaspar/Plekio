@@ -21,6 +21,7 @@ struct DiaryHeaderView: View {
     let onCompare: () -> Void
 
     private let compareTip = CompareProgressTip()
+    @Environment(\.timeSource) private var time
     let onAddEntry: () -> Void
 
     // MARK: - Body
@@ -33,7 +34,7 @@ struct DiaryHeaderView: View {
                     .foregroundColor(.textPrimary)
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
-                Text("· \(Date().formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
+                Text("· \(time.now.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
                     .font(.caption)
                     .foregroundColor(.textSecondary)
             }

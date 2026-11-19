@@ -19,9 +19,9 @@ enum DoseCardAction: Hashable {
     // MARK: - Menu
 
     /// The long-press menu for `pill`, in display order.
-    static func menu(for pill: PillDose, at now: Date = Date()) -> [DoseCardAction] {
+    static func menu(for pill: PillDose, at now: Date, calendar: Calendar) -> [DoseCardAction] {
         var actions: [DoseCardAction] = []
-        if pill.isLoggable(at: now) {
+        if pill.isLoggable(at: now, calendar: calendar) {
             actions.append(.toggle)
             if pill.status == .pending { actions.append(.skip) }
         }

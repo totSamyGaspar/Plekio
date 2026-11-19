@@ -19,6 +19,7 @@ struct ProfileEditView: View {
     @Binding var profile: UserProfile
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.timeSource) private var time
 
     @State private var isChoosingSource = false
 
@@ -92,7 +93,7 @@ struct ProfileEditView: View {
                 DatePicker(
                     "Date of birth",
                     selection: $profile.birthDateOrDefault,
-                    in: ...Date(),
+                    in: ...time.now,
                     displayedComponents: .date
                 )
                 .foregroundColor(.textPrimary)

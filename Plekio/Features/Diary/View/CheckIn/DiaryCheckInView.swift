@@ -13,6 +13,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(AppDependencies.self) private var dependencies
+    @Environment(\.timeSource) private var time
     @StateModel private var viewModel: VM
 
     // Separate flags so each popover anchors to its own field.
@@ -144,7 +145,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 ) { showingDatePicker = true }
                     .popover(isPresented: $showingDatePicker) {
                         // Explicit width: the graphical picker collapses to a narrow column in a popover.
-                        DatePicker("CHECK-IN DATE", selection: $viewModel.draft.checkInDate, in: ...Date(), displayedComponents: .date)
+                        DatePicker("CHECK-IN DATE", selection: $viewModel.draft.checkInDate, in: ...time.now, displayedComponents: .date)
                             .datePickerStyle(.graphical)
                             .labelsHidden()
                             .frame(width: 320)
@@ -159,7 +160,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     label: "TIME"
                 ) { showingTimePicker = true }
                     .popover(isPresented: $showingTimePicker) {
-                        DatePicker("TIME", selection: $viewModel.draft.checkInDate, in: ...Date(), displayedComponents: .hourAndMinute)
+                        DatePicker("TIME", selection: $viewModel.draft.checkInDate, in: ...time.now, displayedComponents: .hourAndMinute)
                             .datePickerStyle(.wheel)
                             .labelsHidden()
                             .padding()

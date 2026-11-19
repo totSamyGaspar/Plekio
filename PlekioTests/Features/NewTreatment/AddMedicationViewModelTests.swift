@@ -25,6 +25,14 @@ struct AddMedicationViewModelTests {
         #expect(vm.showingPhotoSourceMenu == false)
     }
 
+    @Test("A new medication's first dose is at the current time of day, from TimeSource")
+    func firstDoseTimeComesFromTimeSource() {
+        let time = FixedTime(testDate(2026, 11, 12, 8, 30))
+        let vm = AddMedicationViewModel(photos: FakePhotoStore(), time: time)
+
+        #expect(vm.draft.minutesOfDay == [8 * 60 + 30])
+    }
+
     // MARK: - Photo
 
     @Test("removeImage clears both selectedImage and draft.medicationImageData")

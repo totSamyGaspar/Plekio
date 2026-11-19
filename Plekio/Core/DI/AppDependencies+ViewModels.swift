@@ -36,11 +36,11 @@ extension AppDependencies {
     }
 
     func makeNewTreatmentViewModel() -> NewTreatmentViewModel {
-        NewTreatmentViewModel(courseEditing: courseEditing, errors: errorPresenter)
+        NewTreatmentViewModel(courseEditing: courseEditing, errors: errorPresenter, time: time)
     }
 
     func makeAddMedicationViewModel() -> AddMedicationViewModel {
-        AddMedicationViewModel(photos: photoCache)
+        AddMedicationViewModel(photos: photoCache, time: time)
     }
 
     // MARK: - Diary

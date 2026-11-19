@@ -49,4 +49,19 @@ struct NewTreatmentViewModelTests {
         vm.deleteMedication(at: IndexSet(integer: 0))
         #expect(vm.isSaveEnabled == false)
     }
+
+    // MARK: - Dates
+
+    @Test("A new course runs from now for a week, by TimeSource")
+    func datesComeFromTimeSource() {
+        let now = testDate(2026, 11, 12, 8, 30)
+        let vm = NewTreatmentViewModel(
+            courseEditing: CourseEditingUseCase(dbService: MockDatabaseService(), notificationService: MockNotificationService()),
+            errors: SpyErrorReporter(),
+            time: FixedTime(now)
+        )
+
+        #expect(vm.startDate == now)
+        #expect(vm.endDate == addingDays(7, to: now))
+    }
 }
