@@ -66,6 +66,8 @@ nonisolated enum AccessibilityID {
         static let name = "newMedication.nameField"
         static let stock = "newMedication.stockField"
         static let lowStockThreshold = "newMedication.lowStockThresholdField"
+        /// "That's the whole package or more…", under the threshold field.
+        static let lowFromTheStartHint = "newMedication.lowFromTheStartHint"
         static let save = "newMedication.saveButton"
         static let cancel = "newMedication.cancelButton"
     }
