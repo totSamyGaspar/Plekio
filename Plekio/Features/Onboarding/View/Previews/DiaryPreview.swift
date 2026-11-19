@@ -120,7 +120,7 @@ struct DiaryPreview: View {
                     }
                 }
                 .font(.system(size: 28, weight: .bold, design: .serif))
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
 
                 Spacer(minLength: 0)
 
@@ -143,7 +143,7 @@ struct DiaryPreview: View {
                 ForEach(Array(["7,5", "4/5"].enumerated()), id: \.offset) { index, value in
                     Text(verbatim: value)
                         .font(.system(size: 12))
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                         .onboardingChip()
                         .opacity(shown.isMoodSet ? 1 : 0)
                         .offset(y: shown.isMoodSet ? 0 : 4)
@@ -178,14 +178,14 @@ struct DiaryPreview: View {
             VStack(alignment: .leading, spacing: 4) {
                 OnboardingCaption(text: "Blood Pressure")
                 HStack(spacing: 0) {
-                    reading(shown.systolic).foregroundColor(.textPrimary)
-                    Text(verbatim: "/").foregroundColor(.textSecondary)
-                    reading(shown.diastolic).foregroundColor(.textPrimary)
+                    reading(shown.systolic).foregroundStyle(Color.textPrimary)
+                    Text(verbatim: "/").foregroundStyle(Color.textSecondary)
+                    reading(shown.diastolic).foregroundStyle(Color.textPrimary)
                 }
                 .font(.system(size: 28, weight: .bold, design: .serif))
                 reading(shown.pulse)
                     .font(.system(size: 12))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             Spacer(minLength: 0)
@@ -230,14 +230,14 @@ struct DiaryPreview: View {
         HStack(spacing: 12) {
             Image(systemName: "photo.on.rectangle.angled")
                 .font(.system(size: 15))
-                .foregroundColor(.milestonePurple)
+                .foregroundStyle(Color.milestonePurple)
                 .frame(width: 34, height: 34)
                 .background(Color.milestonePurple.opacity(0.16))
                 .clipShape(.rect(cornerRadius: 11))
 
             Text("Progress photos")
                 .font(.system(size: 14))
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
 
             Spacer(minLength: 0)
 
@@ -249,7 +249,7 @@ struct DiaryPreview: View {
                 if shown.photos >= 2 {
                     Image(systemName: "arrow.right")
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                         .transition(.opacity)
                     thumbnail(isAfter: true)
                         .transition(.scale(scale: 0.4).combined(with: .opacity))
@@ -257,7 +257,7 @@ struct DiaryPreview: View {
                 if shown.isAddShown {
                     Image(systemName: "plus")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.milestonePurple)
+                        .foregroundStyle(Color.milestonePurple)
                         .frame(width: 28, height: 28)
                         .background(Color.milestonePurple.opacity(0.16))
                         .clipShape(.circle)
@@ -278,7 +278,7 @@ struct DiaryPreview: View {
             .overlay(
                 Image(systemName: "person.fill")
                     .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundStyle(Color.white.opacity(0.85))
             )
     }
 }

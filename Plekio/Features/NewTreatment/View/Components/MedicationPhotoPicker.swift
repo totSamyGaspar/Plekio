@@ -23,7 +23,7 @@ struct MedicationPhotoPicker: View {
             HStack(spacing: 20) {
                 Button(action: onChoose) {
                     Text(image == nil ? "Add" : "Change")
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 }
 
                 if image != nil {
@@ -65,7 +65,7 @@ private struct PhotoPreview: View {
                     Text("Photo")
                         .font(.caption2)
                 }
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
             }
         }
         .frame(width: size, height: size)

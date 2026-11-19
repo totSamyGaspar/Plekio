@@ -28,11 +28,11 @@ struct TipJarSheet: View {
             VStack(spacing: 8) {
                 Text("Support the project")
                     .scaledFont(size: 24, relativeTo: .title2, weight: .bold, design: .serif)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
 
                 Text("Plekio is free and has no ads. If it helps you, you can leave a tip.")
                     .font(.subheadline)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
             }
 
@@ -67,20 +67,20 @@ struct TipJarSheet: View {
             VStack(spacing: 10) {
                 Image(systemName: option.tip.systemImage)
                     .font(.system(size: 22))
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
                     .frame(width: 52, height: 52)
                     .background(Circle().fill(Color.accentPrimary.opacity(isSelected ? 0.22 : 0.12)))
 
                 Text(option.tip.title)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
                 Text(verbatim: option.displayPrice)
                     .font(.footnote.weight(.semibold))
                     .monospacedDigit()
-                    .foregroundColor(isSelected ? .accentPrimary : .textSecondary)
+                    .foregroundStyle(isSelected ? Color.accentPrimary : .textSecondary)
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)

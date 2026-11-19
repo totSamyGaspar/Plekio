@@ -29,7 +29,7 @@ struct ComparisonPhotoStrip: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("AVAILABLE PROGRESS PHOTOS (\(checkpoints.count))")
                 .font(.caption2.weight(.heavy))
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
                 .tracking(0.5)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -67,7 +67,7 @@ struct ComparisonPhotoStrip: View {
 
             Text(item.entry.checkInDate.formatted(DiaryPhotoCheckpoint.comparisonDateStyle))
                 .font(.caption2)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
         }
         .onTapGesture {
             // Tapping the current "after" photo does nothing.
@@ -82,7 +82,7 @@ struct ComparisonPhotoStrip: View {
     private func badge(_ letter: String, tint: Color) -> some View {
         Text(letter)
             .font(.caption2.weight(.heavy))
-            .foregroundColor(Color.onAccent)
+            .foregroundStyle(Color.onAccent)
             .frame(width: slotBadgeSize, height: slotBadgeSize)
             .background(tint)
             .clipShape(Circle())

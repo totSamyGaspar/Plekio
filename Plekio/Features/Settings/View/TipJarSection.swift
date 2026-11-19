@@ -23,7 +23,7 @@ struct TipJarSection: View {
             Section {
                 Button { showsTips = true } label: {
                     Label("Support the project", systemImage: "cup.and.saucer.fill")
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 }
             }
             .listRowBackground(Color.appSurface)

@@ -59,13 +59,13 @@ struct HeroCard<Content: View>: View {
                 .padding(.vertical, 8)
                 .background(Color.black.opacity(0.15))
                 .cornerRadius(20)
-                .foregroundColor(.white)
+                .foregroundStyle(Color.white)
 
             Spacer(minLength: 0)
 
             Text(date.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
                 .font(.subheadline.weight(.bold))
-                .foregroundColor(.white.opacity(0.9))
+                .foregroundStyle(Color.white.opacity(0.9))
                 .lineLimit(2)
                 .multilineTextAlignment(.trailing)
         }

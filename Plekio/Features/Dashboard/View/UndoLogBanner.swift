@@ -38,11 +38,11 @@ struct UndoLogBanner: View {
             HStack(spacing: 12) {
                 Image(systemName: kind == .logged ? "checkmark.circle.fill" : "forward.end.circle.fill")
                     .font(.subheadline)
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
 
                 Text(message)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                     .accessibilityIdentifier(AccessibilityID.Today.undoMessage)
@@ -52,7 +52,7 @@ struct UndoLogBanner: View {
                 Button(action: onUndo) {
                     Text("Undo")
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
                         .background(

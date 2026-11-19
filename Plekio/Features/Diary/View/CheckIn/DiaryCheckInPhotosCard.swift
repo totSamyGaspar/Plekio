@@ -37,16 +37,16 @@ struct DiaryPhotosCard: View {
     private var heading: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "camera.fill")
-                .foregroundColor(.accentPrimary)
+                .foregroundStyle(Color.accentPrimary)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Progress photos")
                     .font(.subheadline.weight(.bold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
 
                 Text("Add photos to track skin changes, body posture, wellness milestones or recovery progress")
                     .font(.caption2)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             Spacer(minLength: 8)
@@ -55,7 +55,7 @@ struct DiaryPhotosCard: View {
             if !images.isEmpty {
                 Text("\(images.count) Attached")
                     .font(.caption2.weight(.bold))
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(Color.accentPrimary.opacity(0.12))
@@ -88,7 +88,7 @@ struct DiaryPhotosCard: View {
                 Text("Add")
                     .font(.caption2.weight(.semibold))
             }
-            .foregroundColor(.accentPrimary)
+            .foregroundStyle(Color.accentPrimary)
             .frame(width: tile, height: tile)
             .background(Color.accentPrimary.opacity(0.12))
             .clipShape(.rect(cornerRadius: 16))

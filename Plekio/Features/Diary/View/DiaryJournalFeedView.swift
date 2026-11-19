@@ -65,9 +65,9 @@ struct DiaryJournalFeedView: View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.textTertiary)
+                    .foregroundStyle(Color.textTertiary)
                 TextField("Search notes", text: $searchText)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
@@ -88,7 +88,7 @@ struct DiaryJournalFeedView: View {
                         Image(systemName: "chevron.down")
                     }
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.textPrimary.opacity(0.7))
+                    .foregroundStyle(Color.textPrimary.opacity(0.7))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(Color.appSurface)
@@ -103,7 +103,7 @@ struct DiaryJournalFeedView: View {
                         Text("With Photos")
                     }
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(photosOnlyFilter ? Color.onAccent : .textPrimary.opacity(0.7))
+                    .foregroundStyle(photosOnlyFilter ? Color.onAccent : .textPrimary.opacity(0.7))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(photosOnlyFilter ? Color.accentPrimary : Color.appSurface)

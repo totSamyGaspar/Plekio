@@ -29,11 +29,11 @@ struct ToastView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(tint)
+                .foregroundStyle(tint)
                 .accessibilityHidden(true)
             Text(toast.message)
                 .font(.subheadline.weight(.bold))
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .multilineTextAlignment(.leading)
         }
         .padding(.horizontal, 20)

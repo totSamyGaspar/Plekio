@@ -99,7 +99,7 @@ struct OnboardingView<VM: OnboardingViewModelProtocol>: View {
 
             Button("Skip") { isCollectingProfile = true }
                 .font(.subheadline)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
         }
     }
 }

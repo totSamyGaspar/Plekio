@@ -47,14 +47,14 @@ struct DiaryTodayCard: View {
     private var pending: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 6) {
-                Image(systemName: "sparkles").foregroundColor(.yellow)
+                Image(systemName: "sparkles").foregroundStyle(Color.yellow)
                 Text("TODAY'S WELLNESS CHECK-IN IS PENDING")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.textPrimary.opacity(0.7))
+                    .foregroundStyle(Color.textPrimary.opacity(0.7))
             }
             Text("How are you feeling right now? Tap a mood to log quickly or fill in detailed notes & photos.")
                 .font(.subheadline)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
 
             HStack(spacing: 10) {
                 ForEach(quickMoods) { item in
@@ -66,7 +66,7 @@ struct DiaryTodayCard: View {
                             Text(item.label)
                                 .font(.caption.weight(.semibold))
                         }
-                        .foregroundColor(.textPrimary.opacity(0.8))
+                        .foregroundStyle(Color.textPrimary.opacity(0.8))
                         .padding(.vertical, 12)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.appBackground)
@@ -93,7 +93,7 @@ struct DiaryTodayCard: View {
             HStack {
                 Text("TODAY'S CHECK-IN LOGGED")
                     .font(.caption2.weight(.heavy))
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(Color.accentPrimary.opacity(0.12))
@@ -101,7 +101,7 @@ struct DiaryTodayCard: View {
                 Spacer()
                 Text("at \(entry.checkInDate.formatted(date: .omitted, time: .shortened))")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             HStack(alignment: .top, spacing: 12) {
@@ -112,12 +112,12 @@ struct DiaryTodayCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Self.summaryLine(entry)
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     if !quote.isEmpty {
                         Text("“\(quote)”")
                             .font(.subheadline)
                             .italic()
-                            .foregroundColor(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                             .lineLimit(2)
                     }
                 }
@@ -130,7 +130,7 @@ struct DiaryTodayCard: View {
                 } label: {
                     Label("Edit Entry", systemImage: "pencil")
                         .font(.caption.weight(.bold))
-                        .foregroundColor(.textPrimary.opacity(0.8))
+                        .foregroundStyle(Color.textPrimary.opacity(0.8))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
                         .overlay(Capsule().stroke(Color.textPrimary.opacity(0.15), lineWidth: 1))

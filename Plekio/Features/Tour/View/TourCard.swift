@@ -23,35 +23,35 @@ struct TourCard: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(step.title)
                     .font(.headline)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 Spacer(minLength: 8)
                 Text("\(step.rawValue + 1) of \(TourStep.allCases.count)")
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                     .monospacedDigit()
             }
 
             Text(step.message)
                 .font(.subheadline)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack {
                 Button("Skip", action: onSkip)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
 
                 Spacer()
 
                 if step.waitsForAction {
                     Label("Tap the highlighted button", systemImage: "hand.tap")
                         .font(.caption.weight(.semibold))
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 } else {
                     Button(action: onNext) {
                         Text(step.isLast ? "Got it" : "Next")
                             .font(.subheadline.weight(.bold))
-                            .foregroundColor(.onAccent)
+                            .foregroundStyle(Color.onAccent)
                             .padding(.horizontal, 18)
                             .padding(.vertical, 8)
                             .background(Capsule().fill(Color.accentPrimary))

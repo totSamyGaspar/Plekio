@@ -95,7 +95,7 @@ struct TakePillModalView: View {
                             Text("Scheduled for \(scheduleText)")
                         }
                         .font(.caption.weight(.bold))
-                        .foregroundColor(.white)
+                        .foregroundStyle(Color.white)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .background(Color.white.opacity(0.2))
@@ -110,17 +110,17 @@ struct TakePillModalView: View {
                                 .frame(width: 50, height: 50)
                             Image(systemName: "bell.badge.fill")
                                 .font(.title3)
-                                .foregroundColor(.white)
+                                .foregroundStyle(Color.white)
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text("MEDICATION ALERT")
                                 .font(.caption.weight(.heavy))
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundStyle(Color.white.opacity(0.8))
                                 .tracking(1.0)
                             Text("Time for your meds")
                                 .font(.title3.weight(.heavy))
-                                .foregroundColor(.white)
+                                .foregroundStyle(Color.white)
                         }
                         Spacer()
                     }
@@ -139,16 +139,16 @@ struct TakePillModalView: View {
                                             .frame(width: 50, height: 50)
                                         Image(systemName: pill.form.systemImage)
                                             .font(.title2)
-                                            .foregroundColor(.accentPrimary)
+                                            .foregroundStyle(Color.accentPrimary)
                                     }
 
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(pill.name)
                                             .font(.headline.weight(.bold))
-                                            .foregroundColor(.textPrimary)
+                                            .foregroundStyle(Color.textPrimary)
                                         (Text("\(pill.dosage) pcs") + Text(verbatim: " • ") + Text(pill.period.title))
                                             .font(.subheadline.weight(.semibold))
-                                            .foregroundColor(.accentPrimary)
+                                            .foregroundStyle(Color.accentPrimary)
                                     }
                                     Spacer()
                                 }
@@ -214,11 +214,11 @@ struct ActionButton: View {
             VStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.title3.weight(.bold))
-                    .foregroundColor(color)
+                    .foregroundStyle(color)
 
                 Text(title)
                     .font(.caption.weight(.bold))
-                    .foregroundColor(color.opacity(titleOpacity))
+                    .foregroundStyle(color.opacity(titleOpacity))
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.9)

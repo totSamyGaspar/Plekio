@@ -26,18 +26,18 @@ struct EmptyStateView: View {
         VStack(spacing: 14) {
             Image(systemName: icon)
                 .scaledFont(size: 46, relativeTo: .largeTitle)
-                .foregroundColor(.textPrimary.opacity(0.2))
+                .foregroundStyle(Color.textPrimary.opacity(0.2))
 
             Text(title)
                 .font(.headline)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
                 .multilineTextAlignment(.center)
 
             if let actionTitle, let action {
                 Button(action: action) {
                     Label(actionTitle, systemImage: "plus")
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.onAccent)
+                        .foregroundStyle(Color.onAccent)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 12)
                         .background(Capsule().fill(Color.accentPrimary))

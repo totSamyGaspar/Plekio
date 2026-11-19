@@ -20,12 +20,12 @@ struct StorageUsageSection: View {
     // MARK: - Body
 
     var body: some View {
-        Section(header: Text("Your data").foregroundColor(.textSecondary)) {
+        Section(header: Text("Your data").foregroundStyle(Color.textSecondary)) {
             NavigationLink {
                 ManageDataView()
             } label: {
                 Label("Manage your data", systemImage: "externaldrive")
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
             }
         }
         .listRowBackground(Color.appSurface)
@@ -41,10 +41,10 @@ struct StorageUsageSection: View {
     private func row(_ title: LocalizedStringKey, bytes: Int64?) -> some View {
         HStack {
             Text(title)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
             Spacer()
             Text(bytes.map { $0.formatted(.byteCount(style: .file)) } ?? "—")
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
                 .monospacedDigit()
         }
     }

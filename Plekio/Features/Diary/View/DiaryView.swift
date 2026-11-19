@@ -181,10 +181,10 @@ struct DiaryView<VM: DiaryViewModelProtocol>: View {
                         if let count = subTabCount(tab) {
                             Text("(\(count))")
                                 .font(.caption2)
-                                .foregroundColor(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
                     }
-                    .foregroundColor(selectedSubTab == tab ? .accentPrimary : .textSecondary)
+                    .foregroundStyle(selectedSubTab == tab ? Color.accentPrimary : .textSecondary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)

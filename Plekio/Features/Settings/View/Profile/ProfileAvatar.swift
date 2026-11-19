@@ -25,7 +25,7 @@ struct ProfileAvatar: View {
             } else {
                 Image(systemName: "person.crop.circle.fill")
                     .resizable()
-                    .foregroundColor(.textSecondary.opacity(0.35))
+                    .foregroundStyle(Color.textSecondary.opacity(0.35))
             }
         }
         .frame(width: side, height: side)

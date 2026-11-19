@@ -64,14 +64,14 @@ struct DiaryStatsGrid: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
                     .font(.caption2.weight(.heavy))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                 Text(value)
                     .font(.title3.weight(.bold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
             }
             Spacer()
             Image(systemName: icon)
-                .foregroundColor(iconColor)
+                .foregroundStyle(iconColor)
         }
         .padding(16)
         .accessibilityElement(children: .combine)

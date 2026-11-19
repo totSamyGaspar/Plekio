@@ -104,7 +104,7 @@ struct ReminderPreview: View {
             Text(verbatim: shown.isDue ? "14:00" : "13:59")
                 .font(.system(size: 52, weight: .bold, design: .serif))
                 .monospacedDigit()
-                .foregroundColor(.textPrimary.opacity(0.55))
+                .foregroundStyle(Color.textPrimary.opacity(0.55))
                 .contentTransition(.numericText())
                 .opacity(shown.isExpanded ? 0.25 : 1)
                 .blur(radius: shown.isExpanded ? 3 : 0)
@@ -134,7 +134,7 @@ struct ReminderPreview: View {
                 Text("Lock screen")
                     .font(.system(size: 13))
             }
-            .foregroundColor(.textSecondary)
+            .foregroundStyle(Color.textSecondary)
             .opacity(shown.isExpanded ? 0 : 1)
         }
     }
@@ -151,17 +151,17 @@ struct ReminderPreview: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("💊 Time to take your meds")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                         .lineLimit(1)
                     Spacer(minLength: 6)
                     Text("now")
                         .font(.system(size: 12))
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
 
                 Text("Time to take: \(Self.medication)")
                     .font(.system(size: 14))
-                    .foregroundColor(.textPrimary.opacity(0.8))
+                    .foregroundStyle(Color.textPrimary.opacity(0.8))
                     .lineLimit(1)
             }
         }
@@ -198,7 +198,7 @@ struct ReminderPreview: View {
         HStack {
             Text(title)
                 .font(.system(size: 16))
-                .foregroundColor(color)
+                .foregroundStyle(color)
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 16)
@@ -224,7 +224,7 @@ struct ReminderPreview: View {
                 Text(verbatim: shown.isLogged ? "1 / 1" : "0 / 1")
                     .font(.system(size: 12, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundColor(shown.isLogged ? .accentPrimary : .textSecondary)
+                    .foregroundStyle(shown.isLogged ? Color.accentPrimary : .textSecondary)
                     .contentTransition(.numericText())
             }
 
@@ -233,11 +233,11 @@ struct ReminderPreview: View {
                     .font(.system(size: 16, weight: .bold, design: .serif))
                     .monospacedDigit()
                     .fixedSize()
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
 
                 Text(verbatim: Self.medication)
                     .font(.system(size: 15))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
 
                 Spacer(minLength: 0)
 
@@ -249,7 +249,7 @@ struct ReminderPreview: View {
                         .scaleEffect(shown.isLogged ? 1 : 0.01)
                     Image(systemName: "checkmark")
                         .font(.system(size: 11, weight: .heavy))
-                        .foregroundColor(.onAccent)
+                        .foregroundStyle(Color.onAccent)
                         .scaleEffect(shown.isLogged ? 1 : 0.3)
                         .opacity(shown.isLogged ? 1 : 0)
                 }
@@ -263,12 +263,12 @@ struct ReminderPreview: View {
             HStack {
                 Text("Left in pack")
                     .font(.system(size: 13))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                 Spacer(minLength: 0)
                 Text(verbatim: "\(shown.left)")
                     .font(.system(size: 14, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .contentTransition(.numericText(value: Double(shown.left)))
             }
         }

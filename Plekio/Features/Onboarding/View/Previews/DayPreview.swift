@@ -107,7 +107,7 @@ struct DayPreview: View {
             Text(verbatim: tally)
                 .font(.system(size: 12, weight: .semibold))
                 .monospacedDigit()
-                .foregroundColor(isDone ? .accentPrimary : .textSecondary)
+                .foregroundStyle(isDone ? Color.accentPrimary : .textSecondary)
                 .contentTransition(.numericText())
         }
         .padding(.horizontal, 4)
@@ -121,12 +121,12 @@ struct DayPreview: View {
                 .monospacedDigit()
                 .lineLimit(1)
                 .fixedSize()
-                .foregroundColor(state == .next ? .accentPrimary : .textPrimary)
+                .foregroundStyle(state == .next ? Color.accentPrimary : .textPrimary)
                 .frame(minWidth: 50, alignment: .leading)
 
             Text(verbatim: name)
                 .font(.system(size: 15, weight: state == .next ? .semibold : .regular))
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
 
             Spacer(minLength: 0)
 
@@ -159,7 +159,7 @@ struct DayPreview: View {
 
             Image(systemName: "checkmark")
                 .font(.system(size: 11, weight: .heavy))
-                .foregroundColor(.onAccent)
+                .foregroundStyle(Color.onAccent)
                 .scaleEffect(isLogged ? 1 : 0.3)
                 .opacity(isLogged ? 1 : 0)
         }

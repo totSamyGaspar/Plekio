@@ -116,10 +116,10 @@ struct BloodPressureEntryView: View {
                     } footer: {
                         if isInverted {
                             Text("Systolic must be higher than diastolic.")
-                                .foregroundColor(.warningAccent)
+                                .foregroundStyle(Color.warningAccent)
                         } else {
                             Text("A value outside its range can't be saved. Pulse is optional — leave it empty if your monitor doesn't show one.")
-                                .foregroundColor(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
                     }
                     .listRowBackground(Color.appSurface)
@@ -131,7 +131,7 @@ struct BloodPressureEntryView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
-                        .foregroundColor(.textPrimary.opacity(0.7))
+                        .foregroundStyle(Color.textPrimary.opacity(0.7))
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
@@ -140,7 +140,7 @@ struct BloodPressureEntryView: View {
                         dismiss()
                     }
                     .font(.headline)
-                    .foregroundColor(canSave ? .accentPrimary : .textTertiary)
+                    .foregroundStyle(canSave ? Color.accentPrimary : .textTertiary)
                     .disabled(!canSave)
                 }
             }
@@ -154,7 +154,7 @@ struct BloodPressureEntryView: View {
     private var dateRow: some View {
         HStack(spacing: 12) {
             Text("Measured at")
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
 
             Spacer(minLength: 0)
 
@@ -163,7 +163,7 @@ struct BloodPressureEntryView: View {
             } label: {
                 Text(measuredAt.formatted(.dateTime.day().month(.abbreviated)))
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(isCalendarShown ? .accentPrimary : .textPrimary)
+                    .foregroundStyle(isCalendarShown ? Color.accentPrimary : .textPrimary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
                     .background(
@@ -207,11 +207,11 @@ struct BloodPressureEntryView: View {
         return HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 // Verbatim: two numbers and a dash need no translation.
                 Text(verbatim: "\(range.lowerBound)–\(range.upperBound)")
                     .font(.caption2)
-                    .foregroundColor(isInvalid ? .warningAccent : .textTertiary)
+                    .foregroundStyle(isInvalid ? Color.warningAccent : .textTertiary)
             }
 
             Spacer(minLength: 8)
@@ -220,7 +220,7 @@ struct BloodPressureEntryView: View {
             TextField(title, text: text, prompt: Text(verbatim: placeholder))
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.trailing)
-                .foregroundColor(isInvalid ? .warningAccent : .textPrimary)
+                .foregroundStyle(isInvalid ? Color.warningAccent : .textPrimary)
                 .frame(maxWidth: 80)
             // Digits only, max 3: a number pad still accepts pasted text.
                 .onChange(of: text.wrappedValue) { _, newValue in
@@ -230,7 +230,7 @@ struct BloodPressureEntryView: View {
 
             Text(unit)
                 .font(.caption)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
         }
         .accessibilityElement(children: .combine)
         .accessibilityValue(

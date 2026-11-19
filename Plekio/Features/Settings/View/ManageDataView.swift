@@ -98,11 +98,11 @@ struct ManageDataView: View {
         Section {
             Button(role: .destructive) { pending = erasure } label: {
                 Label(erasure.title, systemImage: erasure.systemImage)
-                    .foregroundColor(isEnabled ? .red : .textTertiary)
+                    .foregroundStyle(isEnabled ? Color.red : .textTertiary)
             }
             .disabled(!isEnabled)
         } footer: {
-            Text(erasure.scope).foregroundColor(.textSecondary)
+            Text(erasure.scope).foregroundStyle(Color.textSecondary)
         }
         .listRowBackground(Color.appSurface)
     }

@@ -18,7 +18,7 @@ struct DiaryLabeledField<Content: View>: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.caption2.weight(.heavy))
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
                 .tracking(0.5)
             content
             // Centred: a compact DatePicker hugs its text and would float in the corner.
@@ -44,7 +44,7 @@ struct DiaryValueButton: View {
         Button(action: action) {
             Text(text)
                 .font(.subheadline.weight(.semibold))
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .frame(maxWidth: .infinity, minHeight: 24)
                 .contentShape(Rectangle())
         }
@@ -74,28 +74,28 @@ struct DiarySliderRow: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 HStack(spacing: 6) {
-                    Image(systemName: icon).foregroundColor(iconColor)
+                    Image(systemName: icon).foregroundStyle(iconColor)
                     Text(title)
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                 }
                 Spacer()
                 Text(trailingLabel)
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
             Slider(value: $value, in: range, step: 1)
                 .tint(tint)
                 .sensoryFeedback(.selection, trigger: value)
             HStack {
                 // Three labels share one row; some translations need two lines.
-                Text(minLabel).font(.caption2).foregroundColor(.textSecondary)
+                Text(minLabel).font(.caption2).foregroundStyle(Color.textSecondary)
                     .lineLimit(2).minimumScaleFactor(0.9)
                 Spacer(minLength: 4)
-                Text(midLabel).font(.caption2).foregroundColor(.textSecondary)
+                Text(midLabel).font(.caption2).foregroundStyle(Color.textSecondary)
                     .lineLimit(2).minimumScaleFactor(0.9)
                 Spacer(minLength: 4)
-                Text(maxLabel).font(.caption2).foregroundColor(.textSecondary)
+                Text(maxLabel).font(.caption2).foregroundStyle(Color.textSecondary)
                     .lineLimit(2).minimumScaleFactor(0.9)
             }
         }
@@ -122,7 +122,7 @@ struct DiaryTagChip: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(isSelected ? accent.opacity(0.9) : Color.appSurface)
-            .foregroundColor(isSelected ? Color.onAccent : .textPrimary.opacity(0.8))
+            .foregroundStyle(isSelected ? Color.onAccent : .textPrimary.opacity(0.8))
             .overlay(
                 Capsule().stroke(isSelected ? Color.clear : Color.textPrimary.opacity(0.1), lineWidth: 1)
             )
@@ -145,7 +145,7 @@ struct DiaryTagInputRow: View {
     var body: some View {
         HStack(spacing: 10) {
             TextField(placeholder, text: $text)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
                 .background(Color.appSurface)
@@ -156,7 +156,7 @@ struct DiaryTagInputRow: View {
                 text = ""
             }
             .font(.subheadline.weight(.bold))
-            .foregroundColor(Color.onAccent)
+            .foregroundStyle(Color.onAccent)
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .frame(maxHeight: .infinity)

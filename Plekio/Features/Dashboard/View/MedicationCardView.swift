@@ -68,7 +68,7 @@ struct MedicationCardView: View {
                     RoundedRectangle(cornerRadius: 12).fill(Color.iconTile)
                     Image(systemName: pill.form.systemImage)
                         .font(.title2)
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 }
             }
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.textPrimary.opacity(0.1), lineWidth: 1))
@@ -80,7 +80,7 @@ struct MedicationCardView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(pill.name)
                         .font(.headline.weight(.bold))
-                        .foregroundColor(isSettled ? .textSecondary : .textPrimary)
+                        .foregroundStyle(isSettled ? Color.textSecondary : .textPrimary)
                         .strikethrough(pill.isTaken)
                         .lineLimit(2)
 
@@ -88,7 +88,7 @@ struct MedicationCardView: View {
 
                     Text(pill.time.formatted(date: .omitted, time: .shortened))
                         .font(.caption2.weight(.heavy))
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Color.accentPrimary.opacity(0.15))
@@ -104,7 +104,7 @@ struct MedicationCardView: View {
                     if isLowStock {
                         Text("LOW")
                             .scaledFont(size: 11, relativeTo: .caption2, weight: .heavy)
-                            .foregroundColor(.warningAmber)
+                            .foregroundStyle(Color.warningAmber)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(Color.warningAmber.opacity(0.2))
@@ -144,7 +144,7 @@ struct MedicationCardView: View {
                 .overlay(alignment: .bottomTrailing) {
                     Text(state.label)
                         .font(.caption2.weight(.heavy))
-                        .foregroundColor(state.tint)
+                        .foregroundStyle(state.tint)
                         .lineLimit(1)
                         .fixedSize()
                         .padding(.horizontal, 12)
@@ -161,7 +161,7 @@ struct MedicationCardView: View {
         Button { onAction(.toggle) } label: {
             Image(systemName: pill.isTaken ? "checkmark.circle.fill" : "checkmark.circle")
                 .font(.title)
-                .foregroundColor(checkmarkTint)
+                .foregroundStyle(checkmarkTint)
                 .animatedSymbol(pill.isTaken)
         }
         .buttonStyle(.plain)

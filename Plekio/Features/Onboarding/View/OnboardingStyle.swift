@@ -52,7 +52,7 @@ struct OnboardingCaption: View {
             .font(.system(size: 10, weight: .bold))
             .tracking(1.1)
             .textCase(.uppercase)
-            .foregroundColor(.textSecondary)
+            .foregroundStyle(Color.textSecondary)
     }
 }
 
@@ -65,7 +65,7 @@ struct OnboardingButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundColor(.onAccent)
+            .foregroundStyle(Color.onAccent)
             .frame(maxWidth: .infinity, minHeight: 56)
             .background(Color.accentPrimary)
             .clipShape(.capsule)

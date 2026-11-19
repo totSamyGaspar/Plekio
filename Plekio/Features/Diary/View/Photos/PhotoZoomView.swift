@@ -35,7 +35,7 @@ struct PhotoZoomView: View {
                     Spacer()
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
-                            .foregroundColor(.white)
+                            .foregroundStyle(Color.white)
                             .padding(10)
                             .background(Color.white.opacity(0.15))
                             .clipShape(Circle())

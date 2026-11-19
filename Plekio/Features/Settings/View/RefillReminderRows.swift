@@ -25,7 +25,7 @@ struct RefillReminderRows: View {
     var body: some View {
         Toggle(isOn: $isEnabled) {
             Label("Low stock", systemImage: "pills")
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
         }
         .tint(.accentPrimary)
         .onChange(of: isEnabled) { _, isOn in isOn ? enable() : rebuild() }
@@ -34,7 +34,7 @@ struct RefillReminderRows: View {
 
         if isEnabled {
             DatePicker("Reminder time", selection: $minuteOfDay.timeOfDay, displayedComponents: .hourAndMinute)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
         }
     }
 

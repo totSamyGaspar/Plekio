@@ -21,12 +21,12 @@ struct DiaryMoodGrid: View {
             HStack {
                 Text("OVERALL MOOD TODAY")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                     .tracking(0.5)
                 Spacer()
                 Text("SELECT DOMINANT MOOD")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(.accentPrimary.opacity(0.8))
+                    .foregroundStyle(Color.accentPrimary.opacity(0.8))
             }
 
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
@@ -52,10 +52,10 @@ struct DiaryMoodGrid: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(mood.title)
                         .font(.subheadline.weight(.bold))
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     Text("Score: \(mood.score)/5")
                         .font(.caption2)
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 Spacer()
             }

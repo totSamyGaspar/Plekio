@@ -54,10 +54,10 @@ struct RepeatCourseSheet: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(course.name)
                                 .font(.headline.weight(.bold))
-                                .foregroundColor(.textPrimary)
+                                .foregroundStyle(Color.textPrimary)
                             Text("Medications: \(course.medications.count)")
                                 .font(.caption.weight(.medium))
-                                .foregroundColor(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                         }
                         .padding(.vertical, 4)
                     }
@@ -65,16 +65,16 @@ struct RepeatCourseSheet: View {
 
                     Section {
                         DatePicker("Start", selection: $startDate, displayedComponents: .date)
-                            .foregroundColor(.textPrimary)
+                            .foregroundStyle(Color.textPrimary)
                         DatePicker("End", selection: $endDate,
                                    in: startDate..., displayedComponents: .date)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     } header: {
                         Text("New dates")
-                            .foregroundColor(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                     } footer: {
                         Text("A new course with the same medications will be added to Active. The finished one stays in History.")
-                            .foregroundColor(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                     }
                     .listRowBackground(Color.appSurface)
                 }
@@ -85,7 +85,7 @@ struct RepeatCourseSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .foregroundColor(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Start course") {
@@ -93,7 +93,7 @@ struct RepeatCourseSheet: View {
                         dismiss()
                     }
                     .fontWeight(.bold)
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
                 }
             }
         }

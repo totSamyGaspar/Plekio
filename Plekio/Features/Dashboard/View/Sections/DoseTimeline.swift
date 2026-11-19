@@ -28,10 +28,10 @@ struct DoseTimeline: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Daily Dosage Timeline")
                         .scaledFont(size: 24, relativeTo: .title2, weight: .heavy, design: .serif)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     Text("Your medications for today")
                         .font(.subheadline)
-                        .foregroundColor(.textPrimary.opacity(0.7))
+                        .foregroundStyle(Color.textPrimary.opacity(0.7))
                 }
                 Spacer()
             }

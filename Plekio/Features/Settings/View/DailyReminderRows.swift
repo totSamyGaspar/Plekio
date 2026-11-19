@@ -45,7 +45,7 @@ struct DailyReminderRows: View {
             } icon: {
                 Image(systemName: reminder.settingsIcon)
             }
-            .foregroundColor(.textPrimary)
+            .foregroundStyle(Color.textPrimary)
         }
         .tint(.accentPrimary)
         // On the switch: it is the only row that is always present.

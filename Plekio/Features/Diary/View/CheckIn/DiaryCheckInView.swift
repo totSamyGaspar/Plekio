@@ -115,16 +115,16 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 Circle().fill(Color.accentPrimary.opacity(0.15)).frame(width: 44, height: 44)
                 Image(systemName: "face.smiling.fill")
                     .font(.title2)
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Daily Health & Mood Check-in")
                     .font(.system(.title3, design: .serif, weight: .bold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 Text("Log how your body feels, mood scores & track visual progress")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             Spacer()
@@ -178,18 +178,18 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("HOW ARE YOU FEELING PHYSICALLY TODAY?")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                 Spacer()
                 Text("ONE SENTENCE SUMMARY")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(.accentPrimary.opacity(0.8))
+                    .foregroundStyle(Color.accentPrimary.opacity(0.8))
             }
 
             TextField(
                 "e.g., Clear-headed and relaxed, slight shoulder stiffness",
                 text: $viewModel.draft.physicalSummary
             )
-            .foregroundColor(.textPrimary)
+            .foregroundStyle(Color.textPrimary)
             .padding(14)
             .background(Color.appSurface)
             .cornerRadius(14)
@@ -203,11 +203,11 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("PERSONAL REFLECTION & DIARY NOTES")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                 Spacer()
                 Text("SIDE EFFECTS, PROGRESS NOTES, GRATITUDE")
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(.accentPrimary.opacity(0.8))
+                    .foregroundStyle(Color.accentPrimary.opacity(0.8))
                     .multilineTextAlignment(.trailing)
             }
 
@@ -215,14 +215,14 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                 if viewModel.draft.reflectionNotes.isEmpty {
                     Text("Describe your day in detail: how your medications felt, energy shifts, dietary response, wellness milestones, or questions for your next doctor appointment...")
                         .font(.subheadline)
-                        .foregroundColor(.textTertiary)
+                        .foregroundStyle(Color.textTertiary)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 14)
                         .allowsHitTesting(false)
                 }
                 TextEditor(text: $viewModel.draft.reflectionNotes)
                     .scrollContentBackground(.hidden)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .padding(10)
                     .frame(minHeight: 120)
             }
@@ -239,7 +239,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
             Button(action: { dismiss() }) {
                 Text("CANCEL")
                     .font(.subheadline.weight(.heavy))
-                    .foregroundColor(.textPrimary.opacity(0.7))
+                    .foregroundStyle(Color.textPrimary.opacity(0.7))
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.appSurface)
@@ -257,7 +257,7 @@ struct DiaryCheckInView<VM: DiaryCheckInViewModelProtocol>: View {
                     Text("RECORD DIARY CHECK-IN")
                 }
                 .font(.subheadline.weight(.heavy))
-                .foregroundColor(Color.onAccent)
+                .foregroundStyle(Color.onAccent)
                 .padding(.vertical, 16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.accentPrimary)

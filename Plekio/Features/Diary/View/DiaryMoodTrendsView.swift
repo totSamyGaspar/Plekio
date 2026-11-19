@@ -38,16 +38,16 @@ struct DiaryMoodTrendsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Mood & Well-being Progression")
                     .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 Text("Daily reported emotional and physical state")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             if moodChartEntries.isEmpty {
                 Text("Log a few check-ins to see your mood trend here.")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 30)
             } else {
@@ -61,7 +61,7 @@ struct DiaryMoodTrendsView: View {
             // Only claims derived from the entries: no adherence correlation is computed, so none is shown.
             Text(moodBaselineLabel)
                 .font(.caption2.weight(.semibold))
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(Color.appBackground)
@@ -100,7 +100,7 @@ struct DiaryMoodTrendsView: View {
 
             Text(entry.checkInDate.formatted(.dateTime.weekday(.abbreviated)))
                 .font(.caption2.weight(.bold))
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
         }
         .frame(width: moodBarWidth)
         .accessibilityElement(children: .ignore)
@@ -128,10 +128,10 @@ struct DiaryMoodTrendsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Physical Energy & Rest")
                     .scaledFont(size: 18, relativeTo: .headline, weight: .bold, design: .serif)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 Text("Impact of sleep hours on daytime vitality")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
             }
 
             metricBar(
@@ -159,14 +159,14 @@ struct DiaryMoodTrendsView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 HStack(spacing: 6) {
-                    Image(systemName: icon).foregroundColor(iconColor)
-                    Text(title).foregroundColor(.textPrimary.opacity(0.8))
+                    Image(systemName: icon).foregroundStyle(iconColor)
+                    Text(title).foregroundStyle(Color.textPrimary.opacity(0.8))
                 }
                 .font(.subheadline.weight(.semibold))
                 Spacer()
                 Text(valueText)
                     .font(.subheadline.weight(.bold))
-                    .foregroundColor(tint)
+                    .foregroundStyle(tint)
             }
             GeometryReader { geo in
                 ZStack(alignment: .leading) {

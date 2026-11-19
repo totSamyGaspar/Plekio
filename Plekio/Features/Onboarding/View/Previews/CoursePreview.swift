@@ -102,7 +102,7 @@ struct CoursePreview: View {
         HStack(spacing: 12) {
             Image(systemName: "pills.fill")
                 .font(.system(size: 18))
-                .foregroundColor(.accentPrimary)
+                .foregroundStyle(Color.accentPrimary)
                 .frame(width: 44, height: 44)
                 .background(Color.accentPrimary.opacity(0.14))
                 .clipShape(.rect(cornerRadius: 14))
@@ -111,7 +111,7 @@ struct CoursePreview: View {
                 HStack(spacing: 1) {
                     Text(verbatim: String(Self.name.prefix(shown.typed)))
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
 
                     // Solid caret: iOS doesn't blink it while typing.
                     Capsule()
@@ -123,7 +123,7 @@ struct CoursePreview: View {
 
                 Text("Every day")
                     .font(.system(size: 13))
-                    .foregroundColor(.textSecondary)
+                    .foregroundStyle(Color.textSecondary)
                     .opacity(shown.detailsShown ? 1 : 0)
                     .offset(y: shown.detailsShown ? 0 : 5)
             }
@@ -132,7 +132,7 @@ struct CoursePreview: View {
 
             Text(verbatim: "2")
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.accentPrimary)
+                .foregroundStyle(Color.accentPrimary)
                 .opacity(shown.detailsShown ? 1 : 0)
                 .scaleEffect(shown.detailsShown ? 1 : 0.4)
         }
@@ -147,7 +147,7 @@ struct CoursePreview: View {
                     Text(verbatim: time)
                         .font(.system(size: 13))
                         .monospacedDigit()
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                         .onboardingChip()
                         .transition(.scale(scale: 0.5).combined(with: .opacity))
                 }
@@ -155,7 +155,7 @@ struct CoursePreview: View {
                 if shown.isAddShown {
                     Image(systemName: "plus")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                         .frame(width: 34, height: 27)
                         .background(Color.accentPrimary.opacity(0.14))
                         .clipShape(.capsule)
@@ -171,12 +171,12 @@ struct CoursePreview: View {
         HStack {
             Text("Left in pack")
                 .font(.system(size: 13))
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
             Spacer(minLength: 0)
             Text(verbatim: "\(shown.pack)")
                 .font(.system(size: 14, weight: .semibold))
                 .monospacedDigit()
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .contentTransition(.numericText(value: Double(shown.pack)))
         }
     }

@@ -38,7 +38,7 @@ struct MealTimingPicker: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(isSelected ? Color.accentPrimary : Color.textPrimary.opacity(0.06))
-            .foregroundColor(isSelected ? .onAccent : .textPrimary.opacity(0.8))
+            .foregroundStyle(isSelected ? Color.onAccent : .textPrimary.opacity(0.8))
             .clipShape(Capsule())
         }
         .buttonStyle(.plain)

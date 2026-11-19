@@ -23,7 +23,7 @@ struct TimeOfDayRows: View {
             DatePicker(selection: minute(at: index).timeOfDay, displayedComponents: .hourAndMinute) {
                 title(index)
             }
-            .foregroundColor(.textPrimary)
+            .foregroundStyle(Color.textPrimary)
         }
         .onDelete { offsets in
             guard minutes.count > offsets.count else { return }
@@ -33,7 +33,7 @@ struct TimeOfDayRows: View {
         if minutes.count < maxCount {
             Button(action: addTime) {
                 Label("Add time", systemImage: "plus.circle.fill")
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
             }
         }
     }

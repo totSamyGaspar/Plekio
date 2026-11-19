@@ -20,7 +20,7 @@ struct DashboardHeader: View {
             Text(AppBrand.name)
                 .scaledFont(size: 36, relativeTo: .largeTitle, weight: .heavy, design: .serif)
                 .italic()
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .accessibilityAddTraits(.isHeader)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

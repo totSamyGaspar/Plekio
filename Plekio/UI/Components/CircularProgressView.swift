@@ -64,7 +64,7 @@ struct CircularProgressView: View {
             VStack(spacing: 2) {
                 Text(min(max(progress, 0), 1), format: .percent.precision(.fractionLength(0)))
                     .scaledFont(size: size.fontSize, relativeTo: .subheadline, weight: .semibold, design: .serif)
-                    .foregroundColor(palette.text)
+                    .foregroundStyle(palette.text)
                     .animatedNumber(progress)
             }
         }

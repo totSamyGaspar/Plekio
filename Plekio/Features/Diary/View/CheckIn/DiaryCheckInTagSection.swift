@@ -29,7 +29,7 @@ struct DiaryTagSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
                 .font(.caption.weight(.heavy))
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
 
             FlowLayout(spacing: 10) {
                 ForEach(options, id: \.self) { option in

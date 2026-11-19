@@ -36,12 +36,12 @@ struct WeeklyAdherenceView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("WEEKLY ADHERENCE HISTORY")
                     .font(.caption.weight(.heavy))
-                    .foregroundColor(.accentPrimary)
+                    .foregroundStyle(Color.accentPrimary)
                     .tracking(1.0)
 
                 Text("Compliance rates over past 7 cycles")
                     .font(.subheadline)
-                    .foregroundColor(.textPrimary.opacity(0.7))
+                    .foregroundStyle(Color.textPrimary.opacity(0.7))
             }
 
             HStack(spacing: 12) {
@@ -63,7 +63,7 @@ struct WeeklyAdherenceView: View {
 
                         Text(label)
                             .font(.caption2.weight(.bold))
-                            .foregroundColor(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                     }
                     .frame(maxWidth: .infinity)
                     // Shapes are invisible to VoiceOver, so the value is added explicitly.
@@ -83,14 +83,14 @@ struct WeeklyAdherenceView: View {
                 // Formatted as .percent: sign position and spacing vary by locale.
                 Text(Double(recentAverage) / 100, format: .percent.precision(.fractionLength(0)))
                     .scaledFont(size: 40, relativeTo: .largeTitle, weight: .bold, design: .serif)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .italic()
                     .animatedNumber(Double(recentAverage))
                     .accessibilityIdentifier(AccessibilityID.Today.adherenceAverage)
 
                 Text("recent average")
                     .font(.subheadline)
-                    .foregroundColor(.textPrimary.opacity(0.7))
+                    .foregroundStyle(Color.textPrimary.opacity(0.7))
                     .padding(.bottom, 6)
                     .padding(.leading, 4)
                 Spacer()
@@ -100,7 +100,7 @@ struct WeeklyAdherenceView: View {
                         .font(.caption.weight(.bold))
                         .lineLimit(1)
                         .fixedSize()
-                        .foregroundColor(level.tint)
+                        .foregroundStyle(level.tint)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(level.tint.opacity(0.15))

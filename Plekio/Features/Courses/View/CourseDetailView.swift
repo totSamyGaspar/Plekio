@@ -31,22 +31,22 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
             Color.appBackground.ignoresSafeArea()
 
             Form {
-                Section(header: Text("Course Settings").foregroundColor(.textSecondary)) {
+                Section(header: Text("Course Settings").foregroundStyle(Color.textSecondary)) {
                     TextField("Course Name", text: $viewModel.courseName)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                         .onSubmit { viewModel.saveCourseChanges() }
                     DatePicker("Start", selection: $viewModel.startDate, displayedComponents: .date)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     DatePicker("End", selection: $viewModel.endDate,
                                in: viewModel.startDate..., displayedComponents: .date)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 }
                 .listRowBackground(Color.appSurface)
 
-                Section(header: Text("Medications in Course").foregroundColor(.textSecondary)) {
+                Section(header: Text("Medications in Course").foregroundStyle(Color.textSecondary)) {
                     if viewModel.medications.isEmpty {
                         Text("No medications in this course")
-                            .foregroundColor(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                     } else {
                         ForEach(viewModel.medications) { med in
                             HStack(spacing: 12) {
@@ -56,7 +56,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                                 }) {
                                     Image(systemName: "pencil")
                                         .font(.title2)
-                                        .foregroundColor(.textTertiary)
+                                        .foregroundStyle(Color.textTertiary)
                                 }
                                 .buttonStyle(.borderless)
                                 .accessibilityLabel("Edit medication")
@@ -77,7 +77,7 @@ struct CourseDetailView<VM: CourseDetailViewModelProtocol>: View {
                     showingAddMedication = true
                 }) {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                 }
                 .accessibilityLabel("Add Medication")
             }
