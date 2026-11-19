@@ -156,6 +156,7 @@ extension DatabaseService: DoseStoring {
 
         let calendar = time.calendar
         let skippedAt = time.now
+        var changed = false
 
         for medicationId in ids {
             guard let med = fetchMedication(id: medicationId) else { continue }
@@ -163,8 +164,10 @@ extension DatabaseService: DoseStoring {
 
             guard let skipped = (existing?.status ?? .pending).skipping(at: skippedAt) else { continue }
             write(skipped, to: existing, of: med, at: scheduledTime)
+            changed = true
         }
 
+        guard changed else { return }
         persistence.noteDoseWrite(onDay: time.calendar.startOfDay(for: scheduledTime))
         try persistence.commit([.doses])
     }
