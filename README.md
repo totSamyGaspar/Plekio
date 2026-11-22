@@ -1,4 +1,4 @@
-# Plekio
+# Plekio (status:`waiting for review in App Store Connect`)
 
 A medication tracker for iPhone and iPad. Plan treatment courses, get reminded when a dose is due, log it in one tap, and keep a well-being diary you can hand to your doctor as a PDF.
 
