@@ -40,6 +40,11 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     private let undoCenter: DoseUndoCenter
     @ObservationIgnored private var cancellables = Set<AnyCancellable>()
 
+    /// Course and dose writes announced so far, and how many of them the last load saw.
+    /// An action reloads at once, so the debounced echo of its own write is skipped.
+    @ObservationIgnored private var changeCount = 0
+    @ObservationIgnored private var loadedChangeCount = 0
+
     private static let weekdayFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.setLocalizedDateFormatFromTemplate("EEE")
@@ -65,11 +70,16 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         fetchData()
         refreshHasCourses()
 
-        dbService.changes.publisher(for: [.courses, .doses])
+        let dayChanges = dbService.changes.publisher(for: [.courses, .doses])
+
+        // Counted as they happen, not after the debounce, so a load can tell what it already covers.
+        dayChanges
+            .sink { [weak self] _ in self?.changeCount += 1 }
+            .store(in: &cancellables)
+
+        dayChanges
             .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.fetchData()
-            }
+            .sink { [weak self] _ in self?.reloadIfStale() }
             .store(in: &cancellables)
 
         // Separate from fetchData: that one is served from the day cache, this needs a course read.
@@ -104,6 +114,7 @@ final class DashboardViewModel: DashboardViewModelProtocol {
     // MARK: - Data Loading
 
     private func fetchData() {
+        loadedChangeCount = changeCount
         let pills = dbService.fetchPills(for: selectedDate, preFetchedCourses: nil)
 
         if pills != allPills {
@@ -111,6 +122,12 @@ final class DashboardViewModel: DashboardViewModelProtocol {
         }
 
         calculateWeeklyStats()
+    }
+
+    /// Skips the reload when every write since the last load was already in it.
+    private func reloadIfStale() {
+        guard changeCount != loadedChangeCount else { return }
+        fetchData()
     }
 
     private func refreshHasCourses() {

@@ -393,6 +393,40 @@ struct DashboardViewModelTests {
         #expect(vm.morningPills.first?.isSkipped == true)
     }
 
+    @Test("A tap reloads the dashboard once, not again when its own write is announced")
+    func testOwnWriteIsNotReloadedTwice() async throws {
+        let mockDB = MockDatabaseService()
+        mockDB.announcesWrites = true
+        let pill = PillDose(medicationId: UUID(), name: "Aspirin", dosage: 1,
+                            form: .pill, time: Date(), period: .morning)
+        mockDB.pillsToReturn = [pill]
+        let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
+        // Let the first load finish; each load reads the week once.
+        try await Task.sleep(for: .milliseconds(300))
+        let before = mockDB.pillHistoryCalls
+
+        vm.togglePill(id: pill.id)
+        // Past the 100 ms debounce.
+        try await Task.sleep(for: .milliseconds(400))
+
+        #expect(mockDB.pillHistoryCalls == before + 1)
+        #expect(vm.morningPills.first?.isTaken == true)
+    }
+
+    @Test("A write from elsewhere still reloads the dashboard")
+    func testOutsideWriteReloads() async throws {
+        let mockDB = MockDatabaseService()
+        let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
+        try await Task.sleep(for: .milliseconds(300))
+        let before = mockDB.pillHistoryCalls
+
+        mockDB.changes.send([.doses])
+        try await Task.sleep(for: .milliseconds(400))
+
+        #expect(mockDB.pillHistoryCalls == before + 1)
+        withExtendedLifetime(vm) {}
+    }
+
     @Test("hasCourses follows the first course being created")
     func testHasCoursesFollowsCourseWrites() async throws {
         let mockDB = MockDatabaseService()
