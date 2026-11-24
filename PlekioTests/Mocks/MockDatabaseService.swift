@@ -13,6 +13,10 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
     /// Silent unless a test sends on it; mock writes do not announce themselves.
     let changes = DatabaseChangeFeed()
+    /// Off by default; on, `togglePill` announces its write like the real store's commit.
+    var announcesWrites = false
+    /// One per weekly-statistics load, so a test can count the dashboard's reloads.
+    var pillHistoryCalls = 0
 
     // MARK: - Stubs
 
@@ -83,6 +87,11 @@ final class MockDatabaseService: DatabaseServiceProtocol {
 
     // MARK: - DatabaseServiceProtocol: Doses
 
+    func pillHistory(onDays days: [Date]) async -> [Date: [PillDose]] {
+        pillHistoryCalls += 1
+        return fetchPills(onDays: days)
+    }
+
     func fetchPills(for date: Date, preFetchedCourses: [TreatmentCourse]? = nil) -> [PillDose] {
         fetchedPillsDate = date
         if let scheduled = pillsByDay[Calendar.current.startOfDay(for: date)] {
@@ -92,6 +101,7 @@ final class MockDatabaseService: DatabaseServiceProtocol {
     }
 
     func togglePill(medicationId: UUID, scheduledTime: Date) throws {
+        defer { if announcesWrites { changes.send([.doses]) } }
         toggledPillMedicationId = medicationId
         toggledPillScheduledTime = scheduledTime
         toggleCalls.append((medicationId, scheduledTime))
