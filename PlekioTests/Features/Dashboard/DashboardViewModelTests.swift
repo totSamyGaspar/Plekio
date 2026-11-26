@@ -393,6 +393,9 @@ struct DashboardViewModelTests {
         #expect(vm.morningPills.first?.isSkipped == true)
     }
 
+    // The two tests below wait on conditions, not fixed sleeps: Xcode Cloud's
+    // simulators are slower, and a fixed 300 ms wasn't always enough there.
+
     @Test("A tap reloads the dashboard once, not again when its own write is announced")
     func testOwnWriteIsNotReloadedTwice() async throws {
         let mockDB = MockDatabaseService()
@@ -401,14 +404,15 @@ struct DashboardViewModelTests {
                             form: .pill, time: Date(), period: .morning)
         mockDB.pillsToReturn = [pill]
         let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
-        // Let the first load finish; each load reads the week once.
-        try await Task.sleep(for: .milliseconds(300))
+        await vm.weeklyLoad?.value
         let before = mockDB.pillHistoryCalls
 
         vm.togglePill(id: pill.id)
-        // Past the 100 ms debounce.
-        try await Task.sleep(for: .milliseconds(400))
+        await vm.weeklyLoad?.value
+        #expect(mockDB.pillHistoryCalls == before + 1)
 
+        // Well past the 100 ms debounce: the echo of the tap's own write adds nothing.
+        try await Task.sleep(for: .milliseconds(500))
         #expect(mockDB.pillHistoryCalls == before + 1)
         #expect(vm.morningPills.first?.isTaken == true)
     }
@@ -417,14 +421,24 @@ struct DashboardViewModelTests {
     func testOutsideWriteReloads() async throws {
         let mockDB = MockDatabaseService()
         let vm = DashboardViewModel(dbService: mockDB, notificationService: MockNotificationService())
-        try await Task.sleep(for: .milliseconds(300))
+        await vm.weeklyLoad?.value
         let before = mockDB.pillHistoryCalls
 
         mockDB.changes.send([.doses])
-        try await Task.sleep(for: .milliseconds(400))
+        try await poll(until: { mockDB.pillHistoryCalls > before })
 
         #expect(mockDB.pillHistoryCalls == before + 1)
         withExtendedLifetime(vm) {}
+    }
+
+    /// Polls `condition` until it holds or `timeout` passes; the expectations after it decide.
+    /// Sleeps between checks, unlike the shared `waitUntil`, which only yields: the
+    /// reload waits on a 100 ms debounce, so time has to pass.
+    private func poll(timeout: Duration = .seconds(3), until condition: () -> Bool) async throws {
+        let deadline = ContinuousClock.now + timeout
+        while !condition(), ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
     }
 
     @Test("hasCourses follows the first course being created")
