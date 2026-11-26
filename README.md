@@ -1,6 +1,6 @@
 # Plekio
 
-> **Status:** waiting for App Store review. The public beta is open on [TestFlight](https://testflight.apple.com/join/1ERMHrgT).
+> **Status:** available on the [App Store](https://apps.apple.com/us/app/plekio-medication-reminder/id6820634068). Upcoming versions are tested on [TestFlight](https://testflight.apple.com/join/1ERMHrgT).
 
 A medication tracker for iPhone and iPad. Plan treatment courses, get reminded when a dose is due, log it in one tap, and keep a well-being diary you can hand to your doctor as a PDF.
 
@@ -11,9 +11,8 @@ Everything stays on the device: no account, no server, no analytics.
 </p>
 
 <p align="center">
-  <!-- App Store badge: uncomment once the app is live (ID 6820634068)
-  <a href="https://apps.apple.com/app/id6820634068"><img src="https://tools.applemarketingtools.com/api/badges/download-on-the-app-store/black/en-us" height="40" alt="Download on the App Store"></a>
-  -->
+  <a href="https://apps.apple.com/us/app/plekio-medication-reminder/id6820634068"><img src="https://tools.applemarketingtools.com/api/badges/download-on-the-app-store/black/en-us" height="40" alt="Download on the App Store"></a>
+  <br>
   <img src="https://img.shields.io/badge/iOS-18%2B-000000?logo=apple" alt="iOS 18+">
   <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
   <img src="https://img.shields.io/badge/UI-SwiftUI-0A84FF" alt="SwiftUI">
