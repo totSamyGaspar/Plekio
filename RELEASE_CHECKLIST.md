@@ -1,6 +1,6 @@
 # Release checklist
 
-Go through this for every build that leaves your Mac: a TestFlight build, an App Store release, a hotfix. Items marked **(first release)** are one-time.
+Go through this for every build that leaves your Mac: a TestFlight build, an App Store release, a hotfix.
 
 ## 1. Code is ready
 
@@ -114,20 +114,6 @@ Release build from TestFlight, not a debug run.
 5. **External testers.** The first build of a version goes through Beta App Review, usually within a day. Fill in *What to Test*.
 
 ## 7. App Store submission
-
-**(first release)** Set up once in App Store Connect:
-
-- **App Information**:
-  - category: Medical or Health & Fitness;
-  - content rights;
-  - age rating. Answer the medical questions honestly: it is a tracker, not treatment.
-- **Support URL**: `https://totsamygaspar.github.io/Plekio/`
-- **Privacy Policy URL**: `https://totsamygaspar.github.io/Plekio/privacy-policy.html`
-- **License Agreement**: Apple's standard EULA. `terms.md` points to it.
-- **Pricing and Availability**: free. Choose the countries.
-- **Business → DSA**: trader status for the EU. Without monetization: not a trader.
-
-Every release:
 
 - [ ] **Screenshots**: 6.9" iPhone at least. Only if the UI changed.
 - [ ] **Description, keywords, What's New.**
